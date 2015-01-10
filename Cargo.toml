@@ -1,0 +1,17 @@
+[package]
+
+name = "cql_test"
+version = "0.0.1"
+authors = ["Tupshin Harper <tupshin@tupshin.com>"]
+
+[[bin]]
+name="basic"
+path="src/bin/basic.rs"
+
+[lib]
+name = "cql_test"
+# path = "src/cassandra/mod.rs"
+
+# [dependencies]
+# uuid = "*"
+
