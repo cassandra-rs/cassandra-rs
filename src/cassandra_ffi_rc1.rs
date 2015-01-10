@@ -570,8 +570,6 @@ extern "C" {
      -> *const CassValue;
     pub fn cass_iterator_get_value(iterator: *mut CassIterator)
      -> *const CassValue;
-    pub fn cass_iterator_get_value(iterator: *mut CassIterator)
-     -> *const CassValue;
     pub fn cass_iterator_get_map_key(iterator: *mut CassIterator)
      -> *const CassValue;
     pub fn cass_iterator_get_map_value(iterator: *mut CassIterator)
