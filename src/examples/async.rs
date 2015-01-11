@@ -17,11 +17,11 @@ fn print_error(future:&mut CassFuture) {unsafe{
     println!("Error: {:?}", message);
 }}
 
-fn create_cluster() -> *mut CassCluster {
-    let cluster = unsafe{cass_cluster_new()};
-    unsafe{cass_cluster_set_contact_points(cluster, "127.0.0.1,127.0.0.2,127.0.0.3".as_ptr() as *const i8)};
+fn create_cluster() -> *mut CassCluster {unsafe{
+    let cluster = cass_cluster_new();
+    cass_cluster_set_contact_points(cluster, str2ref("127.0.0.1,127.0.0.2,127.0.0.3"));
     cluster 
-}
+}}
 
 fn connect_session(session:&mut CassSession, cluster:&mut CassCluster) -> CassError {unsafe{
     let future = &mut *cass_session_connect(session, cluster);
@@ -40,8 +40,9 @@ fn execute_query(session: &mut CassSession, query: &str) -> CassError {unsafe{
     let future = &mut *cass_session_execute(session, statement);
     cass_future_wait(future);
     let rc = cass_future_error_code(future);
-    if rc != CASS_OK {
-        print_error(future);
+    match rc {
+        CASS_OK => {},
+        _ => print_error(future)
     }
     cass_future_free(future);
     cass_statement_free(statement);
@@ -49,11 +50,10 @@ fn execute_query(session: &mut CassSession, query: &str) -> CassError {unsafe{
 }}
 
 fn insert_into_async(session: &mut CassSession, key:&str) {unsafe{
-    let query="INSERT INTO examples.async (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, ?);";
- 
+    let query=str2cass_string("INSERT INTO examples.async (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, ?);");
     let mut futures = Vec::<*mut CassFuture>::new();
     for i in (0..NUM_CONCURRENT_REQUESTS) {
-        let statement = cass_statement_new(cass_string_init(cass_string_init(CString::from_slice(query.as_bytes()).as_ptr()).data), 6);
+        let statement = cass_statement_new(query, 6);
         let key = format!("{}{}", key, i).as_ptr() as *const i8;
         cass_statement_bind_string(statement, 0, cass_string_init(key));
         cass_statement_bind_bool(statement, 1, if i % 2 == 0 {cass_true} else {cass_false});
