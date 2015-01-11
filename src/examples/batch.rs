@@ -46,20 +46,23 @@ fn execute_query(session: &mut CassSession, query: &str) -> CassError {unsafe{
     return rc;
 }}
 
-fn prepare_insert_into_batch(session:&mut CassSession, prepared:&Option<&mut CassPrepared>) -> CassError {unsafe{
+fn prepare_insert_into_batch(session:&mut CassSession) -> Result<&CassPrepared,CassError> {unsafe{
     let  query = str2cass_string("INSERT INTO examples.pairs (key, value) VALUES (?, ?)");
     let future = cass_session_prepare(session, query);
     cass_future_wait(future);
     let rc = cass_future_error_code(future);
-    match rc {
-        CASS_OK => {cass_future_get_prepared(future);},
-        _ => print_error(&mut*future)
-    }
+    let prepared = match rc {
+        CASS_OK => {Ok(&*cass_future_get_prepared(future))},
+        _ => {
+            print_error(&mut*future);
+            Err(rc)
+        }
+    };
     cass_future_free(future);
-    return rc;
+    prepared
 }}
 
-fn insert_into_batch_with_prepared<'a>(session:&mut CassSession, pairs:Vec<Pair>, prepared:&'a mut CassPrepared)-> Result<&'a mut CassPrepared,CassError> {unsafe{
+fn insert_into_batch_with_prepared<'a>(session:&mut CassSession, pairs:Vec<Pair>, prepared:&'a CassPrepared)-> Result<&'a CassPrepared,CassError> {unsafe{
     let batch = cass_batch_new(CASS_BATCH_TYPE_LOGGED);
     for pair in pairs.iter() {
         let statement = cass_prepared_bind(prepared);
@@ -81,7 +84,7 @@ fn insert_into_batch_with_prepared<'a>(session:&mut CassSession, pairs:Vec<Pair>
     let future = cass_session_execute_batch(session, batch);
     cass_future_wait(future);
     let rc = cass_future_error_code(future);
-    if (rc != CASS_OK) {
+    if rc != CASS_OK {
         print_error(&mut*future);
     }
     cass_future_free(future);
@@ -101,19 +104,19 @@ fn main() {unsafe{
             panic!();
         }
     }
-    let prepared:Option<&mut CassPrepared>=None;
     execute_query(&mut*session, "CREATE KEYSPACE examples WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '3' };");
     execute_query(&mut*session, "CREATE TABLE examples.pairs (key text, value text, PRIMARY KEY (key));");
-    let rc = prepare_insert_into_batch(&mut*session, &prepared);
-    let prepared = prepared.unwrap();
-    if rc == CASS_OK {
-        insert_into_batch_with_prepared(&mut*session, pairs, prepared);
-    }
-    cass_prepared_free(prepared);
+    let rc = prepare_insert_into_batch(&mut*session);
+    match rc {
+        Ok(ref prepared) => {
+            insert_into_batch_with_prepared(&mut*session, pairs, *prepared);
+            cass_prepared_free(*prepared);
+        }
+        Err(err) => panic!(err)
+    };
     let close_future = cass_session_close(session);
     cass_future_wait(close_future);
     cass_future_free(close_future);
     cass_cluster_free(cluster);
     cass_session_free(session);
-
 }}
