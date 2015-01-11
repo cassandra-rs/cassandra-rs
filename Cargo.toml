@@ -1,6 +1,6 @@
 [package]
 
-name = "cql_test"
+name = "cql_ffi"
 version = "0.0.1"
 authors = ["Tupshin Harper <tupshin@tupshin.com>"]
 
@@ -66,7 +66,7 @@ path="src/examples/uuids.rs"
 
 
 [lib]
-name = "cql_test"
+name = "cql_ffi"
 # path = "src/cassandra/mod.rs"
 
 # [dependencies]

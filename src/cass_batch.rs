@@ -16,6 +16,7 @@ pub const CASS_BATCH_TYPE_UNLOGGED: c_uint = 1;
 pub const CASS_BATCH_TYPE_COUNTER: c_uint = 2;
 pub type CassBatchType = Enum_CassBatchType_;
 
+#[link(name = "cassandra")]
 extern "C" {
     pub fn cass_batch_new(_type: CassBatchType) -> *mut CassBatch;
     pub fn cass_batch_free(batch: *mut CassBatch);

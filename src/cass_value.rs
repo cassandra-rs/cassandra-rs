@@ -51,7 +51,7 @@ extern "C" {
     pub fn cass_value_get_float(value: *const CassValue, output: *mut cass_float_t) -> CassError;
     pub fn cass_value_get_double(value: *const CassValue, output: *mut cass_double_t) -> CassError;
     pub fn cass_value_get_bool(value: *const CassValue, output: *mut cass_bool_t) -> CassError;
-    pub fn cass_value_get_uuid(value: *const CassValue, output: CassUuid) -> CassError;
+    pub fn cass_value_get_uuid(value: *const CassValue, output: *mut CassUuid) -> CassError;
     pub fn cass_value_get_inet(value: *const CassValue, output: *mut CassInet) -> CassError;
     pub fn cass_value_get_string(value: *const CassValue, output: *mut CassString) -> CassError;
     pub fn cass_value_get_bytes(value: *const CassValue, output: *mut CassBytes) -> CassError;

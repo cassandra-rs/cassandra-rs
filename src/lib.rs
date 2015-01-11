@@ -2,6 +2,30 @@
 #![allow(unstable)]
 extern crate libc;
 
+pub use cass_consistency::*;
+pub use cass_bytes::*;
+pub use cass_types::*;
+pub use cass_string::*;
+pub use cass_inet::*;
+pub use cass_decimal::*;
+pub use cass_uuid::*;
+pub use cass_cluster::*;
+pub use cass_session::cass_session_execute;
+pub use cass_session::cass_session_close;
+pub use cass_session::CassSession;
+pub use cass_statement::*;
+pub use cass_batch::*;
+pub use cass_future::*;
+pub use cass_prepared::*;
+pub use cass_result::*;
+pub use cass_iterator::*;
+pub use cass_row::*;
+pub use cass_value::*;
+pub use cass_collection::*;
+pub use cass_ssl::*;
+pub use cass_schema::*;
+pub use cass_error::*;
+
 mod cass_consistency;
 mod cass_bytes;
 mod cass_types;
