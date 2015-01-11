@@ -27,11 +27,12 @@ fn connect_session(session:&mut CassSession, cluster:&mut CassCluster) -> CassEr
     let future = &mut *cass_session_connect(session, cluster);
     cass_future_wait(future);
     let rc = cass_future_error_code(future);
-    if rc != CASS_OK {
-        print_error(future);
+    match rc {
+        CASS_OK => {},
+        _=> print_error(future)
     }
     cass_future_free(future);
-    return rc;
+    rc
 }}
 
 fn execute_query(session: &mut CassSession, query: &str) -> CassError {unsafe{
@@ -50,36 +51,38 @@ fn execute_query(session: &mut CassSession, query: &str) -> CassError {unsafe{
 fn insert_into_async(session: &mut CassSession, key:&str) {unsafe{
     let query="INSERT INTO examples.async (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, ?);";
  
-    let mut futures = Vec::<*mut CassFuture>::new();
+    let mut futures = Vec::<CassFuture>::new();
     for i in (0..NUM_CONCURRENT_REQUESTS) {
-    let statement = cass_statement_new(cass_string_init(cass_string_init(CString::from_slice(query.as_bytes()).as_ptr()).data), 6);
-        let key = format!("key{}",i).as_ptr() as *const i8;
+        let statement = cass_statement_new(cass_string_init(cass_string_init(CString::from_slice(query.as_bytes()).as_ptr()).data), 6);
+        let key = format!("{}{}", key, i).as_ptr() as *const i8;
         cass_statement_bind_string(statement, 0, cass_string_init(key));
         cass_statement_bind_bool(statement, 1, if i % 2 == 0 {cass_true} else {cass_false});
         cass_statement_bind_float(statement, 2, i.to_f32().unwrap() / 2.0f32);
         cass_statement_bind_double(statement, 3, i.to_f64().unwrap() / 200.0);
         cass_statement_bind_int32(statement, 4, i.to_i32().unwrap() * 10);
         cass_statement_bind_int64(statement, 5, i.to_i64().unwrap() * 100);
-        futures.push(cass_session_execute(session, statement));
+        futures.push(*cass_session_execute(session, statement));
         cass_statement_free(statement);
     }
     for mut future in futures.iter_mut() {
-        cass_future_wait(*future);
-        let rc = cass_future_error_code(*future);
+        cass_future_wait(future);
+        let rc = cass_future_error_code(future);
         if rc != CASS_OK {
-            print_error(&mut**future);
+            print_error(&mut*future);
         }
-        cass_future_free(*future);
+        cass_future_free(future);
     }
 }}
 
 pub fn main() {unsafe{
-    let cluster = create_cluster();
-    let session = cass_session_new();
-    if connect_session(&mut*session, &mut*cluster) != CASS_OK {
-        cass_cluster_free(cluster);
-        cass_session_free(session);
-        panic!("couldn't connect");
+    let (cluster,session) = (create_cluster(),cass_session_new());
+    match connect_session(&mut*session, &mut*cluster) {
+        CASS_OK => {},
+        _ => {
+            cass_cluster_free(cluster);
+            cass_session_free(session);
+            panic!("couldn't connect");
+        }
     }
     execute_query(&mut*session, "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '1' };");
     execute_query(&mut*session, "CREATE TABLE IF NOT EXISTS examples.async (key text, bln boolean, flt float, dbl double, i32 int, i64 bigint, PRIMARY KEY (key));");
