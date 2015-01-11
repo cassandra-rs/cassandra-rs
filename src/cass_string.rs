@@ -1,8 +1,6 @@
 #![allow(dead_code)]
 #![allow(raw_pointer_derive)]
 
-use std::ffi::CString;
-
 use cass_types::cass_size_t;
 use libc::types::os::arch::c95::c_char;
 

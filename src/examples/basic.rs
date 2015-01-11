@@ -2,7 +2,6 @@
 
 extern crate cql_ffi;
 
-use std::ffi::CString;
 use std::slice;
 
 use cql_ffi::*;
@@ -42,7 +41,9 @@ fn connect_session(session:&mut CassSession, cluster:&mut CassCluster) -> CassEr
 
 
 fn execute_query(session: &mut CassSession, query: &str) -> CassError {unsafe{
-    let statement = cass_statement_new(cass_string_init(cass_string_init(CString::from_slice(query.as_bytes()).as_ptr()).data), 0);
+        let query=str2cass_string(query);
+
+    let statement = cass_statement_new(query, 0);
     let future = &mut *cass_session_execute(session, statement);
     cass_future_wait(future);
     let rc = cass_future_error_code(future);

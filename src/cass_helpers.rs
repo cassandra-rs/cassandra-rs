@@ -9,6 +9,6 @@ pub fn str2cass_string(query:&str) -> CassString {unsafe{
     cass_string_init(cass_string_init(CString::from_slice(query.as_bytes()).as_ptr()).data)
 }}
 
-pub fn str2ref(query:&str) -> *const i8 {unsafe{
+pub fn str2ref(query:&str) -> *const i8 {
     query.as_ptr() as *const i8
-}}
+}

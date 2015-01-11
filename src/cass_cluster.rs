@@ -43,8 +43,4 @@ extern "C" {
     pub fn cass_cluster_set_token_aware_routing(cluster: *mut CassCluster, enabled: cass_bool_t);
     pub fn cass_cluster_set_tcp_nodelay(cluster: *mut CassCluster, enable: cass_bool_t);
     pub fn cass_cluster_set_tcp_keepalive(cluster: *mut CassCluster, enable: cass_bool_t, delay_secs: ::libc::c_uint);
-    pub fn cass_session_new() -> *mut CassSession;
-    pub fn cass_session_free(session: *mut CassSession);
-    pub fn cass_session_connect(session: *mut CassSession, cluster: *const CassCluster) -> *mut CassFuture;
-    pub fn cass_session_connect_keyspace(session: *mut CassSession, cluster: *const CassCluster, keyspace: *const ::libc::c_char) -> *mut CassFuture;
 }

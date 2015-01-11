@@ -11,7 +11,6 @@ use cass_cluster::CassCluster;
 enum Struct_CassSession_ { }
 pub type CassSession = Struct_CassSession_;
 
-#[link(name = "cassandra")]
 extern "C" {
     pub fn cass_session_new() -> *mut CassSession;
     pub fn cass_session_free(session: *mut CassSession);
@@ -21,4 +20,5 @@ extern "C" {
     pub fn cass_session_execute(session: *mut CassSession, statement: *const CassStatement) -> *mut CassFuture;
     pub fn cass_session_execute_batch(session: *mut CassSession, batch: *const CassBatch) -> *mut CassFuture;
     pub fn cass_session_get_schema(session: *mut CassSession) -> *const CassSchema;
+    pub fn cass_session_connect_keyspace(session: *mut CassSession, cluster: *const CassCluster, keyspace: *const ::libc::c_char) -> *mut CassFuture;
 }
