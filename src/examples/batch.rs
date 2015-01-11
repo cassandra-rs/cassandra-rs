@@ -1,3 +1,4 @@
+#![allow(unstable)]
 extern crate cql_ffi;
 use std::ffi::CString;
 use std::slice;
@@ -106,11 +107,12 @@ fn main() {unsafe{
     }
     execute_query(&mut*session, "CREATE KEYSPACE examples WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '3' };");
     execute_query(&mut*session, "CREATE TABLE examples.pairs (key text, value text, PRIMARY KEY (key));");
-    let rc = prepare_insert_into_batch(&mut*session);
-    match rc {
+    match prepare_insert_into_batch(&mut*session) {
         Ok(ref prepared) => {
-            insert_into_batch_with_prepared(&mut*session, pairs, *prepared);
-            cass_prepared_free(*prepared);
+            match insert_into_batch_with_prepared(&mut*session, pairs, *prepared) {
+                Ok(_) => cass_prepared_free(*prepared),
+                _ => {}
+            }
         }
         Err(err) => panic!(err)
     };
