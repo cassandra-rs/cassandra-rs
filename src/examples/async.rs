@@ -51,7 +51,7 @@ fn execute_query(session: &mut CassSession, query: &str) -> CassError {unsafe{
 fn insert_into_async(session: &mut CassSession, key:&str) {unsafe{
     let query="INSERT INTO examples.async (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, ?);";
  
-    let mut futures = Vec::<CassFuture>::new();
+    let mut futures = Vec::<*mut CassFuture>::new();
     for i in (0..NUM_CONCURRENT_REQUESTS) {
         let statement = cass_statement_new(cass_string_init(cass_string_init(CString::from_slice(query.as_bytes()).as_ptr()).data), 6);
         let key = format!("{}{}", key, i).as_ptr() as *const i8;
@@ -61,16 +61,16 @@ fn insert_into_async(session: &mut CassSession, key:&str) {unsafe{
         cass_statement_bind_double(statement, 3, i.to_f64().unwrap() / 200.0);
         cass_statement_bind_int32(statement, 4, i.to_i32().unwrap() * 10);
         cass_statement_bind_int64(statement, 5, i.to_i64().unwrap() * 100);
-        futures.push(*cass_session_execute(session, statement));
+        futures.push(cass_session_execute(session, statement));
         cass_statement_free(statement);
     }
     for mut future in futures.iter_mut() {
-        cass_future_wait(future);
-        let rc = cass_future_error_code(future);
+        cass_future_wait(*future);
+        let rc = cass_future_error_code(*future);
         if rc != CASS_OK {
-            print_error(&mut*future);
+            print_error(&mut**future);
         }
-        cass_future_free(future);
+        cass_future_free(*future);
     }
 }}
 
