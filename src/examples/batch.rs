@@ -84,9 +84,9 @@ fn insert_into_batch_with_prepared<'a>(session:&mut CassSession, pairs:Vec<Pair>
 
     let future = cass_session_execute_batch(session, batch);
     cass_future_wait(future);
-    let rc = cass_future_error_code(future);
-    if rc != CASS_OK {
-        print_error(&mut*future);
+    match cass_future_error_code(future) {
+        CASS_OK => print_error(&mut*future),
+        _ => panic!()
     }
     cass_future_free(future);
     cass_batch_free(batch);
@@ -111,7 +111,7 @@ fn main() {unsafe{
         Ok(ref prepared) => {
             match insert_into_batch_with_prepared(&mut*session, pairs, *prepared) {
                 Ok(_) => cass_prepared_free(*prepared),
-                _ => {}
+                _ => panic!()
             }
         }
         Err(err) => panic!(err)
