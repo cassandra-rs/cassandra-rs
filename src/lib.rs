@@ -24,6 +24,7 @@ pub use cass_ssl::*;
 pub use cass_schema::*;
 pub use cass_error::*;
 pub use cass_helpers::*;
+pub use cass_log::*;
 
 mod cass_consistency;
 mod cass_bytes;

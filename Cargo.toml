@@ -28,9 +28,9 @@ path="src/examples/bind_by_name.rs"
 name="collections"
 path="src/examples/collections.rs"
 
-[[bin]]
-name="logging"
-path="src/examples/logging.rs"
+# [[bin]]
+# name="logging"
+# path="src/examples/logging.rs"
 
 [[bin]]
 name="maps"
