@@ -1,6 +1,5 @@
 //Unlock the rest of the cass_ files, this is hand created and is a minimal set of helpers to make consuming the low level api palatable
 use std::raw;
-use std::slice;
 use std::mem;
 
 use std::ffi::CString;
@@ -22,11 +21,12 @@ pub fn str2ref(query:&str) -> *const i8 {
 }
 
 pub fn cassvalue2cassstring<'a>(value:&'a CassValue) -> Result<CassString,CassError> {unsafe{
-    let mut cass_string = unsafe { mem::uninitialized() };
+    let mut cass_string = mem::uninitialized();
     cass_value_get_string(value, &mut cass_string);
     Ok(cass_string)
 }}
 
+#[allow(unused)]
 unsafe fn raw_byte_repr<'a, T>(ptr: &'a T) -> &'a [u8] {
         mem::transmute(raw::Slice{
             data: ptr as *const _ as *const u8,

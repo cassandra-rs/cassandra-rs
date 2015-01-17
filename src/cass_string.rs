@@ -1,18 +1,10 @@
 #![allow(dead_code)]
 #![allow(raw_pointer_derive)]
 use std::fmt;
-use std::raw;
 use std::slice;
-use std::str;
-use std::ffi::CString;
-use std::num::Int;
 
 use cass_types::cass_size_t;
 use libc::types::os::arch::c95::c_char;
-
-use cass_error::CassError;
-use cass_value::CassValue;
-use cass_value::cass_value_get_string;
 
 #[repr(C)]
 #[derive(Copy)]
@@ -29,7 +21,7 @@ impl fmt::Show for Struct_CassString_ {
         let vec = slice.to_vec();
         match String::from_utf8(vec) {
             Ok(str_buf) => write!(f, "{}", str_buf),
-            Err(err) => panic!()
+            Err(err) => panic!(err)
         }
     }}
 }
