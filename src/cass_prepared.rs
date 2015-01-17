@@ -1,5 +1,6 @@
 #![allow(non_camel_case_types)]
 #![allow(dead_code)]
+#![allow(missing_copy_implementations)]
 
 use cass_statement::CassStatement;
 

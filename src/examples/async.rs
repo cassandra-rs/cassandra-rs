@@ -28,7 +28,7 @@ fn connect_session(session:&mut CassSession, cluster:&mut CassCluster) -> CassEr
     cass_future_wait(future);
     let rc = cass_future_error_code(future);
     match rc {
-        CASS_OK => {},
+        CassError::CASS_OK => {},
         _=> print_error(future)
     }
     cass_future_free(future);
@@ -41,7 +41,7 @@ fn execute_query(session: &mut CassSession, query: &str) -> CassError {unsafe{
     cass_future_wait(future);
     let rc = cass_future_error_code(future);
     match rc {
-        CASS_OK => {},
+        CassError::CASS_OK => {},
         _ => print_error(future)
     }
     cass_future_free(future);
@@ -67,7 +67,7 @@ fn insert_into_async(session: &mut CassSession, key:&str) {unsafe{
     for mut future in futures.iter_mut() {
         cass_future_wait(*future);
         let rc = cass_future_error_code(*future);
-        if rc != CASS_OK {
+        if rc != CassError::CASS_OK {
             print_error(&mut**future);
         }
         cass_future_free(*future);
@@ -77,7 +77,7 @@ fn insert_into_async(session: &mut CassSession, key:&str) {unsafe{
 pub fn main() {unsafe{
     let (cluster,session) = (create_cluster(),cass_session_new());
     match connect_session(&mut*session, &mut*cluster) {
-        CASS_OK => {},
+        CassError::CASS_OK => {},
         _ => {
             cass_cluster_free(cluster);
             cass_session_free(session);

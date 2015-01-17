@@ -1,5 +1,6 @@
 #![allow(non_camel_case_types)]
 #![allow(dead_code)]
+#![allow(missing_copy_implementations)]
 
 use libc::types::os::arch::c95::c_char;
 use libc::types::os::arch::c95::c_uint;

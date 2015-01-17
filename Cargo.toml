@@ -20,9 +20,9 @@ path="src/examples/batch.rs"
 name="bind_by_name"
 path="src/examples/bind_by_name.rs"
 
-[[bin]]
-name="callbacks"
-path="src/examples/callbacks.rs"
+# [[bin]]
+# name="callbacks"
+# path="src/examples/callbacks.rs"
 
 [[bin]]
 name="collections"

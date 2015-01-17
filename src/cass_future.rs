@@ -1,16 +1,17 @@
 #![allow(non_camel_case_types)]
 #![allow(dead_code)]
+#![allow(missing_copy_implementations)]
 
 use libc::types::common::c95::c_void;
 
 use cass_prepared::CassPrepared;
 use cass_error::CassError;
 use cass_string::CassString;
-use cass_session::CassSession;
 use cass_result::CassResult;
 use cass_types::cass_bool_t;
 use cass_types::cass_duration_t;
 
+#[derive(Show)]
 enum Struct_CassFuture_ { }
 pub type CassFuture = Struct_CassFuture_;
 

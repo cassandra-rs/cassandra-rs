@@ -24,11 +24,10 @@ fn create_cluster() -> *mut CassCluster {unsafe{
 fn connect_session(session:&mut CassSession, cluster:&mut CassCluster) -> CassError {unsafe{
     let future = &mut *cass_session_connect(session, cluster);
     cass_future_wait(future);
-    let rc = cass_future_error_code(future);
-    match rc {
-        CASS_OK => {},
-        _=> print_error(future)
-    }
+    let rc = match cass_future_error_code(future) {
+        CassError::CASS_OK => {CassError::CASS_OK},
+        _=> panic!("{:?}",future)
+    };
     cass_future_free(future);
     rc
 }}
@@ -39,7 +38,7 @@ fn execute_query(session: &mut CassSession, query: &str) -> CassError {unsafe{
     cass_future_wait(future);
     let rc = cass_future_error_code(future);
     match rc {
-        CASS_OK => {},
+        CassError::CASS_OK => {},
         _ => print_error(future)
     }
     cass_future_free(future);
@@ -53,7 +52,7 @@ fn prepare_insert_into_batch(session:&mut CassSession) -> Result<&CassPrepared,C
     cass_future_wait(future);
     let rc = cass_future_error_code(future);
     let prepared = match rc {
-        CASS_OK => {Ok(&*cass_future_get_prepared(future))},
+        CassError::CASS_OK => {Ok(&*cass_future_get_prepared(future))},
         _ => {
             print_error(&mut*future);
             Err(rc)
@@ -85,7 +84,7 @@ fn insert_into_batch_with_prepared<'a>(session:&mut CassSession, pairs:Vec<Pair>
     let future = cass_session_execute_batch(session, batch);
     cass_future_wait(future);
     match cass_future_error_code(future) {
-        CASS_OK => print_error(&mut*future),
+        CassError::CASS_OK => print_error(&mut*future),
         _ => panic!()
     }
     cass_future_free(future);
@@ -98,7 +97,7 @@ fn main() {unsafe{
     let session = cass_session_new();
     let pairs = vec!(Pair{key:"a", value:"1"}, Pair{key:"b", value:"2"});
     match connect_session(&mut*session, &mut*cluster) {
-        CASS_OK => {},
+        CassError::CASS_OK => {},
         _ => {
             cass_cluster_free(cluster);
             cass_session_free(session);

@@ -32,7 +32,7 @@ fn connect_session(session:&mut CassSession, cluster:&mut CassCluster) -> CassEr
     cass_future_wait(future);
     let rc = cass_future_error_code(future);
     match rc {
-        CASS_OK => {},
+        CassError::CASS_OK => {},
         _=> print_error(future)
     }
     cass_future_free(future);
@@ -41,14 +41,14 @@ fn connect_session(session:&mut CassSession, cluster:&mut CassCluster) -> CassEr
 
 
 fn execute_query(session: &mut CassSession, query: &str) -> CassError {unsafe{
-        let query=str2cass_string(query);
+    let query=str2cass_string(query);
 
     let statement = cass_statement_new(query, 0);
     let future = &mut *cass_session_execute(session, statement);
     cass_future_wait(future);
     let rc = cass_future_error_code(future);
     match rc {
-        CASS_OK => {},
+        CassError::CASS_OK => {},
         _ => print_error(future)
     }
     cass_future_free(future);
@@ -60,8 +60,7 @@ fn execute_query(session: &mut CassSession, query: &str) -> CassError {unsafe{
 fn insert_into_basic(session:&mut CassSession, key:&str, basic:&mut Basic) -> CassError {unsafe{
     let query=str2cass_string("INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, ?);");
     let statement = cass_statement_new(query, 6);
-    let key = key.as_ptr() as *const i8;
-    cass_statement_bind_string(statement, 0, cass_string_init(key));
+    cass_statement_bind_string(statement, 0, str2cass_string(key));
     cass_statement_bind_bool(statement, 1, basic.bln);
     cass_statement_bind_float(statement, 2, basic.flt);
     cass_statement_bind_double(statement, 3, basic.dbl);
@@ -71,7 +70,7 @@ fn insert_into_basic(session:&mut CassSession, key:&str, basic:&mut Basic) -> Ca
     cass_future_wait(future);
     let rc = cass_future_error_code(future);
     match rc {
-        CASS_OK => {
+        CassError::CASS_OK => {
             print_error(&mut*future);
         },
         _=> {panic!()}
@@ -90,7 +89,7 @@ fn select_from_basic(session:&mut CassSession, key:&str, basic:&mut Basic) -> Ca
     cass_future_wait(future);
     let rc = cass_future_error_code(future);
     match rc {
-        CASS_OK => {
+        CassError::CASS_OK => {
             let result = cass_future_get_result(future);
             let iterator = cass_iterator_from_result(result);
             if cass_iterator_next(iterator) > 0 {
@@ -125,7 +124,7 @@ fn main() {unsafe{
     let input = &mut Basic{bln:cass_true, flt:0.001f32, dbl:0.0002f64, i32:1, i64:2 };
 
     match connect_session(&mut*session, &mut*cluster) {
-        CASS_OK => {
+        CassError::CASS_OK => {
             let output = &mut Basic{bln:0,flt:0f32,dbl:0f64,i32:0,i64:0};
             execute_query(&mut*session, "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '3' };");
             execute_query(&mut*session, "CREATE TABLE IF NOT EXISTS examples.basic (key text, bln boolean, flt float, dbl double, i32 int, i64 bigint, PRIMARY KEY (key));");
