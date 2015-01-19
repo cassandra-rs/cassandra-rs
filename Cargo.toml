@@ -40,9 +40,9 @@ path="src/examples/maps.rs"
 name="paging"
 path="src/examples/paging.rs"
 
-[[bin]]
-name="perf"
-path="src/examples/perf.rs"
+# [[bin]]
+# name="perf"
+# path="src/examples/perf.rs"
 
 [[bin]]
 name="prepared"

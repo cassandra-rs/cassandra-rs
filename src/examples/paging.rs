@@ -20,7 +20,7 @@ unsafe fn print_error(future:&mut CassFuture) {
 unsafe fn create_cluster() -> *mut CassCluster {
     let cluster = cass_cluster_new();
     cass_cluster_set_contact_points(cluster, str2ref("127.0.0.1,127.0.0.2,127.0.0.3"));
-    cluster 
+    cluster
 }
 
 unsafe fn connect_session(session:&mut CassSession, cluster:&mut CassCluster) -> CassError {
