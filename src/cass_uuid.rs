@@ -18,13 +18,14 @@ pub struct Struct_CassUuid_ {
 impl ::std::default::Default for Struct_CassUuid_ {
     fn default() -> Struct_CassUuid_ { unsafe { ::std::mem::zeroed() } }
 }
+
 pub type CassUuid = Struct_CassUuid_;
 
 enum Struct_CassUuidGen_ { }
 pub type CassUuidGen = Struct_CassUuidGen_;
 
 extern "C" {
- pub fn cass_uuid_gen_new() -> *mut CassUuidGen;
+    pub fn cass_uuid_gen_new() -> *mut CassUuidGen;
     pub fn cass_uuid_gen_new_with_node(node: cass_uint64_t) -> *mut CassUuidGen;
     pub fn cass_uuid_gen_free(uuid_gen: *mut CassUuidGen);
     pub fn cass_uuid_gen_time(uuid_gen: *mut CassUuidGen, output: *mut CassUuid);
