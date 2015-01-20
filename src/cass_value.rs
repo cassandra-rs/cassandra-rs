@@ -19,32 +19,31 @@ use cass_string::CassString;
 use cass_decimal::CassDecimal;
 
 
-enum Struct_CassValue_ { }
-pub type CassValue = Struct_CassValue_;
+pub enum CassValue { }
 
-type Enum_CassValueType_ = c_uint;
-pub const CASS_VALUE_TYPE_UNKNOWN: c_uint = 65535;
-pub const CASS_VALUE_TYPE_CUSTOM: c_uint = 0;
-pub const CASS_VALUE_TYPE_ASCII: c_uint = 1;
-pub const CASS_VALUE_TYPE_BIGINT: c_uint = 2;
-pub const CASS_VALUE_TYPE_BLOB: c_uint = 3;
-pub const CASS_VALUE_TYPE_BOOLEAN: c_uint = 4;
-pub const CASS_VALUE_TYPE_COUNTER: c_uint = 5;
-pub const CASS_VALUE_TYPE_DECIMAL: c_uint = 6;
-pub const CASS_VALUE_TYPE_DOUBLE: c_uint = 7;
-pub const CASS_VALUE_TYPE_FLOAT: c_uint = 8;
-pub const CASS_VALUE_TYPE_INT: c_uint = 9;
-pub const CASS_VALUE_TYPE_TEXT: c_uint = 10;
-pub const CASS_VALUE_TYPE_TIMESTAMP: c_uint = 11;
-pub const CASS_VALUE_TYPE_UUID: c_uint = 12;
-pub const CASS_VALUE_TYPE_VARCHAR: c_uint = 13;
-pub const CASS_VALUE_TYPE_VARINT: c_uint = 14;
-pub const CASS_VALUE_TYPE_TIMEUUID: c_uint = 15;
-pub const CASS_VALUE_TYPE_INET: c_uint = 16;
-pub const CASS_VALUE_TYPE_LIST: c_uint = 32;
-pub const CASS_VALUE_TYPE_MAP: c_uint = 33;
-pub const CASS_VALUE_TYPE_SET: c_uint = 34;
-pub type CassValueType = Enum_CassValueType_;
+pub enum CassValueType {
+    CASS_VALUE_TYPE_UNKNOWN = 65535is,
+    CASS_VALUE_TYPE_CUSTOM = 0,
+    CASS_VALUE_TYPE_ASCII = 1,
+    CASS_VALUE_TYPE_BIGINT = 2,
+    CASS_VALUE_TYPE_BLOB = 3,
+    CASS_VALUE_TYPE_BOOLEAN = 4,
+    CASS_VALUE_TYPE_COUNTER = 5,
+    CASS_VALUE_TYPE_DECIMAL = 6,
+    CASS_VALUE_TYPE_DOUBLE = 7,
+    CASS_VALUE_TYPE_FLOAT = 8,
+    CASS_VALUE_TYPE_INT = 9,
+    CASS_VALUE_TYPE_TEXT = 10,
+    CASS_VALUE_TYPE_TIMESTAMP = 11,
+    CASS_VALUE_TYPE_UUID = 12,
+    CASS_VALUE_TYPE_VARCHAR = 13,
+    CASS_VALUE_TYPE_VARINT = 14,
+    CASS_VALUE_TYPE_TIMEUUID = 15,
+    CASS_VALUE_TYPE_INET = 16,
+    CASS_VALUE_TYPE_LIST = 32,
+    CASS_VALUE_TYPE_MAP = 33,
+    CASS_VALUE_TYPE_SET = 34,
+}
 
 extern "C" {
     pub fn cass_value_get_int32(value: *const CassValue, output: *mut cass_int32_t) -> CassError;

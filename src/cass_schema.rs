@@ -17,11 +17,11 @@ pub type CassSchemaMeta = Struct_CassSchemaMeta_;
 enum Struct_CassSchemaMetaField_ { }
 pub type CassSchemaMetaField = Struct_CassSchemaMetaField_;
 
-type Enum_CassSchemaMetaType_ = c_uint;
-pub const CASS_SCHEMA_META_TYPE_KEYSPACE: c_uint = 0;
-pub const CASS_SCHEMA_META_TYPE_TABLE: c_uint = 1;
-pub const CASS_SCHEMA_META_TYPE_COLUMN: c_uint = 2;
-pub type CassSchemaMetaType = Enum_CassSchemaMetaType_;
+pub enum CassSchemaMetaType {
+    KEYSPACE = 0is,
+    TABLE = 18,
+    COLUMN = 2
+}
 
 extern "C" {
     pub fn cass_schema_free(schema: *const CassSchema);
