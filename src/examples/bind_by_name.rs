@@ -67,7 +67,7 @@ unsafe fn prepare_query(session:&mut CassSession, query:CassString) -> Result<&C
 unsafe fn insert_into_basic(session:&mut CassSession, prepared:&CassPrepared, key:&str, basic:Basic) -> CassError {
     let statement = cass_prepared_bind(prepared);
     println!("key={:?}",str2cass_string(key));
-    cass_statement_bind_string_by_name(statement, "key".as_bytes().as_ptr() as *const i8, str2cass_string(key));
+    cass_statement_bind_string_by_name(statement, str2ref("key"), str2cass_string(key));
     cass_statement_bind_bool_by_name(statement, "BLN".as_ptr() as *const i8, basic.bln);
     cass_statement_bind_float_by_name(statement, "FLT".as_ptr() as *const i8, basic.flt);
     cass_statement_bind_double_by_name(statement, "\"dbl\"".as_ptr() as *const i8, basic.dbl);
