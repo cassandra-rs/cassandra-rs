@@ -10,8 +10,7 @@ use cass_error::CassError;
 use cass_ssl::CassSsl;
 use cass_types::*;
 
-enum Struct_CassCluster_ { }
-pub type CassCluster = Struct_CassCluster_;
+pub enum CassCluster { }
 
 extern "C" {
     pub fn cass_cluster_new() -> *mut CassCluster;
