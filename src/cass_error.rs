@@ -4,13 +4,15 @@
 use libc::types::os::arch::c95::c_uint;
 use libc::types::os::arch::c95::c_char;
 
-pub type Enum_CassErrorSource_ = c_uint;
-pub const CASS_ERROR_SOURCE_NONE: c_uint = 0;
-pub const CASS_ERROR_SOURCE_LIB: c_uint = 1;
-pub const CASS_ERROR_SOURCE_SERVER: c_uint = 2;
-pub const CASS_ERROR_SOURCE_SSL: c_uint = 3;
-pub const CASS_ERROR_SOURCE_COMPRESSION: c_uint = 4;
-pub type CassErrorSource = Enum_CassErrorSource_;
+#[derive(Show,Eq,PartialEq,Copy)]
+#[repr(C)]
+pub enum CassErrorSource {
+    NONE = 0is,
+    LIB = 1,
+    SERVER = 2,
+    SSL = 3,
+    COMPRESSION = 4
+}
 
 #[derive(Show,Eq,PartialEq,Copy)]
 #[repr(C)]
