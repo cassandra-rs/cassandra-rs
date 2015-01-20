@@ -53,7 +53,7 @@ unsafe fn insert_into_maps(session:&mut CassSession, key:&str, items:Vec<Pair>) 
     let query = str2cass_string("INSERT INTO examples.maps (key, items) VALUES (?, ?);");
     let statement = cass_statement_new(query, 2);
     cass_statement_bind_string(statement, 0, str2cass_string(key));
-    let collection = cass_collection_new(CASS_COLLECTION_TYPE_MAP, 5);
+    let collection = cass_collection_new(CassCollectionType::MAP, 5);
     for item in items.iter() {
         cass_collection_append_string(collection, str2cass_string(item.key));
         cass_collection_append_int32(collection, item.value);

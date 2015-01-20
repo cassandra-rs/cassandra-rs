@@ -1,8 +1,6 @@
 #![allow(dead_code)]
 #![allow(non_camel_case_types)]
 
-use libc::types::os::arch::c95::c_uint;
-
 pub enum CassConsistency {
     ANY = 0is,
     ONE = 1,

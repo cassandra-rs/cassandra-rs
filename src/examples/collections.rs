@@ -46,7 +46,7 @@ unsafe fn insert_into_collections(session:&mut CassSession, key:&str, items:Vec<
     let query = cass_string_init("INSERT INTO examples.collections (key, items) VALUES (?, ?);".as_ptr() as *const i8);
     let statement = cass_statement_new(query, 2);
     cass_statement_bind_string(statement, 0, cass_string_init(key.as_ptr() as *const i8));
-    let collection = cass_collection_new(CASS_COLLECTION_TYPE_SET, 2);
+    let collection = cass_collection_new(CassCollectionType::SET, 2);
     for item in items.iter() {
         cass_collection_append_string(collection, cass_string_init(item.as_bytes().as_ptr() as *const i8));
     }

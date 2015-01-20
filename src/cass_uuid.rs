@@ -11,18 +11,15 @@ use cass_error::CassError;
 
 #[repr(C)]
 #[derive(Copy)]
-pub struct Struct_CassUuid_ {
+pub struct CassUuid {
     pub time_and_version: cass_uint64_t,
     pub clock_seq_and_node: cass_uint64_t,
 }
-impl ::std::default::Default for Struct_CassUuid_ {
-    fn default() -> Struct_CassUuid_ { unsafe { ::std::mem::zeroed() } }
+impl ::std::default::Default for CassUuid {
+    fn default() -> CassUuid { unsafe { ::std::mem::zeroed() } }
 }
 
-pub type CassUuid = Struct_CassUuid_;
-
-enum Struct_CassUuidGen_ { }
-pub type CassUuidGen = Struct_CassUuidGen_;
+pub enum CassUuidGen { }
 
 extern "C" {
     pub fn cass_uuid_gen_new() -> *mut CassUuidGen;

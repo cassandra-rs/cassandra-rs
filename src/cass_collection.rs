@@ -21,11 +21,11 @@ use cass_types::cass_float_t;
 enum Struct_CassCollection_ { }
 pub type CassCollection = Struct_CassCollection_;
 
-pub type Enum_CassCollectionType_ = c_uint;
-pub const CASS_COLLECTION_TYPE_LIST: c_uint = 32;
-pub const CASS_COLLECTION_TYPE_MAP: c_uint = 33;
-pub const CASS_COLLECTION_TYPE_SET: c_uint = 34;
-pub type CassCollectionType = Enum_CassCollectionType_;
+pub enum CassCollectionType {
+    LIST = 32is,
+    MAP = 33,
+    SET = 34
+}
 
 extern "C" {
     pub fn cass_collection_new(_type: CassCollectionType, item_count: cass_size_t) -> *mut CassCollection;

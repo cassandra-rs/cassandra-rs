@@ -3,20 +3,18 @@
 #![allow(missing_copy_implementations)]
 
 use libc::types::os::arch::c95::c_char;
-use libc::types::os::arch::c95::c_uint;
 use libc::types::os::arch::c95::c_int;
 
 use cass_error::CassError;
 use cass_string::CassString;
 
-enum Struct_CassSsl_ { }
-pub type CassSsl = Struct_CassSsl_;
+pub enum CassSsl { }
 
-type Enum_CassSslVerifyFlags = c_uint;
-pub const CASS_SSL_VERIFY_NONE: c_uint = 0;
-pub const CASS_SSL_VERIFY_PEER_CERT: c_uint = 1;
-pub const CASS_SSL_VERIFY_PEER_IDENTITY: c_uint = 2;
-pub type CassSslVerifyFlags = Enum_CassSslVerifyFlags;
+pub enum CassSslVerifyFlags {
+    NONE = 0is,
+    PEER_CERT = 1,
+    PEER_IDENTITY = 2
+}
 
 extern "C" {
     pub fn cass_ssl_new() -> *mut CassSsl;
