@@ -23,8 +23,8 @@ use cass_types::cass_int32_t;
 use cass_types::cass_float_t;
 use cass_types::cass_int64_t;
 
-enum Struct_CassStatement_ { }
-pub type CassStatement = Struct_CassStatement_;
+#[derive(Show,Eq,PartialEq,Copy)]
+pub enum CassStatement { }
 
 extern "C" {
     pub fn cass_statement_new(query: CassString, parameter_count: cass_size_t) -> *mut CassStatement;
