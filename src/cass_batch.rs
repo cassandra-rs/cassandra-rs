@@ -8,14 +8,13 @@ use cass_consistency::CassConsistency;
 use cass_statement::CassStatement;
 use cass_error::CassError;
 
-enum Struct_CassBatch_ { }
-pub type CassBatch = Struct_CassBatch_;
+pub enum CassBatch { }
 
-type Enum_CassBatchType_ = c_uint;
-pub const CASS_BATCH_TYPE_LOGGED: c_uint = 0;
-pub const CASS_BATCH_TYPE_UNLOGGED: c_uint = 1;
-pub const CASS_BATCH_TYPE_COUNTER: c_uint = 2;
-pub type CassBatchType = Enum_CassBatchType_;
+pub enum CassBatchType {
+    LOGGED = 0is,
+    UNLOGGED = 1,
+    COUNTER = 2
+}
 
 #[link(name = "cassandra")]
 extern "C" {

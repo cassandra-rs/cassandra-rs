@@ -63,7 +63,7 @@ fn prepare_insert_into_batch(session:&mut CassSession) -> Result<&CassPrepared,C
 }}
 
 fn insert_into_batch_with_prepared<'a>(session:&mut CassSession, pairs:Vec<Pair>, prepared:&'a CassPrepared)-> Result<&'a CassPrepared,CassError> {unsafe{
-    let batch = cass_batch_new(CASS_BATCH_TYPE_LOGGED);
+    let batch = cass_batch_new(CassBatchType::LOGGED);
     for pair in pairs.iter() {
         let statement = cass_prepared_bind(prepared);
         cass_statement_bind_string(statement, 0, str2cass_string(pair.key));
