@@ -12,8 +12,7 @@ use cass_types::cass_bool_t;
 use cass_types::cass_duration_t;
 
 #[derive(Show)]
-enum Struct_CassFuture_ { }
-pub type CassFuture = Struct_CassFuture_;
+pub enum CassFuture { }
 
 pub type CassFutureCallback =
     Option<extern "C" fn (

@@ -4,8 +4,7 @@
 
 use cass_statement::CassStatement;
 
-enum Struct_CassPrepared_ { }
-pub type CassPrepared = Struct_CassPrepared_;
+pub enum CassPrepared { }
 
 extern "C" {
     pub fn cass_prepared_free(prepared: *const CassPrepared);

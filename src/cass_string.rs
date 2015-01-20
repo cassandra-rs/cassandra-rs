@@ -8,12 +8,12 @@ use libc::types::os::arch::c95::c_char;
 
 #[repr(C)]
 #[derive(Copy)]
-struct Struct_CassString_ {
+pub struct CassString {
     pub data: *const c_char,
     pub length: cass_size_t,
 }
 
-impl fmt::Show for Struct_CassString_ {
+impl fmt::Show for CassString {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {unsafe{
         if self.length > 1000000 {panic!("wtf: {}", self.length)};
         let data = self.data as *const u8;
@@ -26,10 +26,9 @@ impl fmt::Show for Struct_CassString_ {
     }}
 }
 
-impl ::std::default::Default for Struct_CassString_ {
-    fn default() -> Struct_CassString_ { unsafe { ::std::mem::zeroed() } }
+impl ::std::default::Default for CassString {
+    fn default() -> CassString { unsafe { ::std::mem::zeroed() } }
 }
-pub type CassString = Struct_CassString_;
 
 extern "C" {
     pub fn cass_string_init(null_terminated: *const c_char) -> CassString;

@@ -9,8 +9,7 @@ use cass_string::CassString;
 use cass_types::cass_size_t;
 use cass_types::cass_bool_t;
 
-enum Struct_CassResult_ { }
-pub type CassResult = Struct_CassResult_;
+pub enum CassResult { }
 
 extern "C" {
     pub fn cass_result_free(result: *const CassResult);

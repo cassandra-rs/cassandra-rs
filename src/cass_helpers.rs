@@ -40,8 +40,6 @@ pub fn gencassuuid<'a>(uuid_gen:&'a mut CassUuidGen) -> Result<CassUuid,CassErro
 }}
 
 
-
-
 pub fn cassvalue2cassuuid<'a>(value:&'a CassValue) -> Result<CassUuid,CassError> {unsafe{
     let mut cass_uuid = mem::uninitialized();
     cass_value_get_uuid(value, &mut cass_uuid);
