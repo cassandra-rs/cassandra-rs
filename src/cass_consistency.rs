@@ -3,16 +3,16 @@
 
 use libc::types::os::arch::c95::c_uint;
 
-type Enum_CassConsistency_ = c_uint;
-pub const CASS_CONSISTENCY_ANY: c_uint = 0;
-pub const CASS_CONSISTENCY_ONE: c_uint = 1;
-pub const CASS_CONSISTENCY_TWO: c_uint = 2;
-pub const CASS_CONSISTENCY_THREE: c_uint = 3;
-pub const CASS_CONSISTENCY_QUORUM: c_uint = 4;
-pub const CASS_CONSISTENCY_ALL: c_uint = 5;
-pub const CASS_CONSISTENCY_LOCAL_QUORUM: c_uint = 6;
-pub const CASS_CONSISTENCY_EACH_QUORUM: c_uint = 7;
-pub const CASS_CONSISTENCY_SERIAL: c_uint = 8;
-pub const CASS_CONSISTENCY_LOCAL_SERIAL: c_uint = 9;
-pub const CASS_CONSISTENCY_LOCAL_ONE: c_uint = 10;
-pub type CassConsistency = Enum_CassConsistency_;
+pub enum CassConsistency {
+    ANY = 0is,
+    ONE = 1,
+    TWO = 2,
+    THREE = 3,
+    QUORUM = 4,
+    ALL = 5,
+    LOCAL_QUORUM = 6,
+    EACH_QUORUM = 7,
+    SERIAL = 8,
+    LOCAL_SERIAL = 9,
+    LOCAL_ONE = 10
+}
