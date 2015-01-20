@@ -86,42 +86,37 @@ fn main() {unsafe{
 }}
 
 fn print_schema_value(value:&CassValue) {unsafe{
-//~ cass_int32_t i;
-//~ cass_bool_t b;
-//~ cass_double_t d;
-//~ CassString s;
-//~ CassUuid u;
-//    char us[CASS_UUID_STRING_LENGTH];
+    use cql_ffi::CassValueType::*;
     let cass_value_type = cass_value_type(value);
     match cass_value_type {
-        CassValueType::CASS_VALUE_TYPE_INT  => {
+        CASS_VALUE_TYPE_INT  => {
             let cint = &mut 0i32;
             cass_value_get_int32(value, cint);
             println!("{}", cint);
         },
-        CassValueType::CASS_VALUE_TYPE_BOOLEAN => {
+        CASS_VALUE_TYPE_BOOLEAN => {
             let mut cbool = 0u32;
             cass_value_get_bool(value, &mut cbool);
             println!("{:?}", if cbool > 0u32 {"true"} else {"false"});
         },
-        CassValueType::CASS_VALUE_TYPE_DOUBLE => {
+        CASS_VALUE_TYPE_DOUBLE => {
             let mut cdouble = 0f64;
             cass_value_get_double(value, &mut cdouble);
             println!("{:?}", cdouble);
         },
-        CassValueType::CASS_VALUE_TYPE_TEXT|CassValueType::CASS_VALUE_TYPE_ASCII|CassValueType::CASS_VALUE_TYPE_VARCHAR => {
+        CASS_VALUE_TYPE_TEXT|CASS_VALUE_TYPE_ASCII|CASS_VALUE_TYPE_VARCHAR => {
             let cstring = cassvalue2cassstring(value);
             println!("\"{:?}\"", cstring);
         },
-        CassValueType::CASS_VALUE_TYPE_UUID => {
+        CASS_VALUE_TYPE_UUID => {
             let uuid = cassvalue2cassuuid(value);
             let uuid_str = cassuuid2string(uuid.unwrap());
             println!("{:?}", uuid_str);
         },
-        CassValueType::CASS_VALUE_TYPE_LIST => {
+        CASS_VALUE_TYPE_LIST => {
             print_schema_list(value);
         },
-        CassValueType::CASS_VALUE_TYPE_MAP => {
+        CASS_VALUE_TYPE_MAP => {
             print_schema_map(value)
         },
         _ => {
