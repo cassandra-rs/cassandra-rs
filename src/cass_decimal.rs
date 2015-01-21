@@ -1,5 +1,8 @@
 #![allow(dead_code)]
 
+use std::default::Default;
+use std::mem;
+
 use cass_bytes::CassBytes;
 use cass_types::cass_int32_t;
 
@@ -10,8 +13,8 @@ pub struct CassDecimal {
     pub varint: CassBytes,
 }
 
-impl ::std::default::Default for CassDecimal {
-    fn default() -> CassDecimal { unsafe { ::std::mem::zeroed() } }
+impl Default for CassDecimal {
+    fn default() -> CassDecimal { unsafe { mem::zeroed() } }
 }
 
 extern "C" {

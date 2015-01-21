@@ -1,4 +1,4 @@
-enum CassColumnType {
+pub enum CassColumnType {
     PARTITION_KEY = 0,
     CLUSTERING_KEY = 1,
     REGULAR = 2,

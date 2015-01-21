@@ -25,6 +25,7 @@ pub use cass_schema::*;
 pub use cass_error::*;
 pub use cass_helpers::*;
 pub use cass_log::*;
+pub use cass_column::*;
 
 mod cass_consistency;
 mod cass_bytes;
@@ -49,3 +50,4 @@ mod cass_schema;
 mod cass_log;
 mod cass_error;
 mod cass_helpers;
+mod cass_column;
