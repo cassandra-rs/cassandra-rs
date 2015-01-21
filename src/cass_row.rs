@@ -8,8 +8,7 @@ use cass_value::CassValue;
 
 use cass_types::cass_size_t;
 
-enum Struct_CassRow_ { }
-pub type CassRow = Struct_CassRow_;
+pub enum CassRow { }
 
 extern "C" {
     pub fn cass_row_get_column(row: *const CassRow, index: cass_size_t) -> *const CassValue;

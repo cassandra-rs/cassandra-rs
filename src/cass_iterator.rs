@@ -13,17 +13,16 @@ use cass_schema::CassSchemaMetaField;
 
 use cass_types::cass_bool_t;
 
-enum Struct_CassIterator_ { }
-pub type CassIterator = Struct_CassIterator_;
+pub enum CassIterator { }
 
-type Enum_CassIteratorType_ = c_uint;
-pub const CASS_ITERATOR_TYPE_RESULT: c_uint = 0;
-pub const CASS_ITERATOR_TYPE_ROW: c_uint = 1;
-pub const CASS_ITERATOR_TYPE_COLLECTION: c_uint = 2;
-pub const CASS_ITERATOR_TYPE_MAP: c_uint = 3;
-pub const CASS_ITERATOR_TYPE_SCHEMA_META: c_uint = 4;
-pub const CASS_ITERATOR_TYPE_SCHEMA_META_FIELD: c_uint = 5;
-pub type CassIteratorType = Enum_CassIteratorType_;
+pub enum CassIteratorType {
+    RESULT = 0,
+    ROW = 1,
+    COLLECTION = 2,
+    MAP = 3,
+    SCHEMA_META = 4,
+    SCHEMA_META_FIELD = 5
+}
 
 extern "C" {
     pub fn cass_iterator_free(iterator: *mut CassIterator);

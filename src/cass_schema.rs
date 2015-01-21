@@ -8,18 +8,15 @@ use libc::types::os::arch::c95::c_uint;
 use cass_string::CassString;
 use cass_value::CassValue;
 
-enum Struct_CassSchema_ { }
-pub type CassSchema = Struct_CassSchema_;
+pub enum CassSchema { }
 
-enum Struct_CassSchemaMeta_ { }
-pub type CassSchemaMeta = Struct_CassSchemaMeta_;
+pub enum CassSchemaMeta { }
 
-enum Struct_CassSchemaMetaField_ { }
-pub type CassSchemaMetaField = Struct_CassSchemaMetaField_;
+pub enum CassSchemaMetaField { }
 
 pub enum CassSchemaMetaType {
     KEYSPACE = 0is,
-    TABLE = 18,
+    TABLE = 1,
     COLUMN = 2
 }
 

@@ -9,8 +9,7 @@ use cass_statement::CassStatement;
 use cass_schema::CassSchema;
 use cass_cluster::CassCluster;
 
-enum Struct_CassSession_ { }
-pub type CassSession = Struct_CassSession_;
+pub enum CassSession { }
 
 extern "C" {
     pub fn cass_session_new() -> *mut CassSession;
