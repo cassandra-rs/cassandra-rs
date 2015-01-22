@@ -89,34 +89,34 @@ fn print_schema_value(value:&CassValue) {unsafe{
     use cql_ffi::CassValueType::*;
     let cass_value_type = cass_value_type(value);
     match cass_value_type {
-        CASS_VALUE_TYPE_INT  => {
+        INT  => {
             let cint = &mut 0i32;
             cass_value_get_int32(value, cint);
             println!("{}", cint);
         },
-        CASS_VALUE_TYPE_BOOLEAN => {
+        BOOLEAN => {
             let mut cbool = 0u32;
             cass_value_get_bool(value, &mut cbool);
             println!("{:?}", if cbool > 0u32 {"true"} else {"false"});
         },
-        CASS_VALUE_TYPE_DOUBLE => {
+        DOUBLE => {
             let mut cdouble = 0f64;
             cass_value_get_double(value, &mut cdouble);
             println!("{:?}", cdouble);
         },
-        CASS_VALUE_TYPE_TEXT|CASS_VALUE_TYPE_ASCII|CASS_VALUE_TYPE_VARCHAR => {
+        TEXT|ASCII|VARCHAR => {
             let cstring = cassvalue2cassstring(value);
             println!("\"{:?}\"", cstring);
         },
-        CASS_VALUE_TYPE_UUID => {
+        UUID => {
             let uuid = cassvalue2cassuuid(value);
             let uuid_str = cassuuid2string(uuid.unwrap());
             println!("{:?}", uuid_str);
         },
-        CASS_VALUE_TYPE_LIST => {
+        LIST => {
             print_schema_list(value);
         },
-        CASS_VALUE_TYPE_MAP => {
+        MAP => {
             print_schema_map(value)
         },
         _ => {
