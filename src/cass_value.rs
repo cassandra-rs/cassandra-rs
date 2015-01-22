@@ -16,11 +16,10 @@ use cass_uuid::CassUuid;
 use cass_string::CassString;
 use cass_decimal::CassDecimal;
 
-
 pub enum CassValue { }
 
 #[repr(C)]
-#[derive(Show,Copy)]
+#[derive(Show,Copy,PartialEq)]
 pub enum CassValueType {
     UNKNOWN = 65535is,
     CUSTOM = 0,
