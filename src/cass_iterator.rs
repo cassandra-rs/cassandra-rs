@@ -15,6 +15,7 @@ use cass_types::cass_bool_t;
 
 pub enum CassIterator { }
 
+#[derive(Show)]
 pub enum CassIteratorType {
     RESULT = 0,
     ROW = 1,
