@@ -1,7 +1,6 @@
 #![allow(non_camel_case_types)]
 #![allow(dead_code)]
 
-use libc::types::os::arch::c95::c_uint;
 use libc::types::os::arch::c95::c_char;
 
 #[derive(Show,Eq,PartialEq,Copy)]

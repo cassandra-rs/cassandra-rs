@@ -3,7 +3,6 @@
 #![allow(missing_copy_implementations)]
 
 use libc::types::os::arch::c95::c_char;
-use libc::types::os::arch::c95::c_uint;
 
 use cass_string::CassString;
 use cass_value::CassValue;
@@ -14,6 +13,8 @@ pub enum CassSchemaMeta { }
 
 pub enum CassSchemaMetaField { }
 
+#[repr(C)]
+#[derive(Show,Copy)]
 pub enum CassSchemaMetaType {
     KEYSPACE = 0is,
     TABLE = 1,

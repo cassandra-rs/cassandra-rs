@@ -2,8 +2,6 @@
 #![allow(dead_code)]
 #![allow(missing_copy_implementations)]
 
-use libc::types::os::arch::c95::c_uint;
-
 use cass_error::CassError;
 use cass_uuid::CassUuid;
 use cass_bytes::CassBytes;
@@ -18,9 +16,10 @@ use cass_types::cass_int32_t;
 use cass_types::cass_int64_t;
 use cass_types::cass_float_t;
 
-enum Struct_CassCollection_ { }
-pub type CassCollection = Struct_CassCollection_;
+pub enum CassCollection{ }
 
+#[repr(C)]
+#[derive(Show,Copy)]
 pub enum CassCollectionType {
     LIST = 32is,
     MAP = 33,

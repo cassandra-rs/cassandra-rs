@@ -2,8 +2,6 @@
 #![allow(dead_code)]
 #![allow(missing_copy_implementations)]
 
-use libc::types::os::arch::c95::c_uint;
-
 use cass_result::CassResult;
 use cass_value::CassValue;
 use cass_row::CassRow;
@@ -15,7 +13,8 @@ use cass_types::cass_bool_t;
 
 pub enum CassIterator { }
 
-#[derive(Show)]
+#[repr(C)]
+#[derive(Show,Copy)]
 pub enum CassIteratorType {
     RESULT = 0,
     ROW = 1,

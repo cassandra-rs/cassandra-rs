@@ -2,8 +2,6 @@
 #![allow(dead_code)]
 #![allow(missing_copy_implementations)]
 
-use libc::types::os::arch::c95::c_uint;
-
 use cass_types::cass_bool_t;
 use cass_types::cass_double_t;
 use cass_types::cass_float_t;
@@ -21,6 +19,8 @@ use cass_decimal::CassDecimal;
 
 pub enum CassValue { }
 
+#[repr(C)]
+#[derive(Show,Copy)]
 pub enum CassValueType {
     UNKNOWN = 65535is,
     CUSTOM = 0,

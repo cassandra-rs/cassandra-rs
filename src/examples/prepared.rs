@@ -1,3 +1,4 @@
+#![allow(unstable)]
 extern crate cql_ffi;
 
 use std::slice;

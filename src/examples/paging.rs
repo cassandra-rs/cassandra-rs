@@ -1,3 +1,4 @@
+#![allow(unstable)]
 extern crate cql_ffi;
 
 use std::slice;
@@ -5,11 +6,6 @@ use std::slice;
 use cql_ffi::*;
 
 static NUM_CONCURRENT_REQUESTS:isize=1000;
-
-struct Pair<'a> {
-    key:&'a str,
-    value:i32
-}
 
 unsafe fn print_error(future:&mut CassFuture) {
     let message = cass_future_error_message(future);

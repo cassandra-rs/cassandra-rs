@@ -3,3 +3,5 @@ pub type CassCompression {
     SNAPPY = 1,
     LZ4 = 2
 }
+
+

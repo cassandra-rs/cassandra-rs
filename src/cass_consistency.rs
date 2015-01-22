@@ -2,6 +2,7 @@
 #![allow(non_camel_case_types)]
 
 #[derive(Copy,Show)]
+#[repr(C)]
 pub enum CassConsistency {
     ANY = 0is,
     ONE = 1,

@@ -2,7 +2,6 @@
 #![allow(dead_code)]
 #![allow(raw_pointer_derive)]
 
-use libc::types::os::arch::c95::c_uint;
 use libc::types::os::arch::c95::c_char;
 
 use cass_types::cass_uint64_t;

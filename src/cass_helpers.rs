@@ -49,7 +49,7 @@ pub fn cassvalue2cassuuid<'a>(value:&'a CassValue) -> Result<CassUuid,CassError>
 
 
 pub fn cassuuid2string<'a>(uuid:CassUuid) -> Result<String,CassError> {unsafe{
-    let mut cass_uuid:*mut i8 = mem::uninitialized();
+    let cass_uuid:*mut i8 = mem::uninitialized();
     cass_uuid_string(uuid, cass_uuid);
     let cass_uuid:*const i8 = cass_uuid;
     Ok(String::from_utf8_lossy(c_str_to_bytes(&cass_uuid)).into_owned())

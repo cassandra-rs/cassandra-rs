@@ -1,3 +1,4 @@
+#![allow(unstable)]
 extern crate cql_ffi;
 
 use std::slice;
@@ -127,12 +128,12 @@ fn print_schema_value(value:&CassValue) {unsafe{
 
 fn print_schema_list(value:&CassValue) {unsafe{
     let iterator = cass_iterator_from_collection(value);
-    let mut is_first = true;
+//    let mut is_first = true;
     //printf("[ ");
     while cass_iterator_next(iterator) > 0 {
 //        if (!is_first) {println!(", ");}
         print_schema_value(&*cass_iterator_get_value(&mut*iterator));
-        is_first = if cass_false > 0 {true} else {false};
+ //       is_first = if cass_false > 0 {true} else {false};
     }
     //printf(" ]");
     cass_iterator_free(iterator);
@@ -140,14 +141,14 @@ fn print_schema_list(value:&CassValue) {unsafe{
 
 fn print_schema_map(value:&CassValue) {unsafe{
     let iterator = cass_iterator_from_map(value);
-    let mut is_first = cass_true;
+    //let mut is_first = cass_true;
     //printf("{ ");
     while cass_iterator_next(iterator) > 0 {
         //if (!is_first) printf(", ");
         print_schema_value(&*cass_iterator_get_map_key(&mut*iterator));
         //printf(" : ");
         print_schema_value(&*cass_iterator_get_map_value(&mut*iterator));
-        is_first = cass_false;
+        //is_first = cass_false;
     }
     //printf(" }");
     cass_iterator_free(iterator);

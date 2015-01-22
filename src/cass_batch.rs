@@ -2,14 +2,13 @@
 #![allow(dead_code)]
 #![allow(missing_copy_implementations)]
 
-use libc::types::os::arch::c95::c_uint;
-
 use cass_consistency::CassConsistency;
 use cass_statement::CassStatement;
 use cass_error::CassError;
 
 pub enum CassBatch { }
 
+#[repr(C)]
 pub enum CassBatchType {
     LOGGED = 0is,
     UNLOGGED = 1,
