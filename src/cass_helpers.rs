@@ -2,7 +2,6 @@
 use std::raw;
 use std::mem;
 
-use std::ffi::CString;
 use std::ffi::c_str_to_bytes;
 
 use cass_string::cass_string_init;
@@ -18,7 +17,7 @@ use cass_uuid::cass_uuid_string;
 use cass_value::cass_value_get_string;
 
 pub fn str2cass_string(query:&str) -> CassString {unsafe{
-    let cass_str = cass_string_init(CString::from_slice(query.as_bytes()).as_ptr());
+    let cass_str = cass_string_init(query.as_ptr() as *const i8);
     cass_str
 }}
 
