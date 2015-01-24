@@ -110,9 +110,13 @@ fn print_schema_value(value:&CassValue) {unsafe{
             println!("\"{:?}\"", cstring);
         },
         UUID => {
-            let uuid = cassvalue2cassuuid(value);
-            let uuid_str = cassuuid2string(uuid.unwrap());
-            println!("{:?}", uuid_str);
+            match cassvalue2cassuuid(value) {
+                Ok(uuid) => {
+                    let uuid_str = cassuuid2string(uuid);
+                    println!("{:?}", uuid_str);
+                },
+                Err(err) => panic!(err)
+            }
         },
         LIST => {
             print_schema_list(value);

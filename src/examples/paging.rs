@@ -52,13 +52,21 @@ unsafe fn insert_into_paging(session:&mut CassSession, uuid_gen:&mut CassUuidGen
 
     for i in (0..NUM_CONCURRENT_REQUESTS) {
         let statement = cass_statement_new(query, 2);
-        let key = gencassuuid(&mut*uuid_gen).unwrap();
-        cass_statement_bind_uuid(statement, 0, key);
-        println!("{}", i);
-        cass_statement_bind_string(statement, 1, str2cass_string(cassuuid2string(key).unwrap().as_slice()));
-
-        futures.push(&mut*cass_session_execute(session, statement));
-        cass_statement_free(statement);
+        match gencassuuid(&mut*uuid_gen) {
+            Ok(key) => {
+                cass_statement_bind_uuid(statement, 0, key);
+                println!("{}", i);
+                match cassuuid2string(key) {
+                    Ok(key) => {
+                        cass_statement_bind_string(statement, 1, str2cass_string(key.as_slice()));
+                        futures.push(&mut*cass_session_execute(session, statement));
+                        cass_statement_free(statement);
+                    },
+                    Err(err) => panic!(err)
+                }
+            },
+            Err(err) => panic!(err)
+        }
     }
     while futures.len() > 0 {
         let future = futures.pop().unwrap();
@@ -87,10 +95,14 @@ unsafe fn select_from_paging(session:&mut CassSession) {
         cass_future_free(future);
         while cass_iterator_next(iterator) > 0 {
             let row = cass_iterator_get_row(iterator);
-            let key = cassvalue2cassuuid(&*cass_row_get_column(row, 0));
-            let key_str = cassuuid2string(key.unwrap());
-            let value = cassvalue2cassstring(&*cass_row_get_column(row, 1));
-            println!("key: '{:?}' value: '{:?}'\n", key_str, value);
+            match cassvalue2cassuuid(&*cass_row_get_column(row, 0)) {
+                Ok(key) => {
+                    let key_str = cassuuid2string(key);
+                    let value = cassvalue2cassstring(&*cass_row_get_column(row, 1));
+                    println!("key: '{:?}' value: '{:?}'\n", key_str, value);
+                },
+                Err(err) => panic!(err)
+            }
         }
         has_more_pages = cass_result_has_more_pages(result) > 0;
         if has_more_pages {

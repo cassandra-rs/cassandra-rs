@@ -1,10 +1,10 @@
-//Unlock the rest of the cass_ files, this is hand created and is a minimal set of helpers to make consuming the low level api palatable
+//Unlike the rest of the cass_ files, this is hand created and is a minimal set of helpers to make consuming the low level api palatable
 use std::raw;
 use std::mem;
 
 use std::ffi::c_str_to_bytes;
 
-use cass_string::cass_string_init;
+use cass_string::cass_string_init2;
 use cass_string::CassString;
 use cass_value::CassValue;
 use cass_error::CassError;
@@ -17,8 +17,7 @@ use cass_uuid::cass_uuid_string;
 use cass_value::cass_value_get_string;
 
 pub fn str2cass_string(query:&str) -> CassString {unsafe{
-    let cass_str = cass_string_init(query.as_ptr() as *const i8);
-    cass_str
+    cass_string_init2(query.as_ptr() as *const i8,query.len() as u64)
 }}
 
 pub fn str2ref(query:&str) -> *const i8 {

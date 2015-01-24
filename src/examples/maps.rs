@@ -89,9 +89,13 @@ unsafe fn select_from_maps(session: &mut CassSession, key:&str) {
             cass_row_get_column(row, 0));
             let mut value = 0;
             while cass_iterator_next(iterator) > 0 {
-                let key = cassvalue2cassstring(&*cass_iterator_get_map_key(iterator)).unwrap();
-                cass_value_get_int32(cass_iterator_get_map_value(iterator), &mut value);
-                println!("item: '{:?}' : {:?}", key, value);
+                match cassvalue2cassstring(&*cass_iterator_get_map_key(iterator)) {
+                    Ok(key) => {
+                        cass_value_get_int32(cass_iterator_get_map_value(iterator), &mut value);
+                        println!("item: '{:?}' : {:?}", key, value);
+                    }
+                    Err(err) => panic!(err)
+                }
             }
             cass_iterator_free(iterator);
         }

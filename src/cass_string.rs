@@ -13,9 +13,9 @@ pub struct CassString {
     pub length: cass_size_t,
 }
 
-impl fmt::Show for CassString {
+impl fmt::Debug for CassString {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {unsafe{
-        if self.length > 1000000 {panic!("wtf: {}", self.length)};
+        //if self.length > 1000000 {panic!("wtf: {}", self.length)};
         let data = self.data as *const u8;
         let slice = slice::from_raw_buf(&data,self.length as usize);
         let vec = slice.to_vec();
@@ -26,9 +26,9 @@ impl fmt::Show for CassString {
     }}
 }
 
-impl ::std::default::Default for CassString {
-    fn default() -> CassString { unsafe { ::std::mem::zeroed() } }
-}
+//~ impl ::std::default::Default for CassString {
+    //~ fn default() -> CassString { unsafe { ::std::mem::zeroed() } }
+//~ }
 
 extern "C" {
     pub fn cass_string_init(null_terminated: *const c_char) -> CassString;
