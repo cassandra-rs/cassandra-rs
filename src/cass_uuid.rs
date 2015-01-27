@@ -10,7 +10,7 @@ use cass_types::cass_uint8_t;
 use cass_error::CassError;
 
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy,Debug)]
 pub struct CassUuid {
     pub time_and_version: cass_uint64_t,
     pub clock_seq_and_node: cass_uint64_t,
