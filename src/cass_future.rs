@@ -11,7 +11,6 @@ use cass_result::CassResult;
 use cass_types::cass_bool_t;
 use cass_types::cass_duration_t;
 
-#[derive(Show)]
 pub enum CassFuture { }
 
 pub type CassFutureCallback =

@@ -21,7 +21,7 @@ unsafe fn connect_session(session:&mut CassSession, cluster:&mut CassCluster) ->
     cass_future_wait(future);
     let rc = match cass_future_error_code(future) {
         CassError::CASS_OK => {CassError::CASS_OK},
-        _=> panic!("{:?}",future)
+        err => panic!("{:?}",err)
     };
     cass_future_free(future);
     rc
