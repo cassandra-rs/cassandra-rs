@@ -16,6 +16,7 @@ use cass_types::cass_int32_t;
 use cass_types::cass_int64_t;
 use cass_types::cass_float_t;
 
+#[derive(Copy,Show)]
 pub enum CassCollection{ }
 
 #[repr(C)]

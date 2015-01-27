@@ -6,6 +6,7 @@ use cass_consistency::CassConsistency;
 use cass_statement::CassStatement;
 use cass_error::CassError;
 
+#[derive(Copy,Debug)]
 pub enum CassBatch { }
 
 #[repr(C)]

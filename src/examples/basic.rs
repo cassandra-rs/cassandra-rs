@@ -2,7 +2,6 @@
 extern crate collections;
 extern crate cql_ffi;
 
-use std::slice;
 use collections::string::String;
 
 use cql_ffi::*;

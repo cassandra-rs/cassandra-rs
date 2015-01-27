@@ -1,5 +1,5 @@
 #[repr(C)]
-#[derive(Show,Copy)]
+#[derive(Copy,Show)]
 pub enum CassColumnType {
     PARTITION_KEY = 0,
     CLUSTERING_KEY = 1,

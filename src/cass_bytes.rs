@@ -5,7 +5,7 @@ use cass_types::cass_byte_t;
 use cass_types::cass_size_t;
 
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy,Debug)]
 pub struct CassBytes {
     pub data: *const cass_byte_t,
     pub size: cass_size_t,

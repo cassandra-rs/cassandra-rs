@@ -16,6 +16,7 @@ use cass_uuid::CassUuid;
 use cass_string::CassString;
 use cass_decimal::CassDecimal;
 
+#[derive(Copy,Debug)]
 pub enum CassValue { }
 
 #[repr(C)]

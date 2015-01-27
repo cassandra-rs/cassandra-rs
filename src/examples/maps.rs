@@ -1,15 +1,15 @@
 #![allow(unstable)]
 extern crate cql_ffi;
 
-use std::slice;
-
 use cql_ffi::*;
+use cql_ffi::CassError::CASS_OK;
+
+use std::slice;
 
 struct Pair<'a> {
     key:&'a str,
     value:i32
 }
-
 
 unsafe fn print_error(future:&mut CassFuture) {
     let message = cass_future_error_message(future);
@@ -27,7 +27,7 @@ unsafe fn connect_session(session:&mut CassSession, cluster:&mut CassCluster) ->
     let future = &mut *cass_session_connect(session, cluster);
     cass_future_wait(future);
     let rc = match cass_future_error_code(future) {
-        CassError::CASS_OK => {CassError::CASS_OK},
+        CASS_OK => CASS_OK,
         err => panic!("{:?}",err)
     };
     cass_future_free(future);
@@ -42,12 +42,12 @@ fn execute_query(session: &mut CassSession, query: &str) -> CassError {unsafe{
     cass_future_wait(future);
     let rc = cass_future_error_code(future);
     match rc {
-        CassError::CASS_OK => {},
+        CASS_OK => {},
         _ => print_error(future)
     }
     cass_future_free(future);
     cass_statement_free(statement);
-    return rc;
+    rc
 }}
 
 unsafe fn insert_into_maps(session:&mut CassSession, key:&str, items:Vec<Pair>) -> CassError {

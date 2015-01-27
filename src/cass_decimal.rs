@@ -7,7 +7,7 @@ use cass_bytes::CassBytes;
 use cass_types::cass_int32_t;
 
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy,Show)]
 pub struct CassDecimal {
     pub scale: cass_int32_t,
     pub varint: CassBytes,

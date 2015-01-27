@@ -10,6 +10,7 @@ use cass_error::CassError;
 use cass_ssl::CassSsl;
 use cass_types::*;
 
+#[derive(Copy,Debug)]
 pub enum CassCluster { }
 
 extern "C" {
