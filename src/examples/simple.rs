@@ -1,5 +1,3 @@
-#![allow(unstable)]
-
 extern crate cql_ffi;
 
 use cql_ffi::*;

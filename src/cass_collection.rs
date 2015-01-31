@@ -16,11 +16,11 @@ use cass_types::cass_int32_t;
 use cass_types::cass_int64_t;
 use cass_types::cass_float_t;
 
-#[derive(Copy,Show)]
+#[derive(Copy,Debug)]
 pub enum CassCollection{ }
 
 #[repr(C)]
-#[derive(Show,Copy)]
+#[derive(Debug,Copy)]
 pub enum CassCollectionType {
     LIST = 32is,
     MAP = 33,

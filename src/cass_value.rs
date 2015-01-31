@@ -20,7 +20,7 @@ use cass_decimal::CassDecimal;
 pub enum CassValue { }
 
 #[repr(C)]
-#[derive(Show,Copy,PartialEq)]
+#[derive(Debug,Copy,PartialEq)]
 pub enum CassValueType {
     UNKNOWN = 65535is,
     CUSTOM = 0,

@@ -1,4 +1,5 @@
-#![allow(unstable)]
+#![feature(core)]
+
 extern crate cql_ffi;
 
 use cql_ffi::*;

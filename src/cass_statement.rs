@@ -23,7 +23,7 @@ use cass_types::cass_int32_t;
 use cass_types::cass_float_t;
 use cass_types::cass_int64_t;
 
-#[derive(Show,Eq,PartialEq,Copy)]
+#[derive(Debug,Eq,PartialEq,Copy)]
 pub enum CassStatement { }
 
 extern "C" {

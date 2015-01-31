@@ -1,4 +1,4 @@
-#![allow(unstable)]
+#![feature(core,std_misc)]
 
 extern crate cql_ffi;
 

@@ -3,7 +3,7 @@
 
 use libc::types::os::arch::c95::c_char;
 
-#[derive(Show,Eq,PartialEq,Copy)]
+#[derive(Debug,Eq,PartialEq,Copy)]
 #[repr(C)]
 pub enum CassErrorSource {
     NONE = 0is,
@@ -13,7 +13,7 @@ pub enum CassErrorSource {
     COMPRESSION = 4
 }
 
-#[derive(Show,Eq,PartialEq,Copy)]
+#[derive(Debug,Eq,PartialEq,Copy)]
 #[repr(C)]
 pub enum CassError {
     CASS_OK = 0,

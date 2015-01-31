@@ -1,11 +1,12 @@
-#![allow(unstable)]
+#![feature(core)]
+
 extern crate cql_ffi;
 
 use std::slice;
 
 use cql_ffi::*;
 
-#[derive(Show)]
+#[derive(Debug)]
 struct Basic {
     bln:u32,
     flt:f32,

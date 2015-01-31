@@ -14,7 +14,7 @@ pub enum CassSchemaMeta { }
 pub enum CassSchemaMetaField { }
 
 #[repr(C)]
-#[derive(Show,Copy)]
+#[derive(Debug,Copy)]
 pub enum CassSchemaMetaType {
     KEYSPACE = 0is,
     TABLE = 1,

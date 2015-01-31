@@ -1,4 +1,5 @@
-#![allow(unstable)]
+#![feature(core,collections)]
+
 extern crate collections;
 extern crate cql_ffi;
 
@@ -6,7 +7,7 @@ use collections::string::String;
 
 use cql_ffi::*;
 
-#[derive(Show)]
+#[derive(Debug)]
 struct Basic {
     bln:cass_bool_t,
     flt:cass_float_t,

@@ -1,5 +1,5 @@
-#![feature(unsafe_destructor)]
-#![allow(unstable)]
+#![feature(unsafe_destructor,core,std_misc,libc)]
+
 extern crate libc;
 
 pub use cass_consistency::*;

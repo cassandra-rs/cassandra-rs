@@ -1,4 +1,5 @@
-#![allow(unstable)]
+#![feature(core,collections,std_misc)]
+
 extern crate cql_ffi;
 use std::ffi::CString;
 use std::slice;

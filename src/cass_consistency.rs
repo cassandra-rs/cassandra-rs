@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 #![allow(non_camel_case_types)]
 
-#[derive(Copy,Show)]
+#[derive(Copy,Debug)]
 #[repr(C)]
 pub enum CassConsistency {
     ANY = 0is,
