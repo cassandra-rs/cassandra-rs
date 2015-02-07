@@ -5,7 +5,7 @@ license = "Apache-2.0"
 homepage = "https://github.com/tupshin/cql-ffi"
 repository = "https://github.com/tupshin/cql-ffi"
 name = "cql_ffi"
-version = "0.0.6"
+version = "0.0.7"
 authors = ["Tupshin Harper <tupshin@tupshin.com>"]
 
 [[bin]]
@@ -71,8 +71,5 @@ path="src/examples/uuids.rs"
 
 [lib]
 name = "cql_ffi"
-# path = "src/cassandra/mod.rs"
 
-# [dependencies]
-# uuid = "*"
 

@@ -24,7 +24,7 @@ fn print_error(future:&mut CassFuture) {unsafe{
 
 fn create_cluster() -> *mut CassCluster {unsafe{
     let cluster = cass_cluster_new();
-    cass_cluster_set_contact_points(cluster, str2ref("127.0.0.1"));
+    cass_cluster_set_contact_points(cluster, foo.as_ptr() as *const i8);
     cluster 
 }}
 
