@@ -1,4 +1,4 @@
-#![feature(core,collections)]
+#![feature(collections)]
 
 extern crate collections;
 extern crate cql_ffi;
@@ -24,7 +24,7 @@ fn print_error(future:&mut CassFuture) {unsafe{
 
 fn create_cluster() -> *mut CassCluster {unsafe{
     let cluster = cass_cluster_new();
-    cass_cluster_set_contact_points(cluster, foo.as_ptr() as *const i8);
+    cass_cluster_set_contact_points(cluster, "127.0.0.1".as_ptr() as *const i8);
     cluster 
 }}
 
