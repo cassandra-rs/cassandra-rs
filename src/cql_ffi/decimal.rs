@@ -3,8 +3,8 @@
 use std::default::Default;
 use std::mem;
 
-use cass_bytes::CassBytes;
-use cass_types::cass_int32_t;
+use cql_ffi::bytes::CassBytes;
+use cql_ffi::types::cass_int32_t;
 
 #[repr(C)]
 #[derive(Copy,Debug)]

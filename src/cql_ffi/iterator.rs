@@ -2,14 +2,13 @@
 #![allow(dead_code)]
 #![allow(missing_copy_implementations)]
 
-use cass_result::CassResult;
-use cass_value::CassValue;
-use cass_row::CassRow;
-use cass_schema::CassSchemaMeta;
-use cass_schema::CassSchema;
-use cass_schema::CassSchemaMetaField;
-
-use cass_types::cass_bool_t;
+use cql_ffi::result::CassResult;
+use cql_ffi::value::CassValue;
+use cql_ffi::row::CassRow;
+use cql_ffi::schema::CassSchemaMeta;
+use cql_ffi::schema::CassSchema;
+use cql_ffi::schema::CassSchemaMetaField;
+use cql_ffi::types::cass_bool_t;
 
 pub enum CassIterator { }
 

@@ -5,23 +5,23 @@
 use libc::types::os::arch::c95::c_char;
 use libc::types::os::arch::c95::c_int;
 
-use cass_error::CassError;
-use cass_collection::CassCollection;
-use cass_decimal::CassDecimal;
-use cass_uuid::CassUuid;
-use cass_bytes::CassBytes;
-use cass_string::CassString;
-use cass_inet::CassInet;
-use cass_result::CassResult;
-use cass_consistency::CassConsistency;
+use cql_ffi::error::CassError;
+use cql_ffi::collection::CassCollection;
+use cql_ffi::decimal::CassDecimal;
+use cql_ffi::uuid::CassUuid;
+use cql_ffi::bytes::CassBytes;
+use cql_ffi::string::CassString;
+use cql_ffi::inet::CassInet;
+use cql_ffi::result::CassResult;
+use cql_ffi::consistency::CassConsistency;
 
-use cass_types::cass_size_t;
-use cass_types::cass_byte_t;
-use cass_types::cass_double_t;
-use cass_types::cass_bool_t;
-use cass_types::cass_int32_t;
-use cass_types::cass_float_t;
-use cass_types::cass_int64_t;
+use cql_ffi::types::cass_size_t;
+use cql_ffi::types::cass_byte_t;
+use cql_ffi::types::cass_double_t;
+use cql_ffi::types::cass_bool_t;
+use cql_ffi::types::cass_int32_t;
+use cql_ffi::types::cass_float_t;
+use cql_ffi::types::cass_int64_t;
 
 #[derive(Debug,Eq,PartialEq,Copy)]
 pub enum CassStatement { }

@@ -2,12 +2,11 @@
 #![allow(dead_code)]
 #![allow(missing_copy_implementations)]
 
-use cass_value::CassValueType;
-use cass_row::CassRow;
-use cass_string::CassString;
-
-use cass_types::cass_size_t;
-use cass_types::cass_bool_t;
+use cql_ffi::value::CassValueType;
+use cql_ffi::row::CassRow;
+use cql_ffi::string::CassString;
+use cql_ffi::types::cass_size_t;
+use cql_ffi::types::cass_bool_t;
 
 pub enum CassResult { }
 

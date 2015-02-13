@@ -6,9 +6,9 @@ use libc::types::os::arch::c95::c_char;
 use libc::types::os::arch::c95::c_int;
 use libc::types::os::arch::c95::c_uint;
 
-use cass_error::CassError;
-use cass_ssl::CassSsl;
-use cass_types::*;
+use cql_ffi::error::CassError;
+use cql_ffi::ssl::CassSsl;
+use cql_ffi::types::*;
 
 #[derive(Copy,Debug)]
 pub enum CassCluster { }

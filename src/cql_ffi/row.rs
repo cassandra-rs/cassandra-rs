@@ -4,9 +4,9 @@
 
 use libc::types::os::arch::c95::c_char;
 
-use cass_value::CassValue;
+use cql_ffi::value::CassValue;
 
-use cass_types::cass_size_t;
+use cql_ffi::types::cass_size_t;
 
 pub enum CassRow { }
 

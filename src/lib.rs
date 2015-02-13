@@ -2,52 +2,60 @@
 
 extern crate libc;
 
-pub use cass_consistency::*;
-pub use cass_bytes::*;
-pub use cass_types::*;
-pub use cass_string::*;
-pub use cass_inet::*;
-pub use cass_decimal::*;
-pub use cass_uuid::*;
-pub use cass_cluster::*;
-pub use cass_session::*;
-pub use cass_statement::*;
-pub use cass_batch::*;
-pub use cass_future::*;
-pub use cass_prepared::*;
-pub use cass_result::*;
-pub use cass_iterator::*;
-pub use cass_row::*;
-pub use cass_value::*;
-pub use cass_collection::*;
-pub use cass_ssl::*;
-pub use cass_schema::*;
-pub use cass_error::*;
-pub use cass_helpers::*;
-pub use cass_log::*;
-pub use cass_column::*;
 
-mod cass_consistency;
-mod cass_bytes;
-mod cass_types;
-mod cass_string;
-mod cass_inet;
-mod cass_decimal;
-mod cass_uuid;
-mod cass_cluster;
-mod cass_session;
-mod cass_statement;
-mod cass_batch;
-mod cass_future;
-mod cass_prepared;
-mod cass_result;
-mod cass_iterator;
-mod cass_row;
-mod cass_value;
-mod cass_collection;
-mod cass_ssl;
-mod cass_schema;
-mod cass_log;
-mod cass_error;
-mod cass_helpers;
-mod cass_column;
+
+pub use cql_ffi::consistency::*;
+pub use cql_ffi::bytes::*;
+pub use cql_ffi::types::*;
+pub use cql_ffi::string::*;
+pub use cql_ffi::inet::*;
+pub use cql_ffi::decimal::*;
+pub use cql_ffi::uuid::*;
+pub use cql_ffi::cluster::*;
+pub use cql_ffi::session::*;
+pub use cql_ffi::statement::*;
+pub use cql_ffi::batch::*;
+pub use cql_ffi::future::*;
+pub use cql_ffi::prepared::*;
+pub use cql_ffi::result::*;
+pub use cql_ffi::iterator::*;
+pub use cql_ffi::row::*;
+pub use cql_ffi::value::*;
+pub use cql_ffi::collection::*;
+pub use cql_ffi::ssl::*;
+pub use cql_ffi::schema::*;
+pub use cql_ffi::error::*;
+pub use cql_ffi::helpers::*;
+pub use cql_ffi::log::*;
+pub use cql_ffi::column::*;
+
+//use cql_bindgen;
+
+mod cql_bindgen;
+
+mod cql_ffi {
+    pub mod consistency;
+    pub mod bytes;
+    pub mod types;
+    pub mod string;
+    pub mod inet;
+    pub mod decimal;
+    pub mod uuid;
+    pub mod cluster;
+    pub mod session;
+    pub mod statement;
+    pub mod batch;
+    pub mod future;
+    pub mod prepared;
+    pub mod result;
+    pub mod iterator;
+    pub mod row;
+    pub mod value;
+    pub mod collection;
+    pub mod ssl;
+    pub mod schema;
+    pub mod log;
+    pub mod error;
+    pub mod helpers;
+    pub mod column;
+}

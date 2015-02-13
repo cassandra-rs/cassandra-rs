@@ -2,7 +2,7 @@
 #![allow(dead_code)]
 #![allow(missing_copy_implementations)]
 
-use cass_statement::CassStatement;
+use cql_ffi::statement::CassStatement;
 
 pub enum CassPrepared { }
 

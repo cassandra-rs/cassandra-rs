@@ -2,9 +2,9 @@
 #![allow(dead_code)]
 #![allow(missing_copy_implementations)]
 
-use cass_consistency::CassConsistency;
-use cass_statement::CassStatement;
-use cass_error::CassError;
+use cql_ffi::consistency::CassConsistency;
+use cql_ffi::statement::CassStatement;
+use cql_ffi::error::CassError;
 
 #[derive(Copy,Debug)]
 pub enum CassBatch { }

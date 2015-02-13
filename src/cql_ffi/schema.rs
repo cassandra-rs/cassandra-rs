@@ -4,8 +4,8 @@
 
 use libc::types::os::arch::c95::c_char;
 
-use cass_string::CassString;
-use cass_value::CassValue;
+use cql_ffi::string::CassString;
+use cql_ffi::value::CassValue;
 
 pub enum CassSchema { }
 

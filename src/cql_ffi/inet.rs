@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use cass_types::cass_uint8_t;
+use cql_ffi::types::cass_uint8_t;
 
 #[repr(C)]
 #[derive(Copy)]

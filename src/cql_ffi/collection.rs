@@ -2,19 +2,18 @@
 #![allow(dead_code)]
 #![allow(missing_copy_implementations)]
 
-use cass_error::CassError;
-use cass_uuid::CassUuid;
-use cass_bytes::CassBytes;
-use cass_string::CassString;
-use cass_decimal::CassDecimal;
-use cass_inet::CassInet;
-
-use cass_types::cass_size_t;
-use cass_types::cass_bool_t;
-use cass_types::cass_double_t;
-use cass_types::cass_int32_t;
-use cass_types::cass_int64_t;
-use cass_types::cass_float_t;
+use cql_ffi::error::CassError;
+use cql_ffi::uuid::CassUuid;
+use cql_ffi::bytes::CassBytes;
+use cql_ffi::string::CassString;
+use cql_ffi::decimal::CassDecimal;
+use cql_ffi::inet::CassInet;
+use cql_ffi::types::cass_size_t;
+use cql_ffi::types::cass_bool_t;
+use cql_ffi::types::cass_double_t;
+use cql_ffi::types::cass_int32_t;
+use cql_ffi::types::cass_int64_t;
+use cql_ffi::types::cass_float_t;
 
 #[derive(Copy,Debug)]
 pub enum CassCollection{ }

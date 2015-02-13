@@ -1,8 +1,8 @@
 #![allow(raw_pointer_derive)]
 #![allow(dead_code)]
 
-use cass_types::cass_byte_t;
-use cass_types::cass_size_t;
+use cql_ffi::types::cass_byte_t;
+use cql_ffi::types::cass_size_t;
 
 #[repr(C)]
 #[derive(Copy,Debug)]

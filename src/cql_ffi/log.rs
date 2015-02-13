@@ -4,8 +4,8 @@
 
 use libc::types::os::arch::c95::c_char;
 
-use cass_types::cass_uint64_t;
-use cass_types::cass_size_t;
+use cql_ffi::types::cass_uint64_t;
+use cql_ffi::types::cass_size_t;
 
 #[repr(C)]
 #[derive(Copy)]

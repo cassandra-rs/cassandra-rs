@@ -4,17 +4,16 @@ use std::mem;
 
 use std::ffi::c_str_to_bytes;
 
-use cass_string::cass_string_init2;
-use cass_string::CassString;
-use cass_value::CassValue;
-use cass_error::CassError;
-use cass_uuid::CassUuid;
-use cass_uuid::CassUuidGen;
-use cass_uuid::cass_uuid_gen_time;
-use cass_value::cass_value_get_uuid;
-use cass_uuid::cass_uuid_string;
-
-use cass_value::cass_value_get_string;
+use cql_ffi::string::cass_string_init2;
+use cql_ffi::string::CassString;
+use cql_ffi::value::CassValue;
+use cql_ffi::error::CassError;
+use cql_ffi::uuid::CassUuid;
+use cql_ffi::uuid::CassUuidGen;
+use cql_ffi::uuid::cass_uuid_gen_time;
+use cql_ffi::value::cass_value_get_uuid;
+use cql_ffi::uuid::cass_uuid_string;
+use cql_ffi::value::cass_value_get_string;
 
 pub fn str2cass_string(query:&str) -> CassString {unsafe{
     cass_string_init2(query.as_ptr() as *const i8,query.len() as u64)

@@ -5,8 +5,8 @@
 use libc::types::os::arch::c95::c_char;
 use libc::types::os::arch::c95::c_int;
 
-use cass_error::CassError;
-use cass_string::CassString;
+use cql_ffi::error::CassError;
+use cql_ffi::string::CassString;
 
 pub enum CassSsl { }
 

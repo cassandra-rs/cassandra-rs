@@ -4,12 +4,12 @@
 
 use libc::types::common::c95::c_void;
 
-use cass_prepared::CassPrepared;
-use cass_error::CassError;
-use cass_string::CassString;
-use cass_result::CassResult;
-use cass_types::cass_bool_t;
-use cass_types::cass_duration_t;
+use cql_ffi::prepared::CassPrepared;
+use cql_ffi::error::CassError;
+use cql_ffi::string::CassString;
+use cql_ffi::result::CassResult;
+use cql_ffi::types::cass_bool_t;
+use cql_ffi::types::cass_duration_t;
 
 pub enum CassFuture { }
 

@@ -2,12 +2,12 @@
 #![allow(dead_code)]
 #![allow(missing_copy_implementations)]
 
-use cass_batch::CassBatch;
-use cass_future::CassFuture;
-use cass_string::CassString;
-use cass_statement::CassStatement;
-use cass_schema::CassSchema;
-use cass_cluster::CassCluster;
+use cql_ffi::batch::CassBatch;
+use cql_ffi::future::CassFuture;
+use cql_ffi::string::CassString;
+use cql_ffi::statement::CassStatement;
+use cql_ffi::schema::CassSchema;
+use cql_ffi::cluster::CassCluster;
 
 pub enum CassSession { }
 
