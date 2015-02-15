@@ -3,10 +3,13 @@
 #![allow(missing_copy_implementations)]
 
 use cql_ffi::statement::CassStatement;
+use cql_bindgen::CassPrepared as _CassPrepared;
+use cql_bindgen::cass_prepared_free;
+use cql_bindgen::cass_prepared_bind;
 
-pub enum CassPrepared { }
+pub struct CassPrepared(pub *const _CassPrepared);
 
-extern "C" {
-    pub fn cass_prepared_free(prepared: *const CassPrepared);
-    pub fn cass_prepared_bind(prepared: *const CassPrepared) -> *mut CassStatement;
+impl CassPrepared {
+    pub unsafe fn free(&mut self) {cass_prepared_free(self.0)}
+    pub unsafe fn bind(&self) -> CassStatement {CassStatement(cass_prepared_bind(self.0))}
 }

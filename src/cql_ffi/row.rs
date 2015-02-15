@@ -5,12 +5,19 @@
 use libc::types::os::arch::c95::c_char;
 
 use cql_ffi::value::CassValue;
+use cql_ffi::iterator::CassIterator;
 
 use cql_ffi::types::cass_size_t;
+use cql_bindgen::CassRow as _CassRow;
+use cql_bindgen::cass_row_get_column;
+use cql_bindgen::cass_row_get_column_by_name;
+use cql_bindgen::cass_iterator_from_row;
 
-pub enum CassRow { }
+pub struct CassRow(pub *const _CassRow);
 
-extern "C" {
-    pub fn cass_row_get_column(row: *const CassRow, index: cass_size_t) -> *const CassValue;
-    pub fn cass_row_get_column_by_name(row: *const CassRow, name: *const c_char) -> *const CassValue;
+impl CassRow {
+    pub unsafe fn get_column(&self, index: cass_size_t) -> CassValue {CassValue(cass_row_get_column(self.0,index))}
+    pub unsafe fn get_column_by_name(&self, name: *const c_char) -> CassValue {CassValue(cass_row_get_column_by_name(self.0,name))}
+    pub unsafe fn from_row(&self) -> CassIterator {CassIterator(cass_iterator_from_row(self.0))}
+
 }

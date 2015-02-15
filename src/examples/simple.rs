@@ -4,24 +4,24 @@ use cql_ffi::*;
 
 fn main() {unsafe{
     /* Setup and connect to cluster */
-    let cluster = cass_cluster_new();
+    let cluster = CassCluster::new();
     let session = cass_session_new();
-    cass_cluster_set_contact_points(cluster, str2ref("127.0.0.1,127.0.0.2,127.0.0.3"));
+    CassCluster::set_contact_points(cluster, str2ref("127.0.0.1,127.0.0.2,127.0.0.3"));
     let connect_future = cass_session_connect(session, cluster);
-    match cass_future_error_code(connect_future) {
-        CassError::CASS_OK => {
+    match CassFuture::error_code(connect_future) {
+        Ok(_) => {
             /* Build statement and execute query */
             let query = str2cass_string("SELECT keyspace_name FROM system.schema_keyspaces;");
-            let statement = cass_statement_new(query, 0);
+            let statement = CassStatement::new(query, 0);
             let result_future = cass_session_execute(session, statement);
-            match cass_future_error_code(result_future) {
-                CassError::CASS_OK => {
+            match CassFuture::error_code(result_future) {
+                Ok(_) => {
                     /* Retrieve result set and iterator over the rows */
-                    let result = cass_future_get_result(result_future);
-                    let rows = cass_iterator_from_result(result);
-                    while cass_iterator_next(rows) > 0 {
-                        let row = cass_iterator_get_row(rows);
-                        let value = cass_row_get_column_by_name(row, str2ref("keyspace_name"));
+                    let result = CassFuture::get_result(result_future);
+                    let rows = CassIterator::from_result(result);
+                    while CassIterator::next(rows) > 0 {
+                        let row = CassIterator::get_row(rows);
+                        let value = CassIterator::get_column_by_name(row, str2ref("keyspace_name"));
                         let keyspace_name = cassvalue2cassstring(&*value);
                         println!("keyspace_name: '{:?}'", keyspace_name);
                     }

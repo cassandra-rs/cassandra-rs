@@ -7,20 +7,21 @@ use libc::types::os::arch::c95::c_int;
 
 use cql_ffi::error::CassError;
 use cql_ffi::string::CassString;
+use cql_bindgen::CassSsl as _CassSsl;
+use cql_bindgen::cass_ssl_new;
+use cql_bindgen::cass_ssl_free;
+use cql_bindgen::cass_ssl_add_trusted_cert;
+use cql_bindgen::cass_ssl_set_verify_flags;
+use cql_bindgen::cass_ssl_set_cert;
+use cql_bindgen::cass_ssl_set_private_key;
 
-pub enum CassSsl { }
+pub struct CassSsl(pub *mut _CassSsl);
 
-pub enum CassSslVerifyFlags {
-    NONE = 0is,
-    PEER_CERT = 1,
-    PEER_IDENTITY = 2
-}
-
-extern "C" {
-    pub fn cass_ssl_new() -> *mut CassSsl;
-    pub fn cass_ssl_free(ssl: *mut CassSsl);
-    pub fn cass_ssl_add_trusted_cert(ssl: *mut CassSsl, cert: CassString) -> CassError;
-    pub fn cass_ssl_set_verify_flags(ssl: *mut CassSsl, flags: c_int);
-    pub fn cass_ssl_set_cert(ssl: *mut CassSsl, cert: CassString) -> CassError;
-    pub fn cass_ssl_set_private_key(ssl: *mut CassSsl, key: CassString, password: *const c_char) -> CassError;
+impl CassSsl {
+    pub unsafe fn new() -> CassSsl {CassSsl(cass_ssl_new())}
+    pub unsafe fn free(ssl: &mut CassSsl) {cass_ssl_free(ssl.0)}
+    pub unsafe fn add_trusted_cert(ssl: &mut CassSsl, cert: CassString) -> Result<(),CassError> {CassError::build(cass_ssl_add_trusted_cert(ssl.0, cert.0))}
+    pub unsafe fn set_verify_flags(ssl: &mut CassSsl, flags: c_int) {cass_ssl_set_verify_flags(ssl.0,flags)}
+    pub unsafe fn set_cert(ssl: &mut CassSsl, cert: CassString) -> Result<(),CassError> {CassError::build(cass_ssl_set_cert(ssl.0,cert.0))}
+    pub unsafe fn set_private_key(ssl: &mut CassSsl, key: CassString, password: *const c_char) -> Result<(),CassError> {CassError::build(cass_ssl_set_private_key(ssl.0,key.0, password))}
 }

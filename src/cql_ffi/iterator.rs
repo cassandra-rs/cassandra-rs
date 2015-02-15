@@ -2,43 +2,57 @@
 #![allow(dead_code)]
 #![allow(missing_copy_implementations)]
 
-use cql_ffi::result::CassResult;
 use cql_ffi::value::CassValue;
 use cql_ffi::row::CassRow;
 use cql_ffi::schema::CassSchemaMeta;
 use cql_ffi::schema::CassSchema;
 use cql_ffi::schema::CassSchemaMetaField;
-use cql_ffi::types::cass_bool_t;
+use cql_bindgen::CassIterator as _CassIterator;
+use cql_bindgen::cass_iterator_free;
+use cql_bindgen::cass_iterator_type;
+use cql_bindgen::cass_iterator_from_collection;
+use cql_bindgen::cass_iterator_from_schema;
+use cql_bindgen::cass_iterator_from_schema_meta;
+use cql_bindgen::cass_iterator_fields_from_schema_meta;
+use cql_bindgen::cass_iterator_next;
+use cql_bindgen::cass_iterator_get_row;
+use cql_bindgen::cass_iterator_from_map;
+use cql_bindgen::cass_iterator_get_column;
+use cql_bindgen::cass_iterator_get_value;
+use cql_bindgen::cass_iterator_get_map_key;
+use cql_bindgen::cass_iterator_get_schema_meta;
+use cql_bindgen::cass_iterator_get_schema_meta_field;
+use cql_bindgen::CassIteratorType as _CassIteratorType;
 
-pub enum CassIterator { }
+pub struct CassIterator(pub *mut _CassIterator);
 
-#[repr(C)]
-#[derive(Debug,Copy)]
-pub enum CassIteratorType {
-    RESULT = 0,
-    ROW = 1,
-    COLLECTION = 2,
-    MAP = 3,
-    SCHEMA_META = 4,
-    SCHEMA_META_FIELD = 5
-}
+pub struct CassIteratorType(_CassIteratorType);
 
-extern "C" {
-    pub fn cass_iterator_free(iterator: *mut CassIterator);
-    pub fn cass_iterator_type(iterator: *mut CassIterator) -> CassIteratorType;
-    pub fn cass_iterator_from_result(result: *const CassResult) -> *mut CassIterator;
-    pub fn cass_iterator_from_row(row: *const CassRow) -> *mut CassIterator;
-    pub fn cass_iterator_from_collection(value: *const CassValue) -> *mut CassIterator;
-    pub fn cass_iterator_from_map(value: *const CassValue) -> *mut CassIterator;
-    pub fn cass_iterator_from_schema(schema: *const CassSchema) -> *mut CassIterator;
-    pub fn cass_iterator_from_schema_meta(meta: *const CassSchemaMeta) -> *mut CassIterator;
-    pub fn cass_iterator_fields_from_schema_meta(meta: *const CassSchemaMeta) -> *mut CassIterator;
-    pub fn cass_iterator_next(iterator: *mut CassIterator) -> cass_bool_t;
-    pub fn cass_iterator_get_row(iterator: *mut CassIterator) -> *const CassRow;
-    pub fn cass_iterator_get_column(iterator: *mut CassIterator) -> *const CassValue;
-    pub fn cass_iterator_get_value(iterator: *mut CassIterator)-> *const CassValue;
-    pub fn cass_iterator_get_map_key(iterator: *mut CassIterator) -> *const CassValue;
-    pub fn cass_iterator_get_map_value(iterator: *mut CassIterator) -> *const CassValue;
-    pub fn cass_iterator_get_schema_meta(iterator: *mut CassIterator) -> *const CassSchemaMeta;
-    pub fn cass_iterator_get_schema_meta_field(iterator: *mut CassIterator) -> *const CassSchemaMetaField;
+//~ #[repr(C)]
+//~ #[derive(Debug,Copy)]
+//~ pub enum CassIteratorType {
+    //~ RESULT = 0,
+    //~ ROW = 1,
+    //~ COLLECTION = 2,
+    //~ MAP = 3,
+    //~ SCHEMA_META = 4,
+    //~ SCHEMA_META_FIELD = 5
+//~ }
+
+impl CassIterator {
+    pub unsafe fn free(&mut self) {cass_iterator_free(self.0)}
+    pub unsafe fn get_type(&mut self) -> CassIteratorType {CassIteratorType(cass_iterator_type(self.0))}
+    pub unsafe fn from_collection(value: CassValue) -> CassIterator {CassIterator(cass_iterator_from_collection(value.0))}
+    pub unsafe fn from_map(value: CassValue) -> CassIterator {CassIterator(cass_iterator_from_map(value.0))}
+    pub unsafe fn from_schema(schema: CassSchema) -> CassIterator {CassIterator(cass_iterator_from_schema(schema.0))}
+    pub unsafe fn from_schema_meta(meta: CassSchemaMeta) -> CassIterator {CassIterator(cass_iterator_from_schema_meta(meta.0))}
+    pub unsafe fn fields_from_schema_meta(meta: CassSchemaMeta) -> CassIterator {CassIterator(cass_iterator_fields_from_schema_meta(meta.0))}
+    pub unsafe fn next(&mut self) -> bool {if cass_iterator_next(self.0) > 0 {true} else {false}}
+    pub unsafe fn get_row(&mut self) -> CassRow {CassRow(cass_iterator_get_row(self.0))}
+    pub unsafe fn get_column(&mut self) -> CassValue {CassValue(cass_iterator_get_column(self.0))}
+    pub unsafe fn get_value(&mut self)-> CassValue {CassValue(cass_iterator_get_value(self.0))}
+    pub unsafe fn get_map_key(&mut self) -> CassValue {CassValue(cass_iterator_get_map_key(self.0))}
+    pub unsafe fn get_map_value(&mut self) -> CassValue {CassValue(cass_iterator_get_value(self.0))}
+    pub unsafe fn get_schema_meta(&mut self) -> CassSchemaMeta {CassSchemaMeta(cass_iterator_get_schema_meta(self.0))}
+    pub unsafe fn get_schema_meta_field(&mut self) -> CassSchemaMetaField {CassSchemaMetaField(cass_iterator_get_schema_meta_field(self.0))}
 }

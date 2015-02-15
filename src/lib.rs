@@ -1,8 +1,5 @@
-#![feature(unsafe_destructor,core,std_misc,libc)]
-
+#![feature(libc,core)]
 extern crate libc;
-
-
 
 pub use cql_ffi::consistency::*;
 pub use cql_ffi::bytes::*;
@@ -29,9 +26,7 @@ pub use cql_ffi::helpers::*;
 pub use cql_ffi::log::*;
 pub use cql_ffi::column::*;
 
-//use cql_bindgen;
-
-mod cql_bindgen;
+extern crate cql_bindgen;
 
 mod cql_ffi {
     pub mod consistency;
