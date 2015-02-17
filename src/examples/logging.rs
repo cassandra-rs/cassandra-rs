@@ -5,29 +5,24 @@ use std::slice;
 use cql_ffi::*;
 
 unsafe fn print_error(future:&mut CassFuture) {
-    let message = cass_future_error_message(future);
+    let message = future.error_message();
     let message = slice::from_raw_buf(&message.data,message.length as usize);
     println!("Error: {:?}", message);
 }
 
 unsafe fn create_cluster() -> *mut CassCluster {
-    let cluster = cass_cluster_new();
-    cass_cluster_set_contact_points(cluster, str2ref("127.0.0.1,127.0.0.2,127.0.0.3"));
+    let cluster = CassCluster::new();
+    cluster.set_contact_points(str2ref("127.0.0.1,127.0.0.2,127.0.0.3"));
     cluster 
 }
 
 unsafe fn connect_session(session:&mut CassSession, cluster:&mut CassCluster) -> CassError {
-    let future = &mut *cass_session_connect(session, cluster);
-    cass_future_wait(future);
-    let rc = match cass_future_error_code(future) {
-        CassError::CASS_OK => {CassError::CASS_OK},
-        _=> panic!("{:?}",future)
-    };
-    cass_future_free(future);
-    rc
+    let future:CassFuture = &mut session.connect(cluster);
+    future.wait();
+    future
 }
 
-fn on_log(message:&CassLogMessage, data:data) {
+//~ fn on_log(message:&CassLogMessage, data:data) {
 
     //~ println!("{}",
         //~ message.time_ms / 1000,
@@ -35,7 +30,7 @@ fn on_log(message:&CassLogMessage, data:data) {
         //~ cass_log_level_string(message.severity),
         //~ message.file, message.line, message.function,
         //~ message.message);
-}
+//~ }
 
 fn main() {
     //~ CassCluster* cluster = NULL;

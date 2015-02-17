@@ -31,3 +31,23 @@ path="src/examples/batch.rs"
 [[bin]]
 name="bind_by_name"
 path="src/examples/bind_by_name.rs"
+
+# [[bin]]
+# name="logging"
+# path="src/examples/logging.rs"
+
+[[bin]]
+name="maps"
+path="src/examples/maps.rs"
+
+[[bin]]
+name="paging"
+path="src/examples/paging.rs"
+
+[[bin]]
+name="schema_meta"
+path="src/examples/schema_meta.rs"
+
+[[bin]]
+name="simple"
+path="src/examples/simple.rs"

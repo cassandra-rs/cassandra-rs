@@ -9,7 +9,13 @@ use cql_bindgen::cass_prepared_bind;
 
 pub struct CassPrepared(pub *const _CassPrepared);
 
+impl Drop for CassPrepared {
+    fn drop(&mut self) {unsafe{
+        self.free()
+    }}
+}
+
 impl CassPrepared {
-    pub unsafe fn free(&mut self) {cass_prepared_free(self.0)}
+    unsafe fn free(&mut self) {cass_prepared_free(self.0)}
     pub unsafe fn bind(&self) -> CassStatement {CassStatement(cass_prepared_bind(self.0))}
 }

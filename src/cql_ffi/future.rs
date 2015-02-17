@@ -21,18 +21,23 @@ use cql_bindgen::cass_future_ready;
 use cql_bindgen::cass_future_set_callback;
 use cql_bindgen::cass_future_error_code;
 
-
 pub struct CassFuture(pub *mut _CassFuture);
 pub struct CassFutureCallback(_CassFutureCallback);
 
+impl Drop for CassFuture {
+    fn drop(&mut self) {unsafe{
+        self.free()
+    }}
+}
+
 impl CassFuture {
-    pub unsafe fn free(&mut self) {cass_future_free(self.0)}
-    pub unsafe fn set_callback(&mut self, callback: CassFutureCallback, data: *mut c_void) -> Result<(),CassError> {CassError::build(cass_future_set_callback(self.0, callback.0, data))}
+    unsafe fn free(&mut self) {cass_future_free(self.0)}
+    pub unsafe fn set_callback<'a>(&'a mut self, callback: CassFutureCallback, data: *mut c_void) -> Result<&'a Self,CassError> {CassError::build(cass_future_set_callback(self.0, callback.0, data)).wrap(self)}
     pub unsafe fn ready(&mut self) -> bool {if (cass_future_ready(self.0)) > 0 {true} else {false}}
-    pub unsafe fn wait(&mut self) {cass_future_wait(self.0)}
+    pub unsafe fn wait(self) -> Result<Self,CassError> {cass_future_wait(self.0);self.error_code()}
     pub unsafe fn wait_timed(&mut self, timeout_us: cass_duration_t) -> bool {if cass_future_wait_timed(self.0, timeout_us) > 0 {true} else {false}}
     pub unsafe fn get_result(&mut self) -> CassResult {CassResult(cass_future_get_result(self.0))}
     pub unsafe fn get_prepared(&mut self) -> CassPrepared {CassPrepared(cass_future_get_prepared(self.0))}
-    pub unsafe fn error_code(&mut self) -> Result<(),CassError> {CassError::build(cass_future_error_code(self.0))}
+    unsafe fn error_code(self) -> Result<Self,CassError> {CassError::build(cass_future_error_code(self.0)).wrap(self)}
     pub unsafe fn error_message(&mut self) -> CassString {CassString(cass_future_error_message(self.0))}
 }

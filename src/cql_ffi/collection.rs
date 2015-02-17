@@ -34,17 +34,23 @@ pub enum CassCollectionType {
     SET = 34
 }
 
+impl Drop for CassCollection {
+    fn drop(&mut self) {unsafe{
+        self.free()
+    }}
+}
+
 impl CassCollection {
     pub unsafe fn new(_type: CassCollectionType, item_count: cass_size_t) -> CassCollection {CassCollection(cass_collection_new(_type as u32,item_count))}
-    pub unsafe fn free(collection: &mut CassCollection) {cass_collection_free(collection.0)}
-    pub unsafe fn append_int32(collection: &mut CassCollection, value: i32) -> Result<(),CassError> {CassError::build(cass_collection_append_int32(collection.0,value))}
-    pub unsafe fn append_int64(collection: &mut CassCollection, value: i64) -> Result<(),CassError> {CassError::build(cass_collection_append_int64(collection.0,value))}
-    pub unsafe fn append_float(collection: &mut CassCollection, value: f32) -> Result<(),CassError> {CassError::build(cass_collection_append_float(collection.0,value))}
-    pub unsafe fn append_double(collection: &mut CassCollection, value: f64) -> Result<(),CassError> {CassError::build(cass_collection_append_double(collection.0,value))}
-    pub unsafe fn append_bool(collection: &mut CassCollection, value: bool) -> Result<(),CassError> {CassError::build(cass_collection_append_bool(collection.0,if value {1} else {0}))}
-    pub unsafe fn append_string(collection: &mut CassCollection, value: CassString) -> Result<(),CassError> {CassError::build(cass_collection_append_string(collection.0,value.0))}
-    pub unsafe fn append_bytes(collection: &mut CassCollection, value: CassBytes) -> Result<(),CassError> {CassError::build(cass_collection_append_bytes(collection.0,value.0))}
-    pub unsafe fn append_uuid(collection: &mut CassCollection, value: CassUuid) -> Result<(),CassError> {CassError::build(cass_collection_append_uuid(collection.0,value.0))}
-    pub unsafe fn append_inet(collection: &mut CassCollection, value: CassInet) -> Result<(),CassError> {CassError::build(cass_collection_append_inet(collection.0,value.0))}
-    pub unsafe fn append_decimal(collection: &mut CassCollection, value: CassDecimal) -> Result<(),CassError> {CassError::build(cass_collection_append_decimal(collection.0,value.0))}
+    unsafe fn free(&mut self) {cass_collection_free(self.0)}
+    pub unsafe fn append_int32<'a>(&'a mut self, value: i32) -> Result<&'a Self,CassError> {CassError::build(cass_collection_append_int32(self.0,value)).wrap(self)}
+    pub unsafe fn append_int64<'a>(&'a mut self, value: i64) -> Result<&'a Self,CassError> {CassError::build(cass_collection_append_int64(self.0,value)).wrap(self)}
+    pub unsafe fn append_float<'a>(&'a mut self, value: f32) -> Result<&'a Self,CassError> {CassError::build(cass_collection_append_float(self.0,value)).wrap(self)}
+    pub unsafe fn append_double<'a>(&'a mut self, value: f64) -> Result<&'a Self,CassError> {CassError::build(cass_collection_append_double(self.0,value)).wrap(self)}
+    pub unsafe fn append_bool<'a>(&'a mut self, value: bool) -> Result<&'a Self,CassError> {CassError::build(cass_collection_append_bool(self.0,if value {1} else {0})).wrap(self)}
+    pub unsafe fn append_string<'a>(&'a mut self, value: CassString) -> Result<&'a Self,CassError> {CassError::build(cass_collection_append_string(self.0,value.0)).wrap(self)}
+    pub unsafe fn append_bytes<'a>(&'a mut self, value: CassBytes) -> Result<&'a Self,CassError> {CassError::build(cass_collection_append_bytes(self.0,value.0)).wrap(self)}
+    pub unsafe fn append_uuid<'a>(&'a mut self, value: CassUuid) -> Result<&'a Self,CassError> {CassError::build(cass_collection_append_uuid(self.0,value.0)).wrap(self)}
+    pub unsafe fn append_inet<'a>(&'a mut self, value: CassInet) -> Result<&'a Self,CassError> {CassError::build(cass_collection_append_inet(self.0,value.0)).wrap(self)}
+    pub unsafe fn append_decimal<'a>(&'a mut self, value: CassDecimal) -> Result<&'a Self,CassError> {CassError::build(cass_collection_append_decimal(self.0,value.0)).wrap(self)}
 }

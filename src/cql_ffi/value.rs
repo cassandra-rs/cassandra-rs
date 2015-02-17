@@ -13,9 +13,9 @@ use cql_ffi::bytes::CassBytes;
 use cql_ffi::inet::CassInet;
 use cql_ffi::uuid::CassUuid;
 use cql_ffi::string::CassString;
+use cql_ffi::iterator::CassIterator;
 use cql_ffi::decimal::CassDecimal;
 use cql_bindgen::CassValue as _CassValue;
-use cql_bindgen::CassValueType as _CassValueType;
 use cql_bindgen::cass_value_secondary_sub_type;
 use cql_bindgen::cass_value_primary_sub_type;
 use cql_bindgen::cass_value_item_count;
@@ -32,53 +32,116 @@ use cql_bindgen::cass_value_get_double;
 use cql_bindgen::cass_value_get_float;
 use cql_bindgen::cass_value_get_int64;
 use cql_bindgen::cass_value_get_int32;
+use cql_bindgen::cass_iterator_from_collection;
+use cql_bindgen::cass_iterator_from_map;
 
+
+use cql_bindgen::CASS_VALUE_TYPE_UNKNOWN;
+use cql_bindgen::CASS_VALUE_TYPE_CUSTOM;
+use cql_bindgen::CASS_VALUE_TYPE_ASCII;
+use cql_bindgen::CASS_VALUE_TYPE_BIGINT;
+use cql_bindgen::CASS_VALUE_TYPE_BLOB;
+use cql_bindgen::CASS_VALUE_TYPE_BOOLEAN;
+use cql_bindgen::CASS_VALUE_TYPE_COUNTER;
+use cql_bindgen::CASS_VALUE_TYPE_DECIMAL;
+use cql_bindgen::CASS_VALUE_TYPE_DOUBLE;
+use cql_bindgen::CASS_VALUE_TYPE_FLOAT;
+use cql_bindgen::CASS_VALUE_TYPE_INT;
+use cql_bindgen::CASS_VALUE_TYPE_TEXT;
+use cql_bindgen::CASS_VALUE_TYPE_TIMESTAMP;
+use cql_bindgen::CASS_VALUE_TYPE_UUID;
+use cql_bindgen::CASS_VALUE_TYPE_VARCHAR;
+use cql_bindgen::CASS_VALUE_TYPE_TIMEUUID;
+use cql_bindgen::CASS_VALUE_TYPE_INET;
+use cql_bindgen::CASS_VALUE_TYPE_LIST;
+use cql_bindgen::CASS_VALUE_TYPE_SET;
+use cql_bindgen::CASS_VALUE_TYPE_MAP;
+use cql_bindgen::CASS_VALUE_TYPE_VARINT;
+
+use std::mem;
 
 pub struct CassValue(pub *const _CassValue);
-pub struct CassValueType(pub _CassValueType);
 
-//~ #[repr(C)]
-//~ #[derive(Debug,Copy,PartialEq)]
-//~ pub enum CassValueType {
-    //~ UNKNOWN = 65535is,
-    //~ CUSTOM = 0,
-    //~ ASCII = 1,
-    //~ BIGINT = 2,
-    //~ BLOB = 3,
-    //~ BOOLEAN = 4,
-    //~ COUNTER = 5,
-    //~ DECIMAL = 6,
-    //~ DOUBLE = 7,
-    //~ FLOAT = 8,
-    //~ INT = 9,
-    //~ TEXT = 10,
-    //~ TIMESTAMP = 11,
-    //~ UUID = 12,
-    //~ VARCHAR = 13,
-    //~ VARINT = 14,
-    //~ TIMEUUID = 15,
-    //~ INET = 16,
-    //~ LIST = 32,
-    //~ MAP = 33,
-    //~ SET = 34,
-//~ }
+
+
+#[derive(Debug,Copy,PartialEq)]
+pub enum CassValueType {
+    UNKNOWN = CASS_VALUE_TYPE_UNKNOWN as isize,
+    CUSTOM = CASS_VALUE_TYPE_CUSTOM as isize,
+    ASCII = CASS_VALUE_TYPE_ASCII as isize,
+    BIGINT = CASS_VALUE_TYPE_BIGINT as isize,
+    BLOB = CASS_VALUE_TYPE_BLOB as isize,
+    BOOLEAN = CASS_VALUE_TYPE_BOOLEAN as isize,
+    COUNTER = CASS_VALUE_TYPE_COUNTER as isize,
+    DECIMAL = CASS_VALUE_TYPE_DECIMAL as isize,
+    DOUBLE = CASS_VALUE_TYPE_DOUBLE as isize,
+    FLOAT = CASS_VALUE_TYPE_FLOAT as isize,
+    INT = CASS_VALUE_TYPE_INT as isize,
+    TEXT = CASS_VALUE_TYPE_TEXT as isize,
+    TIMESTAMP = CASS_VALUE_TYPE_TIMESTAMP as isize,
+    UUID = CASS_VALUE_TYPE_UUID as isize,
+    VARCHAR = CASS_VALUE_TYPE_VARCHAR as isize,
+    VARINT = CASS_VALUE_TYPE_VARINT as isize,
+    TIMEUUID = CASS_VALUE_TYPE_TIMEUUID as isize,
+    INET = CASS_VALUE_TYPE_INET as isize,
+    LIST = CASS_VALUE_TYPE_LIST as isize,
+    MAP = CASS_VALUE_TYPE_MAP as isize,
+    SET = CASS_VALUE_TYPE_SET as isize,
+}
+
+impl CassValueType {
+    pub fn build(_type:u32) -> Self {
+        match _type {
+            CASS_VALUE_TYPE_UNKNOWN     => CassValueType::UNKNOWN,
+            CASS_VALUE_TYPE_CUSTOM      => CassValueType::CUSTOM,
+            CASS_VALUE_TYPE_ASCII       => CassValueType::ASCII,
+            CASS_VALUE_TYPE_BIGINT      => CassValueType::BIGINT,
+            CASS_VALUE_TYPE_BLOB        => CassValueType::BLOB,
+            CASS_VALUE_TYPE_BOOLEAN     => CassValueType::BOOLEAN,
+            CASS_VALUE_TYPE_COUNTER     => CassValueType::COUNTER,
+            CASS_VALUE_TYPE_DECIMAL     => CassValueType::DECIMAL,
+            CASS_VALUE_TYPE_DOUBLE      => CassValueType::DOUBLE,
+            CASS_VALUE_TYPE_FLOAT       => CassValueType::FLOAT,
+            CASS_VALUE_TYPE_INT         => CassValueType::INT,
+            CASS_VALUE_TYPE_TEXT        => CassValueType::TEXT,
+            CASS_VALUE_TYPE_TIMESTAMP   => CassValueType::TIMESTAMP,
+            CASS_VALUE_TYPE_UUID        => CassValueType::UUID,
+            CASS_VALUE_TYPE_VARCHAR     => CassValueType::VARCHAR,
+            CASS_VALUE_TYPE_VARINT      => CassValueType::VARINT,
+            CASS_VALUE_TYPE_TIMEUUID    => CassValueType::TIMEUUID,
+            CASS_VALUE_TYPE_INET        => CassValueType::INET,
+            CASS_VALUE_TYPE_LIST        => CassValueType::LIST,
+            CASS_VALUE_TYPE_MAP         => CassValueType::MAP,
+            CASS_VALUE_TYPE_SET         => CassValueType::SET,
+            _ => panic!("impossible value type")
+        }
+    }   
+}
 
 
 impl CassValue {
-    pub unsafe fn get_int32(&self, output: *mut cass_int32_t) -> Result<(),CassError> {CassError::build(cass_value_get_int32(self.0,output))}
-    pub unsafe fn get_int64(&self, output: *mut cass_int64_t) -> Result<(),CassError> {CassError::build(cass_value_get_int64(self.0,output))}
-    pub unsafe fn get_float(&self, output: *mut cass_float_t) -> Result<(),CassError> {CassError::build(cass_value_get_float(self.0,output))}
-    pub unsafe fn get_double(&self, output: *mut cass_double_t) -> Result<(),CassError> {CassError::build(cass_value_get_double(self.0,output))}
-    pub unsafe fn get_bool(&self, output: *mut cass_bool_t) -> Result<(),CassError> {CassError::build(cass_value_get_bool(self.0,output))}
-    pub unsafe fn get_uuid(&self, output: &mut CassUuid) -> Result<(),CassError> {CassError::build(cass_value_get_uuid(self.0,&mut output.0))}
-    pub unsafe fn get_inet(&self, mut output: CassInet) -> Result<(),CassError> {CassError::build(cass_value_get_inet(self.0,&mut output.0))}
-    pub unsafe fn get_string(&self, mut output: CassString) -> Result<(),CassError> {CassError::build(cass_value_get_string(self.0,&mut output.0))}
-    pub unsafe fn get_bytes(&self, mut output: CassBytes) -> Result<(),CassError> {CassError::build(cass_value_get_bytes(self.0,&mut output.0))}
-    pub unsafe fn get_decimal(&self, mut output: CassDecimal) -> Result<(),CassError> {CassError::build(cass_value_get_decimal(self.0,&mut output.0))}
-    pub unsafe fn get_type(&self) -> CassValueType {CassValueType(cass_value_type(self.0))}
+    pub unsafe fn get_int32<'a>(&'a self, output: *mut cass_int32_t) -> Result<*mut cass_int32_t,CassError> {CassError::build(cass_value_get_int32(self.0,output)).wrap(output)}
+    pub unsafe fn get_int64<'a>(&'a self, output: *mut cass_int64_t) -> Result<*mut cass_int64_t,CassError> {CassError::build(cass_value_get_int64(self.0,output)).wrap(output)}
+    pub unsafe fn get_float<'a>(&'a self, output: *mut cass_float_t) -> Result<*mut cass_float_t,CassError> {CassError::build(cass_value_get_float(self.0,output)).wrap(output)}
+    pub unsafe fn get_double<'a>(&'a self, output: *mut cass_double_t) -> Result<*mut cass_double_t,CassError> {CassError::build(cass_value_get_double(self.0,output)).wrap(output)}
+    pub unsafe fn get_bool<'a>(&'a self, output: *mut cass_bool_t) -> Result<*mut cass_bool_t,CassError> {CassError::build(cass_value_get_bool(self.0,output)).wrap(output)}
+    pub unsafe fn get_uuid<'a>(&'a self, output: &'a mut CassUuid) -> Result<&mut CassUuid,CassError> {CassError::build(cass_value_get_uuid(self.0,&mut output.0)).wrap(output)}
+    pub unsafe fn get_inet<'a>(&'a self, mut output: CassInet) -> Result<CassInet,CassError> {CassError::build(cass_value_get_inet(self.0,&mut output.0)).wrap(output)}
+
+    pub unsafe fn get_string<'a>(&'a self) -> Result<CassString,CassError> {
+        let mut output:CassString = mem::zeroed();
+        CassError::build(cass_value_get_string(self.0,&mut output.0)).wrap(output)
+    }
+
+    pub unsafe fn fill_string<'a>(&'a self, mut output: CassString) -> Result<CassString,CassError> {CassError::build(cass_value_get_string(self.0,&mut output.0)).wrap(output)}
+    pub unsafe fn get_bytes<'a>(&'a self, mut output: CassBytes) -> Result<CassBytes,CassError> {CassError::build(cass_value_get_bytes(self.0,&mut output.0)).wrap(output)}
+    pub unsafe fn get_decimal<'a>(&'a self, mut output: CassDecimal) -> Result<CassDecimal,CassError> {CassError::build(cass_value_get_decimal(self.0,&mut output.0)).wrap(output)}
+    pub unsafe fn get_type(&self) -> CassValueType {CassValueType::build(cass_value_type(self.0))}
     pub unsafe fn is_null(&self) -> bool {if cass_value_is_null(self.0) > 0 {true} else {false}}
     pub unsafe fn is_collection(&self) -> bool {if cass_value_is_collection(self.0) > 0 {true} else {false}}
     pub unsafe fn item_count(&self) -> cass_size_t {cass_value_item_count(self.0)}
-    pub unsafe fn primary_sub_type(&self) -> CassValueType {CassValueType(cass_value_primary_sub_type(self.0))}
-    pub unsafe fn secondary_sub_type(&self) -> CassValueType {CassValueType(cass_value_secondary_sub_type(self.0))}
+    pub unsafe fn primary_sub_type(&self) -> CassValueType {CassValueType::build(cass_value_primary_sub_type(self.0))}
+    pub unsafe fn secondary_sub_type(&self) -> CassValueType {CassValueType::build(cass_value_secondary_sub_type(self.0))}
+    pub unsafe fn as_collection_iterator(&self) -> CassIterator {CassIterator(cass_iterator_from_collection(self.0))}
+    pub unsafe fn map_iterator(&self) -> CassIterator {CassIterator(cass_iterator_from_map(self.0))}
 }

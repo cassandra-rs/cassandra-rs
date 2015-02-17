@@ -17,7 +17,7 @@ pub struct CassRow(pub *const _CassRow);
 
 impl CassRow {
     pub unsafe fn get_column(&self, index: cass_size_t) -> CassValue {CassValue(cass_row_get_column(self.0,index))}
-    pub unsafe fn get_column_by_name(&self, name: *const c_char) -> CassValue {CassValue(cass_row_get_column_by_name(self.0,name))}
+    pub unsafe fn get_column_by_name(&self, name: &str) -> CassValue {CassValue(cass_row_get_column_by_name(self.0,name.as_ptr() as *const i8))}
     pub unsafe fn from_row(&self) -> CassIterator {CassIterator(cass_iterator_from_row(self.0))}
 
 }

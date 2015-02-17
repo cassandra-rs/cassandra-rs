@@ -5,18 +5,12 @@
 use cql_ffi::value::CassValue;
 use cql_ffi::row::CassRow;
 use cql_ffi::schema::CassSchemaMeta;
-use cql_ffi::schema::CassSchema;
 use cql_ffi::schema::CassSchemaMetaField;
 use cql_bindgen::CassIterator as _CassIterator;
 use cql_bindgen::cass_iterator_free;
 use cql_bindgen::cass_iterator_type;
-use cql_bindgen::cass_iterator_from_collection;
-use cql_bindgen::cass_iterator_from_schema;
-use cql_bindgen::cass_iterator_from_schema_meta;
-use cql_bindgen::cass_iterator_fields_from_schema_meta;
 use cql_bindgen::cass_iterator_next;
 use cql_bindgen::cass_iterator_get_row;
-use cql_bindgen::cass_iterator_from_map;
 use cql_bindgen::cass_iterator_get_column;
 use cql_bindgen::cass_iterator_get_value;
 use cql_bindgen::cass_iterator_get_map_key;
@@ -39,14 +33,15 @@ pub struct CassIteratorType(_CassIteratorType);
     //~ SCHEMA_META_FIELD = 5
 //~ }
 
+impl Drop for CassIterator {
+    fn drop(&mut self) {unsafe{
+        self.free()
+    }}
+}
+
 impl CassIterator {
-    pub unsafe fn free(&mut self) {cass_iterator_free(self.0)}
+    unsafe fn free(&mut self) {cass_iterator_free(self.0)}
     pub unsafe fn get_type(&mut self) -> CassIteratorType {CassIteratorType(cass_iterator_type(self.0))}
-    pub unsafe fn from_collection(value: CassValue) -> CassIterator {CassIterator(cass_iterator_from_collection(value.0))}
-    pub unsafe fn from_map(value: CassValue) -> CassIterator {CassIterator(cass_iterator_from_map(value.0))}
-    pub unsafe fn from_schema(schema: CassSchema) -> CassIterator {CassIterator(cass_iterator_from_schema(schema.0))}
-    pub unsafe fn from_schema_meta(meta: CassSchemaMeta) -> CassIterator {CassIterator(cass_iterator_from_schema_meta(meta.0))}
-    pub unsafe fn fields_from_schema_meta(meta: CassSchemaMeta) -> CassIterator {CassIterator(cass_iterator_fields_from_schema_meta(meta.0))}
     pub unsafe fn next(&mut self) -> bool {if cass_iterator_next(self.0) > 0 {true} else {false}}
     pub unsafe fn get_row(&mut self) -> CassRow {CassRow(cass_iterator_get_row(self.0))}
     pub unsafe fn get_column(&mut self) -> CassValue {CassValue(cass_iterator_get_column(self.0))}

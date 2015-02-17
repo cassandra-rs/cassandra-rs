@@ -17,11 +17,17 @@ use cql_bindgen::cass_ssl_set_private_key;
 
 pub struct CassSsl(pub *mut _CassSsl);
 
+impl Drop for CassSsl {
+    fn drop(&mut self) {unsafe{
+        self.free()
+    }}
+}
+
 impl CassSsl {
     pub unsafe fn new() -> CassSsl {CassSsl(cass_ssl_new())}
-    pub unsafe fn free(ssl: &mut CassSsl) {cass_ssl_free(ssl.0)}
-    pub unsafe fn add_trusted_cert(ssl: &mut CassSsl, cert: CassString) -> Result<(),CassError> {CassError::build(cass_ssl_add_trusted_cert(ssl.0, cert.0))}
-    pub unsafe fn set_verify_flags(ssl: &mut CassSsl, flags: c_int) {cass_ssl_set_verify_flags(ssl.0,flags)}
-    pub unsafe fn set_cert(ssl: &mut CassSsl, cert: CassString) -> Result<(),CassError> {CassError::build(cass_ssl_set_cert(ssl.0,cert.0))}
-    pub unsafe fn set_private_key(ssl: &mut CassSsl, key: CassString, password: *const c_char) -> Result<(),CassError> {CassError::build(cass_ssl_set_private_key(ssl.0,key.0, password))}
+    unsafe fn free(&mut self) {cass_ssl_free(self.0)}
+    pub unsafe fn add_trusted_cert<'a>(&'a mut self, cert: CassString) -> Result<&'a Self,CassError> {CassError::build(cass_ssl_add_trusted_cert(self.0, cert.0)).wrap(self)}
+    pub unsafe fn set_verify_flags(&mut self, flags: c_int) {cass_ssl_set_verify_flags(self.0,flags)}
+    pub unsafe fn set_cert<'a>(&'a mut self, cert: CassString) -> Result<&'a Self,CassError> {CassError::build(cass_ssl_set_cert(self.0,cert.0)).wrap(self)}
+    pub unsafe fn set_private_key<'a>(&'a mut self, key: CassString, password: *const c_char) -> Result<&'a Self,CassError> {CassError::build(cass_ssl_set_private_key(self.0,key.0, password)).wrap(self)}
 }
