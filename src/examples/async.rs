@@ -4,8 +4,6 @@ extern crate cql_ffi;
 
 use cql_ffi::*;
 
-use std::str::FromStr;
-
 use std::num::ToPrimitive;
 
 static NUM_CONCURRENT_REQUESTS:usize = 1000;
@@ -28,10 +26,10 @@ fn insert_into_async(session: &mut CassSession, key:String) {
         let future = session.execute_statement(statement);
         futures.push(future);
     }
-    //~ for result in futures.iter()  {
-        //FIXME
-       // result.wait().unwrap();
-    //~ }
+    for mut result in futures.iter()  {
+        //~ //FIXME
+       //result.wait();
+    }
 }
 
 pub fn main() {

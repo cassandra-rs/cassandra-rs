@@ -55,3 +55,7 @@ path="src/examples/prepared.rs"
 [[bin]]
 name="simple"
 path="src/examples/simple.rs"
+
+[[bin]]
+name="uuids"
+path="src/examples/uuids.rs"

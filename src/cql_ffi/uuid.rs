@@ -59,25 +59,36 @@ impl CassUuid {
 }
 
 impl CassUuidGen {
-    pub unsafe fn new() -> Self {CassUuidGen(cass_uuid_gen_new())}
+    pub  fn new() -> Self {unsafe{
+        CassUuidGen(cass_uuid_gen_new())
+    }}
     
-    pub unsafe fn new_with_node(node: cass_uint64_t) -> CassUuidGen {CassUuidGen(cass_uuid_gen_new_with_node(node))}
+    pub fn new_with_node(node: cass_uint64_t) -> CassUuidGen {unsafe{
+        CassUuidGen(cass_uuid_gen_new_with_node(node))
+    }}
     
-    unsafe fn free(&self) {cass_uuid_gen_free(self.0)}
+    fn free(&self) {unsafe{
+        cass_uuid_gen_free(self.0)
+    }}
     
-    pub unsafe fn time(&self) -> CassUuid {
+    pub fn get_time(&self) -> CassUuid {unsafe{
         let mut output = mem::zeroed();
         cass_uuid_gen_time(self.0,&mut output);
         CassUuid(output)
-    }
+    }}
     
-    pub unsafe fn fill_random(&self, mut output: CassUuid) {cass_uuid_gen_random(self.0, &mut output.0)}
+    pub fn fill_random(&self, mut output: CassUuid) {unsafe{
+        cass_uuid_gen_random(self.0, &mut output.0)
+    }}
     
-    pub unsafe fn random(&self) -> CassUuid {
+    pub fn random(&self) -> CassUuid {unsafe{
         let mut output:CassUuid = mem::zeroed();
         cass_uuid_gen_random(self.0, &mut output.0);
         output
-    }
-    pub unsafe fn from_time(&self, timestamp: cass_uint64_t, mut output: CassUuid){cass_uuid_gen_from_time(self.0,timestamp, &mut output.0)}
+    }}
+    
+    pub fn from_time(&self, timestamp: cass_uint64_t, mut output: CassUuid){unsafe{
+        cass_uuid_gen_from_time(self.0,timestamp, &mut output.0)
+    }}
 
 }

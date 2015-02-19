@@ -16,6 +16,7 @@ use cql_ffi::string::CassString;
 use cql_ffi::inet::CassInet;
 use cql_ffi::result::CassResult;
 use cql_ffi::consistency::CassConsistency;
+use cql_ffi::helpers::str_to_ref;
 
 use cql_ffi::types::cass_size_t;
 use cql_ffi::types::cass_byte_t;
@@ -23,7 +24,6 @@ use cql_ffi::types::cass_double_t;
 use cql_ffi::types::cass_int32_t;
 use cql_ffi::types::cass_float_t;
 use cql_ffi::types::cass_int64_t;
-use cql_ffi::helpers::str_to_ref;
 use cql_bindgen::CassStatement as _CassStatement;
 use cql_bindgen::cass_statement_new;
 use cql_bindgen::cass_statement_free;
@@ -81,8 +81,8 @@ impl CassStatement {
         CassError::build(cass_statement_add_key_index(self.0,index)).wrap(&self)
     }}
 
-    pub fn set_keyspace(&self, keyspace: *const c_char) -> Result<&Self,CassError> {unsafe{
-        CassError::build(cass_statement_set_keyspace(self.0,keyspace)).wrap(&self)
+    pub fn set_keyspace(&self, keyspace: String) -> Result<&Self,CassError> {unsafe{        
+        CassError::build(cass_statement_set_keyspace(self.0,str_to_ref(&keyspace[]))).wrap(&self)
     }}
 
     pub fn set_consistency(&self, consistency: CassConsistency) -> Result<&Self,CassError> {unsafe{

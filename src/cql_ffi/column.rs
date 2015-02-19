@@ -2,6 +2,7 @@ use cql_bindgen::CassValue as _CassValue;
 
 use cql_ffi::uuid::CassUuid;
 use cql_ffi::string::CassString;
+use cql_ffi::value::CassValueType;
 use cql_ffi::inet::CassInet;
 use cql_ffi::iterator::CassIterator;
 use cql_ffi::iterator::MapIterator;
@@ -17,6 +18,7 @@ use cql_bindgen::cass_value_get_uuid;
 use cql_bindgen::cass_value_get_string;
 use cql_bindgen::cass_value_get_inet;
 use cql_bindgen::cass_iterator_from_map;
+use cql_bindgen::cass_value_type;
 
 
 use cql_ffi::error::CassError;
@@ -35,6 +37,8 @@ pub enum CassColumnType {
 pub struct CassColumn(pub *const _CassValue);
 
 impl CassColumn {
+    pub unsafe fn get_type(&self) -> CassValueType {CassValueType::build(cass_value_type(self.0))}
+    
     pub unsafe fn get_inet<'a>(&'a self, mut output: CassInet) -> Result<CassInet,CassError> {CassError::build(cass_value_get_inet(self.0,&mut output.0)).wrap(output)}
 
     pub fn get_string(&self) -> Result<CassString,CassError> {unsafe{
@@ -72,7 +76,12 @@ impl CassColumn {
         let mut output:CassUuid = mem::zeroed();CassError::build(cass_value_get_uuid(self.0,&mut output.0)).wrap(output)
     }}
 
-    pub fn map_iterator(&self) -> MapIterator {unsafe{MapIterator(cass_iterator_from_map(self.0))}}
+    pub fn map_iter(&self) -> Result<MapIterator,CassError> {unsafe{
+        match self.get_type() {
+            CassValueType::MAP => Ok(MapIterator(cass_iterator_from_map(self.0))),
+            _ => Err(CassError::build(1))
+        }
+    }}
 
 
 }

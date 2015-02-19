@@ -28,15 +28,14 @@ unsafe fn insert_into_maps(session:&mut CassSession, key:&str, items:Vec<Pair>) 
 }
 
 unsafe fn select_from_maps(session: &mut CassSession, key:&str) {
-    let query = SELECT_QUERY;
-    let statement = CassStatement::new(query, 1);
-    statement.bind_string(0, key);
+    let statement = CassStatement::new(SELECT_QUERY, 1);
+    statement.bind_string(0, key).unwrap();
     match session.execute_statement(&statement).wait() {
         Err(err) => panic!("{:?}",err.desc()),
         Ok(result) => {
             if result.row_count() > 0 {
             let row = result.first_row();
-            let mut iterator = row.get_column(0).map_iterator();
+            let mut iterator = row.get_column(0).map_iter().unwrap();
                 while iterator.next() {
                     match iterator.get_pair() {
                         Ok(pair) => {
@@ -51,7 +50,7 @@ unsafe fn select_from_maps(session: &mut CassSession, key:&str) {
 }
 
 fn main() {unsafe{
-    let cluster = CassCluster::new().set_contact_points("127.0.0.1,127.0.0.2").unwrap();
+    let cluster = CassCluster::new().set_contact_points("127.0.0.1").unwrap();
     let items:Vec<Pair> = vec!(
         Pair{key:"apple", value:1 },
         Pair{key:"orange", value:2 },
