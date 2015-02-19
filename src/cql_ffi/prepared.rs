@@ -11,11 +11,13 @@ pub struct CassPrepared(pub *const _CassPrepared);
 
 impl Drop for CassPrepared {
     fn drop(&mut self) {unsafe{
-        self.free()
+        cass_prepared_free(self.0)
     }}
 }
 
 impl CassPrepared {
-    unsafe fn free(&mut self) {cass_prepared_free(self.0)}
-    pub unsafe fn bind(&self) -> CassStatement {CassStatement(cass_prepared_bind(self.0))}
+
+    pub fn bind(&self) -> CassStatement {unsafe{
+        CassStatement(cass_prepared_bind(self.0))
+    }}
 }

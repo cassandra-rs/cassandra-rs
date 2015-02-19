@@ -1,6 +1,12 @@
 #![allow(non_camel_case_types)]
 #![allow(dead_code)]
 
+use std::fmt::Debug;
+use std::fmt::Formatter;
+use std::fmt;
+use std::str;
+use std::ffi;
+
 use libc::types::os::arch::c95::c_char;
 use cql_bindgen::cass_error_desc;
 use cql_bindgen::CASS_ERROR_LIB_BAD_PARAMS;
@@ -61,8 +67,18 @@ pub enum CassErrorSource {
     COMPRESSION = 4
 }
 
-#[derive(Debug)]
 pub struct CassError(_CassError);
+
+
+impl Debug for CassError {
+    fn fmt(&self, f:&mut Formatter) -> fmt::Result {unsafe{
+        let c_buf: *const c_char = unsafe { self.desc() };
+        let buf: &[u8] = unsafe { ffi::c_str_to_bytes(&c_buf) };
+        let str_slice: &str = str::from_utf8(buf).unwrap();
+        let str_buf: String = String::from_utf8(buf.to_vec()).unwrap();
+        write!(f, "{:?}", str_buf)
+    }}
+}
 
 #[derive(Debug,Eq,PartialEq,Copy)]
 #[repr(C)]
@@ -178,4 +194,6 @@ impl CassError {
 
 impl CassError {
     pub unsafe fn desc(&self) -> *const c_char {cass_error_desc(self.0)}
+    pub fn debug(&self) {println!("{:?}",self)}
+
 }

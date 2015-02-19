@@ -1,4 +1,4 @@
-#![feature(libc,core,std_misc,old_impl_check)]
+#![feature(libc,core,old_impl_check,std_misc)]
 extern crate libc;
 
 pub use cql_ffi::consistency::*;

@@ -2,6 +2,12 @@
 #![allow(dead_code)]
 #![allow(missing_copy_implementations)]
 
+use std::fmt::Debug;
+use std::fmt::Formatter;
+use std::fmt;
+use std::str;
+use std::ffi;
+
 use cql_ffi::types::cass_bool_t;
 use cql_ffi::types::cass_double_t;
 use cql_ffi::types::cass_float_t;
@@ -118,30 +124,76 @@ impl CassValueType {
     }   
 }
 
+impl Debug for CassValue {
+
+    fn fmt(&self, f:&mut Formatter) -> fmt::Result {unsafe{
+        match self.get_type() {
+            CassValueType::UNKNOWN     => write!(f, "{:?}", "unknown"),
+            CassValueType::CUSTOM      => write!(f, "{:?}", "custom"),
+            CassValueType::ASCII       => write!(f, "{:?}", "ascii"),
+            CassValueType::BIGINT      => write!(f, "{:?}", "bigint"),
+            _                          => write!(f, "{:?}", "_"), 
+        }
+    }}
+}
 
 impl CassValue {
-    pub unsafe fn get_int32<'a>(&'a self, output: *mut cass_int32_t) -> Result<*mut cass_int32_t,CassError> {CassError::build(cass_value_get_int32(self.0,output)).wrap(output)}
-    pub unsafe fn get_int64<'a>(&'a self, output: *mut cass_int64_t) -> Result<*mut cass_int64_t,CassError> {CassError::build(cass_value_get_int64(self.0,output)).wrap(output)}
-    pub unsafe fn get_float<'a>(&'a self, output: *mut cass_float_t) -> Result<*mut cass_float_t,CassError> {CassError::build(cass_value_get_float(self.0,output)).wrap(output)}
-    pub unsafe fn get_double<'a>(&'a self, output: *mut cass_double_t) -> Result<*mut cass_double_t,CassError> {CassError::build(cass_value_get_double(self.0,output)).wrap(output)}
-    pub unsafe fn get_bool<'a>(&'a self, output: *mut cass_bool_t) -> Result<*mut cass_bool_t,CassError> {CassError::build(cass_value_get_bool(self.0,output)).wrap(output)}
-    pub unsafe fn get_uuid<'a>(&'a self, output: &'a mut CassUuid) -> Result<&mut CassUuid,CassError> {CassError::build(cass_value_get_uuid(self.0,&mut output.0)).wrap(output)}
-    pub unsafe fn get_inet<'a>(&'a self, mut output: CassInet) -> Result<CassInet,CassError> {CassError::build(cass_value_get_inet(self.0,&mut output.0)).wrap(output)}
-
-    pub unsafe fn get_string<'a>(&'a self) -> Result<CassString,CassError> {
-        let mut output:CassString = mem::zeroed();
-        CassError::build(cass_value_get_string(self.0,&mut output.0)).wrap(output)
-    }
+    pub unsafe fn fill_uuid(&self, mut output: CassUuid) -> Result<CassUuid,CassError> {CassError::build(cass_value_get_uuid(self.0,&mut output.0)).wrap(output)}
 
     pub unsafe fn fill_string<'a>(&'a self, mut output: CassString) -> Result<CassString,CassError> {CassError::build(cass_value_get_string(self.0,&mut output.0)).wrap(output)}
+
     pub unsafe fn get_bytes<'a>(&'a self, mut output: CassBytes) -> Result<CassBytes,CassError> {CassError::build(cass_value_get_bytes(self.0,&mut output.0)).wrap(output)}
+
     pub unsafe fn get_decimal<'a>(&'a self, mut output: CassDecimal) -> Result<CassDecimal,CassError> {CassError::build(cass_value_get_decimal(self.0,&mut output.0)).wrap(output)}
+
     pub unsafe fn get_type(&self) -> CassValueType {CassValueType::build(cass_value_type(self.0))}
+
     pub unsafe fn is_null(&self) -> bool {if cass_value_is_null(self.0) > 0 {true} else {false}}
+
     pub unsafe fn is_collection(&self) -> bool {if cass_value_is_collection(self.0) > 0 {true} else {false}}
+
     pub unsafe fn item_count(&self) -> cass_size_t {cass_value_item_count(self.0)}
+
     pub unsafe fn primary_sub_type(&self) -> CassValueType {CassValueType::build(cass_value_primary_sub_type(self.0))}
+
     pub unsafe fn secondary_sub_type(&self) -> CassValueType {CassValueType::build(cass_value_secondary_sub_type(self.0))}
+
     pub unsafe fn as_collection_iterator(&self) -> CassIterator {CassIterator(cass_iterator_from_collection(self.0))}
-    pub unsafe fn map_iterator(&self) -> CassIterator {CassIterator(cass_iterator_from_map(self.0))}
+
+    pub fn get_string(&self) -> Result<CassString,CassError> {unsafe{
+        let mut output:CassString = mem::zeroed();
+        CassError::build(cass_value_get_string(self.0,&mut output.0)).wrap(output)
+    }}
+
+    pub unsafe fn get_inet<'a>(&'a self, mut output: CassInet) -> Result<CassInet,CassError> {CassError::build(cass_value_get_inet(self.0,&mut output.0)).wrap(output)}
+    
+    pub fn get_int32(&self) -> Result<i32,CassError> {unsafe{
+        let mut output = mem::zeroed();
+        CassError::build(cass_value_get_int32(self.0,&mut output)).wrap(output)
+    }}
+
+    pub fn get_int64(&self) -> Result<i64,CassError> {unsafe{
+        let mut output = mem::zeroed();
+        CassError::build(cass_value_get_int64(self.0,&mut output)).wrap(output)
+    }}
+
+    pub fn get_float(&self) -> Result<f32,CassError> {unsafe{
+        let mut output = mem::zeroed();
+        CassError::build(cass_value_get_float(self.0,&mut output)).wrap(output)
+    }}
+
+    pub fn get_double(&self) -> Result<f64,CassError> {unsafe{
+        let mut output = mem::zeroed();
+        CassError::build(cass_value_get_double(self.0,&mut output)).wrap(output)
+    }}
+
+    pub fn get_bool(&self) -> Result<bool,CassError> {unsafe{
+        let mut output = mem::zeroed();
+        CassError::build(cass_value_get_bool(self.0,&mut output)).wrap(if output > 0 {true} else {false})
+    }}
+
+    pub fn get_uuid(&self) -> Result<CassUuid,CassError> {unsafe{
+        let mut output:CassUuid = mem::zeroed();CassError::build(cass_value_get_uuid(self.0,&mut output.0)).wrap(output)
+    }}
+
 }

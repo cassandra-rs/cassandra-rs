@@ -32,5 +32,5 @@ impl CassBatch {
     pub unsafe fn new(_type: CassBatchType) -> CassBatch {CassBatch(cass_batch_new(_type as u32))}
     unsafe fn free(&mut self) {cass_batch_free(self.0)}
     pub unsafe fn set_consistency(&mut self, consistency: CassConsistency) -> CassError {cass_batch_set_consistency(self.0,consistency)}
-    pub unsafe fn add_statement(&mut self, statement: CassStatement) -> CassError {cass_batch_add_statement(self.0,statement.0)}
+    pub unsafe fn add_statement(&mut self, statement: &CassStatement) -> CassError {cass_batch_add_statement(self.0,statement.0)}
 }

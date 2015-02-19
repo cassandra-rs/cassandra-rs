@@ -8,6 +8,7 @@ use libc::types::os::arch::c95::c_uint;
 
 use cql_ffi::ssl::CassSsl;
 use cql_bindgen::CassCluster as _CassCluster;
+use cql_ffi::helpers::str_to_ref;
 
 use cql_bindgen::cass_cluster_new;
 use cql_bindgen::cass_cluster_free;
@@ -38,7 +39,7 @@ use cql_bindgen::cass_cluster_set_credentials;
 use cql_bindgen::cass_cluster_set_request_timeout;
 use cql_bindgen::cass_cluster_set_connect_timeout;
 
-
+use std::ffi::CString;
 
 use cql_ffi::error::CassError;
 
@@ -51,37 +52,71 @@ impl Drop for CassCluster {
 }
 
 impl CassCluster {
-    pub unsafe fn new() -> CassCluster {CassCluster(cass_cluster_new())}
+
+    pub fn new() -> CassCluster {unsafe{CassCluster(cass_cluster_new())}}
+
     unsafe fn free(&mut self){cass_cluster_free(self.0)}
 
     
-    pub unsafe fn set_contact_points(self, contact_points: &str) -> Result<Self,CassError> {
-        let err:CassError = CassError::build(cass_cluster_set_contact_points(self.0,contact_points.as_ptr() as *const i8));
+    pub fn set_contact_points(self, contact_points: &str) -> Result<Self,CassError> {unsafe{
+        let err:CassError = CassError::build(cass_cluster_set_contact_points(self.0,str_to_ref(contact_points)));
         err.wrap(self)
-    }
+    }}
+
     pub unsafe fn set_port<'a>(&'a mut self, port: c_int) -> Result<&'a mut Self,CassError> {CassError::build(cass_cluster_set_port(self.0,port)).wrap(self)}
+
     pub unsafe fn set_ssl(&mut self, ssl: &mut CassSsl) {cass_cluster_set_ssl(self.0,ssl.0)}
+
     pub unsafe fn set_protocol_version<'a>(&'a mut self, protocol_version: c_int) -> Result<&'a mut Self,CassError> {CassError::build(cass_cluster_set_protocol_version(self.0,protocol_version)).wrap(self)}
+
     pub unsafe fn set_num_threads_io(&mut self, num_threads: c_uint) {cass_cluster_set_num_threads_io(self.0,num_threads);}
+
     pub unsafe fn set_queue_size_io<'a>(&'a mut self, queue_size: c_uint) -> Result<&'a mut Self,CassError> {CassError::build(cass_cluster_set_queue_size_io(self.0,queue_size)).wrap(self)}
+
     pub unsafe fn set_queue_size_event<'a>(&'a mut self, queue_size: c_uint) -> Result<&'a mut Self,CassError> {CassError::build(cass_cluster_set_queue_size_event(self.0,queue_size)).wrap(self)}
+
     pub unsafe fn set_queue_size_log<'a>(&'a mut self, queue_size: c_uint) -> Result<&'a mut Self,CassError> {CassError::build(cass_cluster_set_queue_size_log(self.0,queue_size)).wrap(self)}
+
     pub unsafe fn set_core_connections_per_host<'a>(&'a mut self, num_connections: c_uint) -> Result<&'a mut Self,CassError> {CassError::build(cass_cluster_set_core_connections_per_host(self.0,num_connections)).wrap(self)}
+
     pub unsafe fn set_max_connections_per_host<'a>(&'a mut self, num_connections: c_uint) -> Result<&'a mut Self,CassError> {CassError::build(cass_cluster_set_max_connections_per_host(self.0,num_connections)).wrap(self)}
+
     pub unsafe fn set_reconnect_wait_time(&mut self, wait_time: c_uint) {cass_cluster_set_reconnect_wait_time(self.0,wait_time)}
+
     pub unsafe fn set_max_concurrent_creation<'a>(&'a mut self, num_connections: c_uint) -> Result<&'a mut Self,CassError> {CassError::build(cass_cluster_set_max_concurrent_creation(self.0,num_connections)).wrap(self)}
+
     pub unsafe fn set_max_concurrent_requests_threshold<'a>(&'a mut self, num_requests: c_uint) -> Result<&'a mut Self,CassError> {CassError::build(cass_cluster_set_max_concurrent_requests_threshold(self.0,num_requests)).wrap(self)}
+
     pub unsafe fn set_max_requests_per_flush<'a>(&'a mut self, num_requests: c_uint) -> Result<&'a mut Self,CassError> {CassError::build(cass_cluster_set_max_requests_per_flush(self.0,num_requests)).wrap(self)}
+
     pub unsafe fn set_write_bytes_high_water_mark<'a>(&'a mut self, num_bytes: c_uint) -> Result<&'a mut Self,CassError> {CassError::build(cass_cluster_set_write_bytes_high_water_mark(self.0,num_bytes)).wrap(self)}
+
     pub unsafe fn set_write_bytes_low_water_mark<'a>(&'a mut self, num_bytes: c_uint) -> Result<&'a mut Self,CassError> {CassError::build(cass_cluster_set_write_bytes_low_water_mark(self.0,num_bytes)).wrap(self)}
+
     pub unsafe fn set_pending_requests_high_water_mark<'a>(&'a mut self, num_requests: c_uint) -> Result<&'a mut Self,CassError> {CassError::build(cass_cluster_set_pending_requests_high_water_mark(self.0,num_requests)).wrap(self)}
+
     pub unsafe fn set_pending_requests_low_water_mark<'a>(&'a mut self, num_requests: c_uint) -> Result<&'a mut Self,CassError> {CassError::build(cass_cluster_set_pending_requests_low_water_mark(self.0,num_requests)).wrap(self)}
+
     pub unsafe fn set_connect_timeout(&mut self, timeout_ms: c_uint) {cass_cluster_set_connect_timeout(self.0,timeout_ms)}
+
     pub unsafe fn set_request_timeout(&mut self, timeout_ms: c_uint) {cass_cluster_set_request_timeout(self.0,timeout_ms)}
+
     pub unsafe fn set_credentials(&mut self, username: *const c_char, password: *const c_char) {cass_cluster_set_credentials(self.0,username,password)}
-    pub unsafe fn set_load_balance_round_robin(&mut self) {cass_cluster_set_load_balance_round_robin(self.0)}
-    pub unsafe fn set_load_balance_dc_aware<'a>(&'a mut self, local_dc: *const ::libc::c_char,used_hosts_per_remote_dc: ::libc::c_uint,allow_remote_dcs_for_local_cl: bool) -> Result<&'a mut Self,CassError> {CassError::build(cass_cluster_set_load_balance_dc_aware(self.0,local_dc,used_hosts_per_remote_dc,if allow_remote_dcs_for_local_cl {1} else {0})).wrap(self)}
+
+    pub fn set_load_balance_round_robin(self) -> Result<Self,CassError> {unsafe{
+        cass_cluster_set_load_balance_round_robin(self.0);
+        CassError::build(0).wrap(self)
+    }}
+
+    pub fn set_load_balance_dc_aware(self, local_dc: &str,used_hosts_per_remote_dc: u32,allow_remote_dcs_for_local_cl: bool) -> Result<Self,CassError> {unsafe{
+        CassError::build(
+            cass_cluster_set_load_balance_dc_aware(self.0,str_to_ref(local_dc),used_hosts_per_remote_dc,if allow_remote_dcs_for_local_cl {1} else {0})
+        ).wrap(self)
+    }}
+
     pub unsafe fn set_token_aware_routing<'a>(&'a mut self, enabled: bool) {cass_cluster_set_token_aware_routing(self.0,if enabled {1} else {0})}
+
     pub unsafe fn set_tcp_nodelay(&mut self, enable: bool) {cass_cluster_set_tcp_nodelay(self.0,if enable {1} else {0})}
+
     pub unsafe fn set_tcp_keepalive(&mut self, enable: bool, delay_secs: ::libc::c_uint) {cass_cluster_set_tcp_keepalive(self.0,if enable {1} else {0},delay_secs)}
 }

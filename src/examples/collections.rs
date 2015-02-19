@@ -29,7 +29,7 @@ unsafe fn connect_session(session:&mut CassSession, cluster:&mut CassCluster) ->
 }
 
 unsafe fn execute_query(session: &mut CassSession, query: &str) -> CassError {
-    let statement = cass_statement_new(cass_string_init(cass_string_init(CString::from_slice(query.as_bytes()).as_ptr()).data), 0);
+    let statement = cass_statement_new(cass_string_init(cass_string_init(CString::from_slice(str_to_ref(query)).data), 0);
     let future = &mut *cass_session_execute(session, statement);
     cass_future_wait(future);
     let rc = cass_future_error_code(future);
@@ -44,12 +44,12 @@ unsafe fn execute_query(session: &mut CassSession, query: &str) -> CassError {
 
 
 unsafe fn insert_into_collections(session:&mut CassSession, key:&str, items:Vec<String>) -> CassError {
-    let query = cass_string_init("INSERT INTO examples.collections (key, items) VALUES (?, ?);".as_ptr() as *const i8);
+    let query = "INSERT INTO examples.collections (key, items) VALUES (?, ?);");
     let statement = cass_statement_new(query, 2);
-    cass_statement_bind_string(statement, 0, cass_string_init(key.as_ptr() as *const i8));
+    cass_statement_bind_string(statement, 0, key));
     let collection = cass_collection_new(CassCollectionType::SET, 2);
     for item in items.iter() {
-        cass_collection_append_string(collection, cass_string_init(item.as_bytes().as_ptr() as *const i8));
+        cass_collection_append_string(collection, cass_string_init(item.as_bytes()));
     }
     cass_statement_bind_collection(statement, 1, collection);
     cass_collection_free(collection);

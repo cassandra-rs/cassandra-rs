@@ -1,49 +1,54 @@
 extern crate cql_ffi;
 use cql_ffi::*;
 
-#[derive(Copy)]
+use std::str::FromStr;
+
+#[derive(Copy,Debug,PartialEq)]
 struct Basic {
-    bln:cass_bool_t,
-    flt:cass_float_t,
-    dbl:cass_double_t,
-    i32:cass_int32_t,
-    i64:cass_int64_t
+    bln:bool,
+    flt:f32,
+    dbl:f64,
+    i32:i32,
+    i64:i64
 }
 
-fn create_cluster() -> Result<CassCluster,CassError> {unsafe{
+fn create_cluster() -> Result<CassCluster,CassError> {
     let cluster = CassCluster::new();
     cluster.set_contact_points("127.0.0.1")
-}}
-
-//fixme row key sent is null?
-unsafe fn insert_into_basic(session:&mut CassSession, prepared:&CassPrepared, key:&str, basic:Basic) -> Result<CassFuture,CassError> {
-    let statement = prepared.bind();
-    println!("key={:?}",key);
-    let _ = statement.bind_string_by_name(str2ref("key"), str2cass_string(key));
-    let _ = statement.bind_bool_by_name("BLN".as_ptr() as *const i8, basic.bln);
-    let _ = statement.bind_float_by_name("FLT".as_ptr() as *const i8, basic.flt);
-    let _ = statement.bind_double_by_name("\"dbl\"".as_ptr() as *const i8, basic.dbl);
-    let _ = statement.bind_int32_by_name("i32".as_ptr() as *const i8, basic.i32);
-    let _ = statement.bind_int64_by_name("I64".as_ptr() as *const i8, basic.i64);
-    session.execute_statement(&statement).wait()
 }
 
-unsafe fn select_from_basic(session:&mut CassSession, prepared:&CassPrepared, key:&str, basic:&mut Basic) -> Result<CassFuture,CassError> {
+static CREATE_KEYSPACE:&'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '3' };";
+static CREATE_TABLE:&'static str = "CREATE TABLE IF NOT EXISTS examples.basic (key text, bln boolean, flt float, dbl double,i32 int, i64 bigint, PRIMARY KEY (key));";
+static INSERT_QUERY:&'static str = "INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, ?);";
+static SELECT_QUERY:&'static str = "SELECT * FROM examples.basic WHERE key = ?";
+
+//fixme row key sent is null?
+fn insert_into_basic(session:&mut CassSession, prepared:&CassPrepared, key:&str, basic:Basic) -> Result<CassResult,CassError> {
+    println!("key={:?}",key);
+    let statement = &prepared.bind();
+    statement.bind_string_by_name("key", FromStr::from_str(key).unwrap()).unwrap()
+        .bind_bool_by_name("BLN", basic.bln).unwrap()
+        .bind_float_by_name("FLT", basic.flt).unwrap()
+        .bind_double_by_name("\"dbl\"", basic.dbl).unwrap()
+        .bind_int32_by_name("i32", basic.i32).unwrap()
+        .bind_int64_by_name("I64", basic.i64).unwrap();
+
+    session.execute_statement(statement).wait()
+}
+
+unsafe fn select_from_basic(session:&mut CassSession, prepared:&CassPrepared, key:&str, basic:&mut Basic) -> Result<CassResult,CassError> {
     let statement = prepared.bind();
-    let _ = statement.bind_string_by_name("key".as_ptr() as *const i8, str2cass_string(key));
+    let statement = statement.bind_string_by_name("key", FromStr::from_str(key).unwrap()).unwrap();
     match session.execute_statement(&statement).wait() {
-        Ok(mut future) => {
-            let result = future.get_result();
-            let mut iterator = result.iter();
-            if iterator.next() {
-                let row = iterator.get_row();
-                let _ = row.get_column_by_name("BLN").get_bool(&mut basic.bln);
-                let _ = row.get_column_by_name("dbl").get_double(&mut basic.dbl);
-                let _ = row.get_column_by_name("flt").get_float(&mut basic.flt);
-                let _ = row.get_column_by_name("\"i32\"").get_int32(&mut basic.i32);
-                let _ = row.get_column_by_name("i64").get_int64(&mut basic.i64);
+        Ok(result) => {
+            for row in result.iter() {
+                basic.bln = try!(row.get_column_by_name("BLN").get_bool());
+                basic.dbl = try!(row.get_column_by_name("dbl").get_double());
+                basic.flt = try!(row.get_column_by_name("flt").get_float());
+                basic.i32 = try!(row.get_column_by_name("\"i32\"").get_int32());
+                basic.i64 = try!(row.get_column_by_name("i64").get_int64());
             }
-            Ok(future)
+            Ok(result)
         }
         Err(_) => panic!("err")
     }
@@ -51,36 +56,28 @@ unsafe fn select_from_basic(session:&mut CassSession, prepared:&CassPrepared, ke
 
 fn main() {unsafe{
     let cluster = &mut create_cluster().unwrap();
-    let mut session = CassSession::new();
-    match session.connect(cluster).wait() {
-        Ok(_) => {
-                let input = Basic{bln:cass_true, flt:0.001f32, dbl:0.0002, i32:1, i64:2 };
-                let mut output = Basic{bln:cass_false, flt:0f32, dbl:0.0, i32:0, i64:0 };
-                let insert_query = "INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, ?);";
-                let select_query = "SELECT * FROM examples.basic WHERE key = ?";
-                session.execute_statement(&CassStatement::new("CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '3' };",0));
-                session.execute_statement(&CassStatement::new("CREATE TABLE IF NOT EXISTS examples.basic (key text, bln boolean, flt float, dbl double,i32 int, i64 bigint, PRIMARY KEY (key));",0));
-                match session.prepare(insert_query).wait() {
-                    Ok(ref mut insert_prepared) => {
-                        let _ = insert_into_basic(&mut session, &mut insert_prepared.get_prepared(), "prepared_test", input);
-                    },
-                    Err(_) => {panic!("error")}
-                }
-                match session.prepare(select_query).wait() {
-                    Ok(ref mut select_prepared) => {
-                        let _ = select_from_basic(&mut session, &select_prepared.get_prepared(), "prepared_test", &mut output);
-                        assert!(input.bln == output.bln);
-                        assert!(input.flt == output.flt);
-                        assert!(input.dbl == output.dbl);
-                        assert!(input.i32 == output.i32);
-                        assert!(input.i64 == output.i64);
-                    },
-                    Err(_) => {panic!("err")}
-                }
-                session.close().wait().unwrap();
-            },
-        Err(err) => {
-            panic!("couldn't connect: {:?}",err);
+    match CassSession::new().connect(cluster).wait() {
+        Ok(mut session) => {
+            let input = Basic{bln:true, flt:0.001f32, dbl:0.0002, i32:1, i64:2 };
+            let mut output = Basic{bln:false, flt:0f32, dbl:0.0, i32:0, i64:0 };
+            let _ = session.execute(CREATE_KEYSPACE,0).wait().unwrap();
+            let _ = session.execute(CREATE_TABLE,0).wait().unwrap();
+            match session.prepare(INSERT_QUERY).wait() {
+                Ok(mut insert_prepared) => {
+                    insert_into_basic(&mut session, &mut insert_prepared, "prepared_test", input).unwrap();
+                },
+                Err(err) => println!("error: {:?}",err)
+            }
+            match session.prepare(SELECT_QUERY).wait() {
+                Ok(ref mut select_prepared) => {
+                    select_from_basic(&mut session, &select_prepared, "prepared_test", &mut output).unwrap();
+                    assert_eq!(input,output);
+                    println!("results matched: {:?}", output);
+                },
+                Err(err) => println!("err: {:?}",err)
+            }
+            session.close().wait().unwrap();
         }
+        Err(err) => println!("couldn't connect: {:?}",err)
     }    
 }}

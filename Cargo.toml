@@ -5,7 +5,7 @@ license = "Apache-2.0"
 homepage = "https://github.com/tupshin/cql-ffi"
 repository = "https://github.com/tupshin/cql-ffi"
 name = "cql_ffi"
-version = "0.0.8"
+version = "0.1.0"
 authors = ["Tupshin Harper <tupshin@tupshin.com>"]
 
 
@@ -45,8 +45,12 @@ name="paging"
 path="src/examples/paging.rs"
 
 [[bin]]
-name="schema_meta"
-path="src/examples/schema_meta.rs"
+name="prepared"
+path="src/examples/prepared.rs"
+
+# [[bin]]
+# name="schema_meta"
+# path="src/examples/schema_meta.rs"
 
 [[bin]]
 name="simple"
