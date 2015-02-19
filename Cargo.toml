@@ -1,11 +1,11 @@
 [package]
 
-description = "An unsafe wrapper of the DataStax C++ CQL driver"
+description = "A mostly safe wrapper of the DataStax C++ CQL driver"
 license = "Apache-2.0"
 homepage = "https://github.com/tupshin/cql-ffi"
 repository = "https://github.com/tupshin/cql-ffi"
 name = "cql_ffi"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Tupshin Harper <tupshin@tupshin.com>"]
 
 
