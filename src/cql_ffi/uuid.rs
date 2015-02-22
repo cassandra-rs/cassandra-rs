@@ -37,9 +37,9 @@ impl ::std::default::Default for CassUuid {
 pub struct CassUuidGen(*mut _CassUuidGen);
 
 impl Drop for CassUuidGen {
-    fn drop(&mut self) {unsafe{
+    fn drop(&mut self) {
         self.free()
-    }}
+    }
 }
 
 impl Debug for CassUuid {

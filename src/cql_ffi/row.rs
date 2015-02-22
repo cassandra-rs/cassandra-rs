@@ -2,9 +2,8 @@
 #![allow(dead_code)]
 #![allow(missing_copy_implementations)]
 
-use cql_ffi::value::CassValue;
-use cql_ffi::iterator::CassIterator;
 use cql_ffi::column::CassColumn;
+use cql_ffi::iterator::RowIterator;
 
 use cql_ffi::helpers::str_to_ref;
 
@@ -25,8 +24,8 @@ impl CassRow {
         CassColumn(cass_row_get_column_by_name(self.0,str_to_ref(name)))
     }}
 
-    pub fn from_row(&self) -> CassIterator {unsafe{
-        CassIterator(cass_iterator_from_row(self.0))
+    pub fn from_row(&self) -> RowIterator {unsafe{
+        RowIterator(cass_iterator_from_row(self.0))
     }}
 
 }

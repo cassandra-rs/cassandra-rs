@@ -19,14 +19,40 @@ use cql_bindgen::cass_iterator_get_schema_meta;
 use cql_bindgen::cass_iterator_get_schema_meta_field;
 use cql_bindgen::CassIteratorType as _CassIteratorType;
 
-pub struct CassIterator(pub *mut _CassIterator);
+//pub struct CassIterator(pub *mut _CassIterator);
 
 pub struct CassIteratorType(_CassIteratorType);
 
 pub struct ResultIterator(pub *mut _CassIterator);
+pub struct RowIterator(pub *mut _CassIterator);
 
 pub struct MapIterator(pub *mut _CassIterator);
+pub struct SetIterator(pub *mut _CassIterator);
+pub struct ListIterator(pub *mut _CassIterator);
 
+impl Drop for ResultIterator {
+    fn drop(&mut self) {unsafe{
+        self.free()
+    }}
+}
+
+impl Drop for RowIterator {
+    fn drop(&mut self) {unsafe{
+        self.free()
+    }}
+}
+
+impl Drop for SetIterator {
+    fn drop(&mut self) {unsafe{
+        self.free()
+    }}
+}
+
+impl Drop for ListIterator {
+    fn drop(&mut self) {unsafe{
+        self.free()
+    }}
+}
 //~ #[repr(C)]
 //~ #[derive(Debug,Copy)]
 //~ pub enum CassIteratorType {
@@ -39,16 +65,35 @@ pub struct MapIterator(pub *mut _CassIterator);
 //~ }
 
 impl MapIterator {
-    pub unsafe fn get_key(&mut self) -> CassValue {CassValue(cass_iterator_get_map_key(self.0))}
-    pub unsafe fn get_value(&mut self) -> CassValue {CassValue(cass_iterator_get_value(self.0))}
-    pub unsafe fn get_pair(&mut self) -> Result<(CassValue,CassValue),CassError> {Ok((self.get_key(),self.get_value()))}
-    pub unsafe fn next(&mut self) -> bool {if cass_iterator_next(self.0) > 0 {true} else {false}}
+    pub fn get_key(&mut self) -> CassValue {unsafe{
+        CassValue(cass_iterator_get_map_key(self.0))
+    }}
+    pub fn get_value(&mut self) -> CassValue {unsafe{
+        CassValue(cass_iterator_get_value(self.0))
+    }}
+    
+    pub fn get_pair(&mut self) -> Result<(CassValue,CassValue),CassError> {
+        Ok((self.get_key(),self.get_value()))
+    }
+    
+    fn _next(&mut self) -> bool {unsafe{
+        if cass_iterator_next(self.0) > 0 {true} else {false}
+    }}
+
+    unsafe fn free(&mut self) {
+        cass_iterator_free(self.0)
+    }
+
 }
 
-impl Drop for CassIterator {
+impl Drop for MapIterator {
     fn drop(&mut self) {unsafe{
         self.free()
     }}
+}
+
+impl RowIterator {
+    unsafe fn free(&mut self) {cass_iterator_free(self.0)}
 }
 
 impl Iterator for ResultIterator {
@@ -61,15 +106,62 @@ impl Iterator for ResultIterator {
     }
 }
 
+impl Iterator for ListIterator {
+    type Item = CassValue;
+    fn next(&mut self) -> Option<<Self as Iterator>::Item> {
+        match self._next() {
+            true => Some(self.get_value()),
+            false => None
+        }
+    }
+}
+
+impl Iterator for MapIterator {
+    type Item = CassValue;
+    fn next(&mut self) -> Option<<Self as Iterator>::Item> {
+        match self._next() {
+            true => Some(self.get_value()),
+            false => None
+        }
+    }
+}
+
+impl Iterator for SetIterator {
+    type Item = CassValue;
+    fn next(&mut self) -> Option<<Self as Iterator>::Item> {unsafe{
+        match self._next() {
+            true => Some(self.get_value()),
+            false => None
+        }}
+    }
+}
+
+impl ListIterator {
+    unsafe fn free(&mut self) {cass_iterator_free(self.0)}
+
+    pub fn _next(&mut self) -> bool {unsafe{
+        if cass_iterator_next(self.0) > 0 {true} else {false}
+    }}
+    
+    pub fn get_value(&mut self)-> CassValue {unsafe{
+        CassValue(cass_iterator_get_value(self.0))
+    }}
+}
+
 impl ResultIterator {
+    unsafe fn free(&mut self) {cass_iterator_free(self.0)}
     pub unsafe fn get_row(&mut self) -> CassRow {CassRow(cass_iterator_get_row(self.0))}
     pub unsafe fn next(&mut self) -> bool {if cass_iterator_next(self.0) > 0 {true} else {false}}
 }
 
-impl CassIterator {
+impl SetIterator {
     unsafe fn free(&mut self) {cass_iterator_free(self.0)}
     pub unsafe fn get_type(&mut self) -> CassIteratorType {CassIteratorType(cass_iterator_type(self.0))}
-    pub unsafe fn next(&mut self) -> bool {if cass_iterator_next(self.0) > 0 {true} else {false}}
+
+    fn _next(&mut self) -> bool {unsafe{
+        if cass_iterator_next(self.0) > 0 {true} else {false}
+    }}
+    
     pub unsafe fn get_column(&mut self) -> CassValue {CassValue(cass_iterator_get_column(self.0))}
     pub unsafe fn get_value(&mut self)-> CassValue {CassValue(cass_iterator_get_value(self.0))}
     pub unsafe fn get_schema_meta(&mut self) -> CassSchemaMeta {CassSchemaMeta(cass_iterator_get_schema_meta(self.0))}

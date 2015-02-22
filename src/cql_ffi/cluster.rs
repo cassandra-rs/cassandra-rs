@@ -9,6 +9,7 @@ use libc::types::os::arch::c95::c_uint;
 use cql_ffi::ssl::CassSsl;
 use cql_bindgen::CassCluster as _CassCluster;
 use cql_ffi::helpers::str_to_ref;
+use std::ffi::CString;
 
 use cql_bindgen::cass_cluster_new;
 use cql_bindgen::cass_cluster_free;
@@ -39,8 +40,6 @@ use cql_bindgen::cass_cluster_set_credentials;
 use cql_bindgen::cass_cluster_set_request_timeout;
 use cql_bindgen::cass_cluster_set_connect_timeout;
 
-use std::ffi::CString;
-
 use cql_ffi::error::CassError;
 
 pub struct CassCluster(pub *mut _CassCluster);
@@ -51,6 +50,21 @@ impl Drop for CassCluster {
     }}
 }
 
+pub struct ContactPoints(*const c_char);
+
+pub trait AsContactPoints {
+    fn as_contact_points(&self) -> ContactPoints;
+}
+
+impl AsContactPoints for str {
+    fn as_contact_points(&self) -> ContactPoints {
+        let cstr = CString::new(self).unwrap();
+        let bytes = cstr.as_bytes_with_nul();
+        let ptr = bytes.as_ptr();
+        ContactPoints(ptr as *const i8)
+    }
+}
+
 impl CassCluster {
 
     pub fn new() -> CassCluster {unsafe{CassCluster(cass_cluster_new())}}
@@ -58,8 +72,8 @@ impl CassCluster {
     unsafe fn free(&mut self){cass_cluster_free(self.0)}
 
     
-    pub fn set_contact_points(self, contact_points: &str) -> Result<Self,CassError> {unsafe{
-        let err:CassError = CassError::build(cass_cluster_set_contact_points(self.0,str_to_ref(contact_points)));
+    pub fn set_contact_points(self, contact_points: ContactPoints) -> Result<Self,CassError> {unsafe{
+        let err:CassError = CassError::build(cass_cluster_set_contact_points(self.0,contact_points.0));
         err.wrap(self)
     }}
 

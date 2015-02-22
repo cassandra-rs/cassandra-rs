@@ -15,7 +15,7 @@ fn insert_into_async(session: &mut CassSession, key:String) {
     let mut futures = Vec::<ResultFuture>::new();
     for i in (0..NUM_CONCURRENT_REQUESTS) {
         let statement = &CassStatement::new(query, 6);
-        let key = key.clone() + &i.to_string()[];
+        let key = key.clone() + &i.to_string();
         CassStatement::new(query, 6)
             .bind_string(0, &key).unwrap()
             .bind_bool(1, if i % 2 == 0 {true} else {false}).unwrap()
@@ -26,14 +26,14 @@ fn insert_into_async(session: &mut CassSession, key:String) {
         let future = session.execute_statement(statement);
         futures.push(future);
     }
-    for mut result in futures.iter()  {
-        //~ //FIXME
-       //result.wait();
-    }
+    //~ for mut result in futures.iter()  {
+        //FIXME
+       //~ result.wait();
+    //~ }
 }
 
 pub fn main() {
-    let cluster = &mut CassCluster::new().set_contact_points("127.0.0.1").unwrap();
+    let cluster = &mut CassCluster::new().set_contact_points("127.0.0.1".as_contact_points()).unwrap();
     match CassSession::new().connect(cluster).wait() {
         Ok(mut session) => {
             let _ = session.execute(CREATE_KEYSPACE,0).wait().unwrap();

@@ -50,14 +50,14 @@ fn select_from_basic(session:&mut CassSession, prepared:&CassPrepared, key:&str,
 }
 
 fn main() {
-    let cluster = &mut CassCluster::new().set_contact_points("127.0.0.1").unwrap();
+    let cluster = &mut CassCluster::new().set_contact_points("127.0.0.1".as_contact_points()).unwrap();
     let session = &mut CassSession::new().connect(cluster).wait().unwrap();
     let mut input = Basic{bln:true, flt:0.001f32, dbl:0.0002f64, i32:1, i64:2 };
     let mut output = Basic{bln:false, flt:0f32, dbl:0f64, i32:0, i64:0};
     session.execute(CREATE_KEYSPACE,0);
     session.execute(CREATE_TABLE,0);
     insert_into_basic(session, "prepared_test", &mut input).unwrap();
-    match session.prepare(SELECT_QUERY).wait() {
+    match session.prepare(SELECT_QUERY).unwrap().wait() {
         Ok(prepared) => {
             select_from_basic(session, &prepared, "prepared_test", &mut output).unwrap();
             println!("input: {:?}\nouput: {:?}", input,output);

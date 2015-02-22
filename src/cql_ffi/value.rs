@@ -5,21 +5,14 @@
 use std::fmt::Debug;
 use std::fmt::Formatter;
 use std::fmt;
-use std::str;
-use std::ffi;
 
-use cql_ffi::types::cass_bool_t;
-use cql_ffi::types::cass_double_t;
-use cql_ffi::types::cass_float_t;
 use cql_ffi::types::cass_size_t;
-use cql_ffi::types::cass_int32_t;
-use cql_ffi::types::cass_int64_t;
 use cql_ffi::error::CassError;
 use cql_ffi::bytes::CassBytes;
 use cql_ffi::inet::CassInet;
 use cql_ffi::uuid::CassUuid;
 use cql_ffi::string::CassString;
-use cql_ffi::iterator::CassIterator;
+use cql_ffi::iterator::SetIterator;
 use cql_ffi::decimal::CassDecimal;
 use cql_bindgen::CassValue as _CassValue;
 use cql_bindgen::cass_value_secondary_sub_type;
@@ -39,7 +32,6 @@ use cql_bindgen::cass_value_get_float;
 use cql_bindgen::cass_value_get_int64;
 use cql_bindgen::cass_value_get_int32;
 use cql_bindgen::cass_iterator_from_collection;
-use cql_bindgen::cass_iterator_from_map;
 
 
 use cql_bindgen::CASS_VALUE_TYPE_UNKNOWN;
@@ -158,7 +150,7 @@ impl CassValue {
 
     pub unsafe fn secondary_sub_type(&self) -> CassValueType {CassValueType::build(cass_value_secondary_sub_type(self.0))}
 
-    pub unsafe fn as_collection_iterator(&self) -> CassIterator {CassIterator(cass_iterator_from_collection(self.0))}
+    pub unsafe fn as_collection_iterator(&self) -> SetIterator {SetIterator(cass_iterator_from_collection(self.0))}
 
     pub fn get_string(&self) -> Result<CassString,CassError> {unsafe{
         let mut output:CassString = mem::zeroed();

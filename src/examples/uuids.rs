@@ -7,6 +7,7 @@ use cql_ffi::CassResult;
 use cql_ffi::CassError;
 use cql_ffi::CassUuidGen;
 use cql_ffi::CassCluster;
+use cql_ffi::AsContactPoints;
 
 static INSERT_QUERY:&'static str = "INSERT INTO examples.log (key, time, entry) VALUES (?, ?, ?);";
 static SELECT_QUERY:&'static str = "SELECT * FROM examples.log WHERE key = ?";
@@ -17,14 +18,14 @@ fn insert_into_log(session:&mut CassSession, key:&str, time:CassUuid, entry:&str
 	let statement = CassStatement::new(INSERT_QUERY, 3);
 	statement.bind_string(0, key).unwrap();
 	statement.bind_uuid(1, time).unwrap();
-	statement.bind_string(2, &entry[]).unwrap();
+	statement.bind_string(2, &entry).unwrap();
 	let mut future = session.execute_statement(&statement);
 	future.wait()
 }
 
 fn select_from_log(session:&mut CassSession, key:&str) -> Result<CassResult,CassError> {
 	let statement = &CassStatement::new(SELECT_QUERY, 1);
-	statement.bind_string(0, &key[]).unwrap();
+	statement.bind_string(0, &key).unwrap();
 	let mut future = session.execute_statement(statement);
 	let results = try!(future.wait());
 	for row in results.iter() {
@@ -38,7 +39,7 @@ fn select_from_log(session:&mut CassSession, key:&str) -> Result<CassResult,Cass
 
 fn main() {
 	let uuid_gen = CassUuidGen::new();
-	let cluster = &CassCluster::new().set_contact_points("127.0.0.1").unwrap();
+	let cluster = &CassCluster::new().set_contact_points("127.0.0.1".as_contact_points()).unwrap();
 	let session = &mut CassSession::new().connect(cluster).wait().unwrap();
 	
 	session.execute(CREATE_KEYSPACE, 0);

@@ -32,6 +32,10 @@ path="src/examples/batch.rs"
 name="bind_by_name"
 path="src/examples/bind_by_name.rs"
 
+[[bin]]
+name="collections"
+path="src/examples/collections.rs"
+
 # [[bin]]
 # name="logging"
 # path="src/examples/logging.rs"

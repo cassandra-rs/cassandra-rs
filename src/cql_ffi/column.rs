@@ -4,8 +4,9 @@ use cql_ffi::uuid::CassUuid;
 use cql_ffi::string::CassString;
 use cql_ffi::value::CassValueType;
 use cql_ffi::inet::CassInet;
-use cql_ffi::iterator::CassIterator;
+use cql_ffi::iterator::SetIterator;
 use cql_ffi::iterator::MapIterator;
+use cql_ffi::error::CassErrorTypes;
 
 use std::mem;
 
@@ -18,6 +19,7 @@ use cql_bindgen::cass_value_get_uuid;
 use cql_bindgen::cass_value_get_string;
 use cql_bindgen::cass_value_get_inet;
 use cql_bindgen::cass_iterator_from_map;
+use cql_bindgen::cass_iterator_from_collection;
 use cql_bindgen::cass_value_type;
 
 
@@ -79,6 +81,16 @@ impl CassColumn {
     pub fn map_iter(&self) -> Result<MapIterator,CassError> {unsafe{
         match self.get_type() {
             CassValueType::MAP => Ok(MapIterator(cass_iterator_from_map(self.0))),
+            type_no => {
+                println!("wrong_type: {:?}", type_no);
+                Err(CassError::build(CassErrorTypes::LIB_INVALID_VALUE_TYPE as u32))
+            }
+        }
+    }}
+
+    pub fn set_iter(&self) -> Result<SetIterator,CassError> {unsafe{
+        match self.get_type() {
+            CassValueType::SET => Ok(SetIterator(cass_iterator_from_collection(self.0))),
             _ => Err(CassError::build(1))
         }
     }}

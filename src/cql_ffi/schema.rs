@@ -6,7 +6,7 @@ use cql_ffi::string::CassString;
 use cql_ffi::value::CassValue;
 use cql_ffi::error::CassError;
 use cql_ffi::helpers::str_to_ref;
-use cql_ffi::iterator::CassIterator;
+use cql_ffi::iterator::SetIterator;
 use cql_bindgen::CassSchema as _CassSchema;
 use cql_bindgen::CassSchemaMeta as _CassSchemaMeta;
 use cql_bindgen::CassSchemaMetaField as _CassSchemaMetaField;
@@ -26,12 +26,12 @@ pub struct CassSchema(pub *const _CassSchema);
 pub struct CassSchemaMeta(pub *const _CassSchemaMeta);
 pub struct CassSchemaMetaField(pub *const _CassSchemaMetaField);
 //pub struct CassSchemaMetaType(pub _CassSchemaMetaType);
-pub struct CassSchemaMetaFieldIterator(pub *mut CassIterator);
+pub struct CassSchemaMetaFieldIterator(pub *mut SetIterator);
 
 //~ #[repr(C)]
 #[derive(Debug,Copy)]
 pub enum CassSchemaMetaType {
-    KEYSPACE = 0is,
+    KEYSPACE = 0isize,
     TABLE = 1,
     COLUMN = 2
 }
@@ -63,7 +63,13 @@ impl CassSchema {
         CassSchemaMeta(cass_schema_get_keyspace(self.0,str_to_ref(keyspace_name)))
     }
     
-    pub unsafe fn iterator(&self) -> CassIterator {CassIterator(cass_iterator_from_schema(self.0))}
+    pub unsafe fn iterator(&self) -> SetIterator {SetIterator(cass_iterator_from_schema(self.0))}
+}
+
+impl Drop for CassSchema {
+    fn drop(&mut self) {unsafe{
+        self.free()
+    }}
 }
 
 
@@ -72,8 +78,8 @@ impl CassSchemaMeta {
     pub unsafe fn get_entry(&self, name: &str) -> CassSchemaMeta {CassSchemaMeta(cass_schema_meta_get_entry(self.0,str_to_ref(name)))}
     pub unsafe fn get_field(&self, name: &str) -> CassSchemaMetaField {CassSchemaMetaField(cass_schema_meta_get_field(self.0,str_to_ref(name)))}
 //    pub unsafe fn is_null(&self) -> bool {if cass_value_is_null(self.0) > 0 {true} else {false}}
-    pub unsafe fn iterator(&self) -> CassIterator {CassIterator(cass_iterator_from_schema_meta(self.0))}
-    pub unsafe fn fields_iterator(&self) -> CassIterator {CassIterator(cass_iterator_fields_from_schema_meta(self.0))}
+    pub unsafe fn iterator(&self) -> SetIterator {SetIterator(cass_iterator_from_schema_meta(self.0))}
+    pub unsafe fn fields_iterator(&self) -> SetIterator {SetIterator(cass_iterator_fields_from_schema_meta(self.0))}
 
 }
 

@@ -34,7 +34,7 @@ pub struct CassLogMessage {
     pub file: *const ::libc::c_char,
     pub line: ::libc::c_int,
     pub function: *const ::libc::c_char,
-    pub message: [::libc::c_char; 256us],
+    pub message: [::libc::c_char; 256usize],
 }
 impl ::std::default::Default for CassLogMessage {
     fn default() -> CassLogMessage { unsafe { ::std::mem::zeroed() } }

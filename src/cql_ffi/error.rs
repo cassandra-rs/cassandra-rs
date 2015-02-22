@@ -5,7 +5,7 @@ use std::fmt::Debug;
 use std::fmt::Formatter;
 use std::fmt;
 use std::str;
-use std::ffi;
+use std::ffi::CStr;
 
 use libc::types::os::arch::c95::c_char;
 use cql_bindgen::cass_error_desc;
@@ -60,7 +60,7 @@ use cql_bindgen::CassError as _CassError;
 #[derive(Debug,Eq,PartialEq,Copy)]
 #[repr(C)]
 pub enum CassErrorSource {
-    NONE = 0is,
+    NONE = 0isize,
     LIB = 1,
     SERVER = 2,
     SSL = 3,
@@ -71,13 +71,16 @@ pub struct CassError(_CassError);
 
 
 impl Debug for CassError {
-    fn fmt(&self, f:&mut Formatter) -> fmt::Result {unsafe{
+    fn fmt(&self, f:&mut Formatter) -> fmt::Result {
         let c_buf: *const c_char = unsafe { self.desc() };
-        let buf: &[u8] = unsafe { ffi::c_str_to_bytes(&c_buf) };
-        let str_slice: &str = str::from_utf8(buf).unwrap();
-        let str_buf: String = String::from_utf8(buf.to_vec()).unwrap();
-        write!(f, "{:?}", str_buf)
-    }}
+        let buf: &[u8] = unsafe { CStr::from_ptr(c_buf).to_bytes() };
+        match str::from_utf8(buf) {
+            Ok(str_slice) => {
+                write!(f, "{:?}", str_slice)
+            },
+            Err(err) => panic!("unreachable? {:?}", err)
+        }
+    }
 }
 
 #[derive(Debug,Eq,PartialEq,Copy)]
@@ -130,7 +133,6 @@ pub enum CassErrorTypes {
     LAST_ENTRY = 50331654
 }
 
-#[old_impl_check]
 impl CassError {
     pub fn wrap<'a,T>(&'a self, wrappee:T) -> Result<T,CassError> {
         match self.0 {
@@ -186,7 +188,7 @@ impl CassError {
             50331652 => CassError(CASS_ERROR_SSL_INVALID_PEER_CERT),
             50331653 => CassError(CASS_ERROR_SSL_IDENTITY_MISMATCH),
             50331654 => CassError(CASS_ERROR_LAST_ENTRY),
-            _ => panic!()
+            errno => panic!(errno)
         }
     }
 }

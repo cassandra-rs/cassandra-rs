@@ -5,8 +5,6 @@
 use std::fmt::Debug;
 use std::fmt::Formatter;
 use std::fmt;
-use std::str;
-use std::ffi;
 
 use cql_ffi::value::CassValueType;
 use cql_ffi::row::CassRow;
@@ -27,9 +25,9 @@ use cql_bindgen::cass_iterator_from_result;
 pub struct CassResult(pub *const _CassResult);
 
 impl Debug for CassResult {
-    fn fmt(&self, f:&mut Formatter) -> fmt::Result {unsafe{
+    fn fmt(&self, f:&mut Formatter) -> fmt::Result {
         write!(f, "Result row count: {:?}", self.row_count())
-    }}
+    }
 }
 
 impl Drop for CassResult {
@@ -39,7 +37,7 @@ impl Drop for CassResult {
 }
 
 impl CassResult {
-    unsafe fn free(&mut self) {unsafe{cass_result_free(self.0)}}
+    unsafe fn free(&mut self) {cass_result_free(self.0)}
 
     pub fn row_count(&self) -> u64 {unsafe{cass_result_row_count(self.0)}}
 

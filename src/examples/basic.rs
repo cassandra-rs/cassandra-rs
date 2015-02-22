@@ -7,6 +7,10 @@ use cql_ffi::*;
 
 const CONTACT_POINTS:&'static str = "127.0.0.1";
 
+const CREATE_KEYSPACE:&'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '1' };";
+const CREATE_TABLE:&'static str = "CREATE TABLE IF NOT EXISTS examples.basic (key text, bln boolean, flt float, dbl double, i32 int, i64 bigint, PRIMARY KEY (key));";
+const INSERT_QUERY:&'static str = "INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, ?);";
+const SELECT_QUERY:&'static str = "SELECT * FROM examples.basic WHERE key = ?";
 
 #[derive(Debug)]
 struct Basic {
@@ -18,8 +22,7 @@ struct Basic {
 }
 
 fn insert_into_basic(mut session: CassSession, key:&str, basic:&Basic) -> Result<(CassSession,CassResult),CassError> {
-    let query="INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, ?);";
-    let statement = CassStatement::new(query, 6);
+    let statement = CassStatement::new(INSERT_QUERY, 6);
     statement.bind_string(0, key).unwrap();
     statement.bind_bool(1, basic.bln).unwrap();
     statement.bind_float(2, basic.flt).unwrap();
@@ -31,8 +34,7 @@ fn insert_into_basic(mut session: CassSession, key:&str, basic:&Basic) -> Result
 }
 
 fn select_from_basic(mut session:CassSession, key:&str, basic:&mut Basic) -> Result<(CassSession,CassResult),CassError> {
-    let query = "SELECT * FROM examples.basic WHERE key = ?";
-    let statement = CassStatement::new(query, 1);
+    let statement = CassStatement::new(SELECT_QUERY, 1);
     let statement = statement.bind_string(0, key).unwrap();
     match session.execute_statement(&statement).wait() {
         Ok(result) => {
@@ -46,7 +48,6 @@ fn select_from_basic(mut session:CassSession, key:&str, basic:&mut Basic) -> Res
             Ok((session,result))
         }
         Err(_) => panic!("error")
-        
     }
 }
 
@@ -54,16 +55,16 @@ fn main() {
     let input = Basic{bln:true, flt:0.001f32, dbl:0.0002f64, i32:1, i64:2 };
 
     let cluster = &CassCluster::new()
-                        .set_contact_points(CONTACT_POINTS).unwrap()
+                        .set_contact_points(CONTACT_POINTS.as_contact_points()).unwrap()
                         .set_load_balance_round_robin().unwrap();
 
-    let session_future = CassSession::new().connect(&cluster).wait();
+    let session_future = CassSession::new().connect(cluster).wait();
 
     match session_future {
         Ok(mut session) => {
             let mut output = Basic{bln:false,flt:0f32,dbl:0f64,i32:0,i64:0};
-            session.execute("CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '1' };",0);
-            session.execute("CREATE TABLE IF NOT EXISTS examples.basic (key text, bln boolean, flt float, dbl double, i32 int, i64 bigint, PRIMARY KEY (key));",0);
+            session.execute(CREATE_KEYSPACE,0);
+            session.execute(CREATE_TABLE,0);
             let (session,_) = insert_into_basic(session, "test", &input).unwrap();
             let (mut session,_) = select_from_basic(session, "test", &mut output).unwrap();
             println!("{:?}",input);

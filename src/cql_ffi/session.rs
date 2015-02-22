@@ -2,17 +2,16 @@
 #![allow(dead_code)]
 #![allow(missing_copy_implementations)]
 
-use std::str::FromStr;
-
 use cql_ffi::batch::CassBatch;
 use cql_ffi::future::CassFuture;
 use cql_ffi::future::ResultFuture;
 use cql_ffi::future::SessionFuture;
 use cql_ffi::future::PreparedFuture;
-use cql_ffi::string::CassString;
+use cql_ffi::error::CassError;
 use cql_ffi::statement::CassStatement;
 use cql_ffi::schema::CassSchema;
 use cql_ffi::cluster::CassCluster;
+use cql_ffi::string::AsCassStr;
 use cql_bindgen::CassSession as _CassSession;
 use cql_bindgen::cass_session_new;
 use cql_bindgen::cass_session_free;
@@ -41,8 +40,8 @@ impl CassSession {
     
     pub fn connect(self, cluster: &CassCluster) -> SessionFuture {unsafe{SessionFuture(cass_session_connect(self.0, cluster.0),self)}}
     
-    pub fn prepare(&mut self, query: &str) -> PreparedFuture {unsafe{
-        PreparedFuture(cass_session_prepare(self.0, CassString::build(query).0))
+    pub fn prepare(&mut self, query: &str) -> Result<PreparedFuture,CassError> {unsafe{
+        Ok(PreparedFuture(cass_session_prepare(self.0, query.as_cass_str().0)))
     }}
     
     pub fn execute(&mut self, statement: &str, parameter_count: u64) -> ResultFuture {unsafe{

@@ -7,6 +7,8 @@ use cql_ffi::CassBatchType;
 use cql_ffi::CassPrepared;
 use cql_ffi::CassError;
 
+use cql_ffi::AsContactPoints;
+
 struct Pair<'a> {
     key:&'a str,
     value:&'a str
@@ -17,7 +19,7 @@ static CREATE_TABLE:&'static str = "CREATE TABLE IF NOT EXISTS examples.pairs (k
 static INSERT_QUERY:&'static str = "INSERT INTO examples.pairs (key, value) VALUES (?, ?)";
 
 fn create_cluster() -> Result<CassCluster,CassError> {
-    CassCluster::new().set_contact_points("127.0.0.1")
+    CassCluster::new().set_contact_points("127.0.0.1".as_contact_points())
 }
 
 fn insert_into_batch_with_prepared<'a>(session:&mut CassSession, pairs:Vec<Pair>, prepared:&'a CassPrepared)-> Result<&'a CassPrepared,CassError> {unsafe{
@@ -40,7 +42,7 @@ fn main() {
                     );
     session.execute(CREATE_KEYSPACE,0).wait().unwrap();
     session.execute_statement(&CassStatement::new(CREATE_TABLE,0)).wait().unwrap();
-    match session.prepare(INSERT_QUERY).wait() {
+    match session.prepare(INSERT_QUERY).unwrap().wait() {
         Ok(ref mut prepared) => insert_into_batch_with_prepared(&mut session, pairs, prepared).unwrap(),
         Err(err) => panic!(err)
     };

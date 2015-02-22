@@ -1,8 +1,6 @@
 extern crate cql_ffi;
 use cql_ffi::*;
 
-use std::str::FromStr;
-
 #[derive(Copy,Debug,PartialEq)]
 struct Basic {
     bln:bool,
@@ -14,7 +12,7 @@ struct Basic {
 
 fn create_cluster() -> Result<CassCluster,CassError> {
     let cluster = CassCluster::new();
-    cluster.set_contact_points("127.0.0.1")
+    cluster.set_contact_points("127.0.0.1".as_contact_points())
 }
 
 static CREATE_KEYSPACE:&'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '3' };";
@@ -26,7 +24,7 @@ static SELECT_QUERY:&'static str = "SELECT * FROM examples.basic WHERE key = ?";
 fn insert_into_basic(session:&mut CassSession, prepared:&CassPrepared, key:&str, basic:Basic) -> Result<CassResult,CassError> {
     println!("key={:?}",key);
     let statement = &prepared.bind();
-    statement.bind_string_by_name("key", FromStr::from_str(key).unwrap()).unwrap()
+    statement.bind_string_by_name("key", key.as_cass_str()).unwrap()
         .bind_bool_by_name("BLN", basic.bln).unwrap()
         .bind_float_by_name("FLT", basic.flt).unwrap()
         .bind_double_by_name("\"dbl\"", basic.dbl).unwrap()
@@ -38,7 +36,7 @@ fn insert_into_basic(session:&mut CassSession, prepared:&CassPrepared, key:&str,
 
 unsafe fn select_from_basic(session:&mut CassSession, prepared:&CassPrepared, key:&str, basic:&mut Basic) -> Result<CassResult,CassError> {
     let statement = prepared.bind();
-    let statement = statement.bind_string_by_name("key", FromStr::from_str(key).unwrap()).unwrap();
+    let statement = statement.bind_string_by_name("key", key.as_cass_str()).unwrap();
     match session.execute_statement(&statement).wait() {
         Ok(result) => {
             for row in result.iter() {
@@ -62,13 +60,13 @@ fn main() {unsafe{
             let mut output = Basic{bln:false, flt:0f32, dbl:0.0, i32:0, i64:0 };
             let _ = session.execute(CREATE_KEYSPACE,0).wait().unwrap();
             let _ = session.execute(CREATE_TABLE,0).wait().unwrap();
-            match session.prepare(INSERT_QUERY).wait() {
+            match session.prepare(INSERT_QUERY).unwrap().wait() {
                 Ok(mut insert_prepared) => {
                     insert_into_basic(&mut session, &mut insert_prepared, "prepared_test", input).unwrap();
                 },
                 Err(err) => println!("error: {:?}",err)
             }
-            match session.prepare(SELECT_QUERY).wait() {
+            match session.prepare(SELECT_QUERY).unwrap().wait() {
                 Ok(ref mut select_prepared) => {
                     select_from_basic(&mut session, &select_prepared, "prepared_test", &mut output).unwrap();
                     assert_eq!(input,output);
