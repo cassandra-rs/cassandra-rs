@@ -8,8 +8,8 @@ use libc::types::os::arch::c95::c_uint;
 
 use cql_ffi::ssl::CassSsl;
 use cql_bindgen::CassCluster as _CassCluster;
-use cql_ffi::helpers::str_to_ref;
 use std::ffi::CString;
+use std::ffi::CStr;
 
 use cql_bindgen::cass_cluster_new;
 use cql_bindgen::cass_cluster_free;
@@ -50,20 +50,24 @@ impl Drop for CassCluster {
     }}
 }
 
-pub struct ContactPoints(*const c_char);
+//~ pub struct ContactPoints(*const c_char);
 
-pub trait AsContactPoints {
-    fn as_contact_points(&self) -> ContactPoints;
-}
+//~ pub trait AsContactPoints {
+    //~ fn as_contact_points(&self) -> ContactPoints;
+//~ }
 
-impl AsContactPoints for str {
-    fn as_contact_points(&self) -> ContactPoints {
-        let cstr = CString::new(self).unwrap();
-        let bytes = cstr.as_bytes_with_nul();
-        let ptr = bytes.as_ptr();
-        ContactPoints(ptr as *const i8)
-    }
-}
+//~ impl AsContactPoints for str {
+    //~ fn as_contact_points(&self) -> ContactPoints {
+
+        //~ let s = CString::new(&self).unwrap();
+        //~ cass_call(s.as_ptr()) // s is still alive here }
+        //~ let cstr:&CStr = &CString::new("127.0.0.1").unwrap();
+        //~ let bytes = cstr.to_bytes_with_nul();
+        //~ let ptr = bytes.as_ptr();
+        //~ ContactPoints(ptr as *const i8)
+        //~ ContactPoints(str_to_ref(&self))
+    //~ }
+//~ }
 
 impl CassCluster {
 
@@ -72,8 +76,9 @@ impl CassCluster {
     unsafe fn free(&mut self){cass_cluster_free(self.0)}
 
     
-    pub fn set_contact_points(self, contact_points: ContactPoints) -> Result<Self,CassError> {unsafe{
-        let err:CassError = CassError::build(cass_cluster_set_contact_points(self.0,contact_points.0));
+    pub fn set_contact_points(self, contact_points: &str) -> Result<Self,CassError> {unsafe{
+        let s = CString::new(contact_points).unwrap();
+        let err:CassError = CassError::build(cass_cluster_set_contact_points(self.0,s.as_ptr()));
         err.wrap(self)
     }}
 
@@ -123,9 +128,10 @@ impl CassCluster {
     }}
 
     pub fn set_load_balance_dc_aware(self, local_dc: &str,used_hosts_per_remote_dc: u32,allow_remote_dcs_for_local_cl: bool) -> Result<Self,CassError> {unsafe{
-        CassError::build(
-            cass_cluster_set_load_balance_dc_aware(self.0,str_to_ref(local_dc),used_hosts_per_remote_dc,if allow_remote_dcs_for_local_cl {1} else {0})
-        ).wrap(self)
+        CassError::build({
+            let local_dc = CString::new(local_dc).unwrap();
+            cass_cluster_set_load_balance_dc_aware(self.0,local_dc.as_ptr(),used_hosts_per_remote_dc,if allow_remote_dcs_for_local_cl {1} else {0})
+        }).wrap(self)
     }}
 
     pub unsafe fn set_token_aware_routing<'a>(&'a mut self, enabled: bool) {cass_cluster_set_token_aware_routing(self.0,if enabled {1} else {0})}

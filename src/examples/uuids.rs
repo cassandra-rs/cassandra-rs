@@ -7,7 +7,6 @@ use cql_ffi::CassResult;
 use cql_ffi::CassError;
 use cql_ffi::CassUuidGen;
 use cql_ffi::CassCluster;
-use cql_ffi::AsContactPoints;
 
 static INSERT_QUERY:&'static str = "INSERT INTO examples.log (key, time, entry) VALUES (?, ?, ?);";
 static SELECT_QUERY:&'static str = "SELECT * FROM examples.log WHERE key = ?";
@@ -39,7 +38,7 @@ fn select_from_log(session:&mut CassSession, key:&str) -> Result<CassResult,Cass
 
 fn main() {
 	let uuid_gen = CassUuidGen::new();
-	let cluster = &CassCluster::new().set_contact_points("127.0.0.1".as_contact_points()).unwrap();
+	let cluster = &CassCluster::new().set_contact_points("127.0.0.1").unwrap();
 	let session = &mut CassSession::new().connect(cluster).wait().unwrap();
 	
 	session.execute(CREATE_KEYSPACE, 0);
@@ -48,5 +47,6 @@ fn main() {
 	insert_into_log(session, "test", uuid_gen.get_time(), "Log entry #2").unwrap();
 	insert_into_log(session, "test", uuid_gen.get_time(), "Log entry #3").unwrap();
 	insert_into_log(session, "test", uuid_gen.get_time(), "Log entry #4").unwrap();
-	select_from_log(session, "test").unwrap();
+	let result = select_from_log(session, "test").unwrap();
+	println!("{:?}", result);
 }

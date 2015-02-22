@@ -38,6 +38,7 @@ fn select_from_basic(mut session:CassSession, key:&str, basic:&mut Basic) -> Res
     let statement = statement.bind_string(0, key).unwrap();
     match session.execute_statement(&statement).wait() {
         Ok(result) => {
+            println!("Result: \n{:?}\n",result);
             for row in result.iter() {
                 basic.bln = try!(row.get_column(1).get_bool());
                 basic.dbl = try!(row.get_column(2).get_double());
@@ -55,7 +56,7 @@ fn main() {
     let input = Basic{bln:true, flt:0.001f32, dbl:0.0002f64, i32:1, i64:2 };
 
     let cluster = &CassCluster::new()
-                        .set_contact_points(CONTACT_POINTS.as_contact_points()).unwrap()
+                        .set_contact_points(CONTACT_POINTS).unwrap()
                         .set_load_balance_round_robin().unwrap();
 
     let session_future = CassSession::new().connect(cluster).wait();

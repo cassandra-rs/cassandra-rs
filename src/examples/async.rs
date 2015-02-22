@@ -33,7 +33,7 @@ fn insert_into_async(session: &mut CassSession, key:String) {
 }
 
 pub fn main() {
-    let cluster = &mut CassCluster::new().set_contact_points("127.0.0.1".as_contact_points()).unwrap();
+    let cluster = &mut CassCluster::new().set_contact_points("127.0.0.1").unwrap();
     match CassSession::new().connect(cluster).wait() {
         Ok(mut session) => {
             let _ = session.execute(CREATE_KEYSPACE,0).wait().unwrap();

@@ -12,7 +12,7 @@ struct Basic {
 
 fn create_cluster() -> Result<CassCluster,CassError> {
     let cluster = CassCluster::new();
-    cluster.set_contact_points("127.0.0.1".as_contact_points())
+    cluster.set_contact_points("127.0.0.1")
 }
 
 static CREATE_KEYSPACE:&'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '3' };";
@@ -39,12 +39,13 @@ unsafe fn select_from_basic(session:&mut CassSession, prepared:&CassPrepared, ke
     let statement = statement.bind_string_by_name("key", key.as_cass_str()).unwrap();
     match session.execute_statement(&statement).wait() {
         Ok(result) => {
+            println!("{:?}", result);
             for row in result.iter() {
-                basic.bln = try!(row.get_column_by_name("BLN").get_bool());
-                basic.dbl = try!(row.get_column_by_name("dbl").get_double());
-                basic.flt = try!(row.get_column_by_name("flt").get_float());
-                basic.i32 = try!(row.get_column_by_name("\"i32\"").get_int32());
-                basic.i64 = try!(row.get_column_by_name("i64").get_int64());
+                basic.bln = try!(row.get_column_by_name("BLN".as_cass_name()).get_bool());
+                basic.dbl = try!(row.get_column_by_name("dbl".as_cass_name()).get_double());
+                basic.flt = try!(row.get_column_by_name("flt".as_cass_name()).get_float());
+                basic.i32 = try!(row.get_column_by_name("i32".as_cass_name()).get_int32());
+                basic.i64 = try!(row.get_column_by_name("i64".as_cass_name()).get_int64());
             }
             Ok(result)
         }

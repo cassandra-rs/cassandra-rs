@@ -1,5 +1,7 @@
+extern crate alloc;
 use std::raw;
 use std::mem;
+use std::slice;
 
 use std::ffi::CString;
 
@@ -11,10 +13,13 @@ unsafe fn raw_byte_repr<'a, T>(ptr: &'a T) -> &'a [u8] {
     })
 }
 
-pub fn str_to_ref(mystr:&str) -> *const i8 {
-    let cstr = CString::new(mystr.as_bytes()).unwrap();
-    cstr.as_bytes().as_ptr() as *const i8
-}
+//~ pub fn str_to_ref(mystr:&str) -> *const i8 {
+    //~ let s = CString::new(mystr).unwrap();
+    //~ s.as_ptr() // s is still alive here }
+    
+    //~ let cstr = CString::new(mystr.as_bytes()).unwrap();
+    //~ cstr.as_bytes().as_ptr() as *const i8
+//~ }
 
 //~ pub fn str_to_ref(mystr: &str) -> *const i8 {
     //~ let l = mystr.as_bytes();

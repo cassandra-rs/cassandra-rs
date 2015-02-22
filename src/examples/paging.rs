@@ -37,6 +37,7 @@ fn select_from_paging(session:&mut CassSession) -> Result<(), CassError> {
 
     while has_more_pages {
         let result = try!(session.execute_statement(&statement).wait());
+        //println!("{:?}", result);
         for row in result.iter() {
             match row.get_column(0).get_string() {
                 Ok(key) => {
@@ -59,7 +60,7 @@ fn main() {
     let uuid_gen = &mut CassUuidGen::new();
 
     let cluster = &CassCluster::new()
-                        .set_contact_points(CONTACT_POINTS.as_contact_points()).unwrap()
+                        .set_contact_points(CONTACT_POINTS).unwrap()
                         .set_load_balance_round_robin().unwrap();
 
     let mut session = CassSession::new().connect(&cluster).wait().unwrap();

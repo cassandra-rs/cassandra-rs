@@ -26,7 +26,11 @@ pub struct CassResult(pub *const _CassResult);
 
 impl Debug for CassResult {
     fn fmt(&self, f:&mut Formatter) -> fmt::Result {
-        write!(f, "Result row count: {:?}", self.row_count())
+        try!(write!(f, "Result row count: {:?}\n", self.row_count()));
+        for row in self.iter() {
+            try!(write!(f, "{:?}\n",row));
+        }
+        Ok(())
     }
 }
 

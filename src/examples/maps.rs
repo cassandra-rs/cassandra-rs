@@ -13,7 +13,7 @@ static CREATE_TABLE:&'static str = "CREATE TABLE IF NOT EXISTS examples.maps (ke
 static SELECT_QUERY:&'static str = "SELECT items FROM examples.maps WHERE key = ?";
 static INSERT_QUERY:&'static str ="INSERT INTO examples.maps (key, items) VALUES (?, ?);";
 
-fn insert_into_maps(mut session:CassSession, key:&str, items:Vec<Pair>) -> Result<CassSession,CassError> {
+fn insert_into_maps(session:&mut CassSession, key:&str, items:Vec<Pair>) -> Result<(),CassError> {
     let statement = CassStatement::new(INSERT_QUERY, 2);
     statement.bind_string(0, key).unwrap();
 
@@ -25,29 +25,57 @@ fn insert_into_maps(mut session:CassSession, key:&str, items:Vec<Pair>) -> Resul
     }
     try!(statement.bind_map(1, map));
     try!(session.execute_statement(&statement).wait());
-    Ok(session)
+    Ok(())
 }
 
-fn select_from_maps(mut session: CassSession, key:&str) -> Result<CassSession,CassError> {
+//~ fn select_from_maps(session:&mut CassSession, key:&str) -> Result<(),CassError> {
+    //~ let statement = CassStatement::new(SELECT_QUERY, 1);
+    //~ try!(statement.bind_string(0, key));
+    //~ let result = try!(session.execute_statement(&statement).wait());
+    //~ println!("{:?}", result);
+    //~ for row in result.iter() {
+        //~ let column = row.get_column(0);
+        //~ let items_iterator:MapIterator = try!(column.map_iter());
+        //~ for item in items_iterator {
+            //~ println!("item: {:?}", item);
+        //~ }
+    //~ }
+    //~ Ok(())
+//~ }
+
+fn select_from_maps(session: &mut CassSession, key:&str) -> Result<(),CassError> {
     let statement = CassStatement::new(SELECT_QUERY, 1);
-    let statement = statement.bind_string(0, key).unwrap();
-    match session.execute_statement(&statement).wait() {
-        Ok(result) => {
-            for row in result.iter() {
-                let iterator = row.get_column(0).map_iter().unwrap();
-                for pair in iterator {
-                    println!("item: '{:?}'", try!(pair.get_int32()));
-                }
-            }
-            Ok(session)    
-        },
-        Err(err) => Err(err),
+    try!(statement.bind_string(0, key));
+    let result = try!(session.execute_statement(&statement).wait());
+    //println!("RESULT: {:?}", result);
+
+    for row in result.iter() {
+        let column = row.get_column(0);
+        let items_iterator:MapIterator = try!(column.map_iter());
+        for item in items_iterator {
+            println!("item: {:?}", item);
+        }
     }
+    //~ for row in result.iter() {
+        //~ let column = row.get_column(0);
+        //~ let items_iterator:MapIterator = try!(column.map_iter());
+        //~ for item in items_iterator {
+            //~ println!("item: {:?}", item);
+        //~ }
+    //~ }
+    Ok(())
 }
 
 fn main() {
+    match foo() {
+        Ok(()) => {},
+        Err(err) => println!("Error: {:?}",err)
+    }
+}
+
+fn foo() -> Result<(),CassError> {
     let cluster = &CassCluster::new()
-                        .set_contact_points(CONTACT_POINTS.as_contact_points()).unwrap()
+                        .set_contact_points(CONTACT_POINTS).unwrap()
                         .set_load_balance_round_robin().unwrap();
     let items:Vec<Pair> = vec!(
         Pair{key:"apple", value:1 },
@@ -58,12 +86,14 @@ fn main() {
     let session_future = CassSession::new().connect(cluster).wait();
     match session_future {
         Ok(mut session) => {
-            session.execute(CREATE_KEYSPACE,0).wait().unwrap();
-            session.execute(CREATE_TABLE,0).wait().unwrap();
-            let session = insert_into_maps(session, "test", items).unwrap();
-            let mut session = select_from_maps(session, "test").unwrap();
+            try!(session.execute(CREATE_KEYSPACE,0).wait());
+            try!(session.execute(CREATE_TABLE,0).wait());
+            try!(insert_into_maps(&mut session, "test", items));
+            try!(select_from_maps(&mut session, "test"));
             session.close();
+            Ok(())
         },
-        Err(err) => panic!("agh:{:?}",err)
+        Err(err) => Err(err)
     }
+
 }

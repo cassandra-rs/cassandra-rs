@@ -2,10 +2,11 @@
 #![allow(dead_code)]
 #![allow(missing_copy_implementations)]
 
+use std::ffi::CString;
+
 use cql_ffi::string::CassString;
 use cql_ffi::value::CassValue;
 use cql_ffi::error::CassError;
-use cql_ffi::helpers::str_to_ref;
 use cql_ffi::iterator::SetIterator;
 use cql_bindgen::CassSchema as _CassSchema;
 use cql_bindgen::CassSchemaMeta as _CassSchemaMeta;
@@ -60,7 +61,8 @@ impl CassSchemaMetaType {
 impl CassSchema {
     unsafe fn free(&mut self) {cass_schema_free(self.0)}
     pub unsafe fn get_keyspace(&self, keyspace_name: &str) -> CassSchemaMeta {
-        CassSchemaMeta(cass_schema_get_keyspace(self.0,str_to_ref(keyspace_name)))
+        let keyspace_name = CString::new(keyspace_name).unwrap();
+        CassSchemaMeta(cass_schema_get_keyspace(self.0,keyspace_name.as_ptr()))
     }
     
     pub unsafe fn iterator(&self) -> SetIterator {SetIterator(cass_iterator_from_schema(self.0))}
@@ -75,8 +77,14 @@ impl Drop for CassSchema {
 
 impl CassSchemaMeta {
     pub unsafe fn get_type(&self) -> Result<CassSchemaMetaType,CassError> {CassSchemaMetaType::build(cass_schema_meta_type(self.0) as isize)}
-    pub unsafe fn get_entry(&self, name: &str) -> CassSchemaMeta {CassSchemaMeta(cass_schema_meta_get_entry(self.0,str_to_ref(name)))}
-    pub unsafe fn get_field(&self, name: &str) -> CassSchemaMetaField {CassSchemaMetaField(cass_schema_meta_get_field(self.0,str_to_ref(name)))}
+    pub unsafe fn get_entry(&self, name: &str) -> CassSchemaMeta {
+        let name = CString::new(name).unwrap();
+        CassSchemaMeta(cass_schema_meta_get_entry(self.0,name.as_ptr()))
+    }
+    pub unsafe fn get_field(&self, name: &str) -> CassSchemaMetaField {
+        let name = CString::new(name).unwrap();
+        CassSchemaMetaField(cass_schema_meta_get_field(self.0,name.as_ptr()))
+    }
 //    pub unsafe fn is_null(&self) -> bool {if cass_value_is_null(self.0) > 0 {true} else {false}}
     pub unsafe fn iterator(&self) -> SetIterator {SetIterator(cass_iterator_from_schema_meta(self.0))}
     pub unsafe fn fields_iterator(&self) -> SetIterator {SetIterator(cass_iterator_fields_from_schema_meta(self.0))}

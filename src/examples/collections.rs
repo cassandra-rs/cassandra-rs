@@ -22,19 +22,20 @@ fn select_from_collections(session:&mut CassSession, key:&str) -> Result<(),Cass
     let statement = CassStatement::new(SELECT_QUERY, 1);
     try!(statement.bind_string(0, key));
     let result = try!(session.execute_statement(&statement).wait());
-            for row in result.iter() {
-                let column = row.get_column(0);
-                let items_iterator:SetIterator = try!(column.set_iter());
-                for item in items_iterator {
-                    println!("item: {:?}", item);
-                }
-            }
+    println!("{:?}", result);
+    for row in result.iter() {
+        let column = row.get_column(0);
+        let items_iterator:SetIterator = try!(column.set_iter());
+        for item in items_iterator {
+            println!("item: {:?}", item);
+        }
+    }
     Ok(())
 }
 
 fn main() {
   
-    let cluster = &CassCluster::new().set_contact_points("127.0.0.1".as_contact_points()).unwrap();
+    let cluster = &CassCluster::new().set_contact_points("127.0.0.1").unwrap();
     let session = &mut CassSession::new().connect(cluster).wait().unwrap();
     
     let items = vec!("apple".to_string(), "orange".to_string(), "banana".to_string(), "mango".to_string());

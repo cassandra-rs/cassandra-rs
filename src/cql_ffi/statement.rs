@@ -4,6 +4,7 @@
 
 use libc::types::os::arch::c95::c_int;
 
+use std::ffi::CString;
 
 use cql_ffi::collection::CassSet;
 use cql_ffi::collection::CassMap;
@@ -16,7 +17,6 @@ use cql_ffi::string::CassString;
 use cql_ffi::inet::CassInet;
 use cql_ffi::result::CassResult;
 use cql_ffi::consistency::CassConsistency;
-use cql_ffi::helpers::str_to_ref;
 use cql_ffi::string::AsCassStr;
 
 use cql_ffi::types::cass_size_t;
@@ -83,8 +83,9 @@ impl CassStatement {
         CassError::build(cass_statement_add_key_index(self.0,index)).wrap(&self)
     }}
 
-    pub fn set_keyspace(&self, keyspace: String) -> Result<&Self,CassError> {unsafe{        
-        CassError::build(cass_statement_set_keyspace(self.0,(str_to_ref(&keyspace)))).wrap(&self)
+    pub fn set_keyspace(&self, keyspace: String) -> Result<&Self,CassError> {unsafe{
+        let keyspace = CString::new(keyspace).unwrap();
+        CassError::build(cass_statement_set_keyspace(self.0,(keyspace.as_ptr()))).wrap(&self)
     }}
 
     pub fn set_consistency(&self, consistency: CassConsistency) -> Result<&Self,CassError> {unsafe{
@@ -165,50 +166,62 @@ impl CassStatement {
     }}
 
     pub fn bind_int32_by_name<'a>(&'a self, name: &str, value: cass_int32_t) -> Result<&'a Self,CassError> {unsafe{
-        CassError::build(cass_statement_bind_int32_by_name(self.0,str_to_ref(name), value)).wrap(&self)
+        let name = CString::new(name).unwrap();
+        CassError::build(cass_statement_bind_int32_by_name(self.0,name.as_ptr(), value)).wrap(&self)
     }}
 
     pub fn bind_int64_by_name<'a>(&'a self, name: &str, value: cass_int64_t) -> Result<&'a Self,CassError> {unsafe{
-        CassError::build(cass_statement_bind_int64_by_name(self.0,str_to_ref(name), value)).wrap(&self)
+        let name = CString::new(name).unwrap();
+        CassError::build(cass_statement_bind_int64_by_name(self.0,name.as_ptr(), value)).wrap(&self)
     }}
 
     pub fn bind_float_by_name<'a>(&'a self, name: &str, value: cass_float_t) -> Result<&'a Self,CassError> {unsafe{
-        CassError::build(cass_statement_bind_float_by_name(self.0,str_to_ref(name), value)).wrap(&self)
+        let name = CString::new(name).unwrap();
+        CassError::build(cass_statement_bind_float_by_name(self.0,name.as_ptr(), value)).wrap(&self)
     }}
 
     pub fn bind_double_by_name<'a>(&'a self, name: &str, value: cass_double_t) -> Result<&'a Self,CassError> {unsafe{
-        CassError::build(cass_statement_bind_double_by_name(self.0,str_to_ref(name), value)).wrap(&self)
+        let name = CString::new(name).unwrap();
+        CassError::build(cass_statement_bind_double_by_name(self.0,name.as_ptr(), value)).wrap(&self)
     }}
 
     pub fn bind_bool_by_name<'a>(&'a self, name: &str, value: bool) -> Result<&'a Self,CassError>{unsafe{
-        CassError::build(cass_statement_bind_bool_by_name(self.0,str_to_ref(name),if value {1} else {0})).wrap(&self)
+        let name = CString::new(name).unwrap();
+        CassError::build(cass_statement_bind_bool_by_name(self.0,name.as_ptr(),if value {1} else {0})).wrap(&self)
     }}
 
     pub fn bind_string_by_name<'a>(&'a self, name: &'a str, value: CassString)-> Result<&'a Self,CassError> {unsafe{
-        CassError::build(cass_statement_bind_string_by_name(self.0,str_to_ref(name),value.0)).wrap(&self)
+        let name = CString::new(name).unwrap();
+        CassError::build(cass_statement_bind_string_by_name(self.0,name.as_ptr(),value.0)).wrap(&self)
     }}
 
     pub fn bind_bytes_by_name<'a>(&'a self, name: &str, value: CassBytes)-> Result<&'a Self,CassError>{unsafe{
-        CassError::build(cass_statement_bind_bytes_by_name(self.0,str_to_ref(name),value.0)).wrap(&self)
+        let name = CString::new(name).unwrap();
+        CassError::build(cass_statement_bind_bytes_by_name(self.0,name.as_ptr(),value.0)).wrap(&self)
     }}
 
     pub fn bind_uuid_by_name<'a>(&'a self, name: &str, value: CassUuid) -> Result<&'a Self,CassError>{unsafe{
-        CassError::build(cass_statement_bind_uuid_by_name(self.0,str_to_ref(name),value.0)).wrap(&self)
+        let name = CString::new(name).unwrap();
+        CassError::build(cass_statement_bind_uuid_by_name(self.0,name.as_ptr(),value.0)).wrap(&self)
     }}
 
     pub fn bind_inet_by_name<'a>(&'a self, name: &str, value: CassInet)-> Result<&'a Self,CassError>{unsafe{
-        CassError::build(cass_statement_bind_inet_by_name(self.0,str_to_ref(name),value.0)).wrap(&self)
+        let name = CString::new(name).unwrap();
+        CassError::build(cass_statement_bind_inet_by_name(self.0,name.as_ptr(),value.0)).wrap(&self)
     }}
 
     pub fn bind_decimal_by_name<'a>(&'a self, name: &str, value: CassDecimal)-> Result<&'a Self,CassError>{unsafe{
-        CassError::build(cass_statement_bind_decimal_by_name(self.0,str_to_ref(name), value.0)).wrap(&self)
+        let name = CString::new(name).unwrap();
+        CassError::build(cass_statement_bind_decimal_by_name(self.0,name.as_ptr(), value.0)).wrap(&self)
     }}
 
     pub fn bind_custom_by_name<'a>(&'a self, name: &str, size: cass_size_t, output: *mut *mut cass_byte_t)-> Result<&'a Self,CassError>{unsafe{
-        CassError::build(cass_statement_bind_custom_by_name(self.0,str_to_ref(name), size, output)).wrap(&self)
+        let name = CString::new(name).unwrap();
+        CassError::build(cass_statement_bind_custom_by_name(self.0,name.as_ptr(), size, output)).wrap(&self)
     }}
 
     pub fn bind_set_by_name<'a>(&'a self, name: &str, collection: CassSet)-> Result<&'a Self,CassError>{unsafe{
-        CassError::build(cass_statement_bind_collection_by_name(self.0,str_to_ref(name),collection.0)).wrap(&self)
+        let name = CString::new(name).unwrap();
+        CassError::build(cass_statement_bind_collection_by_name(self.0,name.as_ptr(),collection.0)).wrap(&self)
     }}
 }

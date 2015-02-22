@@ -9,6 +9,9 @@ use cql_ffi::iterator::MapIterator;
 use cql_ffi::error::CassErrorTypes;
 
 use std::mem;
+use std::fmt::Debug;
+use std::fmt::Formatter;
+use std::fmt;
 
 use cql_bindgen::cass_value_get_int32;
 use cql_bindgen::cass_value_get_int64;
@@ -38,8 +41,61 @@ pub enum CassColumnType {
 
 pub struct CassColumn(pub *const _CassValue);
 
+impl Debug for CassColumn {
+    fn fmt(&self, f:&mut Formatter) -> fmt::Result {
+        match self.get_type() {
+            CassValueType::UNKNOWN => write!(f, "UNKNOWN Cassandra type"),
+            CassValueType::CUSTOM => write!(f, "CUSTOM Cassandra type"),
+            CassValueType::ASCII => write!(f, "ASCII Cassandra type"),
+            CassValueType::BIGINT => write!(f, "BIGINT Cassandra type"),
+            CassValueType::BLOB => write!(f, "BLOB Cassandra type"),
+            CassValueType::BOOLEAN => write!(f, "BOOLEAN Cassandra type"),
+            CassValueType::COUNTER => write!(f, "COUNTER Cassandra type"),
+            CassValueType::DECIMAL => write!(f, "DECIMAL Cassandra type"),
+            CassValueType::DOUBLE => write!(f, "DOUBLE Cassandra type"),
+            CassValueType::FLOAT => write!(f, "FLOAT Cassandra type"),
+            CassValueType::INT => write!(f, "INT Cassandra type"),
+            CassValueType::TEXT => write!(f, "TEXT Cassandra type"),
+            CassValueType::TIMESTAMP => write!(f, "TIMESTAMP Cassandra type"),
+            CassValueType::UUID => write!(f, "UUID Cassandra type"),
+            CassValueType::VARCHAR => write!(f, "VARCHAR: {:?}", self.get_string()),
+            CassValueType::VARINT => Ok(()),
+            CassValueType::TIMEUUID => write!(f, "TIMEUUID Cassandra type"),
+            CassValueType::INET => write!(f, "INET Cassandra type"),
+            CassValueType::LIST => {
+                for item in self.set_iter().unwrap() {
+                    try!(write!(f, "LIST {:?}", item ))
+                }
+                Ok(())
+            },
+            CassValueType::MAP => {
+               for item in self.map_iter().unwrap() {
+                    try!(write!(f, "LIST {:?}", item ))
+                }
+                Ok(())
+            },
+            CassValueType::SET => {
+                for item in self.set_iter().unwrap() {
+                    try!(write!(f, "SET {:?}", item ))
+                }
+                Ok(())
+            },
+        }
+    }
+}
+
+trait AsTypedColumn {
+    fn get(col:CassColumn) -> Result<Self,CassError>;
+}
+
+impl AsTypedColumn for bool {
+    fn get(col:CassColumn) -> Result<Self,CassError> {
+        col.get_bool()
+    }
+}
+
 impl CassColumn {
-    pub unsafe fn get_type(&self) -> CassValueType {CassValueType::build(cass_value_type(self.0))}
+    pub fn get_type(&self) -> CassValueType {unsafe{CassValueType::build(cass_value_type(self.0))}}
     
     pub unsafe fn get_inet<'a>(&'a self, mut output: CassInet) -> Result<CassInet,CassError> {CassError::build(cass_value_get_inet(self.0,&mut output.0)).wrap(output)}
 

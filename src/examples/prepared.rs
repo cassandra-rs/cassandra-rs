@@ -36,6 +36,7 @@ fn select_from_basic(session:&mut CassSession, prepared:&CassPrepared, key:&str,
     let mut future = session.execute_statement(statement);
     match future.wait() {
         Ok(result) => {
+            println!("{:?}", result);
             for row in result.iter() {
                 basic.bln = try!(row.get_column(1).get_bool());
                 basic.dbl = try!(row.get_column(2).get_double());
@@ -50,7 +51,7 @@ fn select_from_basic(session:&mut CassSession, prepared:&CassPrepared, key:&str,
 }
 
 fn main() {
-    let cluster = &mut CassCluster::new().set_contact_points("127.0.0.1".as_contact_points()).unwrap();
+    let cluster = &mut CassCluster::new().set_contact_points("127.0.0.1").unwrap();
     let session = &mut CassSession::new().connect(cluster).wait().unwrap();
     let mut input = Basic{bln:true, flt:0.001f32, dbl:0.0002f64, i32:1, i64:2 };
     let mut output = Basic{bln:false, flt:0f32, dbl:0f64, i32:0, i64:0};

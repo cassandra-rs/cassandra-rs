@@ -3,6 +3,7 @@
 #![allow(missing_copy_implementations)]
 
 use cql_ffi::value::CassValue;
+use cql_ffi::column::CassColumn;
 use cql_ffi::row::CassRow;
 use cql_ffi::error::CassError;
 use cql_ffi::schema::CassSchemaMeta;
@@ -64,11 +65,29 @@ impl Drop for ListIterator {
     //~ SCHEMA_META_FIELD = 5
 //~ }
 
+//~ impl Debug for MapIterator{
+    //~ fn fmt(&self, f:&mut Formatter) -> fmt::Result {
+        //~ while self._next() {
+           //~ write!(f, "MAP {:?}:{:?}", "a","b")
+        //~ }
+        //~ Ok(())
+    //~ }
+//~ }
+
+//~ impl Debug for SetIterator{
+    //~ fn fmt(&self, f:&mut Formatter) -> fmt::Result {
+        //~ while self._next() {
+          //~ // write!(f, "SET {:?}:{:?}", self.get_key(), self.get_value())
+        //~ }
+        //~ Ok(())
+    //~ }
+//~ }
+
 impl MapIterator {
-    pub fn get_key(&mut self) -> CassValue {unsafe{
+    fn get_key(&mut self) -> CassValue {unsafe{
         CassValue(cass_iterator_get_map_key(self.0))
     }}
-    pub fn get_value(&mut self) -> CassValue {unsafe{
+    fn get_value(&mut self) -> CassValue {unsafe{
         CassValue(cass_iterator_get_value(self.0))
     }}
     
@@ -94,7 +113,26 @@ impl Drop for MapIterator {
 
 impl RowIterator {
     unsafe fn free(&mut self) {cass_iterator_free(self.0)}
+
+    pub fn _next(&mut self) -> bool {unsafe{
+        if cass_iterator_next(self.0) > 0 {true} else {false}
+    }}
+
+    pub fn get_column(&mut self) -> CassColumn {unsafe{CassColumn(cass_iterator_get_column(self.0))}}
+
+
 }
+
+impl Iterator for RowIterator {
+    type Item = CassColumn;
+    fn next(&mut self) -> Option<<Self as Iterator>::Item> {
+        match self._next() {
+            true => Some(self.get_column()),
+            false => None
+        }
+    }
+}
+
 
 impl Iterator for ResultIterator {
     type Item = CassRow;
@@ -117,12 +155,17 @@ impl Iterator for ListIterator {
 }
 
 impl Iterator for MapIterator {
-    type Item = CassValue;
+    type Item = (CassValue,CassValue);
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
-        match self._next() {
-            true => Some(self.get_value()),
-            false => None
-        }
+        let k = match self._next() {
+            true => self.get_value(),
+            false => return None
+        };
+        let v = match self._next() {
+            true => self.get_value(),
+            false => return None
+        };
+        Some((k,v))
     }
 }
 

@@ -4,8 +4,13 @@
 
 use cql_ffi::column::CassColumn;
 use cql_ffi::iterator::RowIterator;
+use cql_ffi::value::CassName;
 
-use cql_ffi::helpers::str_to_ref;
+use std::fmt::Debug;
+use std::fmt::Formatter;
+use std::fmt;
+
+use cql_ffi::value::CassValue;
 
 use cql_ffi::types::cass_size_t;
 use cql_bindgen::CassRow as _CassRow;
@@ -15,16 +20,25 @@ use cql_bindgen::cass_iterator_from_row;
 
 pub struct CassRow(pub *const _CassRow);
 
+impl Debug for CassRow {
+    fn fmt(&self, f:&mut Formatter) -> fmt::Result {
+        for column in self.iter() {
+            try!(write!(f, "{:?}\t", CassValue(column.0)));
+        }
+        Ok(())
+    }
+}
+
 impl CassRow {
     pub fn get_column(&self, index: cass_size_t) -> CassColumn {unsafe{
         CassColumn(cass_row_get_column(self.0,index))
     }}
 
-    pub fn get_column_by_name(&self, name: &str) -> CassColumn {unsafe{
-        CassColumn(cass_row_get_column_by_name(self.0,str_to_ref(name)))
+    pub fn get_column_by_name(&self, name: CassName) -> CassColumn {unsafe{
+        CassColumn(cass_row_get_column_by_name(self.0,name.0))
     }}
 
-    pub fn from_row(&self) -> RowIterator {unsafe{
+    pub fn iter(&self) -> RowIterator {unsafe{
         RowIterator(cass_iterator_from_row(self.0))
     }}
 
