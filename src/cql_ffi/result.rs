@@ -51,7 +51,12 @@ impl CassResult {
 
     pub fn column_type(&self, index: cass_size_t) -> CassValueType {unsafe{CassValueType::build(cass_result_column_type(self.0, index))}}
 
-    pub fn first_row(&self) -> CassRow {unsafe{CassRow(cass_result_first_row(self.0))}}
+    pub fn first_row(&self) -> Option<CassRow> {unsafe{
+        match self.row_count() {
+            0 => None,
+            _ => Some(CassRow(cass_result_first_row(self.0)))
+        }
+    }}
 
     pub fn has_more_pages(&self) -> bool {unsafe{if cass_result_has_more_pages(self.0) > 0 {true} else {false}}}
     
