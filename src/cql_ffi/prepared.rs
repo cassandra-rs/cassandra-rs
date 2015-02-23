@@ -16,7 +16,6 @@ impl Drop for CassPrepared {
 }
 
 impl CassPrepared {
-
     pub fn bind(&self) -> CassStatement {unsafe{
         CassStatement(cass_prepared_bind(self.0))
     }}

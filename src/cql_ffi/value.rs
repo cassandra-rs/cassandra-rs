@@ -16,7 +16,6 @@ use cql_ffi::string::CassString;
 use cql_ffi::iterator::SetIterator;
 use cql_ffi::iterator::MapIterator;
 use cql_ffi::decimal::CassDecimal;
-use cql_ffi::error::CassErrorTypes;
 
 use cql_bindgen::CassValue as _CassValue;
 use cql_bindgen::cass_value_secondary_sub_type;
@@ -141,7 +140,12 @@ impl CassValueType {
 impl Debug for CassValue {
 
     fn fmt(&self, f:&mut Formatter) -> fmt::Result {unsafe{
-        match self.get_type() {
+        let _type = match self.is_null() {
+            true => return Ok(()),
+            false => self.get_type()
+        };
+        
+        match _type {
             CassValueType::UNKNOWN          => write!(f, "{:?}", "unknown"),
             CassValueType::CUSTOM           => write!(f, "{:?}", "custom"),
             CassValueType::ASCII            => write!(f, "{:?}", self.get_string().unwrap()),
@@ -159,7 +163,7 @@ impl Debug for CassValue {
                 Ok(())
             }
             CassValueType::MAP => {
-               for item in self.map_iter().unwrap() {
+               for item in self.as_map_iterator() {
                     try!(write!(f, "LIST {:?}", item ))
                 }
                 Ok(())
@@ -194,15 +198,17 @@ impl CassValue {
 
     pub unsafe fn as_collection_iterator(&self) -> SetIterator {SetIterator(cass_iterator_from_collection(self.0))}
 
-    pub fn map_iter(&self) -> Result<MapIterator,CassError> {unsafe{
-        match self.get_type() {
-            CassValueType::MAP => Ok(MapIterator(cass_iterator_from_map(self.0))),
-            type_no => {
-                println!("wrong_type: {:?}", type_no);
-                Err(CassError::build(CassErrorTypes::LIB_INVALID_VALUE_TYPE as u32))
-            }
-        }
-    }}
+    pub unsafe fn as_map_iterator(&self) -> MapIterator {MapIterator(cass_iterator_from_map(self.0))}
+
+    //~ pub fn map_iter(&self) -> Result<MapIterator,CassError> {unsafe{
+        //~ match self.get_type() {
+            //~ CassValueType::MAP => Ok(MapIterator(cass_iterator_from_map(self.0))),
+            //~ type_no => {
+                //~ println!("wrong_type: {:?}", type_no);
+                //~ Err(CassError::build(CassErrorTypes::LIB_INVALID_VALUE_TYPE as u32))
+            //~ }
+        //~ }
+    //~ }}
     
     pub fn get_string(&self) -> Result<CassString,CassError> {unsafe{
         let mut output:CassString = mem::zeroed();

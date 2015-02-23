@@ -1,6 +1,5 @@
 #![allow(dead_code)]
 #![allow(raw_pointer_derive)]
-//use std::fmt;
 use cql_bindgen::CassString as _CassString;
 
 use std::fmt::Formatter;
@@ -10,8 +9,7 @@ use std::fmt::Debug;
 use std::string::ToString;
 
 #[repr(C)]
-#[derive(Copy)]
-pub struct CassString(pub *const _CassString);
+pub struct CassString(pub _CassString);
 
 //~ impl Deref for CassString {
     //~ type Target = str;
@@ -38,10 +36,8 @@ impl ToString for CassString {
     fn to_string(&self) -> String {unsafe{
         let data = self.0.data as *mut u8;
         String::from_raw_parts(data,self.0.length as usize, self.0.length as usize)
-        //self.0.length.to_string()
     }}
 }
-
 
 impl Debug for CassString {
     fn fmt(&self, f:&mut Formatter) -> fmt::Result {

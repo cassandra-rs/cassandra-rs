@@ -114,11 +114,11 @@ impl Drop for MapIterator {
 impl RowIterator {
     unsafe fn free(&mut self) {cass_iterator_free(self.0)}
 
-    pub fn _next(&mut self) -> bool {unsafe{
+    fn _next(&mut self) -> bool {unsafe{
         if cass_iterator_next(self.0) > 0 {true} else {false}
     }}
 
-    pub fn get_column(&mut self) -> CassColumn {unsafe{CassColumn(cass_iterator_get_column(self.0))}}
+    fn get_column(&mut self) -> CassColumn {unsafe{CassColumn(cass_iterator_get_column(self.0))}}
 
 
 }
@@ -154,18 +154,28 @@ impl Iterator for ListIterator {
     }
 }
 
+//~ impl Iterator for MapIterator {
+    //~ type Item = (CassValue,());
+    //~ fn next(&mut self) -> Option<<Self as Iterator>::Item> {
+        //~ let k = match self._next() {
+            //~ true => self.get_value(),
+            //~ false => return None
+        //~ };
+        //~ let v = match self._next() {
+            //~ true => self.get_value(),
+            //~ false => return None
+        //~ };
+        //~ Some((k,()))
+    //~ }
+//~ }
+
 impl Iterator for MapIterator {
-    type Item = (CassValue,CassValue);
+    type Item = CassValue;
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
-        let k = match self._next() {
-            true => self.get_value(),
-            false => return None
-        };
-        let v = match self._next() {
-            true => self.get_value(),
-            false => return None
-        };
-        Some((k,v))
+        match self._next() {
+            true => Some(self.get_value()),
+            false => None
+        }
     }
 }
 
@@ -205,8 +215,8 @@ impl SetIterator {
         if cass_iterator_next(self.0) > 0 {true} else {false}
     }}
     
-    pub unsafe fn get_column(&mut self) -> CassValue {CassValue(cass_iterator_get_column(self.0))}
-    pub unsafe fn get_value(&mut self)-> CassValue {CassValue(cass_iterator_get_value(self.0))}
-    pub unsafe fn get_schema_meta(&mut self) -> CassSchemaMeta {CassSchemaMeta(cass_iterator_get_schema_meta(self.0))}
-    pub unsafe fn get_schema_meta_field(&mut self) -> CassSchemaMetaField {CassSchemaMetaField(cass_iterator_get_schema_meta_field(self.0))}
+    unsafe fn get_column(&mut self) -> CassColumn {CassColumn(cass_iterator_get_column(self.0))}
+    unsafe fn get_value(&mut self)-> CassValue {CassValue(cass_iterator_get_value(self.0))}
+    unsafe fn get_schema_meta(&mut self) -> CassSchemaMeta {CassSchemaMeta(cass_iterator_get_schema_meta(self.0))}
+    unsafe fn get_schema_meta_field(&mut self) -> CassSchemaMetaField {CassSchemaMetaField(cass_iterator_get_schema_meta_field(self.0))}
 }

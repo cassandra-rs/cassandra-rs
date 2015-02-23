@@ -28,11 +28,31 @@ fn insert_into_maps(session:&mut CassSession, key:&str, items:Vec<Pair>) -> Resu
     Ok(())
 }
 
-//~ fn select_from_maps(session:&mut CassSession, key:&str) -> Result<(),CassError> {
-    //~ let statement = CassStatement::new(SELECT_QUERY, 1);
-    //~ try!(statement.bind_string(0, key));
-    //~ let result = try!(session.execute_statement(&statement).wait());
-    //~ println!("{:?}", result);
+fn select_from_maps(session:&mut CassSession, key:&str) -> Result<(),CassError> {
+    let statement = CassStatement::new(SELECT_QUERY, 1);
+    try!(statement.bind_string(0, key));
+    let result = try!(session.execute_statement(&statement).wait());
+    //println!("{:?}", result);
+    for row in result.iter() {
+        let column = row.get_column(0);
+        let items_iterator:MapIterator = try!(column.map_iter());
+        for item in items_iterator {
+
+            println!("item: {:?}", item);
+        }
+    }
+    Ok(())
+}
+
+    //println!("RESULT: {:?}", result);
+
+    //~ for row in result.iter() {
+        //~ let column = row.get_column(0);
+        //~ let items_iterator:MapIterator = try!(column.map_iter());
+        //~ for item in items_iterator {
+            //~ println!("item: {:?}", item);
+        //~ }
+    //~ }
     //~ for row in result.iter() {
         //~ let column = row.get_column(0);
         //~ let items_iterator:MapIterator = try!(column.map_iter());
@@ -42,29 +62,6 @@ fn insert_into_maps(session:&mut CassSession, key:&str, items:Vec<Pair>) -> Resu
     //~ }
     //~ Ok(())
 //~ }
-
-fn select_from_maps(session: &mut CassSession, key:&str) -> Result<(),CassError> {
-    let statement = CassStatement::new(SELECT_QUERY, 1);
-    try!(statement.bind_string(0, key));
-    let result = try!(session.execute_statement(&statement).wait());
-    //println!("RESULT: {:?}", result);
-
-    for row in result.iter() {
-        let column = row.get_column(0);
-        let items_iterator:MapIterator = try!(column.map_iter());
-        for item in items_iterator {
-            println!("item: {:?}", item);
-        }
-    }
-    //~ for row in result.iter() {
-        //~ let column = row.get_column(0);
-        //~ let items_iterator:MapIterator = try!(column.map_iter());
-        //~ for item in items_iterator {
-            //~ println!("item: {:?}", item);
-        //~ }
-    //~ }
-    Ok(())
-}
 
 fn main() {
     match foo() {

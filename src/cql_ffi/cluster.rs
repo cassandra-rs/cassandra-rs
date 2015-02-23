@@ -9,7 +9,6 @@ use libc::types::os::arch::c95::c_uint;
 use cql_ffi::ssl::CassSsl;
 use cql_bindgen::CassCluster as _CassCluster;
 use std::ffi::CString;
-use std::ffi::CStr;
 
 use cql_bindgen::cass_cluster_new;
 use cql_bindgen::cass_cluster_free;
@@ -78,7 +77,7 @@ impl CassCluster {
     
     pub fn set_contact_points(self, contact_points: &str) -> Result<Self,CassError> {unsafe{
         let s = CString::new(contact_points).unwrap();
-        let err:CassError = CassError::build(cass_cluster_set_contact_points(self.0,s.as_ptr()));
+        let err:CassError = CassError::build(cass_cluster_set_contact_points(self.0,s.clone().as_ptr()));
         err.wrap(self)
     }}
 

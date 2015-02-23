@@ -1,9 +1,6 @@
 extern crate alloc;
 use std::raw;
 use std::mem;
-use std::slice;
-
-use std::ffi::CString;
 
 #[allow(unused)]
 unsafe fn raw_byte_repr<'a, T>(ptr: &'a T) -> &'a [u8] {
