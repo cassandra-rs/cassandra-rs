@@ -139,7 +139,7 @@ impl CassValueType {
 
 impl Debug for CassValue {
 
-    fn fmt(&self, f:&mut Formatter) -> fmt::Result {unsafe{
+    fn fmt(&self, f:&mut Formatter) -> fmt::Result {
         let _type = match self.is_null() {
             true => return Ok(()),
             false => self.get_type()
@@ -172,33 +172,57 @@ impl Debug for CassValue {
             //FIXME
             err                         => write!(f, "{:?}", err), 
         }
-    }}
+    }
 }
 
 impl CassValue {
-    pub unsafe fn fill_uuid(&self, mut output: CassUuid) -> Result<CassUuid,CassError> {CassError::build(cass_value_get_uuid(self.0,&mut output.0)).wrap(output)}
+    pub fn fill_uuid(&self, mut output: CassUuid) -> Result<CassUuid,CassError> {unsafe{
+        CassError::build(cass_value_get_uuid(self.0,&mut output.0)).wrap(output)
+    }}
 
-    pub unsafe fn fill_string<'a>(&'a self, mut output: CassString) -> Result<CassString,CassError> {CassError::build(cass_value_get_string(self.0,&mut output.0)).wrap(output)}
+    pub fn fill_string<'a>(&'a self, mut output: CassString) -> Result<CassString,CassError> {unsafe{
+        CassError::build(cass_value_get_string(self.0,&mut output.0)).wrap(output)
+    }}
 
-    pub unsafe fn get_bytes<'a>(&'a self, mut output: CassBytes) -> Result<CassBytes,CassError> {CassError::build(cass_value_get_bytes(self.0,&mut output.0)).wrap(output)}
+    pub fn get_bytes<'a>(&'a self, mut output: CassBytes) -> Result<CassBytes,CassError> {unsafe{
+        CassError::build(cass_value_get_bytes(self.0,&mut output.0)).wrap(output)
+    }}
 
-    pub unsafe fn get_decimal<'a>(&'a self, mut output: CassDecimal) -> Result<CassDecimal,CassError> {CassError::build(cass_value_get_decimal(self.0,&mut output.0)).wrap(output)}
+    pub fn get_decimal<'a>(&'a self, mut output: CassDecimal) -> Result<CassDecimal,CassError> {unsafe{
+        CassError::build(cass_value_get_decimal(self.0,&mut output.0)).wrap(output)
+    }}
 
-    pub unsafe fn get_type(&self) -> CassValueType {CassValueType::build(cass_value_type(self.0))}
+    pub fn get_type(&self) -> CassValueType {unsafe{
+        CassValueType::build(cass_value_type(self.0))
+    }}
 
-    pub unsafe fn is_null(&self) -> bool {if cass_value_is_null(self.0) > 0 {true} else {false}}
+    fn is_null(&self) -> bool {unsafe{
+        if cass_value_is_null(self.0) > 0 {true} else {false}
+    }}
 
-    pub unsafe fn is_collection(&self) -> bool {if cass_value_is_collection(self.0) > 0 {true} else {false}}
+    pub fn is_collection(&self) -> bool {unsafe{
+        if cass_value_is_collection(self.0) > 0 {true} else {false}
+    }}
 
-    pub unsafe fn item_count(&self) -> cass_size_t {cass_value_item_count(self.0)}
+    pub fn item_count(&self) -> cass_size_t {unsafe{
+        cass_value_item_count(self.0)
+    }}
 
-    pub unsafe fn primary_sub_type(&self) -> CassValueType {CassValueType::build(cass_value_primary_sub_type(self.0))}
+    pub fn primary_sub_type(&self) -> CassValueType {unsafe{
+        CassValueType::build(cass_value_primary_sub_type(self.0))
+    }}
 
-    pub unsafe fn secondary_sub_type(&self) -> CassValueType {CassValueType::build(cass_value_secondary_sub_type(self.0))}
+    pub fn secondary_sub_type(&self) -> CassValueType {unsafe{
+        CassValueType::build(cass_value_secondary_sub_type(self.0))
+    }}
 
-    pub unsafe fn as_collection_iterator(&self) -> SetIterator {SetIterator(cass_iterator_from_collection(self.0))}
+    pub fn as_collection_iterator(&self) -> SetIterator {unsafe{
+        SetIterator(cass_iterator_from_collection(self.0))
+    }}
 
-    pub unsafe fn as_map_iterator(&self) -> MapIterator {MapIterator(cass_iterator_from_map(self.0))}
+    pub fn as_map_iterator(&self) -> MapIterator {unsafe{
+        MapIterator(cass_iterator_from_map(self.0))
+    }}
 
     //~ pub fn map_iter(&self) -> Result<MapIterator,CassError> {unsafe{
         //~ match self.get_type() {
