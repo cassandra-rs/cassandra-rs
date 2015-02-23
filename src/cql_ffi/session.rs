@@ -25,6 +25,8 @@ use cql_bindgen::cass_session_connect_keyspace;
 
 pub struct CassSession(pub *mut _CassSession);
 
+unsafe impl Send for CassSession{}
+
 impl Drop for CassSession {
     fn drop(&mut self) {unsafe{
         self.free()
