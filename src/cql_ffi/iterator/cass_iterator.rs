@@ -1,3 +1,3 @@
-use cql_bindgen::CassIteratorType as _CassIteratorType;
+use cql_bindgen;
 
-pub struct CassIteratorType(pub _CassIteratorType);
+pub struct CassIteratorType(pub cql_bindgen::CassIteratorType);

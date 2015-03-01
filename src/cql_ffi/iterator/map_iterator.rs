@@ -27,7 +27,6 @@ impl MapIterator {
     unsafe fn free(&mut self) {
         cass_iterator_free(self.0)
     }
-
 }
 
 impl Drop for MapIterator {

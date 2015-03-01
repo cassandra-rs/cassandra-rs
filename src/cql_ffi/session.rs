@@ -3,10 +3,10 @@
 #![allow(missing_copy_implementations)]
 
 use cql_ffi::batch::CassBatch;
-use cql_ffi::future::CassFuture;
-use cql_ffi::future::ResultFuture;
-use cql_ffi::future::SessionFuture;
-use cql_ffi::future::PreparedFuture;
+use cql_ffi::future::cass_future::CassFuture;
+use cql_ffi::future::result_future::ResultFuture;
+use cql_ffi::future::session_future::SessionFuture;
+use cql_ffi::future::prepared_future::PreparedFuture;
 use cql_ffi::error::CassError;
 use cql_ffi::statement::CassStatement;
 use cql_ffi::schema::CassSchema;
