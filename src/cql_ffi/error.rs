@@ -188,7 +188,7 @@ impl CassError {
             50331652 => CassError(CASS_ERROR_SSL_INVALID_PEER_CERT),
             50331653 => CassError(CASS_ERROR_SSL_IDENTITY_MISMATCH),
             50331654 => CassError(CASS_ERROR_LAST_ENTRY),
-            errno => panic!(errno)
+            _ => panic!(val)
         }
     }
 }

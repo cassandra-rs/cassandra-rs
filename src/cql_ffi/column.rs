@@ -4,8 +4,8 @@ use cql_ffi::uuid::CassUuid;
 use cql_ffi::string::CassString;
 use cql_ffi::value::CassValueType;
 use cql_ffi::inet::CassInet;
-use cql_ffi::iterator::SetIterator;
-use cql_ffi::iterator::MapIterator;
+use cql_ffi::iterator::set_iterator::SetIterator;
+use cql_ffi::iterator::map_iterator::MapIterator;
 use cql_ffi::error::CassErrorTypes;
 
 use std::mem;

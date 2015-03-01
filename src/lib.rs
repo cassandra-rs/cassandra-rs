@@ -25,6 +25,8 @@ pub use cql_ffi::error::*;
 pub use cql_ffi::helpers::*;
 pub use cql_ffi::log::*;
 pub use cql_ffi::column::*;
+pub use cql_ffi::iterator::set_iterator::*;
+pub use cql_ffi::iterator::map_iterator::*;
 
 extern crate cql_bindgen;
 
@@ -43,7 +45,13 @@ mod cql_ffi {
     pub mod future;
     pub mod prepared;
     pub mod result;
-    pub mod iterator;
+    pub mod iterator {
+        pub mod map_iterator;
+        pub mod set_iterator;
+        pub mod result_iterator;
+        pub mod row_iterator;
+        pub mod cass_iterator;
+    }
     pub mod row;
     pub mod value;
     pub mod collection;

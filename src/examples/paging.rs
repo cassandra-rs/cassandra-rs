@@ -10,7 +10,7 @@ static SELECT_QUERY:&'static str = "SELECT * FROM paging";
 static INSERT_QUERY:&'static str = "INSERT INTO paging (key, value) VALUES (?, ?);";
 
 //FIXME uuids not yet working
-fn insert_into_paging(session:&mut CassSession, uuid_gen:&mut CassUuidGen) -> Result<Vec<Option<ResultFuture>>,CassError> {
+fn insert_into_paging(session:&mut CassSession/*, uuid_gen:&mut CassUuidGen*/) -> Result<Vec<Option<ResultFuture>>,CassError> {
     let mut futures:Vec<ResultFuture> = Vec::with_capacity(NUM_CONCURRENT_REQUESTS as usize);
     let mut results:Vec<Option<ResultFuture>> = Vec::with_capacity(NUM_CONCURRENT_REQUESTS as usize);
 
@@ -57,7 +57,7 @@ fn select_from_paging(session:&mut CassSession) -> Result<(), CassError> {
 }
 
 fn main() {
-    let uuid_gen = &mut CassUuidGen::new();
+    //let uuid_gen = &mut CassUuidGen::new();
 
     let cluster = &CassCluster::new()
                         .set_contact_points(CONTACT_POINTS).unwrap()
@@ -68,7 +68,7 @@ fn main() {
     session.execute(CREATE_KEYSPACE,0).wait().unwrap();
     session.execute(CREATE_TABLE,0).wait().unwrap();
     session.execute("USE examples",0).wait().unwrap();
-    let results = insert_into_paging(&mut session, uuid_gen).unwrap();
+    let results = insert_into_paging(&mut session/*, uuid_gen*/).unwrap();
     for result in results {
         println!("result: {:?}", result.unwrap().wait());
     }

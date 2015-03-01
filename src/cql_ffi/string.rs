@@ -35,7 +35,7 @@ impl AsCassStr for str {
 impl ToString for CassString {
     fn to_string(&self) -> String {unsafe{
         let data = self.0.data as *mut u8;
-        String::from_raw_parts(data,self.0.length as usize, self.0.length as usize)
+        String::from_raw_parts(data,self.0.length as usize, self.0.length as usize).clone()
     }}
 }
 
@@ -45,9 +45,25 @@ impl Debug for CassString {
     }      
 }
 
-impl ::std::default::Default for CassString {
-    fn default() -> CassString { unsafe { ::std::mem::zeroed() } }
-}
+//~ trait WriteCqlStr {
+    //~ fn write_to<W>(&self, &mut W)
+        //~ where W: Writer; 
+//~ }
+
+//~ impl WriteCqlStr for CassString {
+    //~ fn write_to(&self, writer:&mut Self) {
+
+    //~ }
+    //~ // Straight-forward impl, write the bytes we refer to
+//~ }
+
+//~ impl<'a> WriteCqlStr for &'a str {
+    //~ // Write the length, then write the bytes of the str
+//~ }
+
+//~ impl ::std::default::Default for CassString {
+    //~ fn default() -> CassString { unsafe { ::std::mem::zeroed() } }
+//~ }
 
 //~ impl CassString {
     //~ pub fn build(str:&str) -> Result<Self,CassError> {

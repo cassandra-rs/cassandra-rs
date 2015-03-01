@@ -10,7 +10,7 @@ use cql_ffi::value::CassValueType;
 use cql_ffi::row::CassRow;
 use cql_ffi::string::CassString;
 use cql_ffi::types::cass_size_t;
-use cql_ffi::iterator::ResultIterator;
+use cql_ffi::iterator::result_iterator::ResultIterator;
 use cql_bindgen::CassResult as _CassResult;
 
 use cql_bindgen::cass_result_free;

@@ -12,7 +12,7 @@ unsafe fn print_keyspace(session:&mut CassSession, keyspace:&str) {
     //~ if keyspace_meta.is_null() {
         //~ println!("Unable to find \"{}\" keyspace in the schema metadata\n", keyspace);
     //~ } else {
-        print_schema_meta(&keyspace_meta, 0);
+        print_schema_meta(&keyspace_meta);
     //~ }
 }
 
@@ -24,7 +24,7 @@ unsafe fn print_table(session: &mut CassSession, keyspace:&str, table:&str) {
             let table_meta = keyspace_meta.get_entry(table);
             //~ match table_meta.is_null() {
                 //~ true => {
-                    print_schema_meta(&table_meta, 0);
+                    print_schema_meta(&table_meta);
                 //~ },
                 //~ false => println!("Unable to find \"{}\" table in the schema metadata\n", keyspace)
             //~ }
@@ -33,7 +33,7 @@ unsafe fn print_table(session: &mut CassSession, keyspace:&str, table:&str) {
 }
 
 fn main() {unsafe{
-    let mut cluster = CassCluster::new();
+    let mut cluster = CassCluster::new().set_contact_points("127.0.0.1").unwrap();
     match CassSession::new().connect(&mut cluster).wait() {
         Ok(mut session) => {
             let _ = session.execute_statement(&CassStatement::new(CREATE_KEYSPACE,0));
@@ -48,93 +48,20 @@ fn main() {unsafe{
     }
 }}
 
-fn print_schema_value(value:&CassValue) {unsafe{
-    use cql_ffi::CassValueType::*;
-    match value.get_type() {
-        CassValueType::INT  => {
-            println!("{}", value.get_int32().unwrap());
-        },
-        BOOLEAN => {
-            let cbool = value.get_bool();
-            println!("{:?}", cbool.unwrap());
-        },
-        DOUBLE => {
-            let cdouble = value.get_double();
-            println!("{:?}", cdouble);
-        },
-        //~ TEXT|ASCII|VARCHAR => {
-            //~ let cstring = cassvalue2cassstring(value);
-            //~ println!("\"{:?}\"", cstring);
-        //~ },
-        UUID => {
-            match value.get_uuid() {
-                Ok(uuid) => {
-                    println!("{:?}", uuid);
-                },
-                Err(err) => panic!(err)
-            }
-        },
-        LIST => {
-            print_schema_list(value);
-        },
-        MAP => {
-            print_schema_map(value)
-        },
-        _ => {
-            println!("<unhandled type>");
-        }
+
+//~ fn print_schema_meta_fields(meta:&CassSchemaMeta, indent:i32) {
+    //~ for value in  meta.fields_iterator() {
+        //~ println!("{:?}",value);
+    //~ }
+//~ }
+
+fn print_schema_meta_entries(meta:&CassSchemaMeta) {
+    for value in meta.iterator() {
+        println!("{:?}",value);
     }
-}}
+}
 
-fn print_schema_list(value:&CassValue) {unsafe{
-    let mut iterator = value.as_collection_iterator();;
-//    let mut is_first = true;
-    //printf("[ ");
-    while iterator.next() {
-//        if (!is_first) {println!(", ");}
-        print_schema_value(&iterator.get_value());
- //       is_first = if cass_false > 0 {true} else {false};
-    }
-    //printf(" ]");
-}}
-
-fn print_schema_map(value:&CassValue) {unsafe{
-    let mut iterator = value.as_collection_iterator();
-    //let mut is_first = cass_true;
-    //printf("{ ");
-    while iterator.next() {
-        //if (!is_first) printf(", ");
-        print_schema_value(&iterator.get_map_key());
-        //printf(" : ");
-        print_schema_value(&iterator.get_map_value());
-        //is_first = cass_false;
-    }
-    //printf(" }");
-}}
-
-fn print_schema_meta_field(field:&CassSchemaMetaField, _indent:i32) {unsafe{
-    let (name,value) = (field.get_name(),field.get_value());
-    //print_indent(indent);
-    println!("{:?}: ", ToString::to_string(&name));
-    print_schema_value(&value);
-    //printf("\n");
-}}
-
-fn print_schema_meta_fields(meta:&CassSchemaMeta, indent:i32) {unsafe{
-    let mut fields = meta.fields_iterator();
-    while fields.next() {
-        print_schema_meta_field(&fields.get_schema_meta_field(), indent);
-    }
-}}
-
-fn print_schema_meta_entries(meta:&CassSchemaMeta, indent:i32) {unsafe{
-    let mut entries = meta.iterator();
-    while entries.next() {
-        print_schema_meta(&entries.get_schema_meta(), indent);
-    }
-}}
-
-fn print_schema_meta(meta:&CassSchemaMeta, indent:i32) {unsafe{
+fn print_schema_meta(meta:&CassSchemaMeta) {
     //print_indent(indent);
     match meta.get_type().unwrap() {
         CassSchemaMetaType::KEYSPACE => {
@@ -143,17 +70,20 @@ fn print_schema_meta(meta:&CassSchemaMeta, indent:i32) {unsafe{
                 let name = &field.get_value();
                 println!("Keyspace \"{:?}\":", ToString::to_string(&name.get_string().unwrap()));
             //~ }
-            print_schema_meta_fields(meta, indent + 1);
-            //printf("\n");
-            print_schema_meta_entries(meta, indent + 1);
+            for value in  meta.fields_iterator() {
+                println!("{:?}",value);
+            }          
+            print_schema_meta_entries(meta);
         },
         CassSchemaMetaType::TABLE => {
             let field = meta.get_field("columnfamily_name");
             let name = &field.get_value();
             println!("Table \"{:?}\":", ToString::to_string(&name.get_string().unwrap()));
-            print_schema_meta_fields(meta, indent + 1);
+            for value in  meta.fields_iterator() {
+                println!("{:?}",value);
+            }          
             //printf("\n");
-            print_schema_meta_entries(meta, indent + 1);
+            print_schema_meta_entries(meta);
         },
         CassSchemaMetaType::COLUMN => {
             let field = meta.get_field("column_name");
@@ -161,8 +91,10 @@ fn print_schema_meta(meta:&CassSchemaMeta, indent:i32) {unsafe{
                 let name = &field.get_value();
                 println!("Column \"{:?}\":\n", ToString::to_string(&name.get_string().unwrap()));
             //~ }
-            print_schema_meta_fields(meta, indent + 1);
+            for value in  meta.fields_iterator() {
+                println!("{:?}",value);
+            }          
             //printf("\n");
         }
     }
-}}
+}

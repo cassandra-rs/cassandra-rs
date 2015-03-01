@@ -3,7 +3,7 @@
 #![allow(missing_copy_implementations)]
 
 use cql_ffi::column::CassColumn;
-use cql_ffi::iterator::RowIterator;
+use cql_ffi::iterator::row_iterator::RowIterator;
 use cql_ffi::value::CassName;
 
 use std::fmt::Debug;
