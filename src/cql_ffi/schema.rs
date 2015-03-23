@@ -25,6 +25,7 @@ use cql_bindgen::cass_iterator_from_schema;
 use cql_bindgen::cass_iterator_from_schema_meta;
 use cql_bindgen::cass_iterator_fields_from_schema_meta;
 
+
 pub struct CassSchema(pub *const _CassSchema);
 pub struct CassSchemaMeta(pub *const _CassSchemaMeta);
 pub struct CassSchemaMetaField(pub *const _CassSchemaMetaField);
@@ -108,9 +109,9 @@ impl CassSchemaMeta {
 
 impl CassSchemaMetaField {
     pub fn get_name(&self) -> String {unsafe{
-        let name = mem::zeroed();
-        let name_length = mem::zeroed();
-        cass_schema_meta_field_name(self.0, name, name_length);
+        let mut name = mem::zeroed();
+        let mut name_length = mem::zeroed();
+        cass_schema_meta_field_name(self.0, &mut name, &mut name_length);
 
         let slice = slice::from_raw_parts(name as *const u8,name_length as usize);
         str::from_utf8(slice).unwrap().to_string()

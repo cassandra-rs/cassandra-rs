@@ -4,7 +4,9 @@ use cql_bindgen::cass_iterator_free;
 use cql_bindgen::cass_iterator_type;
 use cql_bindgen::cass_iterator_next;
 use cql_bindgen::cass_iterator_get_value;
+use cql_bindgen::cass_iterator_get_schema_meta_field;
 use cql_ffi::iterator::cass_iterator::CassIteratorType;
+use cql_ffi::schema::CassSchemaMetaField;
 
 pub struct SetIterator(pub *mut _CassIterator);
 
@@ -35,7 +37,9 @@ impl SetIterator {
     }}
     
     //~ unsafe fn get_column(&mut self) -> CassColumn {CassColumn(cass_iterator_get_column(self.0))}
-    unsafe fn get_value(&mut self)-> CassValue {CassValue(cass_iterator_get_value(self.0))}
+    pub unsafe fn get_value(&mut self)-> CassValue {CassValue(cass_iterator_get_value(self.0))}
     //~ unsafe fn get_schema_meta(&mut self) -> CassSchemaMeta {CassSchemaMeta(cass_iterator_get_schema_meta(self.0))}
-    //~ unsafe fn get_schema_meta_field(&mut self) -> CassSchemaMetaField {CassSchemaMetaField(cass_iterator_get_schema_meta_field(self.0))}
+    fn get_schema_meta_field(&mut self) -> CassSchemaMetaField {unsafe{
+        CassSchemaMetaField(cass_iterator_get_schema_meta_field(&mut *self.0))
+    }}
 }

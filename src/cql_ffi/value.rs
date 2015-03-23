@@ -185,7 +185,7 @@ impl CassValue {
         CassValueType::build(cass_value_type(self.0))
     }}
 
-    fn is_null(&self) -> bool {unsafe{
+    pub fn is_null(&self) -> bool {unsafe{
         if cass_value_is_null(self.0) > 0 {true} else {false}
     }}
 

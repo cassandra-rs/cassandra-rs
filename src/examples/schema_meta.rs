@@ -1,6 +1,13 @@
 extern crate cql_ffi;
+extern crate cql_bindgen;
 
 use cql_ffi::*;
+
+use cql_bindgen::cass_iterator_next;
+use cql_bindgen::cass_iterator_get_schema_meta_field;
+use cql_bindgen::cass_iterator_get_schema_meta;
+use cql_bindgen::cass_iterator_fields_from_schema_meta;
+use cql_bindgen::cass_iterator_from_schema_meta;
 
 static CREATE_KEYSPACE:&'static str = "CREATE KEYSPACE examples WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '3' };";
 static CREATE_TABLE:&'static str = "CREATE TABLE examples.schema_meta (key text, value bigint, PRIMARY KEY (key));";
@@ -8,29 +15,15 @@ static CREATE_TABLE:&'static str = "CREATE TABLE examples.schema_meta (key text,
 unsafe fn print_keyspace(session:&mut CassSession, keyspace:&str) {
     let schema = session.get_schema();
     let keyspace_meta = schema.get_keyspace(keyspace);
-    //FIXME
-    //~ if keyspace_meta.is_null() {
-        //~ println!("Unable to find \"{}\" keyspace in the schema metadata\n", keyspace);
-    //~ } else {
-        print_schema_meta(&keyspace_meta);
-    //~ }
+    print_schema_meta(&keyspace_meta, 0);
 }
 
 unsafe fn print_table(session: &mut CassSession, keyspace:&str, table:&str) {
     let keyspace_meta = session.get_schema().get_keyspace(keyspace);
-    //~ match keyspace_meta.is_null() {
-        //~ true => println!("Unable to find \"{}\" keyspace in the schema metadata\n", keyspace),
-        //~ false => {
-            let table_meta = keyspace_meta.get_entry(table);
-            //~ match table_meta.is_null() {
-                //~ true => {
-                    print_schema_meta(&table_meta);
-                //~ },
-                //~ false => println!("Unable to find \"{}\" table in the schema metadata\n", keyspace)
-            //~ }
-        //~ }
-    //~ }
+    let table_meta = keyspace_meta.get_entry(table);
+    print_schema_meta(&table_meta, 0);
 }
+
 
 fn main() {unsafe{
     let mut cluster = CassCluster::new().set_contact_points("127.0.0.1").unwrap();
@@ -40,7 +33,6 @@ fn main() {unsafe{
             print_keyspace(&mut session, "examples");
             let _ = session.execute_statement(&CassStatement::new(CREATE_TABLE,0));
             print_table(&mut session, "examples", "schema_meta");
-            /* Close the session */
             session.close().wait().unwrap();
         },
         Err(err) => println!("Unable to connect: '{:?}'\n", err)
@@ -49,49 +41,140 @@ fn main() {unsafe{
 }}
 
 
-//~ fn print_schema_meta_fields(meta:&CassSchemaMeta, indent:i32) {
-    //~ for value in  meta.fields_iterator() {
-        //~ println!("{:?}",value);
-    //~ }
-//~ }
-
-fn print_schema_meta_entries(meta:&CassSchemaMeta) {
-    for value in meta.iterator() {
-       // println!("{:?}",value);
+fn print_indent(indent:u32) {
+    for _ in 0..indent {
+        print!("\t");
     }
 }
 
-fn print_schema_meta(meta:&CassSchemaMeta) {
-    //print_indent(indent);
+unsafe fn print_schema_value(value:&CassValue) {
+
+    match value.get_type() {
+        CassValueType::INT => {
+            print!("{}", value.get_int32().unwrap());
+        }
+
+        CassValueType::BOOLEAN => {
+            print!("{}",value.get_bool().unwrap());
+        }   
+    
+        CassValueType::DOUBLE => {
+            print!("{}", value.get_double().unwrap());
+        }
+
+        CassValueType::TEXT|CassValueType::ASCII|CassValueType::VARCHAR => {
+            print!("{:?}", value.get_string());
+        }
+    
+        CassValueType::UUID => {
+            print!("{:?}", value.get_uuid().unwrap() /*us*/);
+        }
+    
+        CassValueType::LIST => {
+            print_schema_list(value);
+        }
+
+        CassValueType::MAP => {
+            print_schema_map(value);
+        }
+        _ => {
+            if value.is_null() {
+                print!("null");
+            } else {
+                print!("<unhandled type>");
+            }
+        }
+    }
+}
+
+unsafe fn print_schema_list(value:&CassValue) {
+    let mut iterator = value.as_collection_iterator();
+    let mut is_first = cass_true;
+
+    print!("[ ");
+    while cass_iterator_next(iterator.0) > 0 {
+        if !is_first > 0 {print!(", ")};
+        print_schema_value(&iterator.get_value());
+        is_first = cass_false;
+    }
+    print!(" ]");
+}
+
+unsafe fn print_schema_map(value:&CassValue) {
+    let mut is_first = cass_true;
+
+    print!("[[ ");
+    for (key,value) in value.as_map_iterator() {
+        if !is_first > 0 {} print!(", ");
+        print_schema_value(&key);
+        print!(" : ");
+        print_schema_value(&value);
+        is_first = cass_false;
+    }
+    print!(" ]]");
+}
+
+unsafe fn print_schema_meta_field(field:&CassSchemaMetaField, indent:u32) {
+    let name = field.get_name();
+    let value = field.get_value();
+
+    print_indent(indent);
+  
+    print!("{:?}", name);
+    print_schema_value(&value);
+    print!("\n");
+}
+
+unsafe fn print_schema_meta_fields(meta:&CassSchemaMeta, indent:u32) {
+    let fields = cass_iterator_fields_from_schema_meta(meta.0);
+
+    while cass_iterator_next(fields) > 0 {
+        print_schema_meta_field(&CassSchemaMetaField(cass_iterator_get_schema_meta_field(fields)), indent);
+    }
+}
+
+unsafe fn print_schema_meta_entries(meta:&CassSchemaMeta, indent:u32) {
+    let entries = cass_iterator_from_schema_meta(meta.0);
+
+    while cass_iterator_next(entries) > 0 {
+        print_schema_meta(&CassSchemaMeta(cass_iterator_get_schema_meta(entries)), indent);
+    }
+}
+
+
+unsafe fn print_schema_meta(meta:&CassSchemaMeta, indent:u32) {
+    print_indent(indent);
+
     match meta.get_type().unwrap() {
         CassSchemaMetaType::KEYSPACE => {
-            let field = meta.get_field("keyspace_name");
-            let name = &field.get_value();
+            let KS_NAME = "keyspace_name";
+            let field = meta.get_field(KS_NAME);
+            let value = field.get_value();
+            let name = value.get_string();
+
             println!("Keyspace {:?}", name);
-         //   for value in  meta.fields_iterator() {
-          //      println!("value: {:?}",value);
-           // }          
-         //   print_schema_meta_entries(meta);
-        },
+            print_schema_meta_fields(meta, indent + 1);
+            println!("");
+            print_schema_meta_entries(meta, indent + 1);
+        }
+
         CassSchemaMetaType::TABLE => {
-            let field = meta.get_field("columnfamily_name");
-            let name = &field.get_value();
+            let CF_NAME = "columnfamily_name";
+            let field = meta.get_field(CF_NAME);
+            let name = field.get_value().get_string();      
             println!("Table {:?}", name);
-            for value in  meta.fields_iterator() {
-              //  println!("{:?}",value);
-            }          
-         //   print_schema_meta_entries(meta);
-        },
+            print_schema_meta_fields(meta, indent + 1);
+            println!("");
+            print_schema_meta_entries(meta, indent + 1);
+        }
+    
         CassSchemaMetaType::COLUMN => {
-            let field = meta.get_field("column_name");
-            //~ if !field.is_null() {
-                let name = &field.get_value();
-                println!("Column \"{:?}\":\n", name);
-            //~ }
-            for value in  meta.fields_iterator() {
-            //    println!("{:?}",value);
-            }          
-            //printf("\n");
+            let COLUMN_NAME = "column_name";
+            let field = meta.get_field(COLUMN_NAME);
+            let name = field.get_name();
+            println!("Column {:?}", name);
+            print_schema_meta_fields(meta, indent + 1);
+            println!("");
         }
     }
 }
