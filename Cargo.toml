@@ -45,10 +45,6 @@ name="maps"
 path="src/examples/maps.rs"
 
 [[bin]]
-name="maps2"
-path="src/examples/maps2.rs"
-
-[[bin]]
 name="paging"
 path="src/examples/paging.rs"
 
