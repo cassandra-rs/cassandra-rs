@@ -1,4 +1,4 @@
-#![feature(libc,core,std_misc,alloc)]
+#![feature(libc,core,alloc,net)]
 extern crate libc;
 
 pub use cql_ffi::consistency::*;
@@ -31,6 +31,9 @@ pub use cql_ffi::future::result_future::*;
 pub use cql_ffi::future::cass_future::*;
 pub use cql_ffi::future::prepared_future::*;
 pub use cql_ffi::future::session_future::*;
+pub use cql_ffi::collection::cass_map::*;
+pub use cql_ffi::collection::cass_set::*;
+pub use cql_ffi::collection::cass_list::*;
 
 extern crate cql_bindgen;
 
@@ -46,21 +49,10 @@ mod cql_ffi {
     pub mod session;
     pub mod statement;
     pub mod batch;
-    pub mod future {
-        pub mod result_future;
-        pub mod prepared_future;
-        pub mod cass_future;
-        pub mod session_future;
-    }
+    pub mod future;
     pub mod prepared;
     pub mod result;
-    pub mod iterator {
-        pub mod map_iterator;
-        pub mod set_iterator;
-        pub mod result_iterator;
-        pub mod row_iterator;
-        pub mod cass_iterator;
-    }
+    pub mod iterator;
     pub mod row;
     pub mod value;
     pub mod collection;

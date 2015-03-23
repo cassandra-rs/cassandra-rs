@@ -1,7 +1,6 @@
 use cql_bindgen::CassValue as _CassValue;
 
 use cql_ffi::uuid::CassUuid;
-use cql_ffi::string::CassString;
 use cql_ffi::value::CassValueType;
 use cql_ffi::inet::CassInet;
 use cql_ffi::iterator::set_iterator::SetIterator;
@@ -12,7 +11,12 @@ use std::mem;
 use std::fmt::Debug;
 use std::fmt::Formatter;
 use std::fmt;
+use std::str;
+use std::slice;
+use std::ffi::CString;
 
+use cql_bindgen::CASS_VALUE_TYPE_TEXT;
+use cql_bindgen::CASS_VALUE_TYPE_ASCII;
 use cql_bindgen::cass_value_get_int32;
 use cql_bindgen::cass_value_get_int64;
 use cql_bindgen::cass_value_get_float;
@@ -99,12 +103,22 @@ impl CassColumn {
     
     pub unsafe fn get_inet<'a>(&'a self, mut output: CassInet) -> Result<CassInet,CassError> {CassError::build(cass_value_get_inet(self.0,&mut output.0)).wrap(output)}
 
-    pub fn get_string(&self) -> Result<CassString,CassError> {unsafe{
-        let mut output:CassString = mem::zeroed();
-        CassError::build(cass_value_get_string(self.0,&mut output.0)).wrap(output)
+    pub fn get_string(&self) -> Result<String,CassError> {unsafe{
+        match cass_value_type(self.0) {
+            CASS_VALUE_TYPE_ASCII => {
+                let message:CString = mem::zeroed();
+                let msg_ptr = &mut message.as_ptr();
+                let message_length = mem::zeroed();
+                cass_value_get_string(self.0, msg_ptr, message_length);
+
+                let slice = slice::from_raw_parts(*msg_ptr as *const u8,message_length as usize);
+                Ok(str::from_utf8(slice).unwrap().to_string())
+
+            },
+            err => panic!("incorrect type: {:?}", err)
+        }
     }}
 
-    
     pub fn get_int32(&self) -> Result<i32,CassError> {unsafe{
         let mut output = mem::zeroed();
         CassError::build(cass_value_get_int32(self.0,&mut output)).wrap(output)

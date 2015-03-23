@@ -54,7 +54,11 @@ impl CassUuid {
     pub unsafe fn timestamp(&self) -> u64 {cass_uuid_timestamp(self.0)}
     pub unsafe fn version(&self) -> cass_uint8_t {cass_uuid_version(self.0)}
     
-    pub fn to_string(&self) {unsafe{let output = mem::zeroed();cass_uuid_string(self.0,output)}}
+    pub fn to_string(&self) {unsafe{
+        let mut output:i8 = mem::zeroed();
+        cass_uuid_string(self.0, &mut output)
+    }}
+    
     //pub unsafe fn from_string(&mut self, str: *const c_char) -> Result<(),CassError> {CassError::build(cass_uuid_from_string(str,&mut self.0))}
 }
 
@@ -72,7 +76,7 @@ impl CassUuidGen {
     }}
     
     pub fn get_time(&self) -> CassUuid {unsafe{
-        let mut output = mem::zeroed();
+        let mut output:_CassUuid = mem::zeroed();
         cass_uuid_gen_time(self.0,&mut output);
         CassUuid(output)
     }}
@@ -82,13 +86,12 @@ impl CassUuidGen {
     }}
     
     pub fn random(&self) -> CassUuid {unsafe{
-        let mut output:CassUuid = mem::zeroed();
-        cass_uuid_gen_random(self.0, &mut output.0);
-        output
+        let mut output:_CassUuid = mem::zeroed();
+        cass_uuid_gen_random(self.0, &mut output);
+        CassUuid(output)
     }}
     
     pub fn from_time(&self, timestamp: cass_uint64_t, mut output: CassUuid){unsafe{
         cass_uuid_gen_from_time(self.0,timestamp, &mut output.0)
     }}
-
 }

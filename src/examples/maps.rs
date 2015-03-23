@@ -17,7 +17,6 @@ fn insert_into_maps(session:&mut CassSession, key:&str, items:Vec<Pair>) -> Resu
     let statement = CassStatement::new(INSERT_QUERY, 2);
     statement.bind_string(0, key).unwrap();
 
-    
     let mut map = CassMap::new(5);
     for item in items.iter() {
         map.append_string(item.key).unwrap();
@@ -37,7 +36,6 @@ fn select_from_maps(session:&mut CassSession, key:&str) -> Result<(),CassError> 
         let column = row.get_column(0);
         let items_iterator:MapIterator = try!(column.map_iter());
         for item in items_iterator {
-
             println!("item: {:?}", item);
         }
     }

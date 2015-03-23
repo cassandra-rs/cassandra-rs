@@ -57,7 +57,7 @@ fn main() {unsafe{
 
 fn print_schema_meta_entries(meta:&CassSchemaMeta) {
     for value in meta.iterator() {
-        println!("{:?}",value);
+       // println!("{:?}",value);
     }
 }
 
@@ -66,33 +66,30 @@ fn print_schema_meta(meta:&CassSchemaMeta) {
     match meta.get_type().unwrap() {
         CassSchemaMetaType::KEYSPACE => {
             let field = meta.get_field("keyspace_name");
-            //~ if !field.is_null() {
-                let name = &field.get_value();
-                println!("Keyspace \"{:?}\":", ToString::to_string(&name.get_string().unwrap()));
-            //~ }
-            for value in  meta.fields_iterator() {
-                println!("{:?}",value);
-            }          
-            print_schema_meta_entries(meta);
+            let name = &field.get_value();
+            println!("Keyspace {:?}", name);
+         //   for value in  meta.fields_iterator() {
+          //      println!("value: {:?}",value);
+           // }          
+         //   print_schema_meta_entries(meta);
         },
         CassSchemaMetaType::TABLE => {
             let field = meta.get_field("columnfamily_name");
             let name = &field.get_value();
-            println!("Table \"{:?}\":", ToString::to_string(&name.get_string().unwrap()));
+            println!("Table {:?}", name);
             for value in  meta.fields_iterator() {
-                println!("{:?}",value);
+              //  println!("{:?}",value);
             }          
-            //printf("\n");
-            print_schema_meta_entries(meta);
+         //   print_schema_meta_entries(meta);
         },
         CassSchemaMetaType::COLUMN => {
             let field = meta.get_field("column_name");
             //~ if !field.is_null() {
                 let name = &field.get_value();
-                println!("Column \"{:?}\":\n", ToString::to_string(&name.get_string().unwrap()));
+                println!("Column \"{:?}\":\n", name);
             //~ }
             for value in  meta.fields_iterator() {
-                println!("{:?}",value);
+            //    println!("{:?}",value);
             }          
             //printf("\n");
         }

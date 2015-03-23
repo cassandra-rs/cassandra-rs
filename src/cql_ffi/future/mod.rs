@@ -3,7 +3,7 @@ pub mod result_future;
 pub mod cass_future;
 pub mod session_future;
 
-pub struct CassFutureCallback(_CassFutureCallback);
+//pub struct CassFutureCallback(_CassFutureCallback);
 
 
 

@@ -1,15 +1,17 @@
 #![allow(dead_code)]
 #![allow(raw_pointer_derive)]
-use cql_bindgen::CassString as _CassString;
 
 use std::fmt::Formatter;
 use std::fmt;
 use std::fmt::Debug;
+use std::ffi::CString;
+use std::slice;
+use std::str;
 
 use std::string::ToString;
 
-#[repr(C)]
-pub struct CassString(pub _CassString);
+//~ #[repr(C)]
+//~ pub struct CassString(pub _CassString);
 
 //~ impl Deref for CassString {
     //~ type Target = str;
@@ -19,31 +21,33 @@ pub struct CassString(pub _CassString);
     //~ }}
 //~ }
 
-pub trait AsCassStr {
-    fn as_cass_str(&self) -> CassString;
-}
+//~ pub trait AsCassStr {
+    //~ fn as_cass_str(&self) -> CassString;
+//~ }
 
-impl AsCassStr for str {
-    fn as_cass_str(&self) -> CassString {
-        CassString(_CassString{
-            data: self.as_ptr() as *const i8,
-            length: self.len() as u64,
-        })
-    }
-}
+//~ impl AsCassStr for str {
+    //~ fn as_cass_str(&self) -> CassString {
+        //~ //let cstr = CString::new(self).unwrap();        
+        //~ CassString(_CassString{
+            //~ data: self.as_ptr() as *const i8,
+            //~ length: self.len() as u64,
+        //~ })
+    //~ }
+//~ }
 
-impl ToString for CassString {
-    fn to_string(&self) -> String {unsafe{
-        let data = self.0.data as *mut u8;
-        String::from_raw_parts(data,self.0.length as usize, self.0.length as usize).clone()
-    }}
-}
+//~ impl ToString for CassString {
+    //~ fn to_string(&self) -> String {unsafe{
+        //~ let data = self.0.data as *mut u8;
+        //~ let slice = slice::from_raw_parts(data,self.0.length as usize);
+        //~ str::from_utf8(slice).unwrap().to_string()
+    //~ }}
+//~ }
 
-impl Debug for CassString {
-    fn fmt(&self, f:&mut Formatter) -> fmt::Result {
-        write!(f, "{:?}", self.to_string())
-    }      
-}
+//~ impl Debug for CassString {
+    //~ fn fmt(&self, f:&mut Formatter) -> fmt::Result {
+        //~ write!(f, "{:?}", self.to_string())
+    //~ }      
+//~ }
 
 //~ trait WriteCqlStr {
     //~ fn write_to<W>(&self, &mut W)

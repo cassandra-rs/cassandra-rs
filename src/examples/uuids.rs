@@ -43,6 +43,7 @@ fn main() {
 	
 	session.execute(CREATE_KEYSPACE, 0);
 	session.execute(CREATE_TABLE, 0);
+	println!("uuid_gen = {:?}", uuid_gen.get_time());
 	insert_into_log(session, "test", uuid_gen.get_time(), "Log entry #1").unwrap();
 	insert_into_log(session, "test", uuid_gen.get_time(), "Log entry #2").unwrap();
 	insert_into_log(session, "test", uuid_gen.get_time(), "Log entry #3").unwrap();

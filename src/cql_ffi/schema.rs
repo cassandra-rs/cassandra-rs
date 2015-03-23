@@ -3,11 +3,14 @@
 #![allow(missing_copy_implementations)]
 
 use std::ffi::CString;
+use std::mem;
+use std::slice;
+use std::str;
 
-use cql_ffi::string::CassString;
 use cql_ffi::value::CassValue;
 use cql_ffi::error::CassError;
 use cql_ffi::iterator::set_iterator::SetIterator;
+use cql_ffi::iterator::map_iterator::MapIterator;
 use cql_bindgen::CassSchema as _CassSchema;
 use cql_bindgen::CassSchemaMeta as _CassSchemaMeta;
 use cql_bindgen::CassSchemaMetaField as _CassSchemaMetaField;
@@ -97,15 +100,20 @@ impl CassSchemaMeta {
         SetIterator(cass_iterator_from_schema_meta(self.0))
     }}
         
-    pub fn fields_iterator(&self) -> SetIterator {unsafe{
-        SetIterator(cass_iterator_fields_from_schema_meta(self.0))
+    pub fn fields_iterator(&self) -> MapIterator {unsafe{
+        MapIterator(cass_iterator_fields_from_schema_meta(self.0))
     }}
 
 }
 
 impl CassSchemaMetaField {
-    pub fn get_name(&self) -> CassString {unsafe{
-        CassString(cass_schema_meta_field_name(self.0))
+    pub fn get_name(&self) -> String {unsafe{
+        let name = mem::zeroed();
+        let name_length = mem::zeroed();
+        cass_schema_meta_field_name(self.0, name, name_length);
+
+        let slice = slice::from_raw_parts(name as *const u8,name_length as usize);
+        str::from_utf8(slice).unwrap().to_string()
     }}
     
     pub fn get_value(&self) -> CassValue {unsafe{

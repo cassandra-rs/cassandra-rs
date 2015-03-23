@@ -24,7 +24,7 @@ static SELECT_QUERY:&'static str = "SELECT * FROM examples.basic WHERE key = ?";
 fn insert_into_basic(session:&mut CassSession, prepared:&CassPrepared, key:&str, basic:Basic) -> Result<CassResult,CassError> {
     println!("key={:?}",key);
     let statement = &prepared.bind();
-    statement.bind_string_by_name("key", key.as_cass_str()).unwrap()
+    statement.bind_string_by_name("key", key).unwrap()
         .bind_bool_by_name("BLN", basic.bln).unwrap()
         .bind_float_by_name("FLT", basic.flt).unwrap()
         .bind_double_by_name("\"dbl\"", basic.dbl).unwrap()
@@ -36,16 +36,16 @@ fn insert_into_basic(session:&mut CassSession, prepared:&CassPrepared, key:&str,
 
 unsafe fn select_from_basic(session:&mut CassSession, prepared:&CassPrepared, key:&str, basic:&mut Basic) -> Result<CassResult,CassError> {
     let statement = prepared.bind();
-    let statement = statement.bind_string_by_name("key", key.as_cass_str()).unwrap();
+    let statement = statement.bind_string_by_name("key", key).unwrap();
     match session.execute_statement(&statement).wait() {
         Ok(result) => {
             println!("{:?}", result);
             for row in result.iter() {
-                basic.bln = try!(row.get_column_by_name("BLN".as_cass_name()).get_bool());
-                basic.dbl = try!(row.get_column_by_name("dbl".as_cass_name()).get_double());
-                basic.flt = try!(row.get_column_by_name("flt".as_cass_name()).get_float());
-                basic.i32 = try!(row.get_column_by_name("i32".as_cass_name()).get_int32());
-                basic.i64 = try!(row.get_column_by_name("i64".as_cass_name()).get_int64());
+                basic.bln = try!(row.get_column_by_name("BLN").get_bool());
+                basic.dbl = try!(row.get_column_by_name("dbl").get_double());
+                basic.flt = try!(row.get_column_by_name("flt").get_float());
+                basic.i32 = try!(row.get_column_by_name("i32").get_int32());
+                basic.i64 = try!(row.get_column_by_name("i64").get_int64());
             }
             Ok(result)
         }

@@ -3,17 +3,17 @@ use cql_ffi::value::CassValue;
 use cql_ffi::error::CassError;
 use cql_bindgen::cass_iterator_free;
 use cql_bindgen::cass_iterator_next;
-use cql_bindgen::cass_iterator_get_value;
+use cql_bindgen::cass_iterator_get_map_value;
 use cql_bindgen::cass_iterator_get_map_key;
 
 pub struct MapIterator(pub *mut _CassIterator);
 
 impl MapIterator {
-    fn get_key(&mut self) -> CassValue {unsafe{
+    pub fn get_key(&mut self) -> CassValue {unsafe{
         CassValue(cass_iterator_get_map_key(self.0))
     }}
-    fn get_value(&mut self) -> CassValue {unsafe{
-        CassValue(cass_iterator_get_value(self.0))
+    pub fn get_value(&mut self) -> CassValue {unsafe{
+        CassValue(cass_iterator_get_map_value(self.0))
     }}
     
     pub fn get_pair(&mut self) -> Result<(CassValue,CassValue),CassError> {
@@ -36,10 +36,10 @@ impl Drop for MapIterator {
 }
 
 impl Iterator for MapIterator {
-    type Item = CassValue;
+    type Item = (CassValue,CassValue);
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         match self._next() {
-            true => Some(self.get_value()),
+            true => Some(self.get_pair().unwrap()),
             false => None
         }
     }

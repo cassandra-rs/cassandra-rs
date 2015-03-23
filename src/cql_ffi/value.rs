@@ -6,13 +6,13 @@ use std::fmt::Debug;
 use std::fmt::Formatter;
 use std::fmt;
 use std::ffi::CString;
+use std::str;
+use std::slice;
 
 use cql_ffi::types::cass_size_t;
 use cql_ffi::error::CassError;
-use cql_ffi::bytes::CassBytes;
 use cql_ffi::inet::CassInet;
 use cql_ffi::uuid::CassUuid;
-use cql_ffi::string::CassString;
 use cql_ffi::iterator::set_iterator::SetIterator;
 use cql_ffi::iterator::map_iterator::MapIterator;
 use cql_ffi::decimal::CassDecimal;
@@ -63,25 +63,6 @@ use cql_bindgen::CASS_VALUE_TYPE_VARINT;
 use std::mem;
 
 pub struct CassValue(pub *const _CassValue);
-
-pub struct CassName(pub *const i8);
-
-pub trait AsCassName {
-    fn as_cass_name(&self) -> CassName;
-}
-
-impl AsCassName for str {
-fn as_cass_name(&self) -> CassName {
-        match CString::new(self) {
-            Ok(cstr) => {
-                let bytes = cstr.as_bytes_with_nul();
-                let ptr = bytes.as_ptr();
-                CassName(ptr as *const i8)
-            },
-            Err(err) => panic!("err: {:?}",err)
-        }
-    }
-}
 
 #[derive(Debug,Copy,PartialEq)]
 pub enum CassValueType {
@@ -140,37 +121,35 @@ impl CassValueType {
 impl Debug for CassValue {
 
     fn fmt(&self, f:&mut Formatter) -> fmt::Result {
-        let _type = match self.is_null() {
+        match self.is_null() {
             true => return Ok(()),
-            false => self.get_type()
-        };
-        
-        match _type {
-            CassValueType::UNKNOWN          => write!(f, "{:?}", "unknown"),
-            CassValueType::CUSTOM           => write!(f, "{:?}", "custom"),
-            CassValueType::ASCII            => write!(f, "{:?}", self.get_string().unwrap()),
-            CassValueType::BIGINT           => write!(f, "{:?}", self.get_int64().unwrap()),
-            CassValueType::VARCHAR          => write!(f, "{:?}", self.get_string().unwrap()),
-            CassValueType::BOOLEAN          => write!(f, "{:?}", self.get_bool().unwrap()),
-            CassValueType::DOUBLE           => write!(f, "{:?}", self.get_double().unwrap()),
-            CassValueType::FLOAT            => write!(f, "{:?}", self.get_float().unwrap()),
-            CassValueType::INT              => write!(f, "{:?}", self.get_int32().unwrap()),
-            CassValueType::TIMEUUID         => write!(f, "TIMEUUID: {:?}", self.get_uuid().unwrap()),
-            CassValueType::SET      => {
-                try!(write!(f, "["));
-                for item in self.as_collection_iterator() {try!(write!(f,"{:?} ",item))}
-                try!(write!(f, "]"));
-                Ok(())
-            }
-            CassValueType::MAP => {
-               for item in self.as_map_iterator() {
-                    try!(write!(f, "LIST {:?}", item ))
+            false => match self.get_type() {
+                CassValueType::UNKNOWN          => write!(f, "{:?}", "unknown"),
+                CassValueType::CUSTOM           => write!(f, "{:?}", "custom"),
+                CassValueType::ASCII            => write!(f, "{:?}", self.get_string().unwrap()),
+                CassValueType::BIGINT           => write!(f, "{:?}", self.get_int64().unwrap()),
+                CassValueType::VARCHAR          => write!(f, "{:?}", self.get_string().unwrap()),
+                CassValueType::BOOLEAN          => write!(f, "{:?}", self.get_bool().unwrap()),
+                CassValueType::DOUBLE           => write!(f, "{:?}", self.get_double().unwrap()),
+                CassValueType::FLOAT            => write!(f, "{:?}", self.get_float().unwrap()),
+                CassValueType::INT              => write!(f, "{:?}", self.get_int32().unwrap()),
+                CassValueType::TIMEUUID         => write!(f, "TIMEUUID: {:?}", self.get_uuid().unwrap()),
+                CassValueType::SET      => {
+                    try!(write!(f, "["));
+                    for item in self.as_collection_iterator() {try!(write!(f,"{:?} ",item))}
+                    try!(write!(f, "]"));
+                    Ok(())
                 }
-                Ok(())
-            },
+                CassValueType::MAP => {
+                    for item in self.as_map_iterator() {
+                        try!(write!(f, "LIST {:?}", item ))
+                    }
+                    Ok(())
+                },
             
-            //FIXME
-            err                         => write!(f, "{:?}", err), 
+                //FIXME
+                err => write!(f, "{:?}", err),
+            }
         }
     }
 }
@@ -180,12 +159,22 @@ impl CassValue {
         CassError::build(cass_value_get_uuid(self.0,&mut output.0)).wrap(output)
     }}
 
-    pub fn fill_string<'a>(&'a self, mut output: CassString) -> Result<CassString,CassError> {unsafe{
-        CassError::build(cass_value_get_string(self.0,&mut output.0)).wrap(output)
+    pub fn fill_string<'a>(&'a self, mut output: &str) -> Result<String,CassError> {unsafe{
+        let output = mem::zeroed();
+        let output_length = mem::zeroed();
+        let err = cass_value_get_string(self.0,output, output_length);
+
+        let slice = slice::from_raw_parts(output as *const u8,output_length as usize);
+        let string = str::from_utf8(slice).unwrap().to_string();
+        CassError::build(err).wrap(string)
     }}
 
-    pub fn get_bytes<'a>(&'a self, mut output: CassBytes) -> Result<CassBytes,CassError> {unsafe{
-        CassError::build(cass_value_get_bytes(self.0,&mut output.0)).wrap(output)
+    pub fn get_bytes<'a>(&'a self) -> Result<Vec<u8>,CassError> {unsafe{
+        let mut output = mem::zeroed();
+        let output_size = mem::zeroed();
+        let result = cass_value_get_bytes(self.0,&mut output, output_size);
+        let slice = Vec::from_raw_buf(output as *const u8,output_size as usize);        
+        CassError::build(result).wrap(slice)
     }}
 
     pub fn get_decimal<'a>(&'a self, mut output: CassDecimal) -> Result<CassDecimal,CassError> {unsafe{
@@ -233,12 +222,33 @@ impl CassValue {
             //~ }
         //~ }
     //~ }}
-    
-    pub fn get_string(&self) -> Result<CassString,CassError> {unsafe{
-        let mut output:CassString = mem::zeroed();
-        let err = CassError::build(cass_value_get_string(self.0,&mut output.0));
-        err.wrap(output)
+
+    pub fn get_string(&self) -> Result<String, CassError> {unsafe{
+        let message:CString = mem::zeroed();
+        let mut message = message.as_ptr();
+        let mut message_length:u64 = mem::zeroed();
+        cass_value_get_string(self.0, &mut message, &mut message_length);
+
+        let slice = slice::from_raw_parts(message as *const u8,message_length as usize);
+        let err = CassError::build(cass_value_get_string(self.0, &mut message, &mut message_length));
+        err.wrap(str::from_utf8(slice).unwrap().to_string())
     }}
+    
+    //~ pub fn get_string(&self) -> Result<String,CassError> {unsafe{
+        //~ let mut output = mem::zeroed();
+        //~ let mut output_size = mem::zeroed();
+        //~ let output = &mut output;
+        //~ let foo = self.0;
+        //~ cass_value_get_string(foo, output, output_size);
+        //~ let err = CassError::build(cass_value_get_string(self.0, output, output_size));
+
+        //~ let slice = slice::from_raw_parts(output,output_size as usize);
+        //~ let string = str::from_utf8(slice).unwrap().to_string();
+
+        
+
+        //~ err.wrap(string)
+    //~ }}
 
     pub unsafe fn get_inet<'a>(&'a self, mut output: CassInet) -> Result<CassInet,CassError> {CassError::build(cass_value_get_inet(self.0,&mut output.0)).wrap(output)}
     

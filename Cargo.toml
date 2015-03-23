@@ -5,7 +5,7 @@ license = "Apache-2.0"
 homepage = "https://github.com/tupshin/cql-ffi"
 repository = "https://github.com/tupshin/cql-ffi"
 name = "cql_ffi"
-version = "0.1.6"
+version = "0.1.7"
 authors = ["Tupshin Harper <tupshin@tupshin.com>"]
 
 
@@ -14,7 +14,7 @@ authors = ["Tupshin Harper <tupshin@tupshin.com>"]
 name = "cql_ffi"
 
 [dependencies]
-cql_bindgen = "0.0.1"
+cql_bindgen = "0.0.6"
 
 [[bin]]
 name="async"
@@ -43,6 +43,10 @@ path="src/examples/collections.rs"
 [[bin]]
 name="maps"
 path="src/examples/maps.rs"
+
+[[bin]]
+name="maps2"
+path="src/examples/maps2.rs"
 
 [[bin]]
 name="paging"

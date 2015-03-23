@@ -49,25 +49,6 @@ impl Drop for CassCluster {
     }}
 }
 
-//~ pub struct ContactPoints(*const c_char);
-
-//~ pub trait AsContactPoints {
-    //~ fn as_contact_points(&self) -> ContactPoints;
-//~ }
-
-//~ impl AsContactPoints for str {
-    //~ fn as_contact_points(&self) -> ContactPoints {
-
-        //~ let s = CString::new(&self).unwrap();
-        //~ cass_call(s.as_ptr()) // s is still alive here }
-        //~ let cstr:&CStr = &CString::new("127.0.0.1").unwrap();
-        //~ let bytes = cstr.to_bytes_with_nul();
-        //~ let ptr = bytes.as_ptr();
-        //~ ContactPoints(ptr as *const i8)
-        //~ ContactPoints(str_to_ref(&self))
-    //~ }
-//~ }
-
 impl CassCluster {
 
     pub fn new() -> CassCluster {unsafe{CassCluster(cass_cluster_new())}}
@@ -77,7 +58,7 @@ impl CassCluster {
     
     pub fn set_contact_points(self, contact_points: &str) -> Result<Self,CassError> {unsafe{
         let s = CString::new(contact_points).unwrap();
-        let err:CassError = CassError::build(cass_cluster_set_contact_points(self.0,s.clone().as_ptr()));
+        let err = CassError::build(cass_cluster_set_contact_points(self.0,s.as_ptr()));
         err.wrap(self)
     }}
 

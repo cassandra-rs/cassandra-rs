@@ -6,18 +6,15 @@ use libc::types::os::arch::c95::c_int;
 
 use std::ffi::CString;
 
-use cql_ffi::collection::CassSet;
-use cql_ffi::collection::CassMap;
-use cql_ffi::collection::CassList;
+use cql_ffi::collection::cass_set::CassSet;
+use cql_ffi::collection::cass_map::CassMap;
+use cql_ffi::collection::cass_list::CassList;
 use cql_ffi::error::CassError;
 use cql_ffi::decimal::CassDecimal;
 use cql_ffi::uuid::CassUuid;
-use cql_ffi::bytes::CassBytes;
-use cql_ffi::string::CassString;
 use cql_ffi::inet::CassInet;
 use cql_ffi::result::CassResult;
 use cql_ffi::consistency::CassConsistency;
-use cql_ffi::string::AsCassStr;
 
 use cql_ffi::types::cass_size_t;
 use cql_ffi::types::cass_byte_t;
@@ -76,7 +73,8 @@ impl CassStatement {
     unsafe fn free(&mut self) {cass_statement_free(self.0)}
     
     pub fn new(query: &str, parameter_count: cass_size_t) -> Self {unsafe{
-            CassStatement(cass_statement_new(query.as_cass_str().0,parameter_count))
+        let query = CString::new(query).unwrap();
+        CassStatement(cass_statement_new(query.as_ptr(),parameter_count))
     }}
     
     pub fn add_key_index(&self, index: cass_size_t) -> Result<&Self,CassError> {unsafe{
@@ -130,11 +128,13 @@ impl CassStatement {
     }}
 
     pub fn bind_string<'a>(&'a self, index: cass_size_t, value: &str) -> Result<&'a Self,CassError> {unsafe{
-        CassError::build(cass_statement_bind_string(self.0,index, value.as_cass_str().0)).wrap(&self)
+        let value = CString::new(value).unwrap();
+        CassError::build(cass_statement_bind_string(self.0,index, value.as_ptr())).wrap(&self)
     }}
 
-    pub fn bind_bytes<'a>(&'a self, index: cass_size_t, value: CassBytes) -> Result<&'a Self,CassError> {unsafe{
-        CassError::build(cass_statement_bind_bytes(self.0,index, value.0)).wrap(&self)
+    pub fn bind_bytes<'a>(&'a self, index: cass_size_t, value: Vec<u8>) -> Result<&'a Self,CassError> {unsafe{
+        let bytes = cass_statement_bind_bytes(self.0,index, value.as_ptr(), value.len() as u64);
+        CassError::build(bytes).wrap(&self)
     }}
 
     pub fn bind_map(&self, index: cass_size_t, collection: CassMap)-> Result<&Self,CassError>{unsafe{
@@ -190,14 +190,18 @@ impl CassStatement {
         CassError::build(cass_statement_bind_bool_by_name(self.0,name.as_ptr(),if value {1} else {0})).wrap(&self)
     }}
 
-    pub fn bind_string_by_name<'a>(&'a self, name: &'a str, value: CassString)-> Result<&'a Self,CassError> {unsafe{
+    pub fn bind_string_by_name<'a>(&'a self, name: &'a str, value: &str)-> Result<&'a Self,CassError> {unsafe{
         let name = CString::new(name).unwrap();
-        CassError::build(cass_statement_bind_string_by_name(self.0,name.as_ptr(),value.0)).wrap(&self)
+        let value = CString::new(value).unwrap();
+        let result = cass_statement_bind_string_by_name(self.0,name.as_ptr(),value.as_ptr());
+        CassError::build(result).wrap(&self)
     }}
 
-    pub fn bind_bytes_by_name<'a>(&'a self, name: &str, value: CassBytes)-> Result<&'a Self,CassError>{unsafe{
+    pub fn bind_bytes_by_name<'a>(&'a self, name: &str, mut value: Vec<u8>)-> Result<&'a Self,CassError>{unsafe{
         let name = CString::new(name).unwrap();
-        CassError::build(cass_statement_bind_bytes_by_name(self.0,name.as_ptr(),value.0)).wrap(&self)
+        let val = value.as_mut_ptr();
+        let result = cass_statement_bind_bytes_by_name(self.0,name.as_ptr(),val, value.len() as u64);
+        CassError::build(result).wrap(&self)
     }}
 
     pub fn bind_uuid_by_name<'a>(&'a self, name: &str, value: CassUuid) -> Result<&'a Self,CassError>{unsafe{

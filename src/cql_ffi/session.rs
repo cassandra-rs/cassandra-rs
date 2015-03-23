@@ -2,6 +2,8 @@
 #![allow(dead_code)]
 #![allow(missing_copy_implementations)]
 
+use std::ffi::CString;
+
 use cql_ffi::batch::CassBatch;
 use cql_ffi::future::cass_future::CassFuture;
 use cql_ffi::future::result_future::ResultFuture;
@@ -11,7 +13,6 @@ use cql_ffi::error::CassError;
 use cql_ffi::statement::CassStatement;
 use cql_ffi::schema::CassSchema;
 use cql_ffi::cluster::CassCluster;
-use cql_ffi::string::AsCassStr;
 use cql_bindgen::CassSession as _CassSession;
 use cql_bindgen::cass_session_new;
 use cql_bindgen::cass_session_free;
@@ -43,7 +44,8 @@ impl CassSession {
     pub fn connect(self, cluster: &CassCluster) -> SessionFuture {unsafe{SessionFuture(cass_session_connect(self.0, cluster.0),self)}}
     
     pub fn prepare(&mut self, query: &str) -> Result<PreparedFuture,CassError> {unsafe{
-        Ok(PreparedFuture(cass_session_prepare(self.0, query.as_cass_str().0)))
+        let query = CString::new(query).unwrap();        
+        Ok(PreparedFuture(cass_session_prepare(self.0, query.as_ptr())))
     }}
     
     pub fn execute(&mut self, statement: &str, parameter_count: u64) -> ResultFuture {unsafe{
@@ -54,9 +56,15 @@ impl CassSession {
         ResultFuture(cass_session_execute(self.0, statement.0))
     }}
     
-    pub unsafe fn execute_batch(&mut self, batch: &CassBatch) -> ResultFuture {ResultFuture(cass_session_execute_batch(self.0, batch.0))}
+    pub unsafe fn execute_batch(&mut self, batch: &CassBatch) -> ResultFuture {
+        ResultFuture(cass_session_execute_batch(self.0, batch.0))
+    }
     
-    pub unsafe fn get_schema(&mut self) -> CassSchema {CassSchema(cass_session_get_schema(self.0))}
+    pub unsafe fn get_schema(&mut self) -> CassSchema {
+        CassSchema(cass_session_get_schema(self.0))
+    }
     
-    pub unsafe fn connect_keyspace(&mut self, cluster: CassCluster, keyspace: *const ::libc::c_char) -> CassFuture {CassFuture(cass_session_connect_keyspace(self.0, cluster.0, keyspace))}
+    pub unsafe fn connect_keyspace(&mut self, cluster: CassCluster, keyspace: *const ::libc::c_char) -> CassFuture {
+        CassFuture(cass_session_connect_keyspace(self.0, cluster.0, keyspace))
+    }
 }
