@@ -15,7 +15,6 @@ use std::str;
 use std::slice;
 use std::ffi::CString;
 
-use cql_bindgen::CASS_VALUE_TYPE_TEXT;
 use cql_bindgen::CASS_VALUE_TYPE_ASCII;
 use cql_bindgen::cass_value_get_int32;
 use cql_bindgen::cass_value_get_int64;

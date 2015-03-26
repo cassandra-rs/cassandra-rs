@@ -93,6 +93,10 @@ impl CassSchemaMeta {
         CassSchemaMetaField(cass_schema_meta_get_field(self.0,name.as_ptr()))
     }}
 
+    pub fn fields_from_schema_meta(&self) -> SetIterator{unsafe{
+        SetIterator(cass_iterator_fields_from_schema_meta(self.0))
+    }}
+
     //~ fn is_null(&self) -> bool {unsafe{
         //~ if cass_value_is_null(self.0) > 0 {true} else {false}
     //~ }}

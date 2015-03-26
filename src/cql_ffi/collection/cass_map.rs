@@ -1,4 +1,3 @@
-use std::mem;
 use std::ffi::CString;
 
 use cql_bindgen::CassCollection as _CassCollection;

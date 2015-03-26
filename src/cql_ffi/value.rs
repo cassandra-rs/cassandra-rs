@@ -159,7 +159,7 @@ impl CassValue {
         CassError::build(cass_value_get_uuid(self.0,&mut output.0)).wrap(output)
     }}
 
-    pub fn fill_string<'a>(&'a self, mut output: &str) -> Result<String,CassError> {unsafe{
+    pub fn fill_string<'a>(&'a self) -> Result<String,CassError> {unsafe{
         let output = mem::zeroed();
         let output_length = mem::zeroed();
         let err = cass_value_get_string(self.0,output, output_length);
@@ -173,7 +173,7 @@ impl CassValue {
         let mut output = mem::zeroed();
         let output_size = mem::zeroed();
         let result = cass_value_get_bytes(self.0,&mut output, output_size);
-        let slice = Vec::from_raw_buf(output as *const u8,output_size as usize);        
+        let slice = Vec::from_raw_buf(output,output_size as usize);        
         CassError::build(result).wrap(slice)
     }}
 

@@ -1,10 +1,8 @@
-#![feature(libc,core,alloc,net)]
+#![feature(libc,core,collections,alloc)]
 extern crate libc;
 
 pub use cql_ffi::consistency::*;
-pub use cql_ffi::bytes::*;
 pub use cql_ffi::types::*;
-pub use cql_ffi::string::*;
 pub use cql_ffi::inet::*;
 pub use cql_ffi::decimal::*;
 pub use cql_ffi::uuid::*;
@@ -39,9 +37,7 @@ extern crate cql_bindgen;
 
 mod cql_ffi {
     pub mod consistency;
-    pub mod bytes;
     pub mod types;
-    pub mod string;
     pub mod inet;
     pub mod decimal;
     pub mod uuid;
