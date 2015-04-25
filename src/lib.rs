@@ -1,10 +1,9 @@
-#![feature(libc,core,collections,alloc)]
+#![feature(libc,core,collections,alloc,convert)]
 extern crate libc;
 
 pub use cql_ffi::consistency::*;
 pub use cql_ffi::types::*;
 pub use cql_ffi::inet::*;
-pub use cql_ffi::decimal::*;
 pub use cql_ffi::uuid::*;
 pub use cql_ffi::cluster::*;
 pub use cql_ffi::session::*;
@@ -39,7 +38,6 @@ mod cql_ffi {
     pub mod consistency;
     pub mod types;
     pub mod inet;
-    pub mod decimal;
     pub mod uuid;
     pub mod cluster;
     pub mod session;

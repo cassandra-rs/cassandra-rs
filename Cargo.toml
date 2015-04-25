@@ -5,7 +5,7 @@ license = "Apache-2.0"
 homepage = "https://github.com/tupshin/cql-ffi"
 repository = "https://github.com/tupshin/cql-ffi"
 name = "cql_ffi"
-version = "0.1.8"
+version = "0.1.9"
 authors = ["Tupshin Harper <tupshin@tupshin.com>"]
 
 
@@ -14,7 +14,7 @@ authors = ["Tupshin Harper <tupshin@tupshin.com>"]
 name = "cql_ffi"
 
 [dependencies]
-cql_bindgen = "0.0.6"
+cql_bindgen = "0.0.7"
 
 [[bin]]
 name="async"

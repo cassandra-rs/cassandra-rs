@@ -27,7 +27,7 @@ use cql_bindgen::cass_uuid_string;
 
 //use cql_ffi::error::CassError;
 
-#[derive(Copy)]
+#[derive(Copy,Clone)]
 pub struct CassUuid(pub _CassUuid);
 
 impl ::std::default::Default for CassUuid {

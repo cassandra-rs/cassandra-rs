@@ -57,7 +57,7 @@ use cql_bindgen::CASS_OK;
 
 use cql_bindgen::CassError as _CassError;
 
-#[derive(Debug,Eq,PartialEq,Copy)]
+#[derive(Debug,Eq,PartialEq,Copy,Clone)]
 #[repr(C)]
 pub enum CassErrorSource {
     NONE = 0isize,
@@ -83,7 +83,7 @@ impl Debug for CassError {
     }
 }
 
-#[derive(Debug,Eq,PartialEq,Copy)]
+#[derive(Debug,Eq,PartialEq,Copy,Clone)]
 #[repr(C)]
 pub enum CassErrorTypes {
     CASS_OK = 0,

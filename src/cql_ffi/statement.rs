@@ -10,7 +10,6 @@ use cql_ffi::collection::cass_set::CassSet;
 use cql_ffi::collection::cass_map::CassMap;
 use cql_ffi::collection::cass_list::CassList;
 use cql_ffi::error::CassError;
-use cql_ffi::decimal::CassDecimal;
 use cql_ffi::uuid::CassUuid;
 use cql_ffi::inet::CassInet;
 use cql_ffi::result::CassResult;
@@ -157,9 +156,9 @@ impl CassStatement {
         CassError::build(cass_statement_bind_inet(self.0,index, value.0)).wrap(&self)
     }}
 
-    pub fn bind_decimal<'a>(&'a self, index: cass_size_t, value: CassDecimal) -> Result<&'a Self,CassError> {unsafe{
-        CassError::build(cass_statement_bind_decimal(self.0,index, value.0)).wrap(&self)
-    }}
+//    pub fn bind_decimal<'a>(&'a self, index: cass_size_t, value: String) -> Result<&'a Self,CassError> {unsafe{
+//        CassError::build(cass_statement_bind_decimal(self.0,index, value)).wrap(&self)
+//    }}
 
     pub fn bind_custom<'a>(&'a self, index: cass_size_t, size: cass_size_t, output: *mut *mut cass_byte_t) -> Result<&'a Self,CassError> {unsafe{
         CassError::build(cass_statement_bind_custom(self.0,index, size, output)).wrap(&self)
@@ -214,10 +213,10 @@ impl CassStatement {
         CassError::build(cass_statement_bind_inet_by_name(self.0,name.as_ptr(),value.0)).wrap(&self)
     }}
 
-    pub fn bind_decimal_by_name<'a>(&'a self, name: &str, value: CassDecimal)-> Result<&'a Self,CassError>{unsafe{
-        let name = CString::new(name).unwrap();
-        CassError::build(cass_statement_bind_decimal_by_name(self.0,name.as_ptr(), value.0)).wrap(&self)
-    }}
+//    pub fn bind_decimal_by_name<'a>(&'a self, name: &str, value: String)-> Result<&'a Self,CassError>{unsafe{
+//        let name = CString::new(name).unwrap();
+//        CassError::build(cass_statement_bind_decimal_by_name(self.0,name.as_ptr(), value)).wrap(&self)
+//    }}
 
     pub fn bind_custom_by_name<'a>(&'a self, name: &str, size: cass_size_t, output: *mut *mut cass_byte_t)-> Result<&'a Self,CassError>{unsafe{
         let name = CString::new(name).unwrap();

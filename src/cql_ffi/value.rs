@@ -15,7 +15,6 @@ use cql_ffi::inet::CassInet;
 use cql_ffi::uuid::CassUuid;
 use cql_ffi::iterator::set_iterator::SetIterator;
 use cql_ffi::iterator::map_iterator::MapIterator;
-use cql_ffi::decimal::CassDecimal;
 
 use cql_bindgen::CassValue as _CassValue;
 use cql_bindgen::cass_value_secondary_sub_type;
@@ -64,7 +63,7 @@ use std::mem;
 
 pub struct CassValue(pub *const _CassValue);
 
-#[derive(Debug,Copy,PartialEq)]
+#[derive(Debug,Copy,Clone,PartialEq)]
 pub enum CassValueType {
     UNKNOWN = CASS_VALUE_TYPE_UNKNOWN as isize,
     CUSTOM = CASS_VALUE_TYPE_CUSTOM as isize,
@@ -177,9 +176,9 @@ impl CassValue {
         CassError::build(result).wrap(slice)
     }}
 
-    pub fn get_decimal<'a>(&'a self, mut output: CassDecimal) -> Result<CassDecimal,CassError> {unsafe{
-        CassError::build(cass_value_get_decimal(self.0,&mut output.0)).wrap(output)
-    }}
+//    pub fn get_decimal<'a>(&'a self, mut output: String) -> Result<String,CassError> {unsafe{
+//        CassError::build(cass_value_get_decimal(self.0,&mut output)).wrap(output)
+//    }}
 
     pub fn get_type(&self) -> CassValueType {unsafe{
         CassValueType::build(cass_value_type(self.0))

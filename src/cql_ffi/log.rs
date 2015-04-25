@@ -5,7 +5,7 @@
 use cql_bindgen::CassLogMessage;
 
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy,Clone)]
 pub enum CassLogLevel {
     DISABLED = 0,
     CRITICAL = 1,

@@ -12,7 +12,7 @@ use std::net::Ipv6Addr;
 use std::default::Default;
 
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy,Clone)]
 pub struct CassInet(pub _CassInet);
 
 impl Default for CassInet {

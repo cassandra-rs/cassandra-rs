@@ -17,7 +17,6 @@ use cql_bindgen::cass_collection_append_decimal;
 use cql_ffi::collection::cass_collection::CassCollectionType;
 use cql_ffi::error::CassError;
 use cql_ffi::uuid::CassUuid;
-use cql_ffi::decimal::CassDecimal;
 use cql_ffi::inet::CassInet;
 use cql_ffi::types::cass_size_t;
 
@@ -78,9 +77,10 @@ impl CassList {
         CassError::build(cass_collection_append_inet(self.0,value.0)).wrap(self)
     }}
 
-    pub fn append_decimal<'a>(&'a mut self, value: CassDecimal) -> Result<&'a Self,CassError> {unsafe{
-        CassError::build(cass_collection_append_decimal(self.0,value.0)).wrap(self)
-    }}
+//FIXME rust doesn't have good decimal support yet
+//    pub fn append_decimal<'a>(&'a mut self, value: String) -> Result<&'a Self,CassError> {unsafe{
+//        CassError::build(cass_collection_append_decimal(self.0,value)).wrap(self)
+//    }}
     
 
 }

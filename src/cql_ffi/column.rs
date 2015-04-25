@@ -32,7 +32,7 @@ use cql_bindgen::cass_value_type;
 use cql_ffi::error::CassError;
 
 #[repr(C)]
-#[derive(Copy,Debug)]
+#[derive(Copy,Debug,Clone)]
 pub enum CassColumnType {
     PARTITION_KEY = 0,
     CLUSTERING_KEY = 1,

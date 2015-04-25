@@ -33,7 +33,7 @@ pub struct CassSchemaMetaField(pub *const _CassSchemaMetaField);
 pub struct CassSchemaMetaFieldIterator(pub *mut SetIterator);
 
 //~ #[repr(C)]
-#[derive(Debug,Copy)]
+#[derive(Debug,Copy,Clone)]
 pub enum CassSchemaMetaType {
     KEYSPACE = 0isize,
     TABLE = 1,

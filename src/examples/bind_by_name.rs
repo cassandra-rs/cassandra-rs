@@ -1,7 +1,7 @@
 extern crate cql_ffi;
 use cql_ffi::*;
 
-#[derive(Copy,Debug,PartialEq)]
+#[derive(Clone,Copy,Debug,PartialEq)]
 struct Basic {
     bln:bool,
     flt:f32,
