@@ -26,6 +26,7 @@ use cql_bindgen::cass_session_connect_keyspace;
 
 pub struct CassSession(pub *mut _CassSession);
 
+unsafe impl Sync for CassSession{}
 unsafe impl Send for CassSession{}
 
 impl Drop for CassSession {

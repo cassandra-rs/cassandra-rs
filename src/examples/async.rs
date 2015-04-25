@@ -4,8 +4,6 @@ extern crate cql_ffi;
 
 use cql_ffi::*;
 
-use std::num::ToPrimitive;
-
 static NUM_CONCURRENT_REQUESTS:usize = 1000;
 static CREATE_KEYSPACE:&'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '1' };";
 static CREATE_TABLE:&'static str = "CREATE TABLE IF NOT EXISTS examples.async (key text, bln boolean, flt float, dbl double, i32 int, i64 bigint, PRIMARY KEY (key));";
@@ -19,10 +17,10 @@ fn insert_into_async(session: &mut CassSession, key:String) {
         CassStatement::new(query, 6)
             .bind_string(0, &key).unwrap()
             .bind_bool(1, if i % 2 == 0 {true} else {false}).unwrap()
-            .bind_float(2, i.to_f32().unwrap() / 2.0f32).unwrap()
-            .bind_double(3, i.to_f64().unwrap() / 200.0).unwrap()
-            .bind_int32(4, i.to_i32().unwrap() * 10).unwrap()
-            .bind_int64(5, i.to_i64().unwrap() * 100).unwrap();
+            .bind_float(2, i as f32 / 2.0f32).unwrap()
+            .bind_double(3, i as f64 / 200.0).unwrap()
+            .bind_int32(4, i as i32 * 10).unwrap()
+            .bind_int64(5, i as i64* 100).unwrap();
         let future = session.execute_statement(statement);
         futures.push(future);
     }
