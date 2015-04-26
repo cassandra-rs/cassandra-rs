@@ -1,11 +1,12 @@
 #![allow(non_camel_case_types)]
 #![allow(dead_code)]
 
-use std::fmt::Debug;
-use std::fmt::Formatter;
+use std::fmt::{Debug,Display,Formatter};
 use std::fmt;
 use std::str;
 use std::ffi::CStr;
+use std::error::Error;
+use std::str::from_utf8;
 
 use libc::types::os::arch::c95::c_char;
 use cql_bindgen::cass_error_desc;
@@ -69,6 +70,27 @@ pub enum CassErrorSource {
 
 pub struct CassError(_CassError);
 
+impl Error for CassError {
+	fn description(&self) -> &str {
+		let c_buf: *const c_char = unsafe { self.desc() };
+        let buf: &[u8] = unsafe { CStr::from_ptr(c_buf).to_bytes() };
+        from_utf8(buf).unwrap()
+    }
+}
+
+impl Display for CassError {
+    fn fmt(&self, f:&mut Formatter) -> fmt::Result {
+        let c_buf: *const c_char = unsafe { self.desc() };
+        let buf: &[u8] = unsafe { CStr::from_ptr(c_buf).to_bytes() };
+        match str::from_utf8(buf) {
+            Ok(str_slice) => {
+                write!(f, "{:?}", str_slice)
+            },
+            Err(err) => panic!("unreachable? {:?}", err)
+        }
+    }
+	
+}
 
 impl Debug for CassError {
     fn fmt(&self, f:&mut Formatter) -> fmt::Result {
