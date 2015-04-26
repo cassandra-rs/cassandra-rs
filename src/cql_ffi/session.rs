@@ -44,28 +44,28 @@ impl CassSession {
     
     pub fn connect(self, cluster: &CassCluster) -> SessionFuture {unsafe{SessionFuture(cass_session_connect(self.0, cluster.0),self)}}
     
-    pub fn prepare(&mut self, query: &str) -> Result<PreparedFuture,CassError> {unsafe{
+    pub fn prepare(&self, query: &str) -> Result<PreparedFuture,CassError> {unsafe{
         let query = CString::new(query).unwrap();        
         Ok(PreparedFuture(cass_session_prepare(self.0, query.as_ptr())))
     }}
     
-    pub fn execute(&mut self, statement: &str, parameter_count: u64) -> ResultFuture {unsafe{
+    pub fn execute(&self, statement: &str, parameter_count: u64) -> ResultFuture {unsafe{
         ResultFuture(cass_session_execute(self.0, CassStatement::new(statement,parameter_count).0))
     }}
     
-    pub fn execute_statement(&mut self, statement: &CassStatement) -> ResultFuture {unsafe{
+    pub fn execute_statement(&self, statement: &CassStatement) -> ResultFuture {unsafe{
         ResultFuture(cass_session_execute(self.0, statement.0))
     }}
     
-    pub unsafe fn execute_batch(&mut self, batch: &CassBatch) -> ResultFuture {
-        ResultFuture(cass_session_execute_batch(self.0, batch.0))
+    pub fn execute_batch(&self, batch: &CassBatch) -> ResultFuture {
+        ResultFuture(unsafe{cass_session_execute_batch(self.0, batch.0)})
     }
     
-    pub unsafe fn get_schema(&mut self) -> CassSchema {
+    pub unsafe fn get_schema(&self) -> CassSchema {
         CassSchema(cass_session_get_schema(self.0))
     }
     
-    pub unsafe fn connect_keyspace(&mut self, cluster: CassCluster, keyspace: *const ::libc::c_char) -> CassFuture {
+    pub unsafe fn connect_keyspace(&self, cluster: CassCluster, keyspace: *const ::libc::c_char) -> CassFuture {
         CassFuture(cass_session_connect_keyspace(self.0, cluster.0, keyspace))
     }
 }

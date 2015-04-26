@@ -21,7 +21,7 @@ struct Basic {
     i64:i64,
 }
 
-fn insert_into_basic(mut session: CassSession, key:&str, basic:&Basic) -> Result<(CassSession,CassResult),CassError> {
+fn insert_into_basic(session: CassSession, key:&str, basic:&Basic) -> Result<(CassSession,CassResult),CassError> {
     let statement = CassStatement::new(INSERT_QUERY, 6);
     statement.bind_string(0, key).unwrap();
     statement.bind_bool(1, basic.bln).unwrap();
@@ -33,7 +33,7 @@ fn insert_into_basic(mut session: CassSession, key:&str, basic:&Basic) -> Result
     Ok((session,future))
 }
 
-fn select_from_basic(mut session:CassSession, key:&str, basic:&mut Basic) -> Result<(CassSession,CassResult),CassError> {
+fn select_from_basic(session:CassSession, key:&str, basic:&mut Basic) -> Result<(CassSession,CassResult),CassError> {
     let statement = CassStatement::new(SELECT_QUERY, 1);
     let statement = statement.bind_string(0, key).unwrap();
     match session.execute_statement(&statement).wait() {
@@ -62,7 +62,7 @@ fn main() {
     let session_future = CassSession::new().connect(cluster).wait();
 
     match session_future {
-        Ok(mut session) => {
+        Ok(session) => {
             let mut output = Basic{bln:false,flt:0f32,dbl:0f64,i32:0,i64:0};
             session.execute(CREATE_KEYSPACE,0);
             session.execute(CREATE_TABLE,0);
