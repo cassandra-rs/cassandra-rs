@@ -23,7 +23,7 @@ pub struct CassRow(pub *const _CassRow);
 impl Debug for CassRow {
     fn fmt(&self, f:&mut Formatter) -> fmt::Result {
         for column in self.iter() {
-            try!(write!(f, "{:?}\t", CassValue(column.0)));
+            try!(write!(f, "'{{{:?}}}\t", CassValue(column.0)));
         }
         Ok(())
     }

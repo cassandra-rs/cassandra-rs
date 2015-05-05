@@ -30,7 +30,6 @@ impl Iterator for SetIterator {
     }
 }
 
-
 impl SetIterator {
     unsafe fn free(&mut self) {cass_iterator_free(self.0)}
     pub unsafe fn get_type(&mut self) -> CassIteratorType {CassIteratorType(cass_iterator_type(self.0))}
