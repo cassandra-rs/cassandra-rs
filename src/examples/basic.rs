@@ -60,17 +60,18 @@ fn main() {
     match session_future {
         Ok(mut session) => {
             let mut output = Basic{bln:false,flt:0f32,dbl:0f64,i32:0,i64:0};
+
             session.execute(CREATE_KEYSPACE,0);
             session.execute(CREATE_TABLE,0);
+
             insert_into_basic(&mut session, "test", &input).unwrap();
             select_from_basic(&mut session, "test", &mut output).unwrap();
+
             println!("{:?}",input);
             println!("{:?}",output);
-            assert!(input.bln == output.bln);
-            assert!(input.flt == output.flt);
-            assert!(input.dbl == output.dbl);
-            assert!(input.i32 == output.i32);
-            assert!(input.i64 == output.i64);
+
+            assert!(input == output);
+
             session.close().wait().unwrap();
         },
         _ => {}
