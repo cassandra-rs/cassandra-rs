@@ -1,11 +1,11 @@
 [package]
 
-description = "A mostly safe wrapper of the DataStax C++ CQL driver"
+description = "A mostly safe wrapper of the DataStax C++ CQL driver.\nWorks with both stable and nightly"
 license = "Apache-2.0"
 homepage = "https://github.com/tupshin/cql-ffi"
 repository = "https://github.com/tupshin/cql-ffi"
 name = "cql_ffi"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Tupshin Harper <tupshin@tupshin.com>"]
 
 
@@ -14,11 +14,11 @@ authors = ["Tupshin Harper <tupshin@tupshin.com>"]
 name = "cql_ffi"
 
 [dependencies]
-# cql_bindgen = "*"
+cql_bindgen = "*"
 libc = "*"
 
-[dependencies.cql_bindgen]
-git = "https://github.com/tupshin/cql-bindgen"
+# [dependencies.cql_bindgen]
+# git = "https://github.com/tupshin/cql-bindgen"
 
 [[bin]]
 name="async"

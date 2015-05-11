@@ -1,5 +1,3 @@
-#![feature(custom_attribute)]
-
 extern crate cql_ffi;
 
 use cql_ffi::*;

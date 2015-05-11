@@ -1,5 +1,3 @@
-#![feature(custom_attribute)] 
-
 #[allow(dead_code, non_camel_case_types)]
 
 //#[macro_use] 
