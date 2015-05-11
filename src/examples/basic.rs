@@ -9,7 +9,7 @@ const CREATE_TABLE:&'static str = "CREATE TABLE IF NOT EXISTS examples.basic (ke
 const INSERT_QUERY:&'static str = "INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, ?);";
 const SELECT_QUERY:&'static str = "SELECT * FROM examples.basic WHERE key = ?";
 
-#[derive(Debug)]
+#[derive(Debug,PartialEq)]
 struct Basic {
     bln:bool,
     flt:f32,
