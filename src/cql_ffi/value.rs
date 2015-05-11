@@ -23,7 +23,7 @@ use cql_bindgen::cass_value_item_count;
 use cql_bindgen::cass_value_is_collection;
 use cql_bindgen::cass_value_is_null;
 use cql_bindgen::cass_value_type;
-use cql_bindgen::cass_value_get_decimal;
+//use cql_bindgen::cass_value_get_decimal;
 use cql_bindgen::cass_value_get_inet;
 use cql_bindgen::cass_value_get_string;
 use cql_bindgen::cass_value_get_bytes;

@@ -1,7 +1,7 @@
-extern crate cql_ffi;
+extern crate cassandra;
 extern crate cql_bindgen;
 
-use cql_ffi::*;
+use cassandra::*;
 
 use cql_bindgen::cass_iterator_next;
 

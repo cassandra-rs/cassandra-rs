@@ -8,7 +8,6 @@ use cql_ffi::iterator::row_iterator::RowIterator;
 use std::fmt::Debug;
 use std::fmt::Formatter;
 use std::fmt;
-use std::ptr;
 use std::ffi::CString;
 
 use cql_ffi::value::CassValue;

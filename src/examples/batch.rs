@@ -1,11 +1,11 @@
-extern crate cql_ffi;
-use cql_ffi::CassCluster;
-use cql_ffi::CassSession;
-use cql_ffi::CassStatement;
-use cql_ffi::CassBatch;
-use cql_ffi::CassBatchType;
-use cql_ffi::CassPrepared;
-use cql_ffi::CassError;
+extern crate cassandra;
+use cassandra::CassCluster;
+use cassandra::CassSession;
+use cassandra::CassStatement;
+use cassandra::CassBatch;
+use cassandra::CassBatchType;
+use cassandra::CassPrepared;
+use cassandra::CassError;
 
 //use cql_ffi::AsContactPoints;
 

@@ -1,5 +1,5 @@
-extern crate cql_ffi;
-use cql_ffi::*;
+extern crate cassandra;
+use cassandra::*;
 
 static QUERY:&'static str = "SELECT keyspace_name FROM system.schema_keyspaces;";
 //static COL_NAME:&'static str = "keyspace_name";

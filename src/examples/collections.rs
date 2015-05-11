@@ -1,6 +1,6 @@
-extern crate cql_ffi;
+extern crate cassandra;
 
-use cql_ffi::*;
+use cassandra::*;
 
 static INSERT_QUERY:&'static str = "INSERT INTO examples.collections (key, items) VALUES (?, ?);";
 static SELECT_QUERY:&'static str = "SELECT items FROM examples.collections WHERE key = ?";

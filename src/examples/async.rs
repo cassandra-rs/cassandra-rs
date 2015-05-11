@@ -1,10 +1,10 @@
-extern crate cql_ffi;
+extern crate cassandra;
 
-use cql_ffi::CassSession;
-use cql_ffi::CassStatement;
-use cql_ffi::CassCluster;
-use cql_ffi::ResultFuture;
-use cql_ffi::CassError;
+use cassandra::CassSession;
+use cassandra::CassStatement;
+use cassandra::CassCluster;
+use cassandra::ResultFuture;
+use cassandra::CassError;
 
 static NUM_CONCURRENT_REQUESTS:usize = 100;
 static CREATE_KEYSPACE:&'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '1' };";

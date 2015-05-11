@@ -25,7 +25,7 @@ use cql_bindgen::cass_uuid_max_from_time;
 use cql_bindgen::cass_uuid_timestamp;
 use cql_bindgen::cass_uuid_version;
 use cql_bindgen::cass_uuid_string;
-use cql_bindgen::raw2utf8;
+//use cql_bindgen::raw2utf8;
 //use cql_bindgen::cass_uuid_from_string;
 
 //use cql_ffi::error::CassError;

@@ -2,8 +2,8 @@
 
 description = "A mostly safe wrapper of the DataStax C++ CQL driver.\nWorks with both stable and nightly"
 license = "Apache-2.0"
-homepage = "https://github.com/tupshin/cql-ffi"
-repository = "https://github.com/tupshin/cql-ffi"
+homepage = "https://github.com/tupshin/cassandra-rust"
+repository = "https://github.com/tupshin/cassandra-rust"
 name = "cassandra"
 version = "0.2.2"
 authors = ["Tupshin Harper <tupshin@tupshin.com>"]
@@ -16,9 +16,6 @@ name = "cassandra"
 [dependencies]
 cql_bindgen = "*"
 libc = "*"
-
-# [dependencies.cql_bindgen]
-# git = "https://github.com/tupshin/cql-bindgen"
 
 [[bin]]
 name="async"

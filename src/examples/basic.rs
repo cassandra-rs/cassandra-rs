@@ -1,6 +1,6 @@
-extern crate cql_ffi;
+extern crate cassandra;
 
-use cql_ffi::*;
+use cassandra::*;
 
 const CONTACT_POINTS:&'static str = "127.0.0.1";
 

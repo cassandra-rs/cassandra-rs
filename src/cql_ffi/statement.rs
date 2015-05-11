@@ -40,7 +40,7 @@ use cql_bindgen::cass_statement_bind_string;
 use cql_bindgen::cass_statement_bind_bytes;
 use cql_bindgen::cass_statement_bind_custom;
 use cql_bindgen::cass_statement_bind_collection;
-use cql_bindgen::cass_statement_bind_decimal;
+//use cql_bindgen::cass_statement_bind_decimal;
 use cql_bindgen::cass_statement_bind_inet;
 use cql_bindgen::cass_statement_bind_uuid;
 
@@ -53,7 +53,7 @@ use cql_bindgen::cass_statement_bind_string_by_name;
 use cql_bindgen::cass_statement_bind_bytes_by_name;
 use cql_bindgen::cass_statement_bind_custom_by_name;
 use cql_bindgen::cass_statement_bind_collection_by_name;
-use cql_bindgen::cass_statement_bind_decimal_by_name;
+//use cql_bindgen::cass_statement_bind_decimal_by_name;
 use cql_bindgen::cass_statement_bind_inet_by_name;
 use cql_bindgen::cass_statement_bind_uuid_by_name;
 

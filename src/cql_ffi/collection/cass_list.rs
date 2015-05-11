@@ -12,7 +12,7 @@ use cql_bindgen::cass_collection_append_bytes;
 use cql_bindgen::cass_collection_append_uuid;
 use cql_bindgen::cass_collection_append_string;
 use cql_bindgen::cass_collection_append_inet;
-use cql_bindgen::cass_collection_append_decimal;
+//use cql_bindgen::cass_collection_append_decimal;
 
 use cql_ffi::collection::cass_collection::CassCollectionType;
 use cql_ffi::error::CassError;

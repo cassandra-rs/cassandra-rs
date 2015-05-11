@@ -13,7 +13,6 @@ use std::fmt::Formatter;
 use std::fmt;
 use std::str;
 use std::slice;
-use std::ffi::CString;
 
 use cql_bindgen::CASS_VALUE_TYPE_ASCII;
 use cql_bindgen::CASS_VALUE_TYPE_VARCHAR;

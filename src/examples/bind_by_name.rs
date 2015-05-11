@@ -1,5 +1,5 @@
-extern crate cql_ffi;
-use cql_ffi::*;
+extern crate cassandra;
+use cassandra::*;
 
 #[derive(Clone,Copy,Debug,PartialEq)]
 struct Basic {

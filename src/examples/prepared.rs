@@ -1,6 +1,6 @@
-extern crate cql_ffi;
+extern crate cassandra;
 
-use cql_ffi::*;
+use cassandra::*;
 
 static CREATE_KEYSPACE:&'static str = "CREATE KEYSPACE examples WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '3' };";
 static CREATE_TABLE:&'static str = "CREATE TABLE examples.basic (key text, bln boolean, flt float, dbl double, i32 int, i64 bigint, PRIMARY KEY (key));";

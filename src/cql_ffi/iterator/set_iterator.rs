@@ -4,7 +4,7 @@ use cql_bindgen::cass_iterator_free;
 use cql_bindgen::cass_iterator_type;
 use cql_bindgen::cass_iterator_next;
 use cql_bindgen::cass_iterator_get_value;
-use cql_bindgen::cass_iterator_fields_from_schema_meta;
+//use cql_bindgen::cass_iterator_fields_from_schema_meta;
 use cql_bindgen::cass_iterator_get_schema_meta;
 use cql_bindgen::cass_iterator_get_schema_meta_field;
 use cql_ffi::iterator::cass_iterator::CassIteratorType;

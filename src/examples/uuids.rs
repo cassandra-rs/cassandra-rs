@@ -1,12 +1,12 @@
-extern crate cql_ffi;
+extern crate cassandra;
 
-use cql_ffi::CassSession;
-use cql_ffi::CassUuid;
-use cql_ffi::CassStatement;
-use cql_ffi::CassResult;
-use cql_ffi::CassError;
-use cql_ffi::CassUuidGen;
-use cql_ffi::CassCluster;
+use cassandra::CassSession;
+use cassandra::CassUuid;
+use cassandra::CassStatement;
+use cassandra::CassResult;
+use cassandra::CassError;
+use cassandra::CassUuidGen;
+use cassandra::CassCluster;
 
 static INSERT_QUERY:&'static str = "INSERT INTO examples.log (key, time, entry) VALUES (?, ?, ?);";
 static SELECT_QUERY:&'static str = "SELECT * FROM examples.log WHERE key = ?";
