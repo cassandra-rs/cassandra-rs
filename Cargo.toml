@@ -4,14 +4,14 @@ description = "A mostly safe wrapper of the DataStax C++ CQL driver.\nWorks with
 license = "Apache-2.0"
 homepage = "https://github.com/tupshin/cql-ffi"
 repository = "https://github.com/tupshin/cql-ffi"
-name = "cql_ffi"
-version = "0.2.1"
+name = "cassandra"
+version = "0.2.2"
 authors = ["Tupshin Harper <tupshin@tupshin.com>"]
 
 
 
 [lib]
-name = "cql_ffi"
+name = "cassandra"
 
 [dependencies]
 cql_bindgen = "*"
