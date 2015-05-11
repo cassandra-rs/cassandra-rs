@@ -48,11 +48,11 @@ impl CassResult {
     }
 
     pub fn row_count(&self) -> u64 {unsafe{
-        cass_result_row_count(self.0)
+        cass_result_row_count(self.0) as u64
     }}
 
     pub fn column_count(&self) -> u64 {unsafe{
-        cass_result_column_count(self.0)
+        cass_result_column_count(self.0) as u64
     }}
 
                                     //~ result: *const CassResult, index: size_t,

@@ -168,12 +168,14 @@ impl CassValue {
         CassError::build(err).wrap(string)
     }}
 
-    pub fn get_bytes<'a>(&'a self) -> Result<Vec<u8>,CassError> {unsafe{
-        let mut output = mem::zeroed();
+    pub fn get_bytes<'a>(&'a self) -> Result<Vec<*const u8>,CassError> {unsafe{
+        let output:*mut *const u8 = mem::zeroed();
         let output_size = mem::zeroed();
-        let result = cass_value_get_bytes(self.0,&mut output, output_size);
-        let slice = Vec::from_raw_buf(output,output_size as usize);        
-        CassError::build(result).wrap(slice)
+        let result = cass_value_get_bytes(self.0,output, output_size);
+        //let output:*mut u8 = &mut*output;
+        let slice:Vec<*const u8> = Vec::from_raw_parts(output,output_size as usize,output_size as usize);  
+        let r = CassError::build(result);
+        r.wrap(slice)
     }}
 
 //    pub fn get_decimal<'a>(&'a self, mut output: String) -> Result<String,CassError> {unsafe{
@@ -193,7 +195,7 @@ impl CassValue {
     }}
 
     pub fn item_count(&self) -> cass_size_t {unsafe{
-        cass_value_item_count(self.0)
+        cass_value_item_count(self.0) as u64
     }}
 
     pub fn primary_sub_type(&self) -> CassValueType {unsafe{
@@ -225,11 +227,11 @@ impl CassValue {
     pub fn get_string(&self) -> Result<String, CassError> {unsafe{
         let message:CString = mem::zeroed();
         let mut message = message.as_ptr();
-        let mut message_length:u64 = mem::zeroed();
-        cass_value_get_string(self.0, &mut message, &mut message_length);
+        let mut message_length = mem::zeroed();
+        cass_value_get_string(self.0, &mut message, &mut (message_length));
 
         let slice = slice::from_raw_parts(message as *const u8,message_length as usize);
-        let err = CassError::build(cass_value_get_string(self.0, &mut message, &mut message_length));
+        let err = CassError::build(cass_value_get_string(self.0, &mut message, &mut (message_length)));
         err.wrap(str::from_utf8(slice).unwrap().to_string())
     }}
     

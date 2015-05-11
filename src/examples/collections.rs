@@ -25,7 +25,7 @@ fn select_from_collections(session:&mut CassSession, key:&str) -> Result<(),Cass
     println!("{:?}", result);
     for row in result.iter() {
         let column = row.get_column(0);
-        let items_iterator:SetIterator = try!(column.set_iter());
+        let items_iterator:SetIterator = try!(try!(column).set_iter());
         for item in items_iterator {
             println!("item: {:?}", item);
         }

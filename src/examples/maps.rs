@@ -33,7 +33,7 @@ fn select_from_maps(session:&mut CassSession, key:&str) -> Result<(),CassError> 
     let result = try!(session.execute_statement(&statement).wait());
     //println!("{:?}", result);
     for row in result.iter() {
-        let column = row.get_column(0);
+        let column = row.get_column(0).unwrap(); //FIXME
         let items_iterator:MapIterator = try!(column.map_iter());
         for item in items_iterator {
             println!("item: {:?}", item);

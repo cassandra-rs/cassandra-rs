@@ -1,5 +1,11 @@
-#![feature(libc,core,collections,alloc,convert)]
+#![feature(custom_attribute)] 
 
+#[allow(dead_code, non_camel_case_types)]
+
+//#[macro_use] 
+//mod mysql_bindings {
+//    bindgen!("/usr/include/mysql/mysql.h", match="mysql.h", link="mysql");
+//}
 
 extern crate libc;
 
@@ -35,6 +41,7 @@ pub use cql_ffi::collection::cass_set::*;
 pub use cql_ffi::collection::cass_list::*;
 
 extern crate cql_bindgen;
+
 
 mod cql_ffi {
     pub mod consistency;

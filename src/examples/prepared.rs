@@ -38,11 +38,11 @@ fn select_from_basic(session:&mut CassSession, prepared:&CassPrepared, key:&str,
         Ok(result) => {
             println!("{:?}", result);
             for row in result.iter() {
-                basic.bln = try!(row.get_column(1).get_bool());
-                basic.dbl = try!(row.get_column(2).get_double());
-                basic.flt = try!(row.get_column(3).get_float());
-                basic.i32 = try!(row.get_column(4).get_int32());
-                basic.i64 = try!(row.get_column(5).get_int64());
+                basic.bln = try!(try!(row.get_column(1)).get_bool());
+                basic.dbl = try!(try!(row.get_column(2)).get_double());
+                basic.flt = try!(try!(row.get_column(3)).get_float());
+                basic.i32 = try!(try!(row.get_column(4)).get_int32());
+                basic.i64 = try!(try!(row.get_column(5)).get_int64());
             }
             Ok(())
         },

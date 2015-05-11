@@ -65,7 +65,7 @@ impl CassList {
     }}
 
     pub fn append_bytes<'a>(&'a mut self, value: Vec<u8>) -> Result<&'a Self,CassError> {unsafe{
-        let bytes = cass_collection_append_bytes(self.0,value.as_slice().as_ptr(), value.len() as u64);
+        let bytes = cass_collection_append_bytes(self.0,value[..].as_ptr(), value.len() as u64);
         CassError::build(bytes).wrap(self)
     }}
 

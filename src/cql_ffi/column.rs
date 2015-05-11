@@ -16,6 +16,9 @@ use std::slice;
 use std::ffi::CString;
 
 use cql_bindgen::CASS_VALUE_TYPE_ASCII;
+use cql_bindgen::CASS_VALUE_TYPE_VARCHAR;
+use cql_bindgen::CASS_VALUE_TYPE_TEXT;
+use cql_bindgen::CASS_OK;
 use cql_bindgen::cass_value_get_int32;
 use cql_bindgen::cass_value_get_int64;
 use cql_bindgen::cass_value_get_float;
@@ -104,17 +107,20 @@ impl CassColumn {
 
     pub fn get_string(&self) -> Result<String,CassError> {unsafe{
         match cass_value_type(self.0) {
-            CASS_VALUE_TYPE_ASCII => {
-                let message:CString = mem::zeroed();
-                let msg_ptr = &mut message.as_ptr();
-                let message_length = mem::zeroed();
-                cass_value_get_string(self.0, msg_ptr, message_length);
+            CASS_VALUE_TYPE_ASCII|CASS_VALUE_TYPE_TEXT|CASS_VALUE_TYPE_VARCHAR => {
+                let mut message = mem::zeroed();
+                let mut message_length = mem::zeroed();
+                match cass_value_get_string(self.0, &mut message, &mut message_length) {
+                    CASS_OK=> {
+                        let slice = slice::from_raw_parts(message as *const u8,message_length as usize);
+                        Ok(str::from_utf8(slice).unwrap().to_string())
+                    },
+                    err => Err(CassError::build(err))
+                }
 
-                let slice = slice::from_raw_parts(*msg_ptr as *const u8,message_length as usize);
-                Ok(str::from_utf8(slice).unwrap().to_string())
 
             },
-            err => panic!("incorrect type: {:?}", err)
+            err => Err(CassError::build(err))
         }
     }}
 

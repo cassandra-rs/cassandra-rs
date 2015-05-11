@@ -28,8 +28,8 @@ fn select_from_log(session:&mut CassSession, key:&str) -> Result<CassResult,Cass
 	let mut future = session.execute_statement(statement);
 	let results = try!(future.wait());
 	for row in results.iter() {
-		let time = row.get_column(1);
-		let entry = row.get_column(2);
+		let time = try!(row.get_column(1));
+		let entry = try!(row.get_column(2));
 		let time_str = time.get_string();
 		println!("{:?}.{:?}", time_str, entry.get_string());
 	}

@@ -61,7 +61,7 @@ unsafe fn print_schema_value(value:&CassValue) {
         }
 
         CassValueType::TEXT|CassValueType::ASCII|CassValueType::VARCHAR => {
-            print!("{:?}", value.get_string());
+            print!("{:?}", value            );
         }
     
         CassValueType::UUID => {
@@ -116,9 +116,9 @@ unsafe fn print_schema_map(value:&CassValue) {
 
 unsafe fn print_schema_meta_field(field:&CassSchemaMetaField, indent:u32) {
     print_indent(indent);
-    print!("{:?}", field.get_name());
+    print!("{:?} : ", field.get_name());
     print_schema_value(&field.get_value());
-    print!("\n");
+    println!("");
 }
 
 unsafe fn print_schema_meta_fields(meta:&CassSchemaMeta, indent:u32) {
@@ -140,9 +140,9 @@ unsafe fn print_schema_meta_entries(meta:&CassSchemaMeta, indent:u32) -> Result<
 
 unsafe fn print_schema_meta(meta:&CassSchemaMeta, indent:u32) -> Result<(),CassError> {
     print_indent(indent);
-    match meta.get_type().unwrap() {
+    match try!(meta.get_type()) {
         CassSchemaMetaType::KEYSPACE => {
-            println!("Keyspace {:?}",  meta.get_field("keyspace_name").get_value().get_string());
+            println!("Keyspace {:?}",  meta.get_field("keyspace_name").get_value());
             print_schema_meta_fields(meta, indent + 1);
             println!("");
             try!(print_schema_meta_entries(meta, indent + 1));
@@ -150,7 +150,7 @@ unsafe fn print_schema_meta(meta:&CassSchemaMeta, indent:u32) -> Result<(),CassE
         }
 
         CassSchemaMetaType::TABLE => {
-            println!("Table {:?}", meta.get_field("columnfamily_name").get_value().get_string());
+            println!("Table {:?}", meta.get_field("columnfamily_name").get_value());
             print_schema_meta_fields(meta, indent + 1);
             println!("");
             try!(print_schema_meta_entries(meta, indent + 1));

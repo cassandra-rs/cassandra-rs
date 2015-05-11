@@ -6,7 +6,7 @@ use cql_ffi::*;
 
 unsafe fn print_error(future:&mut CassFuture) {
     let message = future.error_message();
-    let message = slice::from_raw_buf(&message.data,message.length as usize);
+    let message = slice::from_raw_parts(&message.data,message.length as usize);
     println!("Error: {:?}", message);
 }
 

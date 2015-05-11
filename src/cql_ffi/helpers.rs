@@ -1,13 +1,9 @@
-extern crate alloc;
-use std::raw;
 use std::mem;
+use std::slice;
 
 #[allow(unused)]
 unsafe fn raw_byte_repr<'a, T>(ptr: &'a T) -> &'a [u8] {
-    mem::transmute(raw::Slice{
-        data: ptr as *const _ as *const u8,
-        len: mem::size_of::<T>(),
-    })
+    mem::transmute(slice::from_raw_parts(ptr as *const _ as *const u8,mem::size_of::<T>()))
 }
 
 //~ pub fn str_to_ref(mystr:&str) -> *const i8 {

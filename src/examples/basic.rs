@@ -1,6 +1,5 @@
-#![feature(collections)]
+#![feature(custom_attribute)]
 
-extern crate collections;
 extern crate cql_ffi;
 
 use cql_ffi::*;
@@ -21,32 +20,31 @@ struct Basic {
     i64:i64,
 }
 
-fn insert_into_basic(session: CassSession, key:&str, basic:&Basic) -> Result<(CassSession,CassResult),CassError> {
+fn insert_into_basic(session: &mut CassSession, key:&str, basic:&Basic) -> Result<CassResult,CassError> {
     let statement = CassStatement::new(INSERT_QUERY, 6);
-    statement.bind_string(0, key).unwrap();
-    statement.bind_bool(1, basic.bln).unwrap();
-    statement.bind_float(2, basic.flt).unwrap();
-    statement.bind_double(3, basic.dbl).unwrap();
-    statement.bind_int32(4, basic.i32).unwrap();
-    statement.bind_int64(5, basic.i64).unwrap();
-    let future = session.execute_statement(&statement).wait().unwrap();
-    Ok((session,future))
+    try!(statement.bind_string(0, key));
+    try!(statement.bind_bool(1, basic.bln));
+    try!(statement.bind_float(2, basic.flt));
+    try!(statement.bind_double(3, basic.dbl));
+    try!(statement.bind_int32(4, basic.i32));
+    try!(statement.bind_int64(5, basic.i64));
+    Ok(try!(session.execute_statement(&statement).wait()))
 }
 
-fn select_from_basic(session:CassSession, key:&str, basic:&mut Basic) -> Result<(CassSession,CassResult),CassError> {
+fn select_from_basic(session:&mut CassSession, key:&str, basic:&mut Basic) -> Result<CassResult,CassError> {
     let statement = CassStatement::new(SELECT_QUERY, 1);
-    let statement = statement.bind_string(0, key).unwrap();
-    match session.execute_statement(&statement).wait() {
+    let statement = try!(statement.bind_string(0, key));
+    match session.execute_statement(statement).wait() {
         Ok(result) => {
             println!("Result: \n{:?}\n",result);
             for row in result.iter() {
-                basic.bln = try!(row.get_column(1).get_bool());
-                basic.dbl = try!(row.get_column(2).get_double());
-                basic.flt = try!(row.get_column(3).get_float());
-                basic.i32 = try!(row.get_column(4).get_int32());
-                basic.i64 = try!(row.get_column(5).get_int64());
+                basic.bln = try!(try!(row.get_column(1)).get_bool());
+                basic.dbl = try!(try!(row.get_column(2)).get_double());
+                basic.flt = try!(try!(row.get_column(3)).get_float());
+                basic.i32 = try!(try!(row.get_column(4)).get_int32());
+                basic.i64 = try!(try!(row.get_column(5)).get_int64());
             }
-            Ok((session,result))
+            Ok(result)
         }
         Err(_) => panic!("error")
     }
@@ -62,12 +60,12 @@ fn main() {
     let session_future = CassSession::new().connect(cluster).wait();
 
     match session_future {
-        Ok(session) => {
+        Ok(mut session) => {
             let mut output = Basic{bln:false,flt:0f32,dbl:0f64,i32:0,i64:0};
             session.execute(CREATE_KEYSPACE,0);
             session.execute(CREATE_TABLE,0);
-            let (session,_) = insert_into_basic(session, "test", &input).unwrap();
-            let (mut session,_) = select_from_basic(session, "test", &mut output).unwrap();
+            insert_into_basic(&mut session, "test", &input).unwrap();
+            select_from_basic(&mut session, "test", &mut output).unwrap();
             println!("{:?}",input);
             println!("{:?}",output);
             assert!(input.bln == output.bln);
