@@ -1,10 +1,3 @@
-#[allow(dead_code, non_camel_case_types)]
-
-//#[macro_use] 
-//mod mysql_bindings {
-//    bindgen!("/usr/include/mysql/mysql.h", match="mysql.h", link="mysql");
-//}
-
 extern crate libc;
 
 pub use cql_ffi::consistency::*;

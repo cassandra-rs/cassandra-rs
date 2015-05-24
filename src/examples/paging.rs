@@ -17,10 +17,10 @@ fn insert_into_paging(session:&mut CassSession/*, uuid_gen:&mut CassUuidGen*/) -
     for i in 0..NUM_CONCURRENT_REQUESTS {
         let key = i.to_string();
         println!("key ={:?}", key);
-        let statement = &CassStatement::new(INSERT_QUERY, 2);
+        let mut statement = CassStatement::new(INSERT_QUERY, 2);
         try!(statement.bind_string(0, &key));
         try!(statement.bind_string(1, &key));
-        let future = session.execute_statement(&statement);
+        let future = session.execute_statement(statement);
         futures.push(future);
     }
              
@@ -31,28 +31,29 @@ fn insert_into_paging(session:&mut CassSession/*, uuid_gen:&mut CassUuidGen*/) -
 }
 
 fn select_from_paging(session:&mut CassSession) -> Result<(), CassError> {
-   let mut has_more_pages = true;
-    let statement = CassStatement::new(SELECT_QUERY, 0);
-        statement.set_paging_size(100).unwrap();
+//   let mut has_more_pages = true;
+//    let mut statement = CassStatement::new(SELECT_QUERY, 0);
+//    	statement.set_paging_size(100).unwrap();
 
-    while has_more_pages {
-        let result = try!(session.execute_statement(&statement).wait());
-        //println!("{:?}", result);
-        for row in result.iter() {
-            match try!(row.get_column(0)).get_string() {
-                Ok(key) => {
-                    let key_str = key.to_string();
-                    let value = try!(row.get_column(1));
-                    print!("key: '{:?}' value: '{:?}'\n", key_str, &value.get_string().unwrap());
-                },
-                Err(err) => panic!(err)
-            }
-        }
-        if result.has_more_pages() {
-            try!(statement.set_paging_state(&result));
-        }
-        has_more_pages = result.has_more_pages();
-    }
+	//FIXME must understaned statement lifetime better for paging
+//    while has_more_pages {
+//        let result = try!(session.execute_statement(statement).wait());
+//        //println!("{:?}", result);
+//        for row in result.iter() {
+//            match try!(row.get_column(0)).get_string() {
+//                Ok(key) => {
+//                    let key_str = key.to_string();
+//                    let value = try!(row.get_column(1));
+//                    print!("key: '{:?}' value: '{:?}'\n", key_str, &value.get_string().unwrap());
+//                },
+//                Err(err) => panic!(err)
+//            }
+//        }
+//        if result.has_more_pages() {
+//            try!(statement.set_paging_state(&result));
+//        }
+//        has_more_pages = result.has_more_pages();
+//    }
     Ok(())
 }
 

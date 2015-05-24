@@ -14,7 +14,7 @@ static SELECT_QUERY:&'static str = "SELECT items FROM examples.maps WHERE key = 
 static INSERT_QUERY:&'static str ="INSERT INTO examples.maps (key, items) VALUES (?, ?);";
 
 fn insert_into_maps(session:&mut CassSession, key:&str, items:Vec<Pair>) -> Result<(),CassError> {
-    let statement = CassStatement::new(INSERT_QUERY, 2);
+    let mut statement = CassStatement::new(INSERT_QUERY, 2);
     statement.bind_string(0, key).unwrap();
 
     let mut map = CassMap::new(5);
@@ -23,14 +23,14 @@ fn insert_into_maps(session:&mut CassSession, key:&str, items:Vec<Pair>) -> Resu
         map.append_int32(item.value).unwrap();
     }
     try!(statement.bind_map(1, map));
-    try!(session.execute_statement(&statement).wait());
+    try!(session.execute_statement(statement).wait());
     Ok(())
 }
 
 fn select_from_maps(session:&mut CassSession, key:&str) -> Result<(),CassError> {
-    let statement = CassStatement::new(SELECT_QUERY, 1);
+    let mut statement = CassStatement::new(SELECT_QUERY, 1);
     try!(statement.bind_string(0, key));
-    let result = try!(session.execute_statement(&statement).wait());
+    let result = try!(session.execute_statement(statement).wait());
     //println!("{:?}", result);
     for row in result.iter() {
         let column = row.get_column(0).unwrap(); //FIXME

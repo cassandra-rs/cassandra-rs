@@ -175,7 +175,7 @@ impl CassError {
             7 => CassError(CASS_ERROR_LIB_REQUEST_QUEUE_FULL),
             8 => CassError(CASS_ERROR_LIB_NO_AVAILABLE_IO_THREAD),
             9 => CassError(CASS_ERROR_LIB_WRITE_ERROR),
-            10 => CassError(CASS_ERROR_LIB_NO_HOSTS_AVAILABLE),
+            10|16777226 => CassError(CASS_ERROR_LIB_NO_HOSTS_AVAILABLE),
             11 => CassError(CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS),
             12 => CassError(CASS_ERROR_LIB_INVALID_ITEM_COUNT),
             13 => CassError(CASS_ERROR_LIB_INVALID_VALUE_TYPE),

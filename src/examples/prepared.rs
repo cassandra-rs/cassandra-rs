@@ -17,21 +17,21 @@ struct Basic {
 }
 
 fn insert_into_basic(session:&mut CassSession, key:&str, basic:&mut Basic) -> Result<(),CassError> {
-    let statement = CassStatement::new(INSERT_QUERY, 6);
+    let mut statement = CassStatement::new(INSERT_QUERY, 6);
     statement
         .bind_string(0, key).unwrap()
         .bind_bool(1, basic.bln).unwrap()
         .bind_float(2, basic.flt).unwrap()
         .bind_double(3, basic.dbl).unwrap()
-        .bind_int32(4, basic.i32).unwrap()
-        .bind_int64(5, basic.i64).unwrap();
-    try!(session.execute_statement(&statement).wait());
+        .bind_int32(4, basic.i32).unwrap();
+//        .bind_int64(5, basic.i64).unwrap();
+    try!(session.execute_statement(statement).wait());
     Ok(())
 }
 
 
 fn select_from_basic(session:&mut CassSession, prepared:&CassPrepared, key:&str, basic:&mut Basic) -> Result<(),CassError> {
-    let statement = &prepared.bind();
+    let mut statement = prepared.bind();
     try!(statement.bind_string(0, key));
     let mut future = session.execute_statement(statement);
     match future.wait() {

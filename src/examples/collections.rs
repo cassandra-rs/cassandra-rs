@@ -8,7 +8,7 @@ static CREATE_KEYSPACE:&'static str = "CREATE KEYSPACE examples WITH replication
 static CREATE_TABLE:&'static str = "CREATE TABLE examples.collections (key text, items set<text>, PRIMARY KEY (key))";
 
 fn insert_into_collections(session:&mut CassSession, key:&str, items:Vec<String>) -> Result<CassResult,CassError> {
-    let statement = &CassStatement::new(INSERT_QUERY, 2);
+    let mut statement = CassStatement::new(INSERT_QUERY, 2);
     try!(statement.bind_string(0, key));
     let mut set = CassSet::new(2);
     for item in items.iter() {
@@ -19,9 +19,9 @@ fn insert_into_collections(session:&mut CassSession, key:&str, items:Vec<String>
 }
 
 fn select_from_collections(session:&mut CassSession, key:&str) -> Result<(),CassError> {
-    let statement = CassStatement::new(SELECT_QUERY, 1);
+    let mut statement = CassStatement::new(SELECT_QUERY, 1);
     try!(statement.bind_string(0, key));
-    let result = try!(session.execute_statement(&statement).wait());
+    let result = try!(session.execute_statement(statement).wait());
     println!("{:?}", result);
     for row in result.iter() {
         let column = row.get_column(0);

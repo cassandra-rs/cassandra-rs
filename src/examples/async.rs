@@ -1,4 +1,7 @@
+extern crate num;
 extern crate cassandra;
+
+//use num::ToPrimitive;
 
 use cassandra::CassSession;
 use cassandra::CassStatement;
@@ -14,7 +17,7 @@ fn insert_into_async(session: &mut CassSession, key:String) -> Result<(),CassErr
     let query="INSERT INTO examples.async (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, ?);";
     let mut futures = Vec::<ResultFuture>::new();
     for i in (0..NUM_CONCURRENT_REQUESTS) {
-        let statement = &CassStatement::new(query, 6);
+        let mut statement = CassStatement::new(query, 6);
         let key:String = key.clone() + &i.to_string();
         statement
             .bind_string(0, &key).unwrap()
@@ -42,9 +45,9 @@ pub fn main() {
     let cluster = &mut CassCluster::new().set_contact_points("127.0.0.1").unwrap();
     match CassSession::new().connect(cluster).wait() {
         Ok(mut session) => {
-            let _ = session.execute(CREATE_KEYSPACE,0).wait().unwrap();
-            let _ = session.execute(CREATE_TABLE,0).wait().unwrap();
-            let _ = session.execute("USE examples",0);
+            session.execute(CREATE_KEYSPACE,0).wait().unwrap();
+            session.execute(CREATE_TABLE,0).wait().unwrap();
+            session.execute("USE examples",0);
             insert_into_async(&mut session, "test".to_string()).unwrap();
             session.close().wait().unwrap();
         },

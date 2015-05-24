@@ -21,23 +21,23 @@ static INSERT_QUERY:&'static str = "INSERT INTO examples.basic (key, bln, flt, d
 static SELECT_QUERY:&'static str = "SELECT * FROM examples.basic WHERE key = ?";
 
 //fixme row key sent is null?
-fn insert_into_basic(session:&mut CassSession, prepared:&CassPrepared, key:&str, basic:Basic) -> Result<CassResult,CassError> {
+fn insert_into_basic(session:&mut CassSession, prepared:CassPrepared, key:&str, basic:Basic) -> Result<CassResult,CassError> {
     println!("key={:?}",key);
-    let statement = &prepared.bind();
+    let mut statement = prepared.bind();
     statement.bind_string_by_name("key", key).unwrap()
         .bind_bool_by_name("BLN", basic.bln).unwrap()
         .bind_float_by_name("FLT", basic.flt).unwrap()
-        .bind_double_by_name("\"dbl\"", basic.dbl).unwrap()
-        .bind_int32_by_name("i32", basic.i32).unwrap()
-        .bind_int64_by_name("I64", basic.i64).unwrap();
+        .bind_double_by_name("\"dbl\"", basic.dbl).unwrap();
+//        .bind_int32_by_name("i32", basic.i32).unwrap()
+//        .bind_int64_by_name("I64", basic.i64).unwrap();
 
     session.execute_statement(statement).wait()
 }
 
 unsafe fn select_from_basic(session:&mut CassSession, prepared:&CassPrepared, key:&str, basic:&mut Basic) -> Result<CassResult,CassError> {
-    let statement = prepared.bind();
-    let statement = statement.bind_string_by_name("key", key).unwrap();
-    match session.execute_statement(&statement).wait() {
+    let mut statement = prepared.bind();
+    statement.bind_string_by_name("key", key).unwrap();
+    match session.execute_statement(statement).wait() {
         Ok(result) => {
             println!("{:?}", result);
             for row in result.iter() {
@@ -62,8 +62,8 @@ fn main() {unsafe{
             let _ = session.execute(CREATE_KEYSPACE,0).wait().unwrap();
             let _ = session.execute(CREATE_TABLE,0).wait().unwrap();
             match session.prepare(INSERT_QUERY).unwrap().wait() {
-                Ok(mut insert_prepared) => {
-                    insert_into_basic(&mut session, &mut insert_prepared, "prepared_test", input).unwrap();
+                Ok(insert_prepared) => {
+                    insert_into_basic(&mut session, insert_prepared, "prepared_test", input).unwrap();
                 },
                 Err(err) => println!("error: {:?}",err)
             }
