@@ -7,6 +7,7 @@ use cql_bindgen::CassFuture as _CassFuture;
 use cql_ffi::prepared::CassPrepared;
 use cql_ffi::error::CassError;
 
+use cql_bindgen::cass_future_free;
 use cql_bindgen::cass_future_wait;
 use cql_bindgen::cass_future_get_prepared;
 use cql_bindgen::cass_future_error_message;
@@ -14,7 +15,17 @@ use cql_bindgen::cass_future_error_code;
 
 pub struct PreparedFuture(pub *mut _CassFuture);
 
+impl Drop for PreparedFuture {
+    fn drop(&mut self) {unsafe{
+        self.free()
+    }}
+}
+
 impl PreparedFuture {
+    unsafe fn free(&mut self) {
+        cass_future_free(self.0)
+    }
+
     pub fn wait(&mut self) -> Result<CassPrepared,CassError> {unsafe{cass_future_wait(self.0);self.error_code()}}
 
     pub fn error_code(&mut self) -> Result<CassPrepared,CassError> {unsafe{
