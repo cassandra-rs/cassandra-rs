@@ -31,13 +31,13 @@ fn insert_into_basic(session:&mut CassSession, prepared:CassPrepared, key:&str, 
 //        .bind_int32_by_name("i32", basic.i32).unwrap()
 //        .bind_int64_by_name("I64", basic.i64).unwrap();
 
-    session.execute_statement(statement).wait()
+    session.execute_statement(&statement).wait()
 }
 
 unsafe fn select_from_basic(session:&mut CassSession, prepared:&CassPrepared, key:&str, basic:&mut Basic) -> Result<CassResult,CassError> {
     let mut statement = prepared.bind();
     statement.bind_string_by_name("key", key).unwrap();
-    match session.execute_statement(statement).wait() {
+    match session.execute_statement(&statement).wait() {
         Ok(result) => {
             println!("{:?}", result);
             for row in result.iter() {

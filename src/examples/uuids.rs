@@ -18,14 +18,14 @@ fn insert_into_log(session:&mut CassSession, key:&str, time:CassUuid, entry:&str
 	statement.bind_string(0, key).unwrap();
 	statement.bind_uuid(1, time).unwrap();
 	statement.bind_string(2, &entry).unwrap();
-	let mut future = session.execute_statement(statement);
+	let mut future = session.execute_statement(&statement);
 	future.wait()
 }
 
 fn select_from_log(session:&mut CassSession, key:&str) -> Result<CassResult,CassError> {
 	let mut statement = CassStatement::new(SELECT_QUERY, 1);
 	statement.bind_string(0, &key).unwrap();
-	let mut future = session.execute_statement(statement);
+	let mut future = session.execute_statement(&statement);
 	let results = try!(future.wait());
 	for row in results.iter() {
 		let time = try!(row.get_column(1));

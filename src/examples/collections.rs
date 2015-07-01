@@ -15,13 +15,13 @@ fn insert_into_collections(session:&mut CassSession, key:&str, items:Vec<String>
         try!(set.append_string(item));
     }
     try!(statement.bind_set(1, set));
-    session.execute_statement(statement).wait()
+    session.execute_statement(&statement).wait()
 }
 
 fn select_from_collections(session:&mut CassSession, key:&str) -> Result<(),CassError> {
     let mut statement = CassStatement::new(SELECT_QUERY, 1);
     try!(statement.bind_string(0, key));
-    let result = try!(session.execute_statement(statement).wait());
+    let result = try!(session.execute_statement(&statement).wait());
     println!("{:?}", result);
     for row in result.iter() {
         let column = row.get_column(0);

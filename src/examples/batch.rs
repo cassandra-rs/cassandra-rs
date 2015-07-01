@@ -49,7 +49,7 @@ fn main() {
     );
     
     session.execute(CREATE_KEYSPACE,0).wait().unwrap();
-    session.execute_statement(CassStatement::new(CREATE_TABLE,0)).wait().unwrap();
+    session.execute_statement(&CassStatement::new(CREATE_TABLE,0)).wait().unwrap();
     insert_into_batch_with_prepared(session, pairs).unwrap();
    	verify_batch(session);
     session.close();

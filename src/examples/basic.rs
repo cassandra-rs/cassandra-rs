@@ -26,13 +26,13 @@ fn insert_into_basic(session: &mut CassSession, key:&str, basic:&Basic) -> Resul
     try!(statement.bind_double(3, basic.dbl));
     try!(statement.bind_int32(4, basic.i32));
     try!(statement.bind_int64(5, basic.i64));
-    Ok(try!(session.execute_statement(statement).wait()))
+    Ok(try!(session.execute_statement(&statement).wait()))
 }
 
 fn select_from_basic(session:&mut CassSession, key:&str) -> Result<Basic,CassError> {
     let mut statement = CassStatement::new(SELECT_QUERY, 1);
     try!(statement.bind_string(0, key));
-    let result = try!(session.execute_statement(statement).wait());
+    let result = try!(session.execute_statement(&statement).wait());
             println!("Result: \n{:?}\n",result);
             match result.first_row() {
                 None => Err(CassError::build(1)),

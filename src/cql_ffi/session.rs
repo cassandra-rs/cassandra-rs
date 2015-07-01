@@ -53,7 +53,7 @@ impl CassSession {
         ResultFuture(cass_session_execute(self.0, CassStatement::new(statement,parameter_count).0))
     }}
     
-    pub fn execute_statement(&self, statement: CassStatement) -> ResultFuture {unsafe{
+    pub fn execute_statement(&self, statement: &CassStatement) -> ResultFuture {unsafe{
         ResultFuture(cass_session_execute(self.0, statement.0))
     }}
     

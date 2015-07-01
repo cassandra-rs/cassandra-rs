@@ -26,7 +26,7 @@ fn insert_into_async(session: &mut CassSession, key:String) -> Result<(),CassErr
             .bind_double(3, i as f64 / 200.0).unwrap()
             .bind_int32(4, i as i32 * 10).unwrap()
             .bind_int64(5, i as i64* 100).unwrap();
-        let future = session.execute_statement(statement);
+        let future = session.execute_statement(&statement);
         futures.push(future);
     }
     block_async(futures)
