@@ -24,7 +24,8 @@ unsafe fn print_table(session: &mut CassSession, keyspace:&str, table:&str) -> R
 
 
 fn main() {unsafe{
-    let mut cluster = CassCluster::new().set_contact_points("127.0.0.1").unwrap();
+    let mut cluster = CassCluster::new();
+    cluster.set_contact_points("127.0.0.1").unwrap();
     match CassSession::new().connect(&mut cluster).wait() {
         Ok(mut session) => {
             let _ = session.execute_statement(&CassStatement::new(CREATE_KEYSPACE,0));
@@ -88,7 +89,7 @@ unsafe fn print_schema_value(value:&CassValue) {
 unsafe fn print_schema_list(value:&CassValue) {
     let mut is_first = true;
     print!("[ ");
-    for item in value.as_collection_iterator() {
+    for item in value.as_set_iterator().unwrap() {
         if is_first {
             print!(", ");
             is_first = false;
@@ -102,7 +103,7 @@ unsafe fn print_schema_list(value:&CassValue) {
 unsafe fn print_schema_map(value:&CassValue) {
     let mut is_first = true;
     print!("[[ ");
-    for (key,value) in value.as_map_iterator() {
+    for (key,value) in value.as_map_iterator().unwrap() {
         if !is_first {
             print!(", ");
             is_first = false;

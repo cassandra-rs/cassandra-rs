@@ -1,20 +1,17 @@
-#![allow(non_camel_case_types)]
-#![allow(dead_code)]
-#![allow(missing_copy_implementations)]
-
 use std::fmt::Debug;
+use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt;
 use std::ffi::CString;
 use std::str;
 use std::slice;
 
-use cql_ffi::types::cass_size_t;
 use cql_ffi::error::CassError;
 use cql_ffi::inet::CassInet;
 use cql_ffi::uuid::CassUuid;
-use cql_ffi::iterator::set_iterator::SetIterator;
-use cql_ffi::iterator::map_iterator::MapIterator;
+use cql_ffi::collection::map::MapIterator;
+use cql_ffi::collection::set::SetIterator;
+use cql_ffi::error::CassErrorTypes;
 
 use cql_bindgen::CassValue as _CassValue;
 use cql_bindgen::cass_value_secondary_sub_type;
@@ -61,9 +58,9 @@ use cql_bindgen::CASS_VALUE_TYPE_VARINT;
 
 use std::mem;
 
-pub struct CassValue(pub *const _CassValue);
+pub struct CassValue(*const _CassValue);
 
-#[derive(Debug,Copy,Clone,PartialEq)]
+#[derive(Debug)]
 pub enum CassValueType {
     UNKNOWN = CASS_VALUE_TYPE_UNKNOWN as isize,
     CUSTOM = CASS_VALUE_TYPE_CUSTOM as isize,
@@ -112,13 +109,12 @@ impl CassValueType {
             CASS_VALUE_TYPE_LIST        => CassValueType::LIST,
             CASS_VALUE_TYPE_MAP         => CassValueType::MAP,
             CASS_VALUE_TYPE_SET         => CassValueType::SET,
-            _ => panic!("impossible value type")
+            err => panic!("impossible value type{}", err)
         }
     }   
 }
 
 impl Debug for CassValue {
-
     fn fmt(&self, f:&mut Formatter) -> fmt::Result {
         match self.is_null() {
             true => return Ok(()),
@@ -135,13 +131,52 @@ impl Debug for CassValue {
                 CassValueType::TIMEUUID         => write!(f, "TIMEUUID: {:?}", self.get_uuid().unwrap()),
                 CassValueType::SET      => {
                     try!(write!(f, "["));
-                    for item in self.as_collection_iterator() {try!(write!(f,"{:?} ",item))}
+                    for item in self.as_set_iterator().unwrap() {
+                        try!(write!(f,"SET {:?} ",item))
+                    }
                     try!(write!(f, "]"));
                     Ok(())
                 }
                 CassValueType::MAP => {
-                    for item in self.as_map_iterator() {
-                        try!(write!(f, "LIST {:?}", item ))
+                    for item in self.as_map_iterator().unwrap() {
+                        try!(write!(f, "MAP {:?}:{:?}", item.0,item.1))
+                    }
+                    Ok(())
+                },
+            
+                //FIXME
+                err => write!(f, "{:?}", err),
+            }
+        }
+    }
+}
+
+impl Display for CassValue {
+    fn fmt(&self, f:&mut Formatter) -> fmt::Result {
+        match self.is_null() {
+            true => return Ok(()),
+            false => match self.get_type() {
+                CassValueType::UNKNOWN          => write!(f, "{}", "unknown"),
+                CassValueType::CUSTOM           => write!(f, "{}", "custom"),
+                CassValueType::ASCII            => write!(f, "{}", self.get_string().unwrap()),
+                CassValueType::BIGINT           => write!(f, "{}", self.get_int64().unwrap()),
+                CassValueType::VARCHAR          => write!(f, "{}", self.get_string().unwrap()),
+                CassValueType::BOOLEAN          => write!(f, "{}", self.get_bool().unwrap()),
+                CassValueType::DOUBLE           => write!(f, "{}", self.get_double().unwrap()),
+                CassValueType::FLOAT            => write!(f, "{}", self.get_float().unwrap()),
+                CassValueType::INT              => write!(f, "{}", self.get_int32().unwrap()),
+                CassValueType::TIMEUUID         => write!(f, "TIMEUUID: {}", self.get_uuid().unwrap()),
+                CassValueType::SET      => {
+                    try!(write!(f, "["));
+                    for item in self.as_set_iterator().unwrap() {
+                        try!(write!(f,"{} ",item))
+                    }
+                    try!(write!(f, "]"));
+                    Ok(())
+                }
+                CassValueType::MAP => {
+                    for item in self.as_map_iterator().unwrap() {
+                        try!(write!(f, "MAP {}:{}", item.0,item.1))
                     }
                     Ok(())
                 },
@@ -154,11 +189,16 @@ impl Debug for CassValue {
 }
 
 impl CassValue {
-    pub fn fill_uuid(&self, mut output: CassUuid) -> Result<CassUuid,CassError> {unsafe{
-        CassError::build(cass_value_get_uuid(self.0,&mut output.0)).wrap(output)
+    pub fn new(value: *const _CassValue) -> Self {
+//        println!("building value: {:?}", CassValue(value).get_type());
+            CassValue(value)
+    }
+        
+    pub fn fill_uuid(&self, mut uuid: CassUuid) -> Result<CassUuid,CassError> {unsafe{
+        CassError::build(cass_value_get_uuid(self.0,&mut uuid.0)).wrap(uuid)
     }}
 
-    pub fn fill_string<'a>(&'a self) -> Result<String,CassError> {unsafe{
+    pub fn fill_string(&self) -> Result<String,CassError> {unsafe{
         let output = mem::zeroed();
         let output_length = mem::zeroed();
         let err = cass_value_get_string(self.0,output, output_length);
@@ -168,12 +208,13 @@ impl CassValue {
         CassError::build(err).wrap(string)
     }}
 
-    pub fn get_bytes<'a>(&'a self) -> Result<Vec<*const u8>,CassError> {unsafe{
-        let output:*mut *const u8 = mem::zeroed();
+    //FIXME test this
+    pub fn get_bytes(&self) -> Result<Vec<*const u8>,CassError> {unsafe{
+        let mut output:*const u8 = mem::zeroed();
         let output_size = mem::zeroed();
-        let result = cass_value_get_bytes(self.0,output, output_size);
+        let result = cass_value_get_bytes(self.0,&mut output, output_size);
         //let output:*mut u8 = &mut*output;
-        let slice:Vec<*const u8> = Vec::from_raw_parts(output,output_size as usize,output_size as usize);  
+        let slice:Vec<*const u8> = Vec::from_raw_parts(&mut output,output_size as usize,output_size as usize);  
         let r = CassError::build(result);
         r.wrap(slice)
     }}
@@ -194,8 +235,8 @@ impl CassValue {
         if cass_value_is_collection(self.0) > 0 {true} else {false}
     }}
 
-    pub fn item_count(&self) -> cass_size_t {unsafe{
-        cass_value_item_count(self.0) as u64
+    pub fn item_count(&self) -> u64 {unsafe{
+        cass_value_item_count(self.0)
     }}
 
     pub fn primary_sub_type(&self) -> CassValueType {unsafe{
@@ -206,12 +247,18 @@ impl CassValue {
         CassValueType::build(cass_value_secondary_sub_type(self.0))
     }}
 
-    pub fn as_collection_iterator(&self) -> SetIterator {unsafe{
-        SetIterator(cass_iterator_from_collection(self.0))
+    pub fn as_set_iterator(&self) -> Result<SetIterator,CassError> {unsafe{
+        match self.get_type() {
+            CassValueType::SET => Ok(SetIterator(cass_iterator_from_collection(self.0))),
+            _ => Err(CassError::build(CassErrorTypes::LIB_INVALID_VALUE_TYPE as u32))
+        }
     }}
 
-    pub fn as_map_iterator(&self) -> MapIterator {unsafe{
-        MapIterator(cass_iterator_from_map(self.0))
+    pub fn as_map_iterator(&self) -> Result<MapIterator,CassError> {unsafe{
+        match self.get_type() {
+            CassValueType::MAP => Ok(MapIterator(cass_iterator_from_map(self.0))),
+            _ => Err(CassError::build(CassErrorTypes::LIB_INVALID_VALUE_TYPE as u32))
+        }            
     }}
 
     //~ pub fn map_iter(&self) -> Result<MapIterator,CassError> {unsafe{

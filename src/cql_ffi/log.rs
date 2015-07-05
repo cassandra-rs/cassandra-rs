@@ -1,11 +1,6 @@
-#![allow(non_camel_case_types)]
-#![allow(dead_code)]
-#![allow(raw_pointer_derive)]
-
 use cql_bindgen::CassLogMessage;
 
 #[repr(C)]
-#[derive(Copy,Clone)]
 pub enum CassLogLevel {
     DISABLED = 0,
     CRITICAL = 1,

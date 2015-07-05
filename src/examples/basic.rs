@@ -52,11 +52,12 @@ fn select_from_basic(session:&mut CassSession, key:&str) -> Result<Basic,CassErr
 fn main() {
     let input = Basic{bln:true, flt:0.001f32, dbl:0.0002f64, i32:1, i64:2 };
 
-    let cluster = &CassCluster::new()
-                        .set_contact_points(CONTACT_POINTS).unwrap()
-                        .set_load_balance_round_robin().unwrap();
+    let mut cluster = CassCluster::new();
+    cluster
+        .set_contact_points(CONTACT_POINTS).unwrap()
+        .set_load_balance_round_robin().unwrap();
 
-    let session_future = CassSession::new().connect(cluster).wait();
+    let session_future = CassSession::new().connect(&cluster).wait();
 
     match session_future {
         Ok(mut session) => {

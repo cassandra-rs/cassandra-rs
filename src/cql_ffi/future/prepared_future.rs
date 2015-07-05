@@ -17,14 +17,11 @@ pub struct PreparedFuture(pub *mut _CassFuture);
 
 impl Drop for PreparedFuture {
     fn drop(&mut self) {unsafe{
-        self.free()
+        cass_future_free(self.0)
     }}
 }
 
 impl PreparedFuture {
-    unsafe fn free(&mut self) {
-        cass_future_free(self.0)
-    }
 
     pub fn wait(&mut self) -> Result<CassPrepared,CassError> {unsafe{cass_future_wait(self.0);self.error_code()}}
 

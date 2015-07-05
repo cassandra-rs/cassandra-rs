@@ -18,7 +18,7 @@ fn insert_into_maps(session:&mut CassSession, key:&str, items:Vec<Pair>) -> Resu
     statement.bind_string(0, key).unwrap();
 
     let mut map = CassMap::new(5);
-    for item in items.iter() {
+    for item in items {
         map.append_string(item.key).unwrap();
         map.append_int32(item.value).unwrap();
     }
@@ -34,32 +34,13 @@ fn select_from_maps(session:&mut CassSession, key:&str) -> Result<(),CassError> 
     //println!("{:?}", result);
     for row in result.iter() {
         let column = row.get_column(0).unwrap(); //FIXME
-        let items_iterator:MapIterator = try!(column.map_iter());
+        let items_iterator:MapIterator = column.map_iter().unwrap();
         for item in items_iterator {
             println!("item: {:?}", item);
         }
     }
     Ok(())
 }
-
-    //println!("RESULT: {:?}", result);
-
-    //~ for row in result.iter() {
-        //~ let column = row.get_column(0);
-        //~ let items_iterator:MapIterator = try!(column.map_iter());
-        //~ for item in items_iterator {
-            //~ println!("item: {:?}", item);
-        //~ }
-    //~ }
-    //~ for row in result.iter() {
-        //~ let column = row.get_column(0);
-        //~ let items_iterator:MapIterator = try!(column.map_iter());
-        //~ for item in items_iterator {
-            //~ println!("item: {:?}", item);
-        //~ }
-    //~ }
-    //~ Ok(())
-//~ }
 
 fn main() {
     match foo() {
@@ -69,16 +50,18 @@ fn main() {
 }
 
 fn foo() -> Result<(),CassError> {
-    let cluster = &CassCluster::new()
-                        .set_contact_points(CONTACT_POINTS).unwrap()
-                        .set_load_balance_round_robin().unwrap();
+    let mut cluster = CassCluster::new();
+    cluster
+        .set_contact_points(CONTACT_POINTS).unwrap()
+        .set_load_balance_round_robin().unwrap();
+
     let items:Vec<Pair> = vec!(
         Pair{key:"apple", value:1 },
         Pair{key:"orange", value:2 },
         Pair{key:"banana", value:3 },
         Pair{key:"mango", value:4 }
     );
-    let session_future = CassSession::new().connect(cluster).wait();
+    let session_future = CassSession::new().connect(&cluster).wait();
     match session_future {
         Ok(mut session) => {
             try!(session.execute(CREATE_KEYSPACE,0).wait());

@@ -22,11 +22,14 @@ static SELECT_QUERY:&'static str = "SELECT * from examples.pairs";
 fn insert_into_batch_with_prepared<'a>(session:&mut CassSession, pairs:Vec<Pair>)-> Result<CassPrepared,CassError> {
     let prepared = session.prepare(INSERT_QUERY).unwrap().wait().unwrap();
     let mut batch = CassBatch::new(CassBatchType::LOGGED);
-    for pair in pairs.iter() {
+    for pair in pairs {
 	    let mut statement = prepared.bind();
         try!(statement.bind_string(0, pair.key));
         try!(statement.bind_string(1, pair.value));
-        batch.add_statement(statement);
+        match batch.add_statement(statement) {
+            Ok(_) => {},
+            Err(err) => return Err(CassError::build(err))
+        }
     }
     try!(session.execute_batch(batch).wait());
     Ok(prepared)
@@ -38,8 +41,9 @@ pub fn verify_batch(session:&mut CassSession) {
 }
 
 fn main() {
-    let cluster = &CassCluster::new().set_contact_points("127.0.0.1").unwrap();
-    let session = &mut CassSession::new().connect(cluster).wait().unwrap();
+    let mut cluster = CassCluster::new();
+    cluster.set_contact_points("127.0.0.1").unwrap();
+    let mut session = CassSession::new().connect(&mut cluster).wait().unwrap();
     
     let pairs = vec!(   
         Pair{key:"a", value:"1"},
@@ -50,7 +54,7 @@ fn main() {
     
     session.execute(CREATE_KEYSPACE,0).wait().unwrap();
     session.execute_statement(&CassStatement::new(CREATE_TABLE,0)).wait().unwrap();
-    insert_into_batch_with_prepared(session, pairs).unwrap();
-   	verify_batch(session);
+    insert_into_batch_with_prepared(&mut session, pairs).unwrap();
+   	verify_batch(&mut session);
     session.close();
 }

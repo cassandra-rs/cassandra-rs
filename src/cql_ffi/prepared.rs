@@ -1,8 +1,5 @@
-#![allow(non_camel_case_types)]
-#![allow(dead_code)]
-#![allow(missing_copy_implementations)]
-
 use cql_ffi::statement::CassStatement;
+
 use cql_bindgen::CassPrepared as _CassPrepared;
 use cql_bindgen::cass_prepared_free;
 use cql_bindgen::cass_prepared_bind;

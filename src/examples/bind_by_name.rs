@@ -10,11 +10,6 @@ struct Basic {
     i64:i64
 }
 
-fn create_cluster() -> Result<CassCluster,CassError> {
-    let cluster = CassCluster::new();
-    cluster.set_contact_points("127.0.0.1")
-}
-
 static CREATE_KEYSPACE:&'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '3' };";
 static CREATE_TABLE:&'static str = "CREATE TABLE IF NOT EXISTS examples.basic (key text, bln boolean, flt float, dbl double,i32 int, i64 bigint, PRIMARY KEY (key));";
 static INSERT_QUERY:&'static str = "INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, ?);";
@@ -54,8 +49,10 @@ unsafe fn select_from_basic(session:&mut CassSession, prepared:&CassPrepared, ke
 }
 
 fn main() {unsafe{
-    let cluster = &mut create_cluster().unwrap();
-    match CassSession::new().connect(cluster).wait() {
+    let mut cluster = CassCluster::new();
+    cluster.set_contact_points("127.0.0.1").unwrap();
+    
+    match CassSession::new().connect(&cluster).wait() {
         Ok(mut session) => {
             let input = Basic{bln:true, flt:0.001f32, dbl:0.0002, i32:1, i64:2 };
             let mut output = Basic{bln:false, flt:0f32, dbl:0.0, i32:0, i64:0 };

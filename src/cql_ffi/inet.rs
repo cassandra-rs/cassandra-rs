@@ -1,7 +1,3 @@
-#![allow(dead_code)]
-
-extern crate cql_bindgen;
-
 //use cql_ffi::types::cass_uint8_t;
 use cql_bindgen::CassInet as _CassInet;
 use cql_bindgen::cass_inet_init_v4;
@@ -12,7 +8,6 @@ use std::net::Ipv6Addr;
 use std::default::Default;
 
 #[repr(C)]
-#[derive(Copy,Clone)]
 pub struct CassInet(pub _CassInet);
 
 impl Default for CassInet {
@@ -70,12 +65,17 @@ impl FromCassInet for Ipv6Addr {
                 (raw_addr[13] as u16)<<8+raw_addr[12] as u16,
                 (raw_addr[15] as u16)<<8+raw_addr[14] as u16,
             ),
-            unsupported => panic!("impossible inet type: {:?}", unsupported)
+            unsupported => panic!("impossible inet type: {}", unsupported)
         }
     }
 }
 
 impl CassInet {
-    unsafe fn cass_inet_init_v4(address: *const u8) -> CassInet {CassInet(cass_inet_init_v4(address))}
-    unsafe fn cass_inet_init_v6(address: *const u8) -> CassInet {CassInet(cass_inet_init_v6(address))}
+    pub fn cass_inet_init_v4(address: *const u8) -> CassInet {unsafe{
+        CassInet(cass_inet_init_v4(address))
+    }}
+    
+    pub fn cass_inet_init_v6(address: *const u8) -> CassInet {unsafe{
+        CassInet(cass_inet_init_v6(address))
+    }}
 }

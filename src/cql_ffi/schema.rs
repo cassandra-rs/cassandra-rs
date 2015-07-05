@@ -9,8 +9,9 @@ use std::str;
 
 use cql_ffi::value::CassValue;
 use cql_ffi::error::CassError;
-use cql_ffi::iterator::set_iterator::SetIterator;
-use cql_ffi::iterator::map_iterator::MapIterator;
+use cql_ffi::collection::map::MapIterator;
+use cql_ffi::collection::set::SetIterator;
+
 use cql_bindgen::CassSchema as _CassSchema;
 use cql_bindgen::CassSchemaMeta as _CassSchemaMeta;
 use cql_bindgen::CassSchemaMetaField as _CassSchemaMetaField;
@@ -62,7 +63,6 @@ impl CassSchemaMetaType {
 }
 
 impl CassSchema {
-    unsafe fn free(&mut self) {cass_schema_free(self.0)}
     pub unsafe fn get_keyspace(&self, keyspace_name: &str) -> CassSchemaMeta {
         let keyspace_name = CString::new(keyspace_name).unwrap();
         CassSchemaMeta(cass_schema_get_keyspace(self.0,keyspace_name.as_ptr()))
@@ -73,7 +73,7 @@ impl CassSchema {
 
 impl Drop for CassSchema {
     fn drop(&mut self) {unsafe{
-        self.free()
+        cass_schema_free(self.0)
     }}
 }
 
@@ -122,7 +122,7 @@ impl CassSchemaMetaField {
     }}
     
     pub fn get_value(&self) -> CassValue {unsafe{
-        CassValue(cass_schema_meta_field_value(self.0))
+        CassValue::new(cass_schema_meta_field_value(self.0))
     }}
 }
 

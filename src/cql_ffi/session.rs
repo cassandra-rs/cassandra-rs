@@ -7,12 +7,16 @@ use std::ffi::CString;
 use cql_ffi::batch::CassBatch;
 use cql_ffi::future::cass_future::CassFuture;
 use cql_ffi::future::result_future::ResultFuture;
-use cql_ffi::future::session_future::SessionFuture;
 use cql_ffi::future::prepared_future::PreparedFuture;
 use cql_ffi::error::CassError;
 use cql_ffi::statement::CassStatement;
 use cql_ffi::schema::CassSchema;
 use cql_ffi::cluster::CassCluster;
+use cql_bindgen::CassFuture as _CassFuture;
+use cql_bindgen::cass_future_free;
+use cql_bindgen::cass_future_wait;
+use cql_bindgen::cass_future_error_code;
+
 use cql_bindgen::CassSession as _CassSession;
 use cql_bindgen::cass_session_new;
 use cql_bindgen::cass_session_free;
@@ -31,16 +35,14 @@ unsafe impl Send for CassSession{}
 
 impl Drop for CassSession {
     fn drop(&mut self) {unsafe{
-        self.free()
+        cass_session_free(self.0)
     }}
 }
 
 impl CassSession {
     pub fn new() -> CassSession {unsafe{CassSession(cass_session_new())}}
     
-    unsafe fn free(&mut self) {cass_session_free(self.0)}
-    
-    pub fn close(&mut self) -> CassFuture {unsafe{CassFuture(cass_session_close(self.0))}}
+    pub fn close(self) -> CassFuture {unsafe{CassFuture(cass_session_close(self.0))}}
     
     pub fn connect(self, cluster: &CassCluster) -> SessionFuture {unsafe{SessionFuture(cass_session_connect(self.0, cluster.0),self)}}
     
@@ -68,4 +70,19 @@ impl CassSession {
     pub unsafe fn connect_keyspace(&self, cluster: CassCluster, keyspace: *const ::libc::c_char) -> CassFuture {
         CassFuture(cass_session_connect_keyspace(self.0, cluster.0, keyspace))
     }
+}
+
+pub struct SessionFuture(pub *mut _CassFuture, pub CassSession);
+
+impl SessionFuture {
+    pub fn wait(self) -> Result<CassSession,CassError> {unsafe{
+        cass_future_wait(self.0);
+        self.error_code()
+    }}
+    
+    fn error_code(self) -> Result<CassSession,CassError> {unsafe{
+        let code = cass_future_error_code(self.0);
+        cass_future_free(self.0);
+        CassError::build(code).wrap(self.1)
+    }}
 }

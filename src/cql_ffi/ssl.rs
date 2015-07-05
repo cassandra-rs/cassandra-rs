@@ -19,29 +19,31 @@ pub struct CassSsl(pub *mut _CassSsl);
 
 impl Drop for CassSsl {
     fn drop(&mut self) {unsafe{
-        self.free()
+        cass_ssl_free(self.0)
     }}
 }
 
 impl CassSsl {
-    pub unsafe fn new() -> CassSsl {CassSsl(cass_ssl_new())}
-    
-    unsafe fn free(&mut self) {cass_ssl_free(self.0)}
+    pub fn new() -> CassSsl {unsafe{
+            CassSsl(cass_ssl_new())
+    }}
 
-    pub unsafe fn add_trusted_cert<'a>(&'a mut self, cert: &str) -> Result<&'a Self,CassError> {
+    pub fn add_trusted_cert(&mut self, cert: &str) -> Result<&Self,CassError> {unsafe{
         let cert = CString::new(cert).unwrap();        
         CassError::build(cass_ssl_add_trusted_cert(self.0, cert.as_ptr())).wrap(self)
-    }
+    }}
 
-    pub unsafe fn set_verify_flags(&mut self, flags: c_int) {cass_ssl_set_verify_flags(self.0,flags)}
+    pub fn set_verify_flags(&mut self, flags: c_int) {unsafe{
+            cass_ssl_set_verify_flags(self.0,flags)
+    }}        
 
-    pub unsafe fn set_cert<'a>(&'a mut self, cert: &str) -> Result<&'a Self,CassError> {
+    pub fn set_cert(&mut self, cert: &str) -> Result<&Self,CassError> {unsafe{
         let cert = CString::new(cert).unwrap();        
         CassError::build(cass_ssl_set_cert(self.0,cert.as_ptr())).wrap(self)
-    }
+    }}
 
-    pub unsafe fn set_private_key<'a>(&'a mut self, key: &str, password: *const c_char) -> Result<&'a Self,CassError> {
+    pub fn set_private_key(&mut self, key: &str, password: *const c_char) -> Result<&Self,CassError> {unsafe{
         let key = CString::new(key).unwrap();        
         CassError::build(cass_ssl_set_private_key(self.0,key.as_ptr(), password)).wrap(self)
-    }
+    }}
 }

@@ -2,7 +2,7 @@ use std::mem;
 use std::slice;
 
 #[allow(unused)]
-unsafe fn raw_byte_repr<'a, T>(ptr: &'a T) -> &'a [u8] {
+unsafe fn raw_byte_repr<T>(ptr: &T) -> &[u8] {
     mem::transmute(slice::from_raw_parts(ptr as *const _ as *const u8,mem::size_of::<T>()))
 }
 

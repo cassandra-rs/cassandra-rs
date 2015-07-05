@@ -1,6 +1,3 @@
-#![allow(non_camel_case_types)]
-#![allow(dead_code)]
-
 use std::fmt::{Debug,Display,Formatter};
 use std::fmt;
 use std::str;
@@ -8,7 +5,6 @@ use std::ffi::CStr;
 use std::error::Error;
 use std::str::from_utf8;
 
-use libc::types::os::arch::c95::c_char;
 use cql_bindgen::cass_error_desc;
 use cql_bindgen::CASS_ERROR_LIB_BAD_PARAMS;
 use cql_bindgen::CASS_ERROR_LIB_NO_STREAMS;
@@ -58,7 +54,6 @@ use cql_bindgen::CASS_OK;
 
 use cql_bindgen::CassError as _CassError;
 
-#[derive(Debug,Eq,PartialEq,Copy,Clone)]
 #[repr(C)]
 pub enum CassErrorSource {
     NONE = 0isize,
@@ -72,7 +67,7 @@ pub struct CassError(_CassError);
 
 impl Error for CassError {
 	fn description(&self) -> &str {
-		let c_buf: *const c_char = unsafe { self.desc() };
+		let c_buf: *const i8 = unsafe { self.desc() };
         let buf: &[u8] = unsafe { CStr::from_ptr(c_buf).to_bytes() };
         from_utf8(buf).unwrap()
     }
@@ -80,21 +75,20 @@ impl Error for CassError {
 
 impl Display for CassError {
     fn fmt(&self, f:&mut Formatter) -> fmt::Result {
-        let c_buf: *const c_char = unsafe { self.desc() };
+        let c_buf: *const i8 = unsafe { self.desc() };
         let buf: &[u8] = unsafe { CStr::from_ptr(c_buf).to_bytes() };
         match str::from_utf8(buf) {
             Ok(str_slice) => {
-                write!(f, "{:?}", str_slice)
+                write!(f, "{}", str_slice)
             },
             Err(err) => panic!("unreachable? {:?}", err)
         }
-    }
-	
+    }	
 }
 
 impl Debug for CassError {
     fn fmt(&self, f:&mut Formatter) -> fmt::Result {
-        let c_buf: *const c_char = unsafe { self.desc() };
+        let c_buf: *const i8 = unsafe { self.desc() };
         let buf: &[u8] = unsafe { CStr::from_ptr(c_buf).to_bytes() };
         match str::from_utf8(buf) {
             Ok(str_slice) => {
@@ -156,7 +150,7 @@ pub enum CassErrorTypes {
 }
 
 impl CassError {
-    pub fn wrap<'a,T>(&'a self, wrappee:T) -> Result<T,CassError> {
+    pub fn wrap<T>(&self, wrappee:T) -> Result<T,CassError> {
         match self.0 {
             CASS_OK => Ok(wrappee),
             err => Err(CassError::build(err))
@@ -210,14 +204,17 @@ impl CassError {
             50331652 => CassError(CASS_ERROR_SSL_INVALID_PEER_CERT),
             50331653 => CassError(CASS_ERROR_SSL_IDENTITY_MISMATCH),
             50331654 => CassError(CASS_ERROR_LAST_ENTRY),
-            err_no => panic!("err: {:?}",err_no)
+            err_no => {
+                debug!("unhandled error number: {}", err_no);
+                CassError(err_no)
+            }
         }
     }
 }
 
 
 impl CassError {
-    pub unsafe fn desc(&self) -> *const c_char {cass_error_desc(self.0)}
+    pub unsafe fn desc(&self) -> *const i8 {cass_error_desc(self.0)}
     pub fn debug(&self) {println!("{:?}",self)}
 
 }

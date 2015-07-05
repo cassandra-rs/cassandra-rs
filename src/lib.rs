@@ -1,7 +1,8 @@
 extern crate libc;
+#[macro_use]
+extern crate log;
 
 pub use cql_ffi::consistency::*;
-pub use cql_ffi::types::*;
 pub use cql_ffi::inet::*;
 pub use cql_ffi::uuid::*;
 pub use cql_ffi::cluster::*;
@@ -11,7 +12,6 @@ pub use cql_ffi::batch::*;
 pub use cql_ffi::future::*;
 pub use cql_ffi::prepared::*;
 pub use cql_ffi::result::*;
-pub use cql_ffi::iterator::*;
 pub use cql_ffi::row::*;
 pub use cql_ffi::value::*;
 pub use cql_ffi::collection::*;
@@ -21,22 +21,19 @@ pub use cql_ffi::error::*;
 pub use cql_ffi::helpers::*;
 pub use cql_ffi::log::*;
 pub use cql_ffi::column::*;
-pub use cql_ffi::iterator::set_iterator::*;
-pub use cql_ffi::iterator::map_iterator::*;
 pub use cql_ffi::future::result_future::*;
 pub use cql_ffi::future::cass_future::*;
 pub use cql_ffi::future::prepared_future::*;
 pub use cql_ffi::future::session_future::*;
-pub use cql_ffi::collection::cass_map::*;
-pub use cql_ffi::collection::cass_set::*;
-pub use cql_ffi::collection::cass_list::*;
+pub use cql_ffi::collection::map::*;
+pub use cql_ffi::collection::set::*;
+pub use cql_ffi::collection::list::*;
 
 extern crate cql_bindgen;
 
 
 mod cql_ffi {
     pub mod consistency;
-    pub mod types;
     pub mod inet;
     pub mod uuid;
     pub mod cluster;
@@ -46,7 +43,7 @@ mod cql_ffi {
     pub mod future;
     pub mod prepared;
     pub mod result;
-    pub mod iterator;
+    pub mod cass_iterator;
     pub mod row;
     pub mod value;
     pub mod collection;
@@ -57,3 +54,9 @@ mod cql_ffi {
     pub mod helpers;
     pub mod column;
 }
+
+
+//#[allow(dead_code, uppercase_variables, non_camel_case_types)]
+//mod mysql_bindings {
+//    bindgen!("/usr/include/mysql/mysql.h", match="mysql.h", link="mysql");
+//}

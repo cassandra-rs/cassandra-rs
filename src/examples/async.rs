@@ -42,8 +42,9 @@ pub fn block_async(mut futures:Vec<ResultFuture>) -> Result<(),CassError> {
 }
 
 pub fn main() {
-    let cluster = &mut CassCluster::new().set_contact_points("127.0.0.1").unwrap();
-    match CassSession::new().connect(cluster).wait() {
+    let mut cluster = CassCluster::new();
+    cluster.set_contact_points("127.0.0.1").unwrap();
+    match CassSession::new().connect(&cluster).wait() {
         Ok(mut session) => {
             session.execute(CREATE_KEYSPACE,0).wait().unwrap();
             session.execute(CREATE_TABLE,0).wait().unwrap();

@@ -1,17 +1,11 @@
-#![allow(dead_code)]
-#![allow(non_camel_case_types)]
-#![allow(missing_copy_implementations)]
-
 use std::fmt::Formatter;
 use std::fmt;
+use std::fmt::Display;
 use std::fmt::Debug;
 use std::mem;
 use std::ffi::CStr;
 use std::str;
 
-
-use cql_ffi::types::cass_uint64_t;
-use cql_ffi::types::cass_uint8_t;
 use cql_bindgen::CassUuid as _CassUuid;
 use cql_bindgen::CassUuidGen as _CassUuidGen;
 use cql_bindgen::cass_uuid_gen_new;
@@ -54,14 +48,28 @@ impl Debug for CassUuid {
     }      
 }
 
+impl Display for CassUuid {
+    fn fmt(&self, f:&mut Formatter) -> fmt::Result {
+        write!(f, "{}", self.to_string())
+    }      
+}
+
 impl CassUuid {
-    pub unsafe fn min_from_time(&mut self, time: cass_uint64_t) {cass_uuid_min_from_time(time,&mut self.0)}
+    pub fn min_from_time(&mut self, time: u64) {unsafe{
+        cass_uuid_min_from_time(time,&mut self.0)
+    }}
 
-    pub unsafe fn max_from_time(&mut self, time: cass_uint64_t) {cass_uuid_max_from_time(time,&mut self.0)}
+    pub fn max_from_time(&mut self, time: u64) {unsafe{
+        cass_uuid_max_from_time(time,&mut self.0)
+    }}
 
-    pub unsafe fn timestamp(&self) -> u64 {cass_uuid_timestamp(self.0)}
-
-    pub unsafe fn version(&self) -> cass_uint8_t {cass_uuid_version(self.0)}
+    pub  fn timestamp(&self) -> u64 {unsafe{
+        cass_uuid_timestamp(self.0)
+    }}
+    
+    pub fn version(&self) -> u8 {unsafe{
+        cass_uuid_version(self.0)
+    }}    
     
     //FIXME
     pub fn to_string(&self) -> String {unsafe{
@@ -85,7 +93,7 @@ impl CassUuidGen {
         CassUuidGen(cass_uuid_gen_new())
     }}
     
-    pub fn new_with_node(node: cass_uint64_t) -> CassUuidGen {unsafe{
+    pub fn new_with_node(node: u64) -> CassUuidGen {unsafe{
         CassUuidGen(cass_uuid_gen_new_with_node(node))
     }}
     
@@ -109,7 +117,7 @@ impl CassUuidGen {
         CassUuid(output)
     }}
     
-    pub fn from_time(&self, timestamp: cass_uint64_t, mut output: CassUuid){unsafe{
+    pub fn from_time(&self, timestamp: u64, mut output: CassUuid){unsafe{
         cass_uuid_gen_from_time(self.0,timestamp, &mut output.0)
     }}
 }

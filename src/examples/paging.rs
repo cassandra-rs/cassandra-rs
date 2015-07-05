@@ -49,10 +49,10 @@ fn select_from_paging(session:&mut CassSession) -> Result<(), CassError> {
                 Err(err) => panic!(err)
             }
         }
-        if result.has_more_pages() {
-            try!(statement.set_paging_state(&result));
-        }
-        has_more_pages = result.has_more_pages();
+//        if result.has_more_pages() {
+//            try!(statement.set_paging_state(&result));
+//        }
+//        has_more_pages = result.has_more_pages();
     }
     Ok(())
 }
@@ -60,9 +60,10 @@ fn select_from_paging(session:&mut CassSession) -> Result<(), CassError> {
 fn main() {
     //let uuid_gen = &mut CassUuidGen::new();
 
-    let cluster = &CassCluster::new()
-                        .set_contact_points(CONTACT_POINTS).unwrap()
-                        .set_load_balance_round_robin().unwrap();
+    let mut cluster = CassCluster::new();
+    cluster
+        .set_contact_points(CONTACT_POINTS).unwrap()
+        .set_load_balance_round_robin().unwrap();
 
     let mut session = CassSession::new().connect(&cluster).wait().unwrap();
     

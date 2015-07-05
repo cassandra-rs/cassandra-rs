@@ -27,19 +27,14 @@ fn select_from_log(session:&mut CassSession, key:&str) -> Result<CassResult,Cass
 	statement.bind_string(0, &key).unwrap();
 	let mut future = session.execute_statement(&statement);
 	let results = try!(future.wait());
-	for row in results.iter() {
-		let time = try!(row.get_column(1));
-		let entry = try!(row.get_column(2));
-		let time_str = time.get_string();
-		println!("{:?}.{:?}", time_str, entry.get_string());
-	}
 	Ok(results)
 }
 
 fn main() {
 	let uuid_gen = CassUuidGen::new();
-	let cluster = &CassCluster::new().set_contact_points("127.0.0.1").unwrap();
-	let session = &mut CassSession::new().connect(cluster).wait().unwrap();
+	let mut cluster = CassCluster::new();
+	cluster.set_contact_points("127.0.0.1").unwrap();
+	let session = &mut CassSession::new().connect(&cluster).wait().unwrap();
 	
 	session.execute(CREATE_KEYSPACE, 0);
 	session.execute(CREATE_TABLE, 0);
@@ -48,6 +43,13 @@ fn main() {
 	insert_into_log(session, "test", uuid_gen.get_time(), "Log entry #2").unwrap();
 	insert_into_log(session, "test", uuid_gen.get_time(), "Log entry #3").unwrap();
 	insert_into_log(session, "test", uuid_gen.get_time(), "Log entry #4").unwrap();
-	let result = select_from_log(session, "test").unwrap();
-	println!("{:?}", result);
+	let results = select_from_log(session, "test").unwrap();
+//		for row in results.iter() {
+//		let time = row.get_column(1).unwrap();
+//		let entry = try!(row.get_column(2).unwrap();
+//		let time_str = time.get_string();
+//		println!("{:?}.{:?}", time_str, entry.get_string());
+//	}
+
+	println!("{:?}", results);
 }
