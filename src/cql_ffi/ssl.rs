@@ -11,6 +11,7 @@ use cql_bindgen::CassSsl as _CassSsl;
 use cql_bindgen::cass_ssl_new;
 use cql_bindgen::cass_ssl_free;
 use cql_bindgen::cass_ssl_add_trusted_cert;
+use cql_bindgen::cass_ssl_add_trusted_cert_n;
 use cql_bindgen::cass_ssl_set_verify_flags;
 use cql_bindgen::cass_ssl_set_cert;
 use cql_bindgen::cass_ssl_set_private_key;

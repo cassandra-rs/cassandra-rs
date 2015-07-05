@@ -14,10 +14,13 @@ build = "build.rs"
 name = "cassandra"
 
 [dependencies]
-cql_bindgen = "*"
 libc = "*"
 num = "*"
 log = "*"
+
+[dependencies.cql_bindgen]
+git = "https://github.com/tupshin/cql-bindgen/"
+
 
 [[bin]]
 name="async"

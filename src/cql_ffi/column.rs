@@ -201,7 +201,6 @@ impl CassColumn {
         match self.get_type() {
             CassValueType::MAP => Ok(MapIterator(cass_iterator_from_map(self.0))),
             type_no => {
-                panic!("wrong_type: {:?}", type_no);
                 Err(CassError::build(CassErrorTypes::LIB_INVALID_VALUE_TYPE as u32))
             }
         }

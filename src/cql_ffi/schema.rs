@@ -25,6 +25,9 @@ use cql_bindgen::cass_schema_meta_type;
 use cql_bindgen::cass_iterator_from_schema;
 use cql_bindgen::cass_iterator_from_schema_meta;
 use cql_bindgen::cass_iterator_fields_from_schema_meta;
+use cql_bindgen::cass_schema_get_udt;
+use cql_bindgen::cass_schema_get_udt_n;
+
 
 
 pub struct CassSchema(pub *const _CassSchema);

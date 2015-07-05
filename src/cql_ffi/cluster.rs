@@ -30,6 +30,8 @@ use cql_bindgen::cass_cluster_set_load_balance_round_robin;
 use cql_bindgen::cass_cluster_set_credentials;
 use cql_bindgen::cass_cluster_set_request_timeout;
 use cql_bindgen::cass_cluster_set_connect_timeout;
+use cql_bindgen::cass_cluster_set_latency_aware_routing;
+use cql_bindgen::cass_cluster_set_latency_aware_routing_settings;
 
 use cql_ffi::error::CassError;
 
@@ -156,13 +158,24 @@ impl CassCluster {
         self
     }
 
-    pub unsafe fn set_tcp_nodelay(&mut self, enable: bool) -> &Self {
+    pub fn set_tcp_nodelay(&mut self, enable: bool) -> &Self {unsafe{
         cass_cluster_set_tcp_nodelay(self.0,if enable {1} else {0});
         self
-    }
+    }}
 
     pub unsafe fn set_tcp_keepalive(&mut self, enable: bool, delay_secs: u32) -> &Self {
         cass_cluster_set_tcp_keepalive(self.0,if enable {1} else {0},delay_secs);
         self
     }
+    
+    pub fn set_latency_aware_routing(&mut self, enabled: bool) -> &Self {unsafe{
+        cass_cluster_set_latency_aware_routing(self.0, if enabled {1} else {0});
+        self
+    }}
+    
+    pub fn cass_cluster_set_latency_aware_routing_settings(&mut self, exclusion_threshold: f64, scale_ms: u64, retry_period_ms: u64, update_rate_ms:u64, min_measured: u64)-> &Self {unsafe{
+        cass_cluster_set_latency_aware_routing_settings(self.0, exclusion_threshold, scale_ms, retry_period_ms, update_rate_ms, min_measured);
+        self   
+    }}
+
 }
