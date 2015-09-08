@@ -16,31 +16,39 @@ pub struct CassBatch(pub *mut _CassBatch);
 pub enum CassBatchType {
     LOGGED = CASS_BATCH_TYPE_LOGGED as isize,
     UNLOGGED = CASS_BATCH_TYPE_UNLOGGED as isize,
-    COUNTER = CASS_BATCH_TYPE_COUNTER as isize
+    COUNTER = CASS_BATCH_TYPE_COUNTER as isize,
 }
 
 impl Drop for CassBatch {
-    fn drop(&mut self) {unsafe{
-        cass_batch_free(self.0)
-    }}
+    fn drop(&mut self) {
+        unsafe {
+            cass_batch_free(self.0)
+        }
+    }
 }
 
 impl CassBatch {
-    pub fn new(_type: CassBatchType) -> CassBatch {unsafe{
+    pub fn new(_type: CassBatchType) -> CassBatch {
+        unsafe {
             CassBatch(cass_batch_new(_type as u32))
-    }}
-    
-    pub fn set_consistency(&mut self, consistency: CassConsistency) -> Result<&Self,CassError> {unsafe{
-            match cass_batch_set_consistency(self.0,consistency) {
-                0 => Ok(self),
-                err => Err(err)
-            }
-    }}
+        }
+    }
 
-    pub fn add_statement(&mut self, statement: CassStatement) -> Result<&Self,CassError> {unsafe{
-            match cass_batch_add_statement(self.0,statement.0) {
+    pub fn set_consistency(&mut self, consistency: CassConsistency) -> Result<&Self, CassError> {
+        unsafe {
+            match cass_batch_set_consistency(self.0, consistency) {
                 0 => Ok(self),
-                err => Err(err)
+                err => Err(err),
             }
-    }}
+        }
+    }
+
+    pub fn add_statement(&mut self, statement: CassStatement) -> Result<&Self, CassError> {
+        unsafe {
+            match cass_batch_add_statement(self.0, statement.0) {
+                0 => Ok(self),
+                err => Err(err),
+            }
+        }
+    }
 }

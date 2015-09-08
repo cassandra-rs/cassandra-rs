@@ -17,10 +17,11 @@ name = "cassandra"
 libc = "*"
 num = "*"
 log = "*"
+cql_bindgen = "0.0.15"
+# bindgen_plugin = "0.15.0"
 
-[dependencies.cql_bindgen]
-git = "https://github.com/tupshin/cql-bindgen/"
-
+[dependencies.clippy]
+git = "https://github.com/Manishearth/rust-clippy"
 
 [[bin]]
 name="async"
@@ -65,6 +66,10 @@ path="src/examples/schema_meta.rs"
 [[bin]]
 name="simple"
 path="src/examples/simple.rs"
+
+[[bin]]
+name="udt"
+path="src/examples/udt.rs"
 
 [[bin]]
 name="uuids"

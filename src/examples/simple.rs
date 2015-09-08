@@ -14,7 +14,7 @@ fn main() {
     let result = session.execute(QUERY, 0).wait().unwrap();
     println!("{}",result);
     for row in result.iter() {
-       println!("ks name = {}", row.get_column_by_name(COL_NAME));
+        println!("ks name = {}", row.get_column_by_name(COL_NAME));
     }
     session.close().wait().unwrap();
 }

@@ -3,33 +3,46 @@ use cassandra::*;
 
 #[derive(Clone,Copy,Debug,PartialEq)]
 struct Basic {
-    bln:bool,
-    flt:f32,
-    dbl:f64,
-    i32:i32,
-    i64:i64
+    bln: bool,
+    flt: f32,
+    dbl: f64,
+    i32: i32,
+    i64: i64,
 }
 
-static CREATE_KEYSPACE:&'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { 'class': 'SimpleStrategy', 'replication_factor': '3' };";
-static CREATE_TABLE:&'static str = "CREATE TABLE IF NOT EXISTS examples.basic (key text, bln boolean, flt float, dbl double,i32 int, i64 bigint, PRIMARY KEY (key));";
-static INSERT_QUERY:&'static str = "INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, ?);";
+static CREATE_KEYSPACE:&'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \
+                                       \'class\': \'SimpleStrategy\', \'replication_factor\': \
+                                       \'3\' };";
+static CREATE_TABLE:&'static str = "CREATE TABLE IF NOT EXISTS examples.basic (key text, bln \
+                                    boolean, flt float, dbl double,i32 int, i64 bigint, PRIMARY \
+                                    KEY (key));";
+static INSERT_QUERY:&'static str = "INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) \
+                                    VALUES (?, ?, ?, ?, ?, ?);";
 static SELECT_QUERY:&'static str = "SELECT * FROM examples.basic WHERE key = ?";
 
 //fixme row key sent is null?
-fn insert_into_basic(session:&mut CassSession, prepared:CassPrepared, key:&str, basic:Basic) -> Result<CassResult,CassError> {
+fn insert_into_basic(session: &mut CassSession,
+                     prepared: CassPrepared,
+                     key: &str,
+                     basic: Basic)
+                     -> Result<CassResult, CassError> {
     println!("key={:?}",key);
     let mut statement = prepared.bind();
     statement.bind_string_by_name("key", key).unwrap()
         .bind_bool_by_name("BLN", basic.bln).unwrap()
         .bind_float_by_name("FLT", basic.flt).unwrap()
-        .bind_double_by_name("\"dbl\"", basic.dbl).unwrap();
-//        .bind_int32_by_name("i32", basic.i32).unwrap()
-//        .bind_int64_by_name("I64", basic.i64).unwrap();
+        .bind_double_by_name("\"dbl\"", basic.dbl).unwrap()
+        .bind_int32_by_name("i32", basic.i32).unwrap()
+        .bind_int64_by_name("I64", basic.i64).unwrap();
 
     session.execute_statement(&statement).wait()
 }
 
-unsafe fn select_from_basic(session:&mut CassSession, prepared:&CassPrepared, key:&str, basic:&mut Basic) -> Result<CassResult,CassError> {
+unsafe fn select_from_basic(session: &mut CassSession,
+                            prepared: &CassPrepared,
+                            key: &str,
+                            basic: &mut Basic)
+                            -> Result<CassResult, CassError> {
     let mut statement = prepared.bind();
     statement.bind_string_by_name("key", key).unwrap();
     match session.execute_statement(&statement).wait() {
@@ -44,36 +57,48 @@ unsafe fn select_from_basic(session:&mut CassSession, prepared:&CassPrepared, ke
             }
             Ok(result)
         }
-        Err(_) => panic!("err")
+        Err(_) => panic!("err"),
     }
 }
 
-fn main() {unsafe{
-    let mut cluster = CassCluster::new();
-    cluster.set_contact_points("127.0.0.1").unwrap();
-    
-    match CassSession::new().connect(&cluster).wait() {
-        Ok(mut session) => {
-            let input = Basic{bln:true, flt:0.001f32, dbl:0.0002, i32:1, i64:2 };
-            let mut output = Basic{bln:false, flt:0f32, dbl:0.0, i32:0, i64:0 };
-            let _ = session.execute(CREATE_KEYSPACE,0).wait().unwrap();
-            let _ = session.execute(CREATE_TABLE,0).wait().unwrap();
-            match session.prepare(INSERT_QUERY).unwrap().wait() {
-                Ok(insert_prepared) => {
-                    insert_into_basic(&mut session, insert_prepared, "prepared_test", input).unwrap();
-                },
-                Err(err) => println!("error: {:?}",err)
+fn main() {
+    unsafe {
+        let mut cluster = CassCluster::new();
+        cluster.set_contact_points("127.0.0.1").unwrap();
+
+        match CassSession::new().connect(&cluster).wait() {
+            Ok(mut session) => {
+                let input = Basic { bln: true, flt: 0.001f32, dbl: 0.0002, i32: 1, i64: 2 };
+                let mut output = Basic { bln: false, flt: 0f32, dbl: 0.0, i32: 0, i64: 0 };
+                session.execute(CREATE_KEYSPACE,0).wait().unwrap();
+                session.execute(CREATE_TABLE,0).wait().unwrap();
+                match session.prepare(INSERT_QUERY).unwrap().wait() {
+                    Ok(insert_prepared) => {
+                        insert_into_basic(
+                            &mut session,
+                            insert_prepared,
+                            "prepared_test",
+                            input
+                        ).unwrap();
+                    }
+                    Err(err) => println!("error: {:?}",err),
+                }
+                match session.prepare(SELECT_QUERY).unwrap().wait() {
+                    Ok(ref mut select_prepared) => {
+                        select_from_basic(
+                            &mut session,
+                            &select_prepared,
+                            "prepared_test",
+                            &mut output
+                        ).unwrap();
+                        assert_eq!(input,output);
+                        println!("results matched: {:?}", output);
+                    }
+                    Err(err) => println!("err: {:?}",err),
+                }
+                session.close().wait().unwrap();
             }
-            match session.prepare(SELECT_QUERY).unwrap().wait() {
-                Ok(ref mut select_prepared) => {
-                    select_from_basic(&mut session, &select_prepared, "prepared_test", &mut output).unwrap();
-                    assert_eq!(input,output);
-                    println!("results matched: {:?}", output);
-                },
-                Err(err) => println!("err: {:?}",err)
-            }
-            session.close().wait().unwrap();
+            Err(err) => println!("couldn't connect: {:?}",err),
         }
-        Err(err) => println!("couldn't connect: {:?}",err)
-    }    
-}}
+    }
+}

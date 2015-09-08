@@ -4,20 +4,20 @@ use std::slice;
 
 use cql_ffi::*;
 
-unsafe fn print_error(future:&mut CassFuture) {
+unsafe fn print_error(future: &mut CassFuture) {
     let message = future.error_message();
-    let message = slice::from_raw_parts(&message.data,message.length as usize);
+    let message = slice::from_raw_parts(&message.data, message.length as usize);
     println!("Error: {:?}", message);
 }
 
 unsafe fn create_cluster() -> *mut CassCluster {
     let cluster = CassCluster::new();
     cluster.set_contact_points(str2ref("127.0.0.1,127.0.0.2,127.0.0.3"));
-    cluster 
+    cluster
 }
 
-unsafe fn connect_session(session:&mut CassSession, cluster:&mut CassCluster) -> CassError {
-    let future:CassFuture = &mut session.connect(cluster);
+unsafe fn connect_session(session: &mut CassSession, cluster: &mut CassCluster) -> CassError {
+    let future: CassFuture = &mut session.connect(cluster);
     future.wait();
     future
 }

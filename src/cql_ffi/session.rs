@@ -34,40 +34,68 @@ unsafe impl Sync for CassSession{}
 unsafe impl Send for CassSession{}
 
 impl Drop for CassSession {
-    fn drop(&mut self) {unsafe{
-        cass_session_free(self.0)
-    }}
+    fn drop(&mut self) {
+        unsafe {
+            cass_session_free(self.0)
+        }
+    }
 }
 
 impl CassSession {
-    pub fn new() -> CassSession {unsafe{CassSession(cass_session_new())}}
-    
-    pub fn close(self) -> CassFuture {unsafe{CassFuture(cass_session_close(self.0))}}
-    
-    pub fn connect(self, cluster: &CassCluster) -> SessionFuture {unsafe{SessionFuture(cass_session_connect(self.0, cluster.0),self)}}
-    
-    pub fn prepare(&self, query: &str) -> Result<PreparedFuture,CassError> {unsafe{
-        let query = CString::new(query).unwrap();        
-        Ok(PreparedFuture(cass_session_prepare(self.0, query.as_ptr())))
-    }}
-    
-    pub fn execute(&self, statement: &str, parameter_count: u64) -> ResultFuture {unsafe{
-        ResultFuture(cass_session_execute(self.0, CassStatement::new(statement,parameter_count).0))
-    }}
-    
-    pub fn execute_statement(&self, statement: &CassStatement) -> ResultFuture {unsafe{
-        ResultFuture(cass_session_execute(self.0, statement.0))
-    }}
-    
+    pub fn new() -> CassSession {
+        unsafe {
+            CassSession(cass_session_new())
+        }
+    }
+
+    pub fn close(self) -> CassFuture {
+        unsafe {
+            CassFuture(cass_session_close(self.0))
+        }
+    }
+
+    pub fn connect(self, cluster: &CassCluster) -> SessionFuture {
+        unsafe {
+            SessionFuture(cass_session_connect(self.0, cluster.0), self)
+        }
+    }
+
+    pub fn prepare(&self, query: &str) -> Result<PreparedFuture, CassError> {
+        unsafe {
+            let query = CString::new(query).unwrap();
+            Ok(PreparedFuture(cass_session_prepare(self.0, query.as_ptr())))
+        }
+    }
+
+    pub fn execute(&self, statement: &str, parameter_count: u64) -> ResultFuture {
+        unsafe {
+            ResultFuture(cass_session_execute(self.0,
+                                              CassStatement::new(statement,parameter_count).0))
+        }
+    }
+
+    pub fn execute_statement(&self, statement: &CassStatement) -> ResultFuture {
+        unsafe {
+            ResultFuture(cass_session_execute(self.0, statement.0))
+        }
+    }
+
     pub fn execute_batch(&self, batch: CassBatch) -> ResultFuture {
-        ResultFuture(unsafe{cass_session_execute_batch(self.0, batch.0)})
+        ResultFuture(unsafe {
+                cass_session_execute_batch(self.0, batch.0)
+            })
     }
-    
-    pub unsafe fn get_schema(&self) -> CassSchema {
-        CassSchema(cass_session_get_schema(self.0))
+
+    pub fn get_schema(&self) -> CassSchema {
+        unsafe {
+            CassSchema(cass_session_get_schema(self.0))
+        }
     }
-    
-    pub unsafe fn connect_keyspace(&self, cluster: CassCluster, keyspace: *const ::libc::c_char) -> CassFuture {
+
+    pub unsafe fn connect_keyspace(&self,
+                                   cluster: CassCluster,
+                                   keyspace: *const ::libc::c_char)
+                                   -> CassFuture {
         CassFuture(cass_session_connect_keyspace(self.0, cluster.0, keyspace))
     }
 }
@@ -75,14 +103,18 @@ impl CassSession {
 pub struct SessionFuture(pub *mut _CassFuture, pub CassSession);
 
 impl SessionFuture {
-    pub fn wait(self) -> Result<CassSession,CassError> {unsafe{
-        cass_future_wait(self.0);
-        self.error_code()
-    }}
-    
-    fn error_code(self) -> Result<CassSession,CassError> {unsafe{
-        let code = cass_future_error_code(self.0);
-        cass_future_free(self.0);
-        CassError::build(code).wrap(self.1)
-    }}
+    pub fn wait(self) -> Result<CassSession, CassError> {
+        unsafe {
+            cass_future_wait(self.0);
+            self.error_code()
+        }
+    }
+
+    fn error_code(self) -> Result<CassSession, CassError> {
+        unsafe {
+            let code = cass_future_error_code(self.0);
+            cass_future_free(self.0);
+            CassError::build(code).wrap(self.1)
+        }
+    }
 }

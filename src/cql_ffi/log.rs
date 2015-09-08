@@ -9,7 +9,7 @@ pub enum CassLogLevel {
     INFO = 4,
     DEBUG = 5,
     TRACE = 6,
-    LAST_ENTRY = 7
+    LAST_ENTRY = 7,
 }
 
 pub type CassLogCallback =
@@ -17,4 +17,3 @@ pub type CassLogCallback =
         message: *const CassLogMessage,
         data: *mut ::libc::c_void
     )>;
-
