@@ -12,7 +12,7 @@ use cql_bindgen::cass_tuple_set_string;
 //use cql_bindgen::cass_tuple_set_string_n;
 use cql_bindgen::cass_tuple_set_bytes;
 use cql_bindgen::cass_tuple_set_uuid;
-//use cql_bindgen::cass_tuple_set_inet;
+use cql_bindgen::cass_tuple_set_inet;
 //use cql_bindgen::cass_tuple_set_decimal;
 //use cql_bindgen::cass_tuple_set_collection;
 //use cql_bindgen::cass_tuple_set_tuple;
@@ -21,6 +21,8 @@ use cql_bindgen::cass_tuple_set_uuid;
 
 use std::ffi::CString;
 
+use cql_ffi::inet::AsCassInet;
+use std::net::SocketAddr;
 use cql_bindgen::CassTuple as _CassTuple;
 use cql_ffi::uuid::CassUuid;
 use cql_ffi::udt::CassDataType;
@@ -105,6 +107,19 @@ impl CassTuple {
             let value = CString::new(value.into()).unwrap();
             CassError::build(
                 cass_tuple_set_string(self.0, index, value.as_ptr())
+            ).wrap(())
+        }
+    }
+
+    pub fn set_inet(&mut self, index: u64, value: SocketAddr) -> Result<(), CassError> {
+        let inet = AsCassInet::as_cass_inet(&value);
+        unsafe {
+            CassError::build(
+                cass_tuple_set_inet(
+                    self.0,
+                    index,
+                    inet.0,
+                )
             ).wrap(())
         }
     }

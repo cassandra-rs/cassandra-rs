@@ -4,7 +4,6 @@
 extern crate num;
 extern crate cassandra;
 
-//use num::ToPrimitive;
 
 use cassandra::CassSession;
 use cassandra::CassStatement;
@@ -25,8 +24,8 @@ fn insert_into_async(session: &mut CassSession, key: String) -> Result<(), CassE
                  ?);";
     let mut futures = Vec::<ResultFuture>::new();
     for i in (0..NUM_CONCURRENT_REQUESTS) {
-        let mut statement = CassStatement::new(query, 6);
         let key: String = key.clone() + &i.to_string();
+        let mut statement = CassStatement::new(query, 6);
         statement
             .bind_string(0, &key).unwrap()
             .bind_bool(1, i % 2 == 0).unwrap()

@@ -1,11 +1,11 @@
 [package]
 
-description = "A usable Cassandra CQL driver (this replaces the previous cql-ffi package).\nWraps the DataStax c++ native driver and uses cql-bindgen vian rust-bindgen.\nWorks with both stable and nightly"
+description = "A usable Cassandra CQL driver (this replaces the previous cql-ffi package).\nWraps the DataStax c++ native driver and uses cql-bindgen vian rust-bindgen.\nWorks with nightly"
 license = "Apache-2.0"
 homepage = "https://github.com/tupshin/cassandra-rust"
 repository = "https://github.com/tupshin/cassandra-rust"
 name = "cassandra"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["Tupshin Harper <tupshin@tupshin.com>"]
 build = "build.rs"
 
@@ -14,11 +14,10 @@ build = "build.rs"
 name = "cassandra"
 
 [dependencies]
-libc = "*"
-num = "*"
-log = "*"
-cql_bindgen = "0.0.15"
-# bindgen_plugin = "0.15.0"
+libc = "0.1.*"
+num = "0.1.*"
+log = "0.3.*"
+cql_bindgen = "0.1.*"
 
 [dependencies.clippy]
 git = "https://github.com/Manishearth/rust-clippy"
