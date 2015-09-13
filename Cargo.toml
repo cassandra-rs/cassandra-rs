@@ -18,9 +18,7 @@ libc = "0.1.*"
 num = "0.1.*"
 log = "0.3.*"
 cql_bindgen = "0.1.*"
-
-[dependencies.clippy]
-git = "https://github.com/Manishearth/rust-clippy"
+clippy = "0.0.*"
 
 [[bin]]
 name="async"
