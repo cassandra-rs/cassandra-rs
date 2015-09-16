@@ -6,7 +6,7 @@ in a somewhat-sane crate.
 
 You can use it from cargo with
 
-    [dependencies.cql_ffi]
+    [dependencies.cassandra]
     git = "https://github.com/tupshin/cassandra-rs"
     
 Or just 
