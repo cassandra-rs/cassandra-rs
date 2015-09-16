@@ -1,5 +1,5 @@
-#![feature(plugin)]
-#![plugin(clippy)]
+//#![feature(plugin)]
+//#![plugin(clippy)]
 //#![plugin(bindgen_plugin)]
 extern crate libc;
 #[macro_use]

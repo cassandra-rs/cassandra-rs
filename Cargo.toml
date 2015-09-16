@@ -5,7 +5,7 @@ license = "Apache-2.0"
 homepage = "https://github.com/tupshin/cassandra-rust"
 repository = "https://github.com/tupshin/cassandra-rust"
 name = "cassandra"
-version = "0.4.1"
+version = "0.4.2"
 authors = ["Tupshin Harper <tupshin@tupshin.com>"]
 build = "build.rs"
 
@@ -18,7 +18,10 @@ libc = "0.1.*"
 num = "0.1.*"
 log = "0.3.*"
 cql_bindgen = "0.1.*"
-clippy = "0.0.*"
+# clippy = "*"
+
+# [depdencies.clippy]
+# git = "https://github.com:Manishearth/rust-clippy.git"
 
 [[bin]]
 name="async"

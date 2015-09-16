@@ -1,5 +1,5 @@
-#![feature(plugin)]
-#![plugin(clippy)]
+//#![feature(plugin)]
+//#![plugin(clippy)]
 
 extern crate num;
 extern crate cassandra;
