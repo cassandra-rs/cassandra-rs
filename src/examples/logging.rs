@@ -4,7 +4,7 @@ use std::slice;
 
 use cql_ffi::*;
 
-unsafe fn print_error(future: &mut CassFuture) {
+unsafe fn print_error(future: &mut Future) {
     let message = future.error_message();
     let message = slice::from_raw_parts(&message.data, message.length as usize);
     println!("Error: {:?}", message);
@@ -17,7 +17,7 @@ unsafe fn create_cluster() -> *mut Cluster {
 }
 
 unsafe fn connect_session(session: &mut Session, cluster: &mut Cluster) -> CassError {
-    let future: CassFuture = &mut session.connect(cluster);
+    let future: Future = &mut session.connect(cluster);
     future.wait();
     future
 }
@@ -35,7 +35,7 @@ unsafe fn connect_session(session: &mut Session, cluster: &mut Cluster) -> CassE
 fn main() {
     //~ Cluster* cluster = NULL;
     //~ Session* session = NULL;
-    //~ CassFuture* close_future = NULL;
+    //~ Future* close_future = NULL;
     //~ FILE* log_file = fopen("driver.log", "w+");
     //~ if (log_file == NULL) {
         //~ fprintf(stderr, "Unable to open log file\n");

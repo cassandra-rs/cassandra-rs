@@ -5,14 +5,14 @@
 use std::ffi::CString;
 
 use cql_ffi::batch::CassBatch;
-use cql_ffi::future::CassFuture;
+use cql_ffi::future::Future;
 use cql_ffi::future::ResultFuture;
 use cql_ffi::future::PreparedFuture;
 use cql_ffi::error::CassError;
 use cql_ffi::statement::CassStatement;
 use cql_ffi::schema::CassSchema;
 use cql_ffi::cluster::Cluster;
-use cql_bindgen::CassFuture as _CassFuture;
+use cql_bindgen::CassFuture as _Future;
 use cql_bindgen::cass_future_free;
 use cql_bindgen::cass_future_wait;
 use cql_bindgen::cass_future_error_code;
@@ -50,9 +50,9 @@ impl Session {
         }
     }
 
-    pub fn close(self) -> CassFuture {
+    pub fn close(self) -> Future {
         unsafe {
-            CassFuture(cass_session_close(self.0))
+            Future(cass_session_close(self.0))
         }
     }
 
@@ -97,12 +97,12 @@ impl Session {
     pub unsafe fn connect_keyspace(&self,
                                    cluster: Cluster,
                                    keyspace: *const ::libc::c_char)
-                                   -> CassFuture {
-        CassFuture(cass_session_connect_keyspace(self.0, cluster.0, keyspace))
+                                   -> Future {
+        Future(cass_session_connect_keyspace(self.0, cluster.0, keyspace))
     }
 }
 
-pub struct SessionFuture(pub *mut _CassFuture, pub Session);
+pub struct SessionFuture(pub *mut _Future, pub Session);
 
 impl SessionFuture {
     pub fn wait(self) -> Result<Session, CassError> {

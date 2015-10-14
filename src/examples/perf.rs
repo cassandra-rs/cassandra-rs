@@ -27,7 +27,7 @@
 //~ double total_averages;
 //~ double samples[NUM_SAMPLES];
 //~ } ThreadStats;
-//~ void print_error(CassFuture* future) {
+//~ void print_error(Future* future) {
 //~ CassString message = cass_future_error_message(future);
 //~ fprintf(stderr, "Error: %.*s\n", (int)message.length, message.data);
 //~ }
@@ -45,7 +45,7 @@
 //~ }
 //~ CassError connect_session(Session* session, const Cluster* cluster) {
 //~ CassError rc = CASS_OK;
-//~ CassFuture* future = cass_session_connect_keyspace(session, cluster, "examples");
+//~ Future* future = cass_session_connect_keyspace(session, cluster, "examples");
 //~ cass_future_wait(future);
 //~ rc = cass_future_error_code(future);
 //~ if (rc != CASS_OK) {
@@ -56,7 +56,7 @@
 //~ }
 //~ CassError execute_query(Session* session, const char* query) {
 //~ CassError rc = CASS_OK;
-//~ CassFuture* future = NULL;
+//~ Future* future = NULL;
 //~ CassStatement* statement = cass_statement_new(cass_string_init(query), 0);
 //~ future = cass_session_execute(session, statement);
 //~ cass_future_wait(future);
@@ -70,7 +70,7 @@
 //~ }
 //~ CassError prepare_query(Session* session, CassString query, const PreparedStatement** prepared) {
 //~ CassError rc = CASS_OK;
-//~ CassFuture* future = NULL;
+//~ Future* future = NULL;
 //~ future = cass_session_prepare(session, query);
 //~ cass_future_wait(future);
 //~ rc = cass_future_error_code(future);
@@ -116,7 +116,7 @@
 //~ double elapsed, throughput;
 //~ uint64_t start;
 //~ int num_requests = 0;
-//~ CassFuture* futures[NUM_CONCURRENT_REQUESTS];
+//~ Future* futures[NUM_CONCURRENT_REQUESTS];
 //~ unsigned long thread_id = uv_thread_self();
 //~ CassCollection* collection = cass_collection_new(CASS_COLLECTION_TYPE_SET, 2);
 //~ cass_collection_append_string(collection, cass_string_init("jazz"));
@@ -140,7 +140,7 @@
 //~ cass_statement_free(statement);
 //~ }
 //~ for (i = 0; i < NUM_CONCURRENT_REQUESTS; ++i) {
-//~ CassFuture* future = futures[i];
+//~ Future* future = futures[i];
 //~ CassError rc = cass_future_error_code(future);
 //~ if (rc != CASS_OK) {
 //~ print_error(future);
@@ -182,7 +182,7 @@
 //~ double elapsed, throughput;
 //~ uint64_t start;
 //~ int num_requests = 0;
-//~ CassFuture* futures[NUM_CONCURRENT_REQUESTS];
+//~ Future* futures[NUM_CONCURRENT_REQUESTS];
 //~ unsigned long thread_id = uv_thread_self();
 //~ start = uv_hrtime();
 //~ for (i = 0; i < NUM_CONCURRENT_REQUESTS; ++i) {
@@ -196,7 +196,7 @@
 //~ cass_statement_free(statement);
 //~ }
 //~ for (i = 0; i < NUM_CONCURRENT_REQUESTS; ++i) {
-//~ CassFuture* future = futures[i];
+//~ Future* future = futures[i];
 //~ CassError rc = cass_future_error_code(future);
 //~ if (rc != CASS_OK) {
 //~ print_error(future);
@@ -239,7 +239,7 @@
 //~ uv_thread_t threads[NUM_THREADS];
 //~ Cluster* cluster = NULL;
 //~ Session* session = NULL;
-//~ CassFuture* close_future = NULL;
+//~ Future* close_future = NULL;
 //~ cass_log_set_level(CASS_LOG_INFO);
 //~ cluster = create_cluster();
 //~ uuid_gen = cass_uuid_gen_new();

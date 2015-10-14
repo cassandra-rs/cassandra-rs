@@ -6,7 +6,7 @@ use cql_ffi::error::CassError;
 use cql_ffi::result::CassResult;
 use cql_ffi::prepared::PreparedStatement;
 
-use cql_bindgen::CassFuture as _CassFuture;
+use cql_bindgen::CassFuture as _Future;
 use cql_bindgen::cass_future_free;
 use cql_bindgen::cass_future_error_message;
 use cql_bindgen::cass_future_wait_timed;
@@ -17,9 +17,9 @@ use cql_bindgen::cass_future_error_code;
 use cql_bindgen::cass_future_get_result;
 use cql_bindgen::cass_future_get_prepared;
 
-pub struct CassFuture(pub *mut _CassFuture);
+pub struct Future(pub *mut _Future);
 
-impl Drop for CassFuture {
+impl Drop for Future {
     fn drop(&mut self) {
         unsafe {
             cass_future_free(self.0)
@@ -27,9 +27,9 @@ impl Drop for CassFuture {
     }
 }
 
-impl CassFuture {
+impl Future {
 
-//    pub unsafe fn set_callback(&mut self, callback: CassFutureCallback, data: *mut c_void)
+//    pub unsafe fn set_callback(&mut self, callback: FutureCallback, data: *mut c_void)
 //        -> Result<&Self,CassError> {
 //        CassError::build(cass_future_set_callback(self.0, callback.0, data)).wrap(self)
 //    }
@@ -72,7 +72,7 @@ impl CassFuture {
 
 }
 
-pub struct ResultFuture(pub *mut _CassFuture);
+pub struct ResultFuture(pub *mut _Future);
 
 impl Drop for ResultFuture {
     fn drop(&mut self) {
@@ -117,7 +117,7 @@ impl ResultFuture {
 }
 
 
-pub struct PreparedFuture(pub *mut _CassFuture);
+pub struct PreparedFuture(pub *mut _Future);
 
 impl Drop for PreparedFuture {
     fn drop(&mut self) {
