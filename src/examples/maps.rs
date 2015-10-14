@@ -23,7 +23,7 @@ fn insert_into_maps(session: &mut Session,
     let mut statement = CassStatement::new(INSERT_QUERY, 2);
     statement.bind_string(0, key).unwrap();
 
-    let mut map = CassMap::new(5);
+    let mut map = Map::new(5);
     for item in items {
         map.append_string(item.key).unwrap();
         map.append_int32(item.value).unwrap();

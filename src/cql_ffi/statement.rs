@@ -1,7 +1,7 @@
 use std::ffi::CString;
 
 use cql_ffi::collection::set::CassSet;
-use cql_ffi::collection::map::CassMap;
+use cql_ffi::collection::map::Map;
 use cql_ffi::collection::list::CassList;
 use cql_ffi::error::CassError;
 use cql_ffi::uuid::CassUuid;
@@ -213,7 +213,7 @@ impl CassStatement {
         }
     }
 
-    pub fn bind_map(&mut self, index: u64, collection: CassMap) -> Result<&mut Self, CassError> {
+    pub fn bind_map(&mut self, index: u64, collection: Map) -> Result<&mut Self, CassError> {
         unsafe {
             CassError::build(
                 cass_statement_bind_collection(self.0,index,collection.0)

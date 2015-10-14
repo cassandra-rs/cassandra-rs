@@ -2,7 +2,7 @@ use cql_bindgen::CassIterator as _CassIterator;
 use cql_bindgen::cass_iterator_free;
 use cql_bindgen::cass_iterator_next;
 use cql_bindgen::cass_iterator_get_column;
-use cql_bindgen::CassRow as _CassRow;
+use cql_bindgen::CassRow as _Row;
 use cql_bindgen::cass_row_get_column;
 use cql_bindgen::cass_row_get_column_by_name;
 use cql_bindgen::cass_iterator_from_row;
@@ -20,9 +20,9 @@ use cql_ffi::value::CassValue;
 use cql_ffi::error::CassError;
 use cql_ffi::column::Column;
 
-pub struct CassRow(pub *const _CassRow);
+pub struct Row(pub *const _Row);
 
-impl Debug for CassRow {
+impl Debug for Row {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         for column in self {
             //println!("foo:{:?}",column);
@@ -32,7 +32,7 @@ impl Debug for CassRow {
     }
 }
 
-impl Display for CassRow {
+impl Display for Row {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         for column in self {
             try!(write!(f, "{}\t", CassValue::new(column.0)));
@@ -41,7 +41,7 @@ impl Display for CassRow {
     }
 }
 
-impl CassRow {
+impl Row {
     pub fn get_column(&self, index: u64) -> Result<Column, CassError> {
         unsafe {
             let col = cass_row_get_column(self.0, index);
@@ -113,7 +113,7 @@ impl Display for RowIterator {
     }
 }
 
-impl IntoIterator for CassRow {
+impl IntoIterator for Row {
 
     type Item = Column;
     type IntoIter = RowIterator;
@@ -125,7 +125,7 @@ impl IntoIterator for CassRow {
     }
 }
 
-impl<'a> IntoIterator for &'a CassRow {
+impl<'a> IntoIterator for &'a Row {
     type Item = Column;
     type IntoIter = RowIterator;
     fn into_iter(self) -> Self::IntoIter {

@@ -27,10 +27,10 @@ use cql_ffi::uuid::CassUuid;
 use cql_ffi::inet::CassInet;
 use cql_ffi::collection::collection::CassCollectionType;
 
-pub struct CassMap(pub *mut _CassCollection);
+pub struct Map(pub *mut _CassCollection);
 
 
-impl Drop for CassMap {
+impl Drop for Map {
     fn drop(&mut self) {
         unsafe {
             cass_collection_free(self.0)
@@ -38,10 +38,10 @@ impl Drop for CassMap {
     }
 }
 
-impl CassMap {
-    pub fn new(item_count: u64) -> CassMap {
+impl Map {
+    pub fn new(item_count: u64) -> Map {
         unsafe {
-            CassMap(cass_collection_new(CassCollectionType::MAP as u32, item_count))
+            Map(cass_collection_new(CassCollectionType::MAP as u32, item_count))
         }
     }
 

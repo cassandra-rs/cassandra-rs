@@ -11,7 +11,7 @@ use std::slice;
 use std::str;
 
 use cql_ffi::value::CassValueType;
-use cql_ffi::row::CassRow;
+use cql_ffi::row::Row;
 
 use cql_bindgen::CassResult as _CassResult;
 use cql_bindgen::CassIterator as _CassIterator;
@@ -96,11 +96,11 @@ impl CassResult {
         }
     }
 
-    pub fn first_row(&self) -> Option<CassRow> {
+    pub fn first_row(&self) -> Option<Row> {
         unsafe {
             match self.row_count() {
                 0 => None,
-                _ => Some(CassRow(cass_result_first_row(self.0))),
+                _ => Some(Row(cass_result_first_row(self.0))),
             }
         }
     }
@@ -130,7 +130,7 @@ impl Drop for ResultIterator {
 }
 
 impl Iterator for ResultIterator {
-    type Item = CassRow;
+    type Item = Row;
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
@@ -142,9 +142,9 @@ impl Iterator for ResultIterator {
 }
 
 impl ResultIterator {
-    pub fn get_row(&mut self) -> CassRow {
+    pub fn get_row(&mut self) -> Row {
         unsafe {
-            CassRow(cass_iterator_get_row(self.0))
+            Row(cass_iterator_get_row(self.0))
         }
     }
 
@@ -152,7 +152,7 @@ impl ResultIterator {
 
 impl IntoIterator for CassResult {
 
-    type Item = CassRow;
+    type Item = Row;
     type IntoIter = ResultIterator;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -161,7 +161,7 @@ impl IntoIterator for CassResult {
 }
 
 //impl<'a> IntoIterator for &'a CassResult {
-//    type Item = CassRow;
+//    type Item = Row;
 //    type IntoIter = ResultIterator;
 //
 //    fn into_iter(self) -> Self::IntoIter {unsafe{
