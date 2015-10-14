@@ -6,8 +6,8 @@ use std::mem;
 use std::ffi::CStr;
 use std::str;
 
-use cql_bindgen::CassUuid as _CassUuid;
-use cql_bindgen::CassUuidGen as _CassUuidGen;
+use cql_bindgen::CassUuid as _Uuid;
+use cql_bindgen::CassUuidGen as _UuidGen;
 use cql_bindgen::cass_uuid_gen_new;
 use cql_bindgen::cass_uuid_gen_free;
 use cql_bindgen::cass_uuid_gen_time;
@@ -28,19 +28,19 @@ const CASS_UUID_STRING_LENGTH:usize = 37;
 
 
 #[derive(Copy,Clone)]
-pub struct CassUuid(pub _CassUuid);
+pub struct Uuid(pub _Uuid);
 
-impl ::std::default::Default for CassUuid {
-    fn default() -> CassUuid {
+impl ::std::default::Default for Uuid {
+    fn default() -> Uuid {
         unsafe {
             ::std::mem::zeroed()
         }
     }
 }
 
-pub struct CassUuidGen(pub *mut _CassUuidGen);
+pub struct UuidGen(pub *mut _UuidGen);
 
-impl Drop for CassUuidGen {
+impl Drop for UuidGen {
     fn drop(&mut self) {
         unsafe {
             cass_uuid_gen_free(self.0)
@@ -48,19 +48,19 @@ impl Drop for CassUuidGen {
     }
 }
 
-impl Debug for CassUuid {
+impl Debug for Uuid {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(f, "{:?}", self.to_string())
     }
 }
 
-impl Display for CassUuid {
+impl Display for Uuid {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         write!(f, "{}", self.to_string())
     }
 }
 
-impl CassUuid {
+impl Uuid {
     pub fn min_from_time(&mut self, time: u64) {
         unsafe {
             cass_uuid_min_from_time(time, &mut self.0)
@@ -103,42 +103,42 @@ impl CassUuid {
 //    }
 }
 
-impl CassUuidGen {
+impl UuidGen {
     pub fn new() -> Self {
         unsafe {
-            CassUuidGen(cass_uuid_gen_new())
+            UuidGen(cass_uuid_gen_new())
         }
     }
 
-    pub fn new_with_node(node: u64) -> CassUuidGen {
+    pub fn new_with_node(node: u64) -> UuidGen {
         unsafe {
-            CassUuidGen(cass_uuid_gen_new_with_node(node))
+            UuidGen(cass_uuid_gen_new_with_node(node))
         }
     }
 
-    pub fn get_time(&self) -> CassUuid {
+    pub fn get_time(&self) -> Uuid {
         unsafe {
-            let mut output: _CassUuid = mem::zeroed();
+            let mut output: _Uuid = mem::zeroed();
             cass_uuid_gen_time(self.0, &mut output);
-            CassUuid(output)
+            Uuid(output)
         }
     }
 
-    pub fn fill_random(&self, mut output: CassUuid) {
+    pub fn fill_random(&self, mut output: Uuid) {
         unsafe {
             cass_uuid_gen_random(self.0, &mut output.0)
         }
     }
 
-    pub fn random(&self) -> CassUuid {
+    pub fn random(&self) -> Uuid {
         unsafe {
-            let mut output: _CassUuid = mem::zeroed();
+            let mut output: _Uuid = mem::zeroed();
             cass_uuid_gen_random(self.0, &mut output);
-            CassUuid(output)
+            Uuid(output)
         }
     }
 
-    pub fn with_time(&self, timestamp: u64, mut output: CassUuid) {
+    pub fn with_time(&self, timestamp: u64, mut output: Uuid) {
         unsafe {
             cass_uuid_gen_from_time(self.0, timestamp, &mut output.0)
         }

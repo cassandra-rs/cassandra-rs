@@ -8,7 +8,7 @@ use std::slice;
 
 use cql_ffi::error::CassError;
 use cql_ffi::inet::CassInet;
-use cql_ffi::uuid::CassUuid;
+use cql_ffi::uuid::Uuid;
 use cql_ffi::collection::map::MapIterator;
 use cql_ffi::collection::set::SetIterator;
 use cql_ffi::error::CassErrorTypes;
@@ -210,7 +210,7 @@ impl CassValue {
         CassValue(value)
     }
 
-    pub fn fill_uuid(&self, mut uuid: CassUuid) -> Result<CassUuid, CassError> {
+    pub fn fill_uuid(&self, mut uuid: Uuid) -> Result<Uuid, CassError> {
         unsafe {
             CassError::build(cass_value_get_uuid(self.0,&mut uuid.0)).wrap(uuid)
         }
@@ -391,9 +391,9 @@ impl CassValue {
         }
     }
 
-    pub fn get_uuid(&self) -> Result<CassUuid, CassError> {
+    pub fn get_uuid(&self) -> Result<Uuid, CassError> {
         unsafe {
-            let mut output: CassUuid = mem::zeroed();
+            let mut output: Uuid = mem::zeroed();
             CassError::build(cass_value_get_uuid(self.0,&mut output.0)).wrap(output)
         }
     }

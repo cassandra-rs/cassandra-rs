@@ -24,7 +24,7 @@ use cql_bindgen::cass_iterator_from_collection;
 use cql_bindgen::cass_value_type;
 use cql_bindgen::CassValue as _CassValue;
 
-use cql_ffi::uuid::CassUuid;
+use cql_ffi::uuid::Uuid;
 //use cql_ffi::udt::CassUserType;
 use cql_ffi::value::ValueType;
 use cql_ffi::collection::set::SetIterator;
@@ -219,9 +219,9 @@ impl Column {
         }
     }
 
-    pub fn get_uuid(&self) -> Result<CassUuid, CassError> {
+    pub fn get_uuid(&self) -> Result<Uuid, CassError> {
         unsafe {
-            let mut output: CassUuid = mem::zeroed();
+            let mut output: Uuid = mem::zeroed();
             CassError::build(cass_value_get_uuid(self.0,&mut output.0)).wrap(output)
         }
     }

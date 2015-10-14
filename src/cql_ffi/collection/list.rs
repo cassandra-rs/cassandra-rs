@@ -21,7 +21,7 @@ use cql_bindgen::cass_collection_append_inet;
 use cql_ffi::value::CassValue;
 use cql_ffi::collection::collection::CassCollectionType;
 use cql_ffi::error::CassError;
-use cql_ffi::uuid::CassUuid;
+use cql_ffi::uuid::Uuid;
 use cql_ffi::inet::CassInet;
 
 pub struct CassList(pub *mut _CassCollection);
@@ -89,7 +89,7 @@ impl CassList {
         }
     }
 
-    pub fn append_uuid(&mut self, value: CassUuid) -> Result<&Self, CassError> {
+    pub fn append_uuid(&mut self, value: Uuid) -> Result<&Self, CassError> {
         unsafe {
             CassError::build(cass_collection_append_uuid(self.0,value.0)).wrap(self)
         }

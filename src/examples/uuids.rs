@@ -1,11 +1,11 @@
 extern crate cassandra;
 
 use cassandra::Session;
-use cassandra::CassUuid;
+use cassandra::Uuid;
 use cassandra::Statement;
 use cassandra::CassResult;
 use cassandra::CassError;
-use cassandra::CassUuidGen;
+use cassandra::UuidGen;
 use cassandra::Cluster;
 
 static INSERT_QUERY:&'static str = "INSERT INTO examples.log (key, time, entry) VALUES (?, ?, ?);";
@@ -18,7 +18,7 @@ static CREATE_TABLE:&'static str = "CREATE TABLE IF NOT EXISTS examples.log (key
 
 fn insert_into_log(session: &mut Session,
                    key: &str,
-                   time: CassUuid,
+                   time: Uuid,
                    entry: &str)
                    -> Result<CassResult, CassError> {
     let mut statement = Statement::new(INSERT_QUERY, 3);
@@ -38,7 +38,7 @@ fn select_from_log(session: &mut Session, key: &str) -> Result<CassResult, CassE
 }
 
 fn main() {
-    let uuid_gen = CassUuidGen::new();
+    let uuid_gen = UuidGen::new();
     let mut cluster = Cluster::new();
     cluster.set_contact_points("127.0.0.1").unwrap();
     let session = &mut Session::new().connect(&cluster).wait().unwrap();

@@ -21,7 +21,7 @@
 //~ "0123456701234567012345670123456701234567012345670123456701234567"
 //~ "0123456701234567012345670123456701234567012345670123456701234567"
 //~ "0123456701234567012345670123456701234567012345670123456701234567";
-//~ CassUuidGen* uuid_gen;
+//~ UuidGen* uuid_gen;
 //~ typedef struct ThreadStats_ {
 //~ long count;
 //~ double total_averages;
@@ -123,7 +123,7 @@
 //~ cass_collection_append_string(collection, cass_string_init("2013"));
 //~ start = uv_hrtime();
 //~ for (i = 0; i < NUM_CONCURRENT_REQUESTS; ++i) {
-//~ CassUuid id;
+//~ Uuid id;
 //~ Statement* statement;
 //~ if (prepared != NULL) {
 //~ statement = cass_prepared_bind(prepared);

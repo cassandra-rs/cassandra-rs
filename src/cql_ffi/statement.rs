@@ -4,7 +4,7 @@ use cql_ffi::collection::set::CassSet;
 use cql_ffi::collection::map::Map;
 use cql_ffi::collection::list::CassList;
 use cql_ffi::error::CassError;
-use cql_ffi::uuid::CassUuid;
+use cql_ffi::uuid::Uuid;
 use cql_ffi::inet::CassInet;
 use cql_ffi::result::CassResult;
 use cql_ffi::consistency::Consistency;
@@ -237,7 +237,7 @@ impl Statement {
         }
     }
 
-    pub fn bind_uuid(&mut self, index: u64, value: CassUuid) -> Result<&mut Self, CassError> {
+    pub fn bind_uuid(&mut self, index: u64, value: Uuid) -> Result<&mut Self, CassError> {
         unsafe {
             CassError::build(
                 cass_statement_bind_uuid(self.0,index, value.0)
@@ -389,7 +389,7 @@ impl Statement {
 
     pub fn bind_uuid_by_name(&mut self,
                              name: &str,
-                             value: CassUuid)
+                             value: Uuid)
                              -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();

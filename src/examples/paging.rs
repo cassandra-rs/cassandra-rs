@@ -13,7 +13,7 @@ static SELECT_QUERY:&'static str = "SELECT * FROM paging";
 static INSERT_QUERY:&'static str = "INSERT INTO paging (key, value) VALUES (?, ?);";
 
 //FIXME uuids not yet working
-fn insert_into_paging(session: &mut Session /* , uuid_gen:&mut CassUuidGen */)
+fn insert_into_paging(session: &mut Session /* , uuid_gen:&mut UuidGen */)
                       -> Result<Vec<Option<ResultFuture>>, CassError> {
     let mut futures = Vec::with_capacity(NUM_CONCURRENT_REQUESTS as usize);
     let mut results = Vec::with_capacity(NUM_CONCURRENT_REQUESTS as usize);
@@ -62,7 +62,7 @@ fn select_from_paging(session: &mut Session) -> Result<(), CassError> {
 }
 
 fn main() {
-    //let uuid_gen = &mut CassUuidGen::new();
+    //let uuid_gen = &mut UuidGen::new();
 
     let mut cluster = Cluster::new();
     cluster

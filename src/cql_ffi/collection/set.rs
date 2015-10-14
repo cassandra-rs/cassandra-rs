@@ -28,7 +28,7 @@ use cql_ffi::schema::SchemaMetaField;
 use cql_ffi::schema::SchemaMeta;//use cql_bindgen::cass_collection_append_decimal;
 use cql_ffi::collection::collection::CassCollectionType;
 use cql_ffi::error::CassError;
-use cql_ffi::uuid::CassUuid;
+use cql_ffi::uuid::Uuid;
 use cql_ffi::inet::CassInet;
 use cql_bindgen::cass_collection_append_user_type;
 
@@ -101,7 +101,7 @@ impl CassSet {
         }
     }
 
-    pub fn append_uuid(&mut self, value: CassUuid) -> Result<&Self, CassError> {
+    pub fn append_uuid(&mut self, value: Uuid) -> Result<&Self, CassError> {
         unsafe {
             CassError::build(cass_collection_append_uuid(self.0,value.0)).wrap(self)
         }

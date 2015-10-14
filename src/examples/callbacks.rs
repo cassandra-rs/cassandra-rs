@@ -7,7 +7,7 @@ use cql_ffi::*;
 //~ uv_mutex_t mutex;
 //~ uv_cond_t cond;
 //~ Future* close_future = NULL;
-//~ CassUuidGen* uuid_gen = NULL;
+//~ UuidGen* uuid_gen = NULL;
 
 
 fn wait_exit() {
@@ -124,7 +124,7 @@ fn on_select(future: Future, data: Session) {
         let result = cass_future_get_result(future);
         let iterator = cass_iterator_from_result(result);
         while (cass_iterator_next(iterator)) {
-            //CassUuid key;
+            //Uuid key;
             //char key_str[CASS_UUID_STRING_LENGTH];
             let value = 0u64;
             let row = cass_iterator_get_row(iterator);

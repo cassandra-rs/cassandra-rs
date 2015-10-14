@@ -74,7 +74,7 @@ fn select_from_udt(session: &Session) -> Result<(), CassError> {
 fn insert_into_udt(session: &Session, schema: Schema) -> Result<(), CassError> {
     let query = "INSERT INTO examples.udt (id, address) VALUES (?, ?)";
     let mut statement = Statement::new(query, 2);
-    let uuid_gen = CassUuidGen::new();
+    let uuid_gen = UuidGen::new();
     let udt_address = schema.get_udt("examples", "address");
     let udt_phone = Schema::get_udt(&schema, "examples", "phone_numbers");
     let id = uuid_gen.get_time();

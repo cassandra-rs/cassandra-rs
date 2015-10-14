@@ -24,7 +24,7 @@ use std::ffi::CString;
 use cql_ffi::inet::AsCassInet;
 use std::net::SocketAddr;
 use cql_bindgen::CassTuple as _CassTuple;
-use cql_ffi::uuid::CassUuid;
+use cql_ffi::uuid::Uuid;
 use cql_ffi::udt::CassDataType;
 use cql_ffi::udt::CassConstDataType;
 use cql_ffi::error::CassError;
@@ -138,7 +138,7 @@ impl CassTuple {
     }
 
     pub fn set_uuid<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
-        where S: Into<CassUuid>
+        where S: Into<Uuid>
     {
         unsafe {
             CassError::build(
