@@ -1,7 +1,7 @@
 use cql_bindgen::CassLogMessage;
 
 #[repr(C)]
-pub enum CassLogLevel {
+pub enum LogLevel {
     DISABLED = 0,
     CRITICAL = 1,
     ERROR = 2,
