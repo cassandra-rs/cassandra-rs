@@ -67,7 +67,8 @@ fn main() {
     cluster.set_contact_points("127.0.0.1").unwrap();
     cluster.set_protocol_version(3).unwrap();
     println!("Proto set");
-    let mut session = CassSession::new().connect(&mut cluster).wait().unwrap();
+    let mut session = cluster.connect().unwrap();
+    
     println!("Connected");
     let mut input = Basic { bln: true, flt: 0.001f32, dbl: 0.0002f64, i32: 1, i64: 2 };
     let mut output = Basic { bln: false, flt: 0f32, dbl: 0f64, i32: 0, i64: 0 };
