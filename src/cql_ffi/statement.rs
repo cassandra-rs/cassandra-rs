@@ -7,7 +7,7 @@ use cql_ffi::error::CassError;
 use cql_ffi::uuid::CassUuid;
 use cql_ffi::inet::CassInet;
 use cql_ffi::result::CassResult;
-use cql_ffi::consistency::CassConsistency;
+use cql_ffi::consistency::Consistency;
 use cql_ffi::udt::CassUserType;
 
 use cql_bindgen::CassStatement as _Statement;
@@ -99,7 +99,7 @@ impl Statement {
         }
     }
 
-    pub fn set_consistency(&mut self, consistency: CassConsistency) -> Result<&Self, CassError> {
+    pub fn set_consistency(&mut self, consistency: Consistency) -> Result<&Self, CassError> {
         unsafe {
             CassError::build(
                 cass_statement_set_consistency(self.0,consistency.0)
@@ -108,7 +108,7 @@ impl Statement {
     }
 
     pub fn set_serial_consistency(&mut self,
-                                  serial_consistency: CassConsistency)
+                                  serial_consistency: Consistency)
                                   -> Result<&mut Self, CassError> {
         unsafe {
             CassError::build(
