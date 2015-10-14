@@ -31,8 +31,8 @@
 //~ CassString message = cass_future_error_message(future);
 //~ fprintf(stderr, "Error: %.*s\n", (int)message.length, message.data);
 //~ }
-//~ CassCluster* create_cluster() {
-//~ CassCluster* cluster = cass_cluster_new();
+//~ Cluster* create_cluster() {
+//~ Cluster* cluster = cass_cluster_new();
 //~ cass_cluster_set_contact_points(cluster, "127.0.0.1");
 //~ cass_cluster_set_credentials(cluster, "cassandra", "cassandra");
 //~ cass_cluster_set_num_threads_io(cluster, NUM_IO_WORKER_THREADS);
@@ -43,7 +43,7 @@
 //~ cass_cluster_set_max_connections_per_host(cluster, 2);
 //~ return cluster;
 //~ }
-//~ CassError connect_session(Session* session, const CassCluster* cluster) {
+//~ CassError connect_session(Session* session, const Cluster* cluster) {
 //~ CassError rc = CASS_OK;
 //~ CassFuture* future = cass_session_connect_keyspace(session, cluster, "examples");
 //~ cass_future_wait(future);
@@ -237,7 +237,7 @@
 //~ int main() {
 //~ int i;
 //~ uv_thread_t threads[NUM_THREADS];
-//~ CassCluster* cluster = NULL;
+//~ Cluster* cluster = NULL;
 //~ Session* session = NULL;
 //~ CassFuture* close_future = NULL;
 //~ cass_log_set_level(CASS_LOG_INFO);

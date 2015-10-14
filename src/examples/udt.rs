@@ -4,7 +4,7 @@ use cassandra::*;
 
 fn main() {
 
-    let mut cluster = CassCluster::new();
+    let mut cluster = Cluster::new();
     cluster.set_contact_points("127.0.0.1").unwrap();
 
     let session = Session::new().connect(&cluster).wait().unwrap();

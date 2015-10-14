@@ -1,5 +1,5 @@
 use cql_ffi::ssl::CassSsl;
-use cql_bindgen::CassCluster as _CassCluster;
+use cql_bindgen::CassCluster as _Cluster;
 use std::ffi::CString;
 
 use cql_bindgen::cass_cluster_new;
@@ -37,9 +37,9 @@ use cql_ffi::error::CassError;
 
 use cql_ffi::session::Session;
 
-pub struct CassCluster(pub *mut _CassCluster);
+pub struct Cluster(pub *mut _Cluster);
 
-impl Drop for CassCluster {
+impl Drop for Cluster {
     fn drop(&mut self) {
         unsafe {
             cass_cluster_free(self.0)
@@ -47,11 +47,11 @@ impl Drop for CassCluster {
     }
 }
 
-impl CassCluster {
+impl Cluster {
 
-    pub fn new() -> CassCluster {
+    pub fn new() -> Cluster {
         unsafe {
-            CassCluster(cass_cluster_new())
+            Cluster(cass_cluster_new())
         }
     }
 

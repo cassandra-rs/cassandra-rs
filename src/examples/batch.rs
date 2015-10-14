@@ -1,5 +1,5 @@
 extern crate cassandra;
-use cassandra::CassCluster;
+use cassandra::Cluster;
 use cassandra::Session;
 use cassandra::CassStatement;
 use cassandra::CassBatch;
@@ -46,7 +46,7 @@ pub fn verify_batch(session: &mut Session) {
 }
 
 fn main() {
-    let mut cluster = CassCluster::new();
+    let mut cluster = Cluster::new();
     cluster.set_contact_points("127.0.0.1").unwrap();
     let mut session = Session::new().connect(&mut cluster).wait().unwrap();
 

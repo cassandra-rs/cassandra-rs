@@ -40,14 +40,14 @@ unsafe fn print_error(future: &mut CassFuture) {
     println!("Error: {:?}", message);
 }
 
-unsafe fn create_cluster() -> *mut CassCluster {
+unsafe fn create_cluster() -> *mut Cluster {
     let cluster = cass_cluster_new();
     cass_cluster_set_contact_points(cluster, str2ref("127.0.0.1,127.0.0.2,127.0.0.3"));
     cluster
 }
 
 
-fn connect_session(session: Session, cluster: &CassCluster, callback: CassFutureCallback) {
+fn connect_session(session: Session, cluster: &Cluster, callback: CassFutureCallback) {
     let future = cass_session_connect_keyspace(session, cluster, "examples");
     cass_future_set_callback(future, callback, session);
     cass_future_free(future);
@@ -140,7 +140,7 @@ fn on_select(future: CassFuture, data: Session) {
 }
 
 fn main() {
-    CassCluster * cluster = create_cluster();
+    Cluster * cluster = create_cluster();
     Session * session = cass_session_new();
     uuid_gen = cass_uuid_gen_new();
     uv_mutex_init(&mutex);

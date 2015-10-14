@@ -40,7 +40,7 @@ fn select_from_collections(session: &mut Session, key: &str) -> Result<(), CassE
 
 fn main() {
 
-    let mut cluster = CassCluster::new();
+    let mut cluster = Cluster::new();
     cluster.set_contact_points("127.0.0.1").unwrap();
     let session = &mut Session::new().connect(&cluster).wait().unwrap();
 

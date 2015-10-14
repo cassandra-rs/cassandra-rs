@@ -6,7 +6,7 @@ use cassandra::CassStatement;
 use cassandra::CassResult;
 use cassandra::CassError;
 use cassandra::CassUuidGen;
-use cassandra::CassCluster;
+use cassandra::Cluster;
 
 static INSERT_QUERY:&'static str = "INSERT INTO examples.log (key, time, entry) VALUES (?, ?, ?);";
 static SELECT_QUERY:&'static str = "SELECT * FROM examples.log WHERE key = ?";
@@ -39,7 +39,7 @@ fn select_from_log(session: &mut Session, key: &str) -> Result<CassResult, CassE
 
 fn main() {
     let uuid_gen = CassUuidGen::new();
-    let mut cluster = CassCluster::new();
+    let mut cluster = Cluster::new();
     cluster.set_contact_points("127.0.0.1").unwrap();
     let session = &mut Session::new().connect(&cluster).wait().unwrap();
 

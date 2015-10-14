@@ -30,7 +30,7 @@ unsafe fn print_table(session: &mut Session,
 
 fn main() {
     unsafe {
-        let mut cluster = CassCluster::new();
+        let mut cluster = Cluster::new();
         cluster.set_contact_points("127.0.0.1").unwrap();
         match Session::new().connect(&mut cluster).wait() {
             Ok(mut session) => {

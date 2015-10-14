@@ -56,7 +56,7 @@ fn main() {
 }
 
 fn foo() -> Result<(), CassError> {
-    let mut cluster = CassCluster::new();
+    let mut cluster = Cluster::new();
     cluster
         .set_contact_points(CONTACT_POINTS).unwrap()
         .set_load_balance_round_robin().unwrap();

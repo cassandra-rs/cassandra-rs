@@ -64,7 +64,7 @@ fn select_from_paging(session: &mut Session) -> Result<(), CassError> {
 fn main() {
     //let uuid_gen = &mut CassUuidGen::new();
 
-    let mut cluster = CassCluster::new();
+    let mut cluster = Cluster::new();
     cluster
         .set_contact_points(CONTACT_POINTS).unwrap()
         .set_load_balance_round_robin().unwrap();

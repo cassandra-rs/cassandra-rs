@@ -7,7 +7,7 @@ extern crate cassandra;
 
 use cassandra::Session;
 use cassandra::CassStatement;
-use cassandra::CassCluster;
+use cassandra::Cluster;
 use cassandra::ResultFuture;
 use cassandra::CassError;
 
@@ -49,7 +49,7 @@ pub fn block_async(mut futures: Vec<ResultFuture>) -> Result<(), CassError> {
 }
 
 pub fn main() {
-    let mut cluster = CassCluster::new();
+    let mut cluster = Cluster::new();
     cluster.set_contact_points("127.0.0.1").unwrap();
     match Session::new().connect(&cluster).wait() {
         Ok(mut session) => {

@@ -10,13 +10,13 @@ unsafe fn print_error(future: &mut CassFuture) {
     println!("Error: {:?}", message);
 }
 
-unsafe fn create_cluster() -> *mut CassCluster {
-    let cluster = CassCluster::new();
+unsafe fn create_cluster() -> *mut Cluster {
+    let cluster = Cluster::new();
     cluster.set_contact_points(str2ref("127.0.0.1,127.0.0.2,127.0.0.3"));
     cluster
 }
 
-unsafe fn connect_session(session: &mut Session, cluster: &mut CassCluster) -> CassError {
+unsafe fn connect_session(session: &mut Session, cluster: &mut Cluster) -> CassError {
     let future: CassFuture = &mut session.connect(cluster);
     future.wait();
     future
@@ -33,7 +33,7 @@ unsafe fn connect_session(session: &mut Session, cluster: &mut CassCluster) -> C
 //~ }
 
 fn main() {
-    //~ CassCluster* cluster = NULL;
+    //~ Cluster* cluster = NULL;
     //~ Session* session = NULL;
     //~ CassFuture* close_future = NULL;
     //~ FILE* log_file = fopen("driver.log", "w+");

@@ -6,7 +6,7 @@ static COL_NAME:&'static str = "keyspace_name";
 static CONTACT_POINTS:&'static str = "127.0.0.1";
 
 fn main() {
-    let mut cluster = CassCluster::new();
+    let mut cluster = Cluster::new();
     cluster
         .set_contact_points(CONTACT_POINTS).unwrap()
         .set_load_balance_round_robin().unwrap();

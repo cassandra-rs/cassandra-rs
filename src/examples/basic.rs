@@ -60,7 +60,7 @@ fn select_from_basic(session: &mut Session, key: &str) -> Result<Basic, CassErro
 fn main() {
     let input = Basic { bln: true, flt: 0.001f32, dbl: 0.0002f64, i32: 1, i64: 2 };
 
-    let mut cluster = CassCluster::new();
+    let mut cluster = Cluster::new();
     cluster
         .set_contact_points(CONTACT_POINTS).unwrap()
         .set_load_balance_round_robin().unwrap();

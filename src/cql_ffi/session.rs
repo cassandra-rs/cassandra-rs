@@ -11,7 +11,7 @@ use cql_ffi::future::PreparedFuture;
 use cql_ffi::error::CassError;
 use cql_ffi::statement::CassStatement;
 use cql_ffi::schema::CassSchema;
-use cql_ffi::cluster::CassCluster;
+use cql_ffi::cluster::Cluster;
 use cql_bindgen::CassFuture as _CassFuture;
 use cql_bindgen::cass_future_free;
 use cql_bindgen::cass_future_wait;
@@ -43,7 +43,7 @@ impl Drop for Session {
 
 impl Session {
     /// Create a new Cassanda session.
-    /// It's recommended to use CassCluster.connect() instead
+    /// It's recommended to use Cluster.connect() instead
     pub fn new() -> Session {
         unsafe {
             Session(cass_session_new())
@@ -56,7 +56,7 @@ impl Session {
         }
     }
 
-    pub fn connect(self, cluster: &CassCluster) -> SessionFuture {
+    pub fn connect(self, cluster: &Cluster) -> SessionFuture {
         unsafe {
             SessionFuture(cass_session_connect(self.0, cluster.0), self)
         }
@@ -95,7 +95,7 @@ impl Session {
     }
 
     pub unsafe fn connect_keyspace(&self,
-                                   cluster: CassCluster,
+                                   cluster: Cluster,
                                    keyspace: *const ::libc::c_char)
                                    -> CassFuture {
         CassFuture(cass_session_connect_keyspace(self.0, cluster.0, keyspace))
