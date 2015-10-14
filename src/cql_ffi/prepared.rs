@@ -1,6 +1,6 @@
 use cql_ffi::statement::CassStatement;
 
-use cql_bindgen::CassPrepared as _CassPrepared;
+use cql_bindgen::CassPrepared as _PreparedStatement;
 use cql_bindgen::cass_prepared_free;
 use cql_bindgen::cass_prepared_bind;
 //use cql_bindgen::cass_prepared_parameter_name;
@@ -8,12 +8,12 @@ use cql_bindgen::cass_prepared_bind;
 //use cql_bindgen::cass_prepared_parameter_data_type_by_name;
 //use cql_bindgen::cass_prepared_parameter_data_type_by_name_n;
 
-pub struct CassPrepared(pub *const _CassPrepared);
+pub struct PreparedStatement(pub *const _PreparedStatement);
 
-unsafe impl Sync for CassPrepared{}
-unsafe impl Send for CassPrepared{}
+unsafe impl Sync for PreparedStatement{}
+unsafe impl Send for PreparedStatement{}
 
-impl Drop for CassPrepared {
+impl Drop for PreparedStatement {
     fn drop(&mut self) {
         unsafe {
             cass_prepared_free(self.0)
@@ -21,7 +21,7 @@ impl Drop for CassPrepared {
     }
 }
 
-impl CassPrepared {
+impl PreparedStatement {
     pub fn bind(&self) -> CassStatement {
         unsafe {
             CassStatement(cass_prepared_bind(self.0))

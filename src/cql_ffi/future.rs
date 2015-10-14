@@ -4,7 +4,7 @@ use std::slice;
 
 use cql_ffi::error::CassError;
 use cql_ffi::result::CassResult;
-use cql_ffi::prepared::CassPrepared;
+use cql_ffi::prepared::PreparedStatement;
 
 use cql_bindgen::CassFuture as _CassFuture;
 use cql_bindgen::cass_future_free;
@@ -129,14 +129,14 @@ impl Drop for PreparedFuture {
 
 impl PreparedFuture {
 
-    pub fn wait(&mut self) -> Result<CassPrepared, CassError> {
+    pub fn wait(&mut self) -> Result<PreparedStatement, CassError> {
         unsafe {
             cass_future_wait(self.0);
             self.error_code()
         }
     }
 
-    pub fn error_code(&mut self) -> Result<CassPrepared, CassError> {
+    pub fn error_code(&mut self) -> Result<PreparedStatement, CassError> {
         unsafe {
             CassError::build(cass_future_error_code(self.0)).wrap(self.get())
         }
@@ -153,9 +153,9 @@ impl PreparedFuture {
         }
     }
 
-    pub fn get(&mut self) -> CassPrepared {
+    pub fn get(&mut self) -> PreparedStatement {
         unsafe {
-            CassPrepared(cass_future_get_prepared(self.0))
+            PreparedStatement(cass_future_get_prepared(self.0))
         }
     }
 

@@ -39,7 +39,7 @@ fn insert_into_basic(session: &mut Session,
 
 
 fn select_from_basic(session: &mut Session,
-                     prepared: &CassPrepared,
+                     prepared: &PreparedStatement,
                      key: &str,
                      basic: &mut Basic)
                      -> Result<(), CassError> {

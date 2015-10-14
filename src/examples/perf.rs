@@ -68,7 +68,7 @@
 //~ cass_statement_free(statement);
 //~ return rc;
 //~ }
-//~ CassError prepare_query(Session* session, CassString query, const CassPrepared** prepared) {
+//~ CassError prepare_query(Session* session, CassString query, const PreparedStatement** prepared) {
 //~ CassError rc = CASS_OK;
 //~ CassFuture* future = NULL;
 //~ future = cass_session_prepare(session, query);
@@ -110,7 +110,7 @@
 //~ throughput_median,
 //~ throughput_max);
 //~ }
-//~ void insert_into_perf(Session* session, CassString query, const CassPrepared* prepared,
+//~ void insert_into_perf(Session* session, CassString query, const PreparedStatement* prepared,
 //~ ThreadStats* thread_stats) {
 //~ int i;
 //~ double elapsed, throughput;
@@ -159,7 +159,7 @@
 //~ void run_insert_queries(void* data) {
 //~ int i;
 //~ Session* session = (Session*)data;
-//~ const CassPrepared* insert_prepared = NULL;
+//~ const PreparedStatement* insert_prepared = NULL;
 //~ CassString insert_query = cass_string_init("INSERT INTO songs (id, title, album, artist, tags) VALUES (?, ?, ?, ?, ?);");
 //~ ThreadStats thread_stats;
 //~ thread_stats.count = 0;
@@ -176,7 +176,7 @@
 //~ #endif
 //~ print_thread_stats(&thread_stats);
 //~ }
-//~ void select_from_perf(Session* session, CassString query, const CassPrepared* prepared,
+//~ void select_from_perf(Session* session, CassString query, const PreparedStatement* prepared,
 //~ ThreadStats* thread_stats) {
 //~ int i;
 //~ double elapsed, throughput;
@@ -217,7 +217,7 @@
 //~ void run_select_queries(void* data) {
 //~ int i;
 //~ Session* session = (Session*)data;
-//~ const CassPrepared* select_prepared = NULL;
+//~ const PreparedStatement* select_prepared = NULL;
 //~ CassString select_query = cass_string_init("SELECT * FROM songs WHERE id = a98d21b2-1900-11e4-b97b-e5e358e71e0d");
 //~ ThreadStats thread_stats;
 //~ thread_stats.count = 0;

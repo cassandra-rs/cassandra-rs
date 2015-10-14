@@ -22,7 +22,7 @@ static SELECT_QUERY:&'static str = "SELECT * FROM examples.basic WHERE key = ?";
 
 //fixme row key sent is null?
 fn insert_into_basic(session: &mut Session,
-                     prepared: CassPrepared,
+                     prepared: PreparedStatement,
                      key: &str,
                      basic: Basic)
                      -> Result<CassResult, CassError> {
@@ -39,7 +39,7 @@ fn insert_into_basic(session: &mut Session,
 }
 
 unsafe fn select_from_basic(session: &mut Session,
-                            prepared: &CassPrepared,
+                            prepared: &PreparedStatement,
                             key: &str,
                             basic: &mut Basic)
                             -> Result<CassResult, CassError> {
