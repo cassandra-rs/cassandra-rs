@@ -2,7 +2,7 @@ extern crate cassandra;
 
 use cassandra::Session;
 use cassandra::CassUuid;
-use cassandra::CassStatement;
+use cassandra::Statement;
 use cassandra::CassResult;
 use cassandra::CassError;
 use cassandra::CassUuidGen;
@@ -21,7 +21,7 @@ fn insert_into_log(session: &mut Session,
                    time: CassUuid,
                    entry: &str)
                    -> Result<CassResult, CassError> {
-    let mut statement = CassStatement::new(INSERT_QUERY, 3);
+    let mut statement = Statement::new(INSERT_QUERY, 3);
     statement.bind_string(0, key).unwrap();
     statement.bind_uuid(1, time).unwrap();
     statement.bind_string(2, &entry).unwrap();
@@ -30,7 +30,7 @@ fn insert_into_log(session: &mut Session,
 }
 
 fn select_from_log(session: &mut Session, key: &str) -> Result<CassResult, CassError> {
-    let mut statement = CassStatement::new(SELECT_QUERY, 1);
+    let mut statement = Statement::new(SELECT_QUERY, 1);
     statement.bind_string(0, &key).unwrap();
     let mut future = session.execute_statement(&statement);
     let results = try!(future.wait());

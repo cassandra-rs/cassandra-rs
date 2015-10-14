@@ -57,7 +57,7 @@
 //~ CassError execute_query(Session* session, const char* query) {
 //~ CassError rc = CASS_OK;
 //~ Future* future = NULL;
-//~ CassStatement* statement = cass_statement_new(cass_string_init(query), 0);
+//~ Statement* statement = cass_statement_new(cass_string_init(query), 0);
 //~ future = cass_session_execute(session, statement);
 //~ cass_future_wait(future);
 //~ rc = cass_future_error_code(future);
@@ -124,7 +124,7 @@
 //~ start = uv_hrtime();
 //~ for (i = 0; i < NUM_CONCURRENT_REQUESTS; ++i) {
 //~ CassUuid id;
-//~ CassStatement* statement;
+//~ Statement* statement;
 //~ if (prepared != NULL) {
 //~ statement = cass_prepared_bind(prepared);
 //~ } else {
@@ -186,7 +186,7 @@
 //~ unsigned long thread_id = uv_thread_self();
 //~ start = uv_hrtime();
 //~ for (i = 0; i < NUM_CONCURRENT_REQUESTS; ++i) {
-//~ CassStatement* statement;
+//~ Statement* statement;
 //~ if (prepared != NULL) {
 //~ statement = cass_prepared_bind(prepared);
 //~ } else {

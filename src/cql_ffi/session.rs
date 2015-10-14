@@ -9,7 +9,7 @@ use cql_ffi::future::Future;
 use cql_ffi::future::ResultFuture;
 use cql_ffi::future::PreparedFuture;
 use cql_ffi::error::CassError;
-use cql_ffi::statement::CassStatement;
+use cql_ffi::statement::Statement;
 use cql_ffi::schema::Schema;
 use cql_ffi::cluster::Cluster;
 use cql_bindgen::CassFuture as _Future;
@@ -72,11 +72,11 @@ impl Session {
     pub fn execute(&self, statement: &str, parameter_count: u64) -> ResultFuture {
         unsafe {
             ResultFuture(cass_session_execute(self.0,
-                                              CassStatement::new(statement,parameter_count).0))
+                                              Statement::new(statement,parameter_count).0))
         }
     }
 
-    pub fn execute_statement(&self, statement: &CassStatement) -> ResultFuture {
+    pub fn execute_statement(&self, statement: &Statement) -> ResultFuture {
         unsafe {
             ResultFuture(cass_session_execute(self.0, statement.0))
         }

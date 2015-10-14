@@ -1,4 +1,4 @@
-use cql_ffi::statement::CassStatement;
+use cql_ffi::statement::Statement;
 
 use cql_bindgen::CassPrepared as _PreparedStatement;
 use cql_bindgen::cass_prepared_free;
@@ -24,9 +24,9 @@ impl Drop for PreparedStatement {
 }
 
 impl PreparedStatement {
-    pub fn bind(&self) -> CassStatement {
+    pub fn bind(&self) -> Statement {
         unsafe {
-            CassStatement(cass_prepared_bind(self.0))
+            Statement(cass_prepared_bind(self.0))
         }
     }
 }

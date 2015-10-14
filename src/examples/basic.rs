@@ -27,7 +27,7 @@ fn insert_into_basic(session: &mut Session,
                      key: &str,
                      basic: &Basic)
                      -> Result<CassResult, CassError> {
-    let mut statement = CassStatement::new(INSERT_QUERY, 6);
+    let mut statement = Statement::new(INSERT_QUERY, 6);
     try!(statement.bind_string(0, key));
     try!(statement.bind_bool(1, basic.bln));
     try!(statement.bind_float(2, basic.flt));
@@ -38,7 +38,7 @@ fn insert_into_basic(session: &mut Session,
 }
 
 fn select_from_basic(session: &mut Session, key: &str) -> Result<Basic, CassError> {
-    let mut statement = CassStatement::new(SELECT_QUERY, 1);
+    let mut statement = Statement::new(SELECT_QUERY, 1);
     try!(statement.bind_string(0, key));
     let result = try!(session.execute_statement(&statement).wait());
     println!("Result: \n{:?}\n",result);

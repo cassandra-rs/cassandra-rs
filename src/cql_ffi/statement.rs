@@ -10,7 +10,7 @@ use cql_ffi::result::CassResult;
 use cql_ffi::consistency::CassConsistency;
 use cql_ffi::udt::CassUserType;
 
-use cql_bindgen::CassStatement as _CassStatement;
+use cql_bindgen::CassStatement as _Statement;
 use cql_bindgen::cass_statement_new;
 //use cql_bindgen::cass_statement_new_n;
 use cql_bindgen::cass_statement_free;
@@ -51,9 +51,9 @@ use cql_bindgen::cass_statement_bind_inet_by_name;
 use cql_bindgen::cass_statement_bind_uuid_by_name;
 
 
-pub struct CassStatement(pub *mut _CassStatement);
+pub struct Statement(pub *mut _Statement);
 
-impl Drop for CassStatement {
+impl Drop for Statement {
     fn drop(&mut self) {
         unsafe {
             self.free()
@@ -65,7 +65,7 @@ pub enum CassBindable {
 
 }
 
-impl CassStatement {
+impl Statement {
     unsafe fn free(&mut self) {
         cass_statement_free(self.0)
     }
@@ -78,7 +78,7 @@ impl CassStatement {
     pub fn new(query: &str, parameter_count: u64) -> Self {
         unsafe {
             let query = CString::new(query).unwrap();
-            CassStatement(cass_statement_new(query.as_ptr(), parameter_count))
+            Statement(cass_statement_new(query.as_ptr(), parameter_count))
         }
     }
 

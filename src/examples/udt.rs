@@ -38,7 +38,7 @@ fn main() {
 
 fn select_from_udt(session: &Session) -> Result<(), CassError> {
     let query = "SELECT * FROM examples.udt";
-    let statement = CassStatement::new(query, 0);
+    let statement = Statement::new(query, 0);
     let mut future = session.execute_statement(&statement);
     match future.wait() {
         Err(err) => panic!("Error: {:?}", err),
@@ -73,7 +73,7 @@ fn select_from_udt(session: &Session) -> Result<(), CassError> {
 
 fn insert_into_udt(session: &Session, schema: Schema) -> Result<(), CassError> {
     let query = "INSERT INTO examples.udt (id, address) VALUES (?, ?)";
-    let mut statement = CassStatement::new(query, 2);
+    let mut statement = Statement::new(query, 2);
     let uuid_gen = CassUuidGen::new();
     let udt_address = schema.get_udt("examples", "address");
     let udt_phone = Schema::get_udt(&schema, "examples", "phone_numbers");

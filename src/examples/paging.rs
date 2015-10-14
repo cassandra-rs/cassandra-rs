@@ -21,7 +21,7 @@ fn insert_into_paging(session: &mut Session /* , uuid_gen:&mut CassUuidGen */)
     for i in 0..NUM_CONCURRENT_REQUESTS {
         let key = i.to_string();
         println!("key ={:?}", key);
-        let mut statement = CassStatement::new(INSERT_QUERY, 2);
+        let mut statement = Statement::new(INSERT_QUERY, 2);
         try!(statement.bind_string(0, &key));
         try!(statement.bind_string(1, &key));
         let future = session.execute_statement(&statement);
@@ -36,7 +36,7 @@ fn insert_into_paging(session: &mut Session /* , uuid_gen:&mut CassUuidGen */)
 
 fn select_from_paging(session: &mut Session) -> Result<(), CassError> {
     let has_more_pages = true;
-    let mut statement = CassStatement::new(SELECT_QUERY, 0);
+    let mut statement = Statement::new(SELECT_QUERY, 0);
     statement.set_paging_size(100).unwrap();
 
 	//FIXME must understaned statement lifetime better for paging

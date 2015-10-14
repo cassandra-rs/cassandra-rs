@@ -1,7 +1,7 @@
 extern crate cassandra;
 use cassandra::Cluster;
 use cassandra::Session;
-use cassandra::CassStatement;
+use cassandra::Statement;
 use cassandra::Batch;
 use cassandra::BatchType;
 use cassandra::PreparedStatement;
@@ -58,7 +58,7 @@ fn main() {
     );
 
     session.execute(CREATE_KEYSPACE,0).wait().unwrap();
-    session.execute_statement(&CassStatement::new(CREATE_TABLE,0)).wait().unwrap();
+    session.execute_statement(&Statement::new(CREATE_TABLE,0)).wait().unwrap();
     insert_into_batch_with_prepared(&mut session, pairs).unwrap();
     verify_batch(&mut session);
     session.close();

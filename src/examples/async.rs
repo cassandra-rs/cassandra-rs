@@ -6,7 +6,7 @@ extern crate cassandra;
 
 
 use cassandra::Session;
-use cassandra::CassStatement;
+use cassandra::Statement;
 use cassandra::Cluster;
 use cassandra::ResultFuture;
 use cassandra::CassError;
@@ -25,7 +25,7 @@ fn insert_into_async(session: &mut Session, key: String) -> Result<(), CassError
     let mut futures = Vec::<ResultFuture>::new();
     for i in (0..NUM_CONCURRENT_REQUESTS) {
         let key: String = key.clone() + &i.to_string();
-        let mut statement = CassStatement::new(query, 6);
+        let mut statement = Statement::new(query, 6);
         statement
             .bind_string(0, &key).unwrap()
             .bind_bool(1, i % 2 == 0).unwrap()

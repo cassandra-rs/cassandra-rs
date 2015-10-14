@@ -24,7 +24,7 @@ fn insert_into_basic(session: &mut Session,
                      basic: &mut Basic)
                      -> Result<(), CassError> {
     println!("Creating statement");
-    let mut statement = CassStatement::new(INSERT_QUERY, 6);
+    let mut statement = Statement::new(INSERT_QUERY, 6);
     statement
         .bind_string(0, key).unwrap()
         .bind_bool(1, basic.bln).unwrap()

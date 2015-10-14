@@ -20,7 +20,7 @@ fn insert_into_maps(session: &mut Session,
                     key: &str,
                     items: Vec<Pair>)
                     -> Result<(), CassError> {
-    let mut statement = CassStatement::new(INSERT_QUERY, 2);
+    let mut statement = Statement::new(INSERT_QUERY, 2);
     statement.bind_string(0, key).unwrap();
 
     let mut map = Map::new(5);
@@ -34,7 +34,7 @@ fn insert_into_maps(session: &mut Session,
 }
 
 fn select_from_maps(session: &mut Session, key: &str) -> Result<(), CassError> {
-    let mut statement = CassStatement::new(SELECT_QUERY, 1);
+    let mut statement = Statement::new(SELECT_QUERY, 1);
     try!(statement.bind_string(0, key));
     let result = try!(session.execute_statement(&statement).wait());
     //println!("{:?}", result);

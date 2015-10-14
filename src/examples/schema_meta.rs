@@ -34,9 +34,9 @@ fn main() {
         cluster.set_contact_points("127.0.0.1").unwrap();
         match Session::new().connect(&mut cluster).wait() {
             Ok(mut session) => {
-                let _ = session.execute_statement(&CassStatement::new(CREATE_KEYSPACE,0));
+                let _ = session.execute_statement(&Statement::new(CREATE_KEYSPACE,0));
                 print_keyspace(&mut session, "examples").unwrap();
-                let _ = session.execute_statement(&CassStatement::new(CREATE_TABLE,0));
+                let _ = session.execute_statement(&Statement::new(CREATE_TABLE,0));
                 print_table(&mut session, "examples", "schema_meta").unwrap();
                 session.close().wait().unwrap();
             }

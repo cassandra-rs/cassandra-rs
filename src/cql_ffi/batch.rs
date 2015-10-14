@@ -1,4 +1,4 @@
-use cql_ffi::statement::CassStatement;
+use cql_ffi::statement::Statement;
 
 use cql_bindgen::CassError;
 use cql_bindgen::CassConsistency;
@@ -43,7 +43,7 @@ impl Batch {
         }
     }
 
-    pub fn add_statement(&mut self, statement: CassStatement) -> Result<&Self, CassError> {
+    pub fn add_statement(&mut self, statement: Statement) -> Result<&Self, CassError> {
         unsafe {
             match cass_batch_add_statement(self.0, statement.0) {
                 0 => Ok(self),

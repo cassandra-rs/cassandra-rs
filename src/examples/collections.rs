@@ -13,7 +13,7 @@ fn insert_into_collections(session: &mut Session,
                            key: &str,
                            items: Vec<String>)
                            -> Result<CassResult, CassError> {
-    let mut statement = CassStatement::new(INSERT_QUERY, 2);
+    let mut statement = Statement::new(INSERT_QUERY, 2);
     try!(statement.bind_string(0, key));
     let mut set = CassSet::new(2);
     for item in items {
@@ -24,7 +24,7 @@ fn insert_into_collections(session: &mut Session,
 }
 
 fn select_from_collections(session: &mut Session, key: &str) -> Result<(), CassError> {
-    let mut statement = CassStatement::new(SELECT_QUERY, 1);
+    let mut statement = Statement::new(SELECT_QUERY, 1);
     try!(statement.bind_string(0, key));
     let result = try!(session.execute_statement(&statement).wait());
     println!("{:?}", result);
