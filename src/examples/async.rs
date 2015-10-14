@@ -5,7 +5,7 @@ extern crate num;
 extern crate cassandra;
 
 
-use cassandra::CassSession;
+use cassandra::Session;
 use cassandra::CassStatement;
 use cassandra::CassCluster;
 use cassandra::ResultFuture;
@@ -19,7 +19,7 @@ static CREATE_TABLE:&'static str = "CREATE TABLE IF NOT EXISTS examples.async (k
                                     boolean, flt float, dbl double, i32 int, i64 bigint, PRIMARY \
                                     KEY (key));";
 
-fn insert_into_async(session: &mut CassSession, key: String) -> Result<(), CassError> {
+fn insert_into_async(session: &mut Session, key: String) -> Result<(), CassError> {
     let query = "INSERT INTO examples.async (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, \
                  ?);";
     let mut futures = Vec::<ResultFuture>::new();
@@ -51,7 +51,7 @@ pub fn block_async(mut futures: Vec<ResultFuture>) -> Result<(), CassError> {
 pub fn main() {
     let mut cluster = CassCluster::new();
     cluster.set_contact_points("127.0.0.1").unwrap();
-    match CassSession::new().connect(&cluster).wait() {
+    match Session::new().connect(&cluster).wait() {
         Ok(mut session) => {
             session.execute(CREATE_KEYSPACE,0).wait().unwrap();
             session.execute(CREATE_TABLE,0).wait().unwrap();

@@ -1,6 +1,6 @@
 extern crate cassandra;
 use cassandra::CassCluster;
-use cassandra::CassSession;
+use cassandra::Session;
 use cassandra::CassStatement;
 use cassandra::CassBatch;
 use cassandra::CassBatchType;
@@ -22,7 +22,7 @@ static CREATE_TABLE:&'static str = "CREATE TABLE IF NOT EXISTS examples.pairs (k
 static INSERT_QUERY:&'static str = "INSERT INTO examples.pairs (key, value) VALUES (?, ?)";
 static SELECT_QUERY:&'static str = "SELECT * from examples.pairs";
 
-fn insert_into_batch_with_prepared<'a>(session: &mut CassSession,
+fn insert_into_batch_with_prepared<'a>(session: &mut Session,
                                        pairs: Vec<Pair>)
                                        -> Result<CassPrepared, CassError> {
     let prepared = session.prepare(INSERT_QUERY).unwrap().wait().unwrap();
@@ -40,7 +40,7 @@ fn insert_into_batch_with_prepared<'a>(session: &mut CassSession,
     Ok(prepared)
 }
 
-pub fn verify_batch(session: &mut CassSession) {
+pub fn verify_batch(session: &mut Session) {
     let result = session.execute(SELECT_QUERY,0).wait().unwrap();
     println!("{:?}",result);
 }
@@ -48,7 +48,7 @@ pub fn verify_batch(session: &mut CassSession) {
 fn main() {
     let mut cluster = CassCluster::new();
     cluster.set_contact_points("127.0.0.1").unwrap();
-    let mut session = CassSession::new().connect(&mut cluster).wait().unwrap();
+    let mut session = Session::new().connect(&mut cluster).wait().unwrap();
 
     let pairs = vec!(
         Pair{key:"a", value:"1"},

@@ -21,7 +21,7 @@ static INSERT_QUERY:&'static str = "INSERT INTO examples.basic (key, bln, flt, d
 static SELECT_QUERY:&'static str = "SELECT * FROM examples.basic WHERE key = ?";
 
 //fixme row key sent is null?
-fn insert_into_basic(session: &mut CassSession,
+fn insert_into_basic(session: &mut Session,
                      prepared: CassPrepared,
                      key: &str,
                      basic: Basic)
@@ -38,7 +38,7 @@ fn insert_into_basic(session: &mut CassSession,
     session.execute_statement(&statement).wait()
 }
 
-unsafe fn select_from_basic(session: &mut CassSession,
+unsafe fn select_from_basic(session: &mut Session,
                             prepared: &CassPrepared,
                             key: &str,
                             basic: &mut Basic)
@@ -66,7 +66,7 @@ fn main() {
         let mut cluster = CassCluster::new();
         cluster.set_contact_points("127.0.0.1").unwrap();
 
-        match CassSession::new().connect(&cluster).wait() {
+        match Session::new().connect(&cluster).wait() {
             Ok(mut session) => {
                 let input = Basic { bln: true, flt: 0.001f32, dbl: 0.0002, i32: 1, i64: 2 };
                 let mut output = Basic { bln: false, flt: 0f32, dbl: 0.0, i32: 0, i64: 0 };

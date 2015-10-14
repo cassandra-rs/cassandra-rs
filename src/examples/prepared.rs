@@ -19,7 +19,7 @@ struct Basic {
     i64: i64,
 }
 
-fn insert_into_basic(session: &mut CassSession,
+fn insert_into_basic(session: &mut Session,
                      key: &str,
                      basic: &mut Basic)
                      -> Result<(), CassError> {
@@ -38,7 +38,7 @@ fn insert_into_basic(session: &mut CassSession,
 }
 
 
-fn select_from_basic(session: &mut CassSession,
+fn select_from_basic(session: &mut Session,
                      prepared: &CassPrepared,
                      key: &str,
                      basic: &mut Basic)

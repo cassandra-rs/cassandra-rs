@@ -23,7 +23,7 @@ struct Basic {
     i64: i64,
 }
 
-fn insert_into_basic(session: &mut CassSession,
+fn insert_into_basic(session: &mut Session,
                      key: &str,
                      basic: &Basic)
                      -> Result<CassResult, CassError> {
@@ -37,7 +37,7 @@ fn insert_into_basic(session: &mut CassSession,
     Ok(try!(session.execute_statement(&statement).wait()))
 }
 
-fn select_from_basic(session: &mut CassSession, key: &str) -> Result<Basic, CassError> {
+fn select_from_basic(session: &mut Session, key: &str) -> Result<Basic, CassError> {
     let mut statement = CassStatement::new(SELECT_QUERY, 1);
     try!(statement.bind_string(0, key));
     let result = try!(session.execute_statement(&statement).wait());
@@ -65,7 +65,7 @@ fn main() {
         .set_contact_points(CONTACT_POINTS).unwrap()
         .set_load_balance_round_robin().unwrap();
 
-    let session_future = CassSession::new().connect(&cluster).wait();
+    let session_future = Session::new().connect(&cluster).wait();
 
     match session_future {
         Ok(mut session) => {

@@ -10,14 +10,14 @@ static CREATE_KEYSPACE:&'static str = "CREATE KEYSPACE examples WITH replication
 static CREATE_TABLE:&'static str = "CREATE TABLE examples.schema_meta (key text, value bigint, \
                                     PRIMARY KEY (key));";
 
-unsafe fn print_keyspace(session: &mut CassSession, keyspace: &str) -> Result<(), CassError> {
+unsafe fn print_keyspace(session: &mut Session, keyspace: &str) -> Result<(), CassError> {
     let schema = session.get_schema();
     let keyspace_meta = schema.get_keyspace(keyspace);
     try!(print_schema_meta(&keyspace_meta, 0));
     Ok(())
 }
 
-unsafe fn print_table(session: &mut CassSession,
+unsafe fn print_table(session: &mut Session,
                       keyspace: &str,
                       table: &str)
                       -> Result<(), CassError> {
@@ -32,7 +32,7 @@ fn main() {
     unsafe {
         let mut cluster = CassCluster::new();
         cluster.set_contact_points("127.0.0.1").unwrap();
-        match CassSession::new().connect(&mut cluster).wait() {
+        match Session::new().connect(&mut cluster).wait() {
             Ok(mut session) => {
                 let _ = session.execute_statement(&CassStatement::new(CREATE_KEYSPACE,0));
                 print_keyspace(&mut session, "examples").unwrap();

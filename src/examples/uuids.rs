@@ -1,6 +1,6 @@
 extern crate cassandra;
 
-use cassandra::CassSession;
+use cassandra::Session;
 use cassandra::CassUuid;
 use cassandra::CassStatement;
 use cassandra::CassResult;
@@ -16,7 +16,7 @@ static CREATE_KEYSPACE:&'static str = "CREATE KEYSPACE IF NOT EXISTS examples WI
 static CREATE_TABLE:&'static str = "CREATE TABLE IF NOT EXISTS examples.log (key text, time \
                                     timeuuid, entry text, PRIMARY KEY (key, time));";
 
-fn insert_into_log(session: &mut CassSession,
+fn insert_into_log(session: &mut Session,
                    key: &str,
                    time: CassUuid,
                    entry: &str)
@@ -29,7 +29,7 @@ fn insert_into_log(session: &mut CassSession,
     future.wait()
 }
 
-fn select_from_log(session: &mut CassSession, key: &str) -> Result<CassResult, CassError> {
+fn select_from_log(session: &mut Session, key: &str) -> Result<CassResult, CassError> {
     let mut statement = CassStatement::new(SELECT_QUERY, 1);
     statement.bind_string(0, &key).unwrap();
     let mut future = session.execute_statement(&statement);
@@ -41,7 +41,7 @@ fn main() {
     let uuid_gen = CassUuidGen::new();
     let mut cluster = CassCluster::new();
     cluster.set_contact_points("127.0.0.1").unwrap();
-    let session = &mut CassSession::new().connect(&cluster).wait().unwrap();
+    let session = &mut Session::new().connect(&cluster).wait().unwrap();
 
     session.execute(CREATE_KEYSPACE, 0);
     session.execute(CREATE_TABLE, 0);

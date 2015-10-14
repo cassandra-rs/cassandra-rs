@@ -16,7 +16,7 @@ unsafe fn create_cluster() -> *mut CassCluster {
     cluster
 }
 
-unsafe fn connect_session(session: &mut CassSession, cluster: &mut CassCluster) -> CassError {
+unsafe fn connect_session(session: &mut Session, cluster: &mut CassCluster) -> CassError {
     let future: CassFuture = &mut session.connect(cluster);
     future.wait();
     future
@@ -34,7 +34,7 @@ unsafe fn connect_session(session: &mut CassSession, cluster: &mut CassCluster) 
 
 fn main() {
     //~ CassCluster* cluster = NULL;
-    //~ CassSession* session = NULL;
+    //~ Session* session = NULL;
     //~ CassFuture* close_future = NULL;
     //~ FILE* log_file = fopen("driver.log", "w+");
     //~ if (log_file == NULL) {

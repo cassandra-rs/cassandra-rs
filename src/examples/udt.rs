@@ -7,7 +7,7 @@ fn main() {
     let mut cluster = CassCluster::new();
     cluster.set_contact_points("127.0.0.1").unwrap();
 
-    let session = CassSession::new().connect(&cluster).wait().unwrap();
+    let session = Session::new().connect(&cluster).wait().unwrap();
     let schema = session.get_schema();
     session.execute(
         "CREATE KEYSPACE examples WITH replication = \
@@ -36,7 +36,7 @@ fn main() {
     session.close().wait().unwrap();
 }
 
-fn select_from_udt(session: &CassSession) -> Result<(), CassError> {
+fn select_from_udt(session: &Session) -> Result<(), CassError> {
     let query = "SELECT * FROM examples.udt";
     let statement = CassStatement::new(query, 0);
     let mut future = session.execute_statement(&statement);
@@ -71,7 +71,7 @@ fn select_from_udt(session: &CassSession) -> Result<(), CassError> {
     }
 }
 
-fn insert_into_udt(session: &CassSession, schema: CassSchema) -> Result<(), CassError> {
+fn insert_into_udt(session: &Session, schema: CassSchema) -> Result<(), CassError> {
     let query = "INSERT INTO examples.udt (id, address) VALUES (?, ?)";
     let mut statement = CassStatement::new(query, 2);
     let uuid_gen = CassUuidGen::new();

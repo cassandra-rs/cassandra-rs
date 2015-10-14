@@ -17,7 +17,7 @@ use cql_bindgen::cass_future_free;
 use cql_bindgen::cass_future_wait;
 use cql_bindgen::cass_future_error_code;
 
-use cql_bindgen::CassSession as _CassSession;
+use cql_bindgen::CassSession as _Session;
 use cql_bindgen::cass_session_new;
 use cql_bindgen::cass_session_free;
 use cql_bindgen::cass_session_close;
@@ -28,12 +28,12 @@ use cql_bindgen::cass_session_execute_batch;
 use cql_bindgen::cass_session_get_schema;
 use cql_bindgen::cass_session_connect_keyspace;
 
-pub struct CassSession(pub *mut _CassSession);
+pub struct Session(pub *mut _Session);
 
-unsafe impl Sync for CassSession{}
-unsafe impl Send for CassSession{}
+unsafe impl Sync for Session{}
+unsafe impl Send for Session{}
 
-impl Drop for CassSession {
+impl Drop for Session {
     fn drop(&mut self) {
         unsafe {
             cass_session_free(self.0)
@@ -41,12 +41,12 @@ impl Drop for CassSession {
     }
 }
 
-impl CassSession {
+impl Session {
     /// Create a new Cassanda session.
     /// It's recommended to use CassCluster.connect() instead
-    pub fn new() -> CassSession {
+    pub fn new() -> Session {
         unsafe {
-            CassSession(cass_session_new())
+            Session(cass_session_new())
         }
     }
 
@@ -102,17 +102,17 @@ impl CassSession {
     }
 }
 
-pub struct SessionFuture(pub *mut _CassFuture, pub CassSession);
+pub struct SessionFuture(pub *mut _CassFuture, pub Session);
 
 impl SessionFuture {
-    pub fn wait(self) -> Result<CassSession, CassError> {
+    pub fn wait(self) -> Result<Session, CassError> {
         unsafe {
             cass_future_wait(self.0);
             self.error_code()
         }
     }
 
-    fn error_code(self) -> Result<CassSession, CassError> {
+    fn error_code(self) -> Result<Session, CassError> {
         unsafe {
             let code = cass_future_error_code(self.0);
             cass_future_free(self.0);

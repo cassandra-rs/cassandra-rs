@@ -9,7 +9,7 @@ static CREATE_KEYSPACE:&'static str = "CREATE KEYSPACE examples WITH replication
 static CREATE_TABLE:&'static str = "CREATE TABLE examples.collections (key text, items set<text>, \
                                     PRIMARY KEY (key))";
 
-fn insert_into_collections(session: &mut CassSession,
+fn insert_into_collections(session: &mut Session,
                            key: &str,
                            items: Vec<String>)
                            -> Result<CassResult, CassError> {
@@ -23,7 +23,7 @@ fn insert_into_collections(session: &mut CassSession,
     session.execute_statement(&statement).wait()
 }
 
-fn select_from_collections(session: &mut CassSession, key: &str) -> Result<(), CassError> {
+fn select_from_collections(session: &mut Session, key: &str) -> Result<(), CassError> {
     let mut statement = CassStatement::new(SELECT_QUERY, 1);
     try!(statement.bind_string(0, key));
     let result = try!(session.execute_statement(&statement).wait());
@@ -42,7 +42,7 @@ fn main() {
 
     let mut cluster = CassCluster::new();
     cluster.set_contact_points("127.0.0.1").unwrap();
-    let session = &mut CassSession::new().connect(&cluster).wait().unwrap();
+    let session = &mut Session::new().connect(&cluster).wait().unwrap();
 
     let items =
         vec!("apple".to_string(), "orange".to_string(), "banana".to_string(), "mango".to_string());

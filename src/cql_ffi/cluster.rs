@@ -35,7 +35,7 @@ use cql_bindgen::cass_cluster_set_latency_aware_routing_settings;
 
 use cql_ffi::error::CassError;
 
-use cql_ffi::session::CassSession;
+use cql_ffi::session::Session;
 
 pub struct CassCluster(pub *mut _CassCluster);
 
@@ -78,8 +78,8 @@ impl CassCluster {
         }
     }
     /// Connect to Cassandra cluster
-    pub fn connect(&mut self) -> Result<CassSession, CassError> {
-        CassSession::new().connect(&self).wait()
+    pub fn connect(&mut self) -> Result<Session, CassError> {
+        Session::new().connect(&self).wait()
     }
 
     pub fn set_protocol_version(&mut self, protocol_version: i32) -> Result<&mut Self, CassError> {

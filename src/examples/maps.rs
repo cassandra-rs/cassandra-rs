@@ -16,7 +16,7 @@ static CREATE_TABLE:&'static str = "CREATE TABLE IF NOT EXISTS examples.maps (ke
 static SELECT_QUERY:&'static str = "SELECT items FROM examples.maps WHERE key = ?";
 static INSERT_QUERY:&'static str ="INSERT INTO examples.maps (key, items) VALUES (?, ?);";
 
-fn insert_into_maps(session: &mut CassSession,
+fn insert_into_maps(session: &mut Session,
                     key: &str,
                     items: Vec<Pair>)
                     -> Result<(), CassError> {
@@ -33,7 +33,7 @@ fn insert_into_maps(session: &mut CassSession,
     Ok(())
 }
 
-fn select_from_maps(session: &mut CassSession, key: &str) -> Result<(), CassError> {
+fn select_from_maps(session: &mut Session, key: &str) -> Result<(), CassError> {
     let mut statement = CassStatement::new(SELECT_QUERY, 1);
     try!(statement.bind_string(0, key));
     let result = try!(session.execute_statement(&statement).wait());
@@ -67,7 +67,7 @@ fn foo() -> Result<(), CassError> {
         Pair{key:"banana", value:3 },
         Pair{key:"mango", value:4 }
     );
-    let session_future = CassSession::new().connect(&cluster).wait();
+    let session_future = Session::new().connect(&cluster).wait();
     match session_future {
         Ok(mut session) => {
             try!(session.execute(CREATE_KEYSPACE,0).wait());

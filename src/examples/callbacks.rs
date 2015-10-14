@@ -20,7 +20,7 @@ fn wait_exit() {
     cass_future_free(close_future);
 }
 
-fn signal_exit(session: &CassSession) {
+fn signal_exit(session: &Session) {
     uv_mutex_lock(&mutex);
     close_future = cass_session_close(session);
     uv_cond_signal(&cond);
@@ -47,13 +47,13 @@ unsafe fn create_cluster() -> *mut CassCluster {
 }
 
 
-fn connect_session(session: CassSession, cluster: &CassCluster, callback: CassFutureCallback) {
+fn connect_session(session: Session, cluster: &CassCluster, callback: CassFutureCallback) {
     let future = cass_session_connect_keyspace(session, cluster, "examples");
     cass_future_set_callback(future, callback, session);
     cass_future_free(future);
 }
 
-fn execute_query(session: CassSession, query: &str, callback: CassFutureCallback) {
+fn execute_query(session: Session, query: &str, callback: CassFutureCallback) {
     let statement = cass_statement_new(cass_string_init(query), 0);
     let future = cass_session_execute(session, statement);
     cass_future_set_callback(future, callback, session);
@@ -62,7 +62,7 @@ fn execute_query(session: CassSession, query: &str, callback: CassFutureCallback
 }
 
 fn on_session_connect(future: CassFuture, data: void) {
-    let session: CassSession = data;
+    let session: Session = data;
     let code = cass_future_error_code(future);
     if (code != CASS_OK) {
         print_error(future);
@@ -85,7 +85,7 @@ fn on_create_keyspace(future: CassFuture, data: void) {
                   on_create_table);
 }
 
-fn on_create_table(future: CassFuture, data: CassSession) {
+fn on_create_table(future: CassFuture, data: Session) {
     let insert_query = cass_string_init("INSERT INTO callbacks (key, value) VALUES (?, ?)");
     let code = cass_future_error_code(future);
     if (code != CASS_OK) {
@@ -101,7 +101,7 @@ fn on_create_table(future: CassFuture, data: CassSession) {
     cass_future_free(insert_future);
 }
 
-fn on_insert(future: CassFuture, data: CassSession) {
+fn on_insert(future: CassFuture, data: Session) {
     let code = cass_future_error_code(future);
     if (code != CASS_OK) {
         print_error(future);
@@ -116,7 +116,7 @@ fn on_insert(future: CassFuture, data: CassSession) {
     }
 }
 
-fn on_select(future: CassFuture, data: CassSession) {
+fn on_select(future: CassFuture, data: Session) {
     let code = cass_future_error_code(future);
     if (code != CASS_OK) {
         print_error(future);
@@ -141,7 +141,7 @@ fn on_select(future: CassFuture, data: CassSession) {
 
 fn main() {
     CassCluster * cluster = create_cluster();
-    CassSession * session = cass_session_new();
+    Session * session = cass_session_new();
     uuid_gen = cass_uuid_gen_new();
     uv_mutex_init(&mutex);
     uv_cond_init(&cond);

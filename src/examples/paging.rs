@@ -13,7 +13,7 @@ static SELECT_QUERY:&'static str = "SELECT * FROM paging";
 static INSERT_QUERY:&'static str = "INSERT INTO paging (key, value) VALUES (?, ?);";
 
 //FIXME uuids not yet working
-fn insert_into_paging(session: &mut CassSession /* , uuid_gen:&mut CassUuidGen */)
+fn insert_into_paging(session: &mut Session /* , uuid_gen:&mut CassUuidGen */)
                       -> Result<Vec<Option<ResultFuture>>, CassError> {
     let mut futures = Vec::with_capacity(NUM_CONCURRENT_REQUESTS as usize);
     let mut results = Vec::with_capacity(NUM_CONCURRENT_REQUESTS as usize);
@@ -34,7 +34,7 @@ fn insert_into_paging(session: &mut CassSession /* , uuid_gen:&mut CassUuidGen *
     Ok(results)
 }
 
-fn select_from_paging(session: &mut CassSession) -> Result<(), CassError> {
+fn select_from_paging(session: &mut Session) -> Result<(), CassError> {
     let has_more_pages = true;
     let mut statement = CassStatement::new(SELECT_QUERY, 0);
     statement.set_paging_size(100).unwrap();
@@ -69,7 +69,7 @@ fn main() {
         .set_contact_points(CONTACT_POINTS).unwrap()
         .set_load_balance_round_robin().unwrap();
 
-    let mut session = CassSession::new().connect(&cluster).wait().unwrap();
+    let mut session = Session::new().connect(&cluster).wait().unwrap();
 
     session.execute(CREATE_KEYSPACE,0).wait().unwrap();
     session.execute(CREATE_TABLE,0).wait().unwrap();
