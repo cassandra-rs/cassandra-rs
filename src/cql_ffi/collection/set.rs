@@ -21,7 +21,7 @@ use cql_bindgen::cass_iterator_get_value;
 use cql_bindgen::cass_iterator_get_schema_meta;
 use cql_bindgen::cass_iterator_get_schema_meta_field;
 
-use cql_ffi::udt::CassUserType;
+use cql_ffi::udt::UserType;
 use cql_ffi::value::CassValue;
 use cql_ffi::cass_iterator::CassIteratorType;
 use cql_ffi::schema::SchemaMetaField;
@@ -113,7 +113,7 @@ impl CassSet {
         }
     }
 
-    pub fn append_user_type(&mut self, value: CassUserType) -> Result<&Self, CassError> {
+    pub fn append_user_type(&mut self, value: UserType) -> Result<&Self, CassError> {
         unsafe {
             CassError::build(cass_collection_append_user_type(self.0,value.0)).wrap(self)
         }

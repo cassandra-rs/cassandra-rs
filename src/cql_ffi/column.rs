@@ -25,7 +25,7 @@ use cql_bindgen::cass_value_type;
 use cql_bindgen::CassValue as _CassValue;
 
 use cql_ffi::uuid::Uuid;
-//use cql_ffi::udt::CassUserType;
+//use cql_ffi::udt::UserType;
 use cql_ffi::value::ValueType;
 use cql_ffi::collection::set::SetIterator;
 use cql_ffi::inet::CassInet;

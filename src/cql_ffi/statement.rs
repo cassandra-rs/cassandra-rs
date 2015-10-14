@@ -8,7 +8,7 @@ use cql_ffi::uuid::Uuid;
 use cql_ffi::inet::CassInet;
 use cql_ffi::result::CassResult;
 use cql_ffi::consistency::Consistency;
-use cql_ffi::udt::CassUserType;
+use cql_ffi::udt::UserType;
 
 use cql_bindgen::CassStatement as _Statement;
 use cql_bindgen::cass_statement_new;
@@ -255,7 +255,7 @@ impl Statement {
 
     pub fn bind_user_type(&mut self,
                           index: u64,
-                          value: CassUserType)
+                          value: UserType)
                           -> Result<&mut Self, CassError> {
         unsafe {
             CassError::build(

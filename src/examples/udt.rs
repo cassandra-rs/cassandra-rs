@@ -79,9 +79,9 @@ fn insert_into_udt(session: &Session, schema: Schema) -> Result<(), CassError> {
     let udt_phone = Schema::get_udt(&schema, "examples", "phone_numbers");
     let id = uuid_gen.get_time();
     let id_str = id.to_string();
-    let mut address = CassUserType::new(udt_address);
+    let mut address = UserType::new(udt_address);
     let mut phone = CassSet::new(2);
-    let mut phone_numbers = CassUserType::new(udt_phone);
+    let mut phone_numbers = UserType::new(udt_phone);
     phone_numbers.set_int32_by_name("phone1", 0 + 1).unwrap();
     phone_numbers.set_int32_by_name("phone2", 0 + 2).unwrap();
     phone.append_user_type(phone_numbers).unwrap();

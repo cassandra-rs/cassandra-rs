@@ -95,7 +95,7 @@ use cql_bindgen::cass_iterator_get_user_type_field_name;
 use cql_bindgen::cass_iterator_get_user_type_field_value;
 
 use cql_bindgen::CassDataType as _CassDataType;
-use cql_bindgen::CassUserType as _CassUserType;
+use cql_bindgen::CassUserType as _UserType;
 
 use cql_ffi::value::ValueType;
 use cql_ffi::error::CassError;
@@ -103,7 +103,7 @@ use cql_ffi::error::CassError;
 pub struct CassDataType(pub *mut _CassDataType);
 pub struct CassConstDataType(pub *const _CassDataType);
 
-pub struct CassUserType(pub *mut _CassUserType);
+pub struct UserType(pub *mut _UserType);
 
 impl CassDataType {
     pub fn new(value_type: ValueType) -> Self {
@@ -362,16 +362,16 @@ impl CassDataType {
 //    }}
 //}
 
-//impl Drop for CassUserType {
+//impl Drop for UserType {
 //    fn drop(&mut self) {unsafe{
 //        cass_user_type_free(self.0)
 //    }}
 //}
 
-impl CassUserType {
+impl UserType {
     pub fn new(data_type: CassConstDataType) -> Self {
         unsafe {
-            CassUserType(cass_user_type_new_from_data_type(data_type.0))
+            UserType(cass_user_type_new_from_data_type(data_type.0))
         }
     }
 
@@ -584,7 +584,7 @@ impl CassUserType {
         }
     }
 
-    pub fn set_user_type(&mut self, index: u64, value: CassUserType) -> Result<(), CassError> {
+    pub fn set_user_type(&mut self, index: u64, value: UserType) -> Result<(), CassError> {
         unsafe {
             CassError::build(cass_user_type_set_user_type(self.0, index, value.0)).wrap(())
         }
