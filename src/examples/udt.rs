@@ -71,12 +71,12 @@ fn select_from_udt(session: &Session) -> Result<(), CassError> {
     }
 }
 
-fn insert_into_udt(session: &Session, schema: CassSchema) -> Result<(), CassError> {
+fn insert_into_udt(session: &Session, schema: Schema) -> Result<(), CassError> {
     let query = "INSERT INTO examples.udt (id, address) VALUES (?, ?)";
     let mut statement = CassStatement::new(query, 2);
     let uuid_gen = CassUuidGen::new();
     let udt_address = schema.get_udt("examples", "address");
-    let udt_phone = CassSchema::get_udt(&schema, "examples", "phone_numbers");
+    let udt_phone = Schema::get_udt(&schema, "examples", "phone_numbers");
     let id = uuid_gen.get_time();
     let id_str = id.to_string();
     let mut address = CassUserType::new(udt_address);

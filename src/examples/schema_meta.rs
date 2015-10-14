@@ -121,34 +121,34 @@ unsafe fn print_schema_map(value: &CassValue) {
     print!(" ]]");
 }
 
-unsafe fn print_schema_meta_field(field: &CassSchemaMetaField, indent: u32) {
+unsafe fn print_schema_meta_field(field: &SchemaMetaField, indent: u32) {
     print_indent(indent);
     print!("{:?} : ", field.get_name());
     print_schema_value(&field.get_value());
     println!("");
 }
 
-unsafe fn print_schema_meta_fields(meta: &CassSchemaMeta, indent: u32) {
+unsafe fn print_schema_meta_fields(meta: &SchemaMeta, indent: u32) {
     let mut fields = meta.fields_from_schema_meta();
 
     while cass_iterator_next(fields.0) > 0 {
-        print_schema_meta_field(&CassSchemaMetaField(fields.get_schema_meta_field().0), indent);
+        print_schema_meta_field(&SchemaMetaField(fields.get_schema_meta_field().0), indent);
     }
 }
 
-unsafe fn print_schema_meta_entries(meta: &CassSchemaMeta, indent: u32) -> Result<(), CassError> {
+unsafe fn print_schema_meta_entries(meta: &SchemaMeta, indent: u32) -> Result<(), CassError> {
     let mut entries = meta.iterator();
 
     while cass_iterator_next(entries.0) > 0 {
-        try!(print_schema_meta(&CassSchemaMeta(entries.get_schema_meta().0), indent));
+        try!(print_schema_meta(&SchemaMeta(entries.get_schema_meta().0), indent));
     }
     Ok(())
 }
 
-unsafe fn print_schema_meta(meta: &CassSchemaMeta, indent: u32) -> Result<(), CassError> {
+unsafe fn print_schema_meta(meta: &SchemaMeta, indent: u32) -> Result<(), CassError> {
     print_indent(indent);
     match try!(meta.get_type()) {
-        CassSchemaMetaType::KEYSPACE => {
+        SchemaMetaType::KEYSPACE => {
             println!("Keyspace {:?}",  meta.get_field("keyspace_name").get_value());
             print_schema_meta_fields(meta, indent + 1);
             println!("");
@@ -156,7 +156,7 @@ unsafe fn print_schema_meta(meta: &CassSchemaMeta, indent: u32) -> Result<(), Ca
             Ok(())
         }
 
-        CassSchemaMetaType::TABLE => {
+        SchemaMetaType::TABLE => {
             println!("Table {:?}", meta.get_field("columnfamily_name").get_value());
             print_schema_meta_fields(meta, indent + 1);
             println!("");
@@ -164,7 +164,7 @@ unsafe fn print_schema_meta(meta: &CassSchemaMeta, indent: u32) -> Result<(), Ca
             Ok(())
         }
 
-        CassSchemaMetaType::COLUMN => {
+        SchemaMetaType::COLUMN => {
             println!("Column {:?}", meta.get_field("column_name").get_name());
             print_schema_meta_fields(meta, indent + 1);
             println!("");

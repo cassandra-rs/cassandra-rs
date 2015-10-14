@@ -24,8 +24,8 @@ use cql_bindgen::cass_iterator_get_schema_meta_field;
 use cql_ffi::udt::CassUserType;
 use cql_ffi::value::CassValue;
 use cql_ffi::cass_iterator::CassIteratorType;
-use cql_ffi::schema::CassSchemaMetaField;
-use cql_ffi::schema::CassSchemaMeta;//use cql_bindgen::cass_collection_append_decimal;
+use cql_ffi::schema::SchemaMetaField;
+use cql_ffi::schema::SchemaMeta;//use cql_bindgen::cass_collection_append_decimal;
 use cql_ffi::collection::collection::CassCollectionType;
 use cql_ffi::error::CassError;
 use cql_ffi::uuid::CassUuid;
@@ -169,15 +169,15 @@ impl SetIterator {
         }
     }
 
-    pub fn get_schema_meta(&mut self) -> CassSchemaMeta {
+    pub fn get_schema_meta(&mut self) -> SchemaMeta {
         unsafe {
-            CassSchemaMeta(cass_iterator_get_schema_meta(self.0))
+            SchemaMeta(cass_iterator_get_schema_meta(self.0))
         }
     }
 
-    pub fn get_schema_meta_field(&mut self) -> CassSchemaMetaField {
+    pub fn get_schema_meta_field(&mut self) -> SchemaMetaField {
         unsafe {
-            CassSchemaMetaField(cass_iterator_get_schema_meta_field(&mut *self.0))
+            SchemaMetaField(cass_iterator_get_schema_meta_field(&mut *self.0))
         }
     }
 }

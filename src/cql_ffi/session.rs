@@ -10,7 +10,7 @@ use cql_ffi::future::ResultFuture;
 use cql_ffi::future::PreparedFuture;
 use cql_ffi::error::CassError;
 use cql_ffi::statement::CassStatement;
-use cql_ffi::schema::CassSchema;
+use cql_ffi::schema::Schema;
 use cql_ffi::cluster::Cluster;
 use cql_bindgen::CassFuture as _Future;
 use cql_bindgen::cass_future_free;
@@ -88,9 +88,9 @@ impl Session {
             })
     }
 
-    pub fn get_schema(&self) -> CassSchema {
+    pub fn get_schema(&self) -> Schema {
         unsafe {
-            CassSchema(cass_session_get_schema(self.0))
+            Schema(cass_session_get_schema(self.0))
         }
     }
 

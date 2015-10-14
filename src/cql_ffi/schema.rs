@@ -14,9 +14,9 @@ use cql_ffi::collection::set::SetIterator;
 
 //use cql_ffi::udt::CassDataType;
 use cql_ffi::udt::CassConstDataType;
-use cql_bindgen::CassSchema as _CassSchema;
-use cql_bindgen::CassSchemaMeta as _CassSchemaMeta;
-use cql_bindgen::CassSchemaMetaField as _CassSchemaMetaField;
+use cql_bindgen::CassSchema as _Schema;
+use cql_bindgen::CassSchemaMeta as _SchemaMeta;
+use cql_bindgen::CassSchemaMetaField as _SchemaMetaField;
 use cql_bindgen::cass_schema_meta_field_value;
 use cql_bindgen::cass_schema_meta_field_name;
 use cql_bindgen::cass_schema_meta_get_entry;
@@ -32,46 +32,46 @@ use cql_bindgen::cass_schema_get_udt;
 
 
 
-pub struct CassSchema(pub *const _CassSchema);
-pub struct CassSchemaMeta(pub *const _CassSchemaMeta);
-pub struct CassSchemaMetaField(pub *const _CassSchemaMetaField);
-//pub struct CassSchemaMetaType(pub _CassSchemaMetaType);
-pub struct CassSchemaMetaFieldIterator(pub *mut SetIterator);
+pub struct Schema(pub *const _Schema);
+pub struct SchemaMeta(pub *const _SchemaMeta);
+pub struct SchemaMetaField(pub *const _SchemaMetaField);
+//pub struct SchemaMetaType(pub _SchemaMetaType);
+pub struct SchemaMetaFieldIterator(pub *mut SetIterator);
 
 //~ #[repr(C)]
 #[derive(Debug,Copy,Clone)]
-pub enum CassSchemaMetaType {
+pub enum SchemaMetaType {
     KEYSPACE = 0isize,
     TABLE = 1,
     COLUMN = 2,
 }
 
-//~ impl Iterator for CassSchemaMetaFieldIterator {
-    //~ type Item = CassSchemaMeta;
+//~ impl Iterator for SchemaMetaFieldIterator {
+    //~ type Item = SchemaMeta;
     //~ fn next(&mut self) -> Option<<Self as Iterator>::Item> {unsafe{
         //~ match self.0.next() {
-            //~ Some(field) => Some(CassSchemaMeta(self.0.get_schema_meta_field())),
+            //~ Some(field) => Some(SchemaMeta(self.0.get_schema_meta_field())),
             //~ None => None
         //~ }}
     //~ }
 //~ }
 
-impl CassSchemaMetaType {
+impl SchemaMetaType {
     pub fn build(val: isize) -> Result<Self, CassError> {
         match val {
-            0 => Ok(CassSchemaMetaType::KEYSPACE),
-            1 => Ok(CassSchemaMetaType::TABLE),
-            2 => Ok(CassSchemaMetaType::COLUMN),
+            0 => Ok(SchemaMetaType::KEYSPACE),
+            1 => Ok(SchemaMetaType::TABLE),
+            2 => Ok(SchemaMetaType::COLUMN),
             _ => panic!("impossible schema meta type"),
         }
     }
 }
 
-impl CassSchema {
-    pub fn get_keyspace(&self, keyspace_name: &str) -> CassSchemaMeta {
+impl Schema {
+    pub fn get_keyspace(&self, keyspace_name: &str) -> SchemaMeta {
         unsafe {
             let keyspace_name = CString::new(keyspace_name).unwrap();
-            CassSchemaMeta(cass_schema_get_keyspace(self.0, keyspace_name.as_ptr()))
+            SchemaMeta(cass_schema_get_keyspace(self.0, keyspace_name.as_ptr()))
         }
     }
 
@@ -92,7 +92,7 @@ impl CassSchema {
     }
 }
 
-impl Drop for CassSchema {
+impl Drop for Schema {
     fn drop(&mut self) {
         unsafe {
             cass_schema_free(self.0)
@@ -101,24 +101,24 @@ impl Drop for CassSchema {
 }
 
 
-impl CassSchemaMeta {
-    pub fn get_type(&self) -> Result<CassSchemaMetaType, CassError> {
+impl SchemaMeta {
+    pub fn get_type(&self) -> Result<SchemaMetaType, CassError> {
         unsafe {
-            CassSchemaMetaType::build(cass_schema_meta_type(self.0) as isize)
+            SchemaMetaType::build(cass_schema_meta_type(self.0) as isize)
         }
     }
 
-    pub fn get_entry(&self, name: &str) -> CassSchemaMeta {
+    pub fn get_entry(&self, name: &str) -> SchemaMeta {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassSchemaMeta(cass_schema_meta_get_entry(self.0, name.as_ptr()))
+            SchemaMeta(cass_schema_meta_get_entry(self.0, name.as_ptr()))
         }
     }
 
-    pub fn get_field(&self, name: &str) -> CassSchemaMetaField {
+    pub fn get_field(&self, name: &str) -> SchemaMetaField {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassSchemaMetaField(cass_schema_meta_get_field(self.0, name.as_ptr()))
+            SchemaMetaField(cass_schema_meta_get_field(self.0, name.as_ptr()))
         }
     }
 
@@ -146,7 +146,7 @@ impl CassSchemaMeta {
 
 }
 
-impl CassSchemaMetaField {
+impl SchemaMetaField {
     pub fn get_name(&self) -> String {
         unsafe {
             let mut name = mem::zeroed();
