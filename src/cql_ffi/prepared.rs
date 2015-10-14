@@ -8,6 +8,8 @@ use cql_bindgen::cass_prepared_bind;
 //use cql_bindgen::cass_prepared_parameter_data_type_by_name;
 //use cql_bindgen::cass_prepared_parameter_data_type_by_name_n;
 
+/// A statement that has been prepared against at least one Cassandra node.
+/// Instances of this class should not be created directly, but through Session.prepare().
 pub struct PreparedStatement(pub *const _PreparedStatement);
 
 unsafe impl Sync for PreparedStatement{}

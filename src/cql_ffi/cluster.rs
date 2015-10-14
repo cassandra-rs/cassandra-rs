@@ -37,6 +37,16 @@ use cql_ffi::error::CassError;
 
 use cql_ffi::session::Session;
 
+///
+/// The main class to use when interacting with a Cassandra cluster.
+/// Typically, one instance of this class will be created for each separate Cassandra cluster that your application interacts with.
+///
+/// # Examples
+/// ```
+/// let mut cluster = Cluster::new();
+/// cluster.set_contact_points("127.0.0.1").unwrap();
+/// let mut session = cluster.connect().unwrap();
+/// ```
 pub struct Cluster(pub *mut _Cluster);
 
 impl Drop for Cluster {
