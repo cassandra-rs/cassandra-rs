@@ -42,6 +42,8 @@ impl Drop for CassSession {
 }
 
 impl CassSession {
+    /// Create a new Cassanda session.
+    /// It's recommended to use CassCluster.connect() instead
     pub fn new() -> CassSession {
         unsafe {
             CassSession(cass_session_new())

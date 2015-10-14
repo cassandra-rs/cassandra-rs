@@ -23,6 +23,7 @@ fn insert_into_basic(session: &mut CassSession,
                      key: &str,
                      basic: &mut Basic)
                      -> Result<(), CassError> {
+    println!("Creating statement");
     let mut statement = CassStatement::new(INSERT_QUERY, 6);
     statement
         .bind_string(0, key).unwrap()
@@ -31,6 +32,7 @@ fn insert_into_basic(session: &mut CassSession,
         .bind_double(3, basic.dbl).unwrap()
         .bind_int32(4, basic.i32).unwrap();
 //        .bind_int64(5, basic.i64).unwrap();
+    println!("Executing insert statement");
     try!(session.execute_statement(&statement).wait());
     Ok(())
 }
@@ -63,12 +65,19 @@ fn select_from_basic(session: &mut CassSession,
 fn main() {
     let mut cluster = CassCluster::new();
     cluster.set_contact_points("127.0.0.1").unwrap();
+    cluster.set_protocol_version(3).unwrap();
+    println!("Proto set");
     let mut session = CassSession::new().connect(&mut cluster).wait().unwrap();
+    println!("Connected");
     let mut input = Basic { bln: true, flt: 0.001f32, dbl: 0.0002f64, i32: 1, i64: 2 };
     let mut output = Basic { bln: false, flt: 0f32, dbl: 0f64, i32: 0, i64: 0 };
+    println!("Executing create keyspace");
     session.execute(CREATE_KEYSPACE,0);
+    println!("Creating table");
     session.execute(CREATE_TABLE,0);
+
     insert_into_basic(&mut session, "prepared_test", &mut input).unwrap();
+    println!("Preparing");
     match session.prepare(SELECT_QUERY).unwrap().wait() {
         Ok(prepared) => {
             select_from_basic(&mut session, &prepared, "prepared_test", &mut output).unwrap();

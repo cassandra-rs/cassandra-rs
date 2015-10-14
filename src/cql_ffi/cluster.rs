@@ -35,6 +35,8 @@ use cql_bindgen::cass_cluster_set_latency_aware_routing_settings;
 
 use cql_ffi::error::CassError;
 
+use cql_ffi::session::CassSession;
+
 pub struct CassCluster(pub *mut _CassCluster);
 
 impl Drop for CassCluster {
@@ -74,6 +76,10 @@ impl CassCluster {
             cass_cluster_set_ssl(self.0, ssl.0);
             self
         }
+    }
+    /// Connect to Cassandra cluster
+    pub fn connect(&mut self) -> Result<CassSession, CassError> {
+        CassSession::new().connect(&self).wait()
     }
 
     pub fn set_protocol_version(&mut self, protocol_version: i32) -> Result<&mut Self, CassError> {
