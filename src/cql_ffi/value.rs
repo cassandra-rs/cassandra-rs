@@ -67,7 +67,7 @@ use std::mem;
 pub struct CassValue(*const _CassValue);
 
 #[derive(Debug)]
-pub enum CassValueType {
+pub enum ValueType {
     UNKNOWN = CASS_VALUE_TYPE_UNKNOWN as isize,
     CUSTOM = CASS_VALUE_TYPE_CUSTOM as isize,
     ASCII = CASS_VALUE_TYPE_ASCII as isize,
@@ -94,31 +94,31 @@ pub enum CassValueType {
     LASTENTRY = CASS_VALUE_TYPE_LAST_ENTRY as isize,
 }
 
-impl CassValueType {
+impl ValueType {
     pub fn build(_type: u32) -> Self {
         match _type {
-            CASS_VALUE_TYPE_UNKNOWN => CassValueType::UNKNOWN,
-            CASS_VALUE_TYPE_CUSTOM => CassValueType::CUSTOM,
-            CASS_VALUE_TYPE_ASCII => CassValueType::ASCII,
-            CASS_VALUE_TYPE_BIGINT => CassValueType::BIGINT,
-            CASS_VALUE_TYPE_BLOB => CassValueType::BLOB,
-            CASS_VALUE_TYPE_BOOLEAN => CassValueType::BOOLEAN,
-            CASS_VALUE_TYPE_COUNTER => CassValueType::COUNTER,
-            CASS_VALUE_TYPE_DECIMAL => CassValueType::DECIMAL,
-            CASS_VALUE_TYPE_DOUBLE => CassValueType::DOUBLE,
-            CASS_VALUE_TYPE_FLOAT => CassValueType::FLOAT,
-            CASS_VALUE_TYPE_INT => CassValueType::INT,
-            CASS_VALUE_TYPE_TEXT => CassValueType::TEXT,
-            CASS_VALUE_TYPE_TIMESTAMP => CassValueType::TIMESTAMP,
-            CASS_VALUE_TYPE_UUID => CassValueType::UUID,
-            CASS_VALUE_TYPE_VARCHAR => CassValueType::VARCHAR,
-            CASS_VALUE_TYPE_VARINT => CassValueType::VARINT,
-            CASS_VALUE_TYPE_TIMEUUID => CassValueType::TIMEUUID,
-            CASS_VALUE_TYPE_INET => CassValueType::INET,
-            CASS_VALUE_TYPE_LIST => CassValueType::LIST,
-            CASS_VALUE_TYPE_MAP => CassValueType::MAP,
-            CASS_VALUE_TYPE_SET => CassValueType::SET,
-            CASS_VALUE_TYPE_UDT => CassValueType::UDT,
+            CASS_VALUE_TYPE_UNKNOWN => ValueType::UNKNOWN,
+            CASS_VALUE_TYPE_CUSTOM => ValueType::CUSTOM,
+            CASS_VALUE_TYPE_ASCII => ValueType::ASCII,
+            CASS_VALUE_TYPE_BIGINT => ValueType::BIGINT,
+            CASS_VALUE_TYPE_BLOB => ValueType::BLOB,
+            CASS_VALUE_TYPE_BOOLEAN => ValueType::BOOLEAN,
+            CASS_VALUE_TYPE_COUNTER => ValueType::COUNTER,
+            CASS_VALUE_TYPE_DECIMAL => ValueType::DECIMAL,
+            CASS_VALUE_TYPE_DOUBLE => ValueType::DOUBLE,
+            CASS_VALUE_TYPE_FLOAT => ValueType::FLOAT,
+            CASS_VALUE_TYPE_INT => ValueType::INT,
+            CASS_VALUE_TYPE_TEXT => ValueType::TEXT,
+            CASS_VALUE_TYPE_TIMESTAMP => ValueType::TIMESTAMP,
+            CASS_VALUE_TYPE_UUID => ValueType::UUID,
+            CASS_VALUE_TYPE_VARCHAR => ValueType::VARCHAR,
+            CASS_VALUE_TYPE_VARINT => ValueType::VARINT,
+            CASS_VALUE_TYPE_TIMEUUID => ValueType::TIMEUUID,
+            CASS_VALUE_TYPE_INET => ValueType::INET,
+            CASS_VALUE_TYPE_LIST => ValueType::LIST,
+            CASS_VALUE_TYPE_MAP => ValueType::MAP,
+            CASS_VALUE_TYPE_SET => ValueType::SET,
+            CASS_VALUE_TYPE_UDT => ValueType::UDT,
             err => panic!("impossible value type{}", err),
         }
     }
@@ -129,17 +129,17 @@ impl Debug for CassValue {
         match self.is_null() {
             true => Ok(()),
             false => match self.get_type() {
-                CassValueType::UNKNOWN => write!(f, "{:?}", "unknown"),
-                CassValueType::CUSTOM => write!(f, "{:?}", "custom"),
-                CassValueType::ASCII => write!(f, "{:?}", self.get_string().unwrap()),
-                CassValueType::BIGINT => write!(f, "{:?}", self.get_int64().unwrap()),
-                CassValueType::VARCHAR => write!(f, "{:?}", self.get_string().unwrap()),
-                CassValueType::BOOLEAN => write!(f, "{:?}", self.get_bool().unwrap()),
-                CassValueType::DOUBLE => write!(f, "{:?}", self.get_double().unwrap()),
-                CassValueType::FLOAT => write!(f, "{:?}", self.get_float().unwrap()),
-                CassValueType::INT => write!(f, "{:?}", self.get_int32().unwrap()),
-                CassValueType::TIMEUUID => write!(f, "TIMEUUID: {:?}", self.get_uuid().unwrap()),
-                CassValueType::SET => {
+                ValueType::UNKNOWN => write!(f, "{:?}", "unknown"),
+                ValueType::CUSTOM => write!(f, "{:?}", "custom"),
+                ValueType::ASCII => write!(f, "{:?}", self.get_string().unwrap()),
+                ValueType::BIGINT => write!(f, "{:?}", self.get_int64().unwrap()),
+                ValueType::VARCHAR => write!(f, "{:?}", self.get_string().unwrap()),
+                ValueType::BOOLEAN => write!(f, "{:?}", self.get_bool().unwrap()),
+                ValueType::DOUBLE => write!(f, "{:?}", self.get_double().unwrap()),
+                ValueType::FLOAT => write!(f, "{:?}", self.get_float().unwrap()),
+                ValueType::INT => write!(f, "{:?}", self.get_int32().unwrap()),
+                ValueType::TIMEUUID => write!(f, "TIMEUUID: {:?}", self.get_uuid().unwrap()),
+                ValueType::SET => {
                     try!(write!(f, "["));
                     for item in self.as_set_iterator().unwrap() {
                         try!(write!(f,"SET {:?} ",item))
@@ -147,13 +147,13 @@ impl Debug for CassValue {
                     try!(write!(f, "]"));
                     Ok(())
                 }
-                CassValueType::MAP => {
+                ValueType::MAP => {
                     for item in self.as_map_iterator().unwrap() {
                         try!(write!(f, "MAP {:?}:{:?}", item.0,item.1))
                     }
                     Ok(())
                 }
-                CassValueType::UDT => {
+                ValueType::UDT => {
 //                    for item in self.as_map_iterator().unwrap() {
 //                        try!(write!(f, "MAP {:?}:{:?}", item.0,item.1))
 //                    }
@@ -172,17 +172,17 @@ impl Display for CassValue {
         match self.is_null() {
             true => Ok(()),
             false => match self.get_type() {
-                CassValueType::UNKNOWN => write!(f, "{}", "unknown"),
-                CassValueType::CUSTOM => write!(f, "{}", "custom"),
-                CassValueType::ASCII => write!(f, "{}", self.get_string().unwrap()),
-                CassValueType::BIGINT => write!(f, "{}", self.get_int64().unwrap()),
-                CassValueType::VARCHAR => write!(f, "{}", self.get_string().unwrap()),
-                CassValueType::BOOLEAN => write!(f, "{}", self.get_bool().unwrap()),
-                CassValueType::DOUBLE => write!(f, "{}", self.get_double().unwrap()),
-                CassValueType::FLOAT => write!(f, "{}", self.get_float().unwrap()),
-                CassValueType::INT => write!(f, "{}", self.get_int32().unwrap()),
-                CassValueType::TIMEUUID => write!(f, "TIMEUUID: {}", self.get_uuid().unwrap()),
-                CassValueType::SET => {
+                ValueType::UNKNOWN => write!(f, "{}", "unknown"),
+                ValueType::CUSTOM => write!(f, "{}", "custom"),
+                ValueType::ASCII => write!(f, "{}", self.get_string().unwrap()),
+                ValueType::BIGINT => write!(f, "{}", self.get_int64().unwrap()),
+                ValueType::VARCHAR => write!(f, "{}", self.get_string().unwrap()),
+                ValueType::BOOLEAN => write!(f, "{}", self.get_bool().unwrap()),
+                ValueType::DOUBLE => write!(f, "{}", self.get_double().unwrap()),
+                ValueType::FLOAT => write!(f, "{}", self.get_float().unwrap()),
+                ValueType::INT => write!(f, "{}", self.get_int32().unwrap()),
+                ValueType::TIMEUUID => write!(f, "TIMEUUID: {}", self.get_uuid().unwrap()),
+                ValueType::SET => {
                     try!(write!(f, "["));
                     for item in self.as_set_iterator().unwrap() {
                         try!(write!(f,"{} ",item))
@@ -190,7 +190,7 @@ impl Display for CassValue {
                     try!(write!(f, "]"));
                     Ok(())
                 }
-                CassValueType::MAP => {
+                ValueType::MAP => {
                     for item in self.as_map_iterator().unwrap() {
                         try!(write!(f, "MAP {}:{}", item.0,item.1))
                     }
@@ -247,9 +247,9 @@ impl CassValue {
 //        CassError::build(cass_value_get_decimal(self.0,&mut output)).wrap(output)
 //    }}
 
-    pub fn get_type(&self) -> CassValueType {
+    pub fn get_type(&self) -> ValueType {
         unsafe {
-            CassValueType::build(cass_value_type(self.0))
+            ValueType::build(cass_value_type(self.0))
         }
     }
 
@@ -271,22 +271,22 @@ impl CassValue {
         }
     }
 
-    pub fn primary_sub_type(&self) -> CassValueType {
+    pub fn primary_sub_type(&self) -> ValueType {
         unsafe {
-            CassValueType::build(cass_value_primary_sub_type(self.0))
+            ValueType::build(cass_value_primary_sub_type(self.0))
         }
     }
 
-    pub fn secondary_sub_type(&self) -> CassValueType {
+    pub fn secondary_sub_type(&self) -> ValueType {
         unsafe {
-            CassValueType::build(cass_value_secondary_sub_type(self.0))
+            ValueType::build(cass_value_secondary_sub_type(self.0))
         }
     }
 
     pub fn as_set_iterator(&self) -> Result<SetIterator, CassError> {
         unsafe {
             match self.get_type() {
-                CassValueType::SET => Ok(SetIterator(cass_iterator_from_collection(self.0))),
+                ValueType::SET => Ok(SetIterator(cass_iterator_from_collection(self.0))),
                 _ => Err(CassError::build(CassErrorTypes::LIB_INVALID_VALUE_TYPE as u32)),
             }
         }
@@ -295,7 +295,7 @@ impl CassValue {
     pub fn as_map_iterator(&self) -> Result<MapIterator, CassError> {
         unsafe {
             match self.get_type() {
-                CassValueType::MAP => Ok(MapIterator(cass_iterator_from_map(self.0))),
+                ValueType::MAP => Ok(MapIterator(cass_iterator_from_map(self.0))),
                 _ => Err(CassError::build(CassErrorTypes::LIB_INVALID_VALUE_TYPE as u32)),
             }
         }
@@ -304,7 +304,7 @@ impl CassValue {
     pub fn as_user_type_iterator(&self) -> Result<UserTypeIterator, CassError> {
         unsafe {
             match self.get_type() {
-                CassValueType::UDT => Ok(UserTypeIterator(cass_iterator_from_user_type(self.0))),
+                ValueType::UDT => Ok(UserTypeIterator(cass_iterator_from_user_type(self.0))),
                 _ => Err(CassError::build(CassErrorTypes::LIB_INVALID_VALUE_TYPE as u32)),
             }
         }
@@ -313,7 +313,7 @@ impl CassValue {
 
     //~ pub fn map_iter(&self) -> Result<MapIterator,CassError> {unsafe{
         //~ match self.get_type() {
-            //~ CassValueType::MAP => Ok(MapIterator(cass_iterator_from_map(self.0))),
+            //~ ValueType::MAP => Ok(MapIterator(cass_iterator_from_map(self.0))),
             //~ type_no => {
                 //~ println!("wrong_type: {:?}", type_no);
                 //~ Err(CassError::build(CassErrorTypes::LIB_INVALID_VALUE_TYPE as u32))

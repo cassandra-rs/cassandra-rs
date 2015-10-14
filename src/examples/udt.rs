@@ -52,9 +52,9 @@ fn select_from_udt(session: &Session) -> Result<(), CassError> {
                 for field in fields_iter {
                     println!("{}", field.0);
                     match field.1.get_type() {
-                        CassValueType::VARCHAR => println!("{}", try!(field.1.get_string())),
-                        CassValueType::INT => println!("{}", try!(field.1.get_int32())),
-                        CassValueType::SET =>
+                        ValueType::VARCHAR => println!("{}", try!(field.1.get_string())),
+                        ValueType::INT => println!("{}", try!(field.1.get_int32())),
+                        ValueType::SET =>
                             for phone_numbers in try!(field.1.as_set_iterator()) {
                             for phone_number in try!(phone_numbers.as_user_type_iterator()) {
                                 let phone_number_value = phone_number.1;

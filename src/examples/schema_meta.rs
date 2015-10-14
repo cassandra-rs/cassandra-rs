@@ -55,31 +55,31 @@ fn print_indent(indent: u32) {
 unsafe fn print_schema_value(value: &CassValue) {
 
     match value.get_type() {
-        CassValueType::INT => {
+        ValueType::INT => {
             print!("{}", value.get_int32().unwrap());
         }
 
-        CassValueType::BOOLEAN => {
+        ValueType::BOOLEAN => {
             print!("{}",value.get_bool().unwrap());
         }
 
-        CassValueType::DOUBLE => {
+        ValueType::DOUBLE => {
             print!("{}", value.get_double().unwrap());
         }
 
-        CassValueType::TEXT | CassValueType::ASCII | CassValueType::VARCHAR => {
+        ValueType::TEXT | ValueType::ASCII | ValueType::VARCHAR => {
             print!("{:?}", value            );
         }
 
-        CassValueType::UUID => {
+        ValueType::UUID => {
             print!("{:?}", value.get_uuid().unwrap() /*us*/);
         }
 
-        CassValueType::LIST => {
+        ValueType::LIST => {
             print_schema_list(value);
         }
 
-        CassValueType::MAP => {
+        ValueType::MAP => {
             print_schema_map(value);
         }
         _ => {

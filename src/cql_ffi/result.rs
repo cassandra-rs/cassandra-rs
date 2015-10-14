@@ -10,7 +10,7 @@ use std::mem;
 use std::slice;
 use std::str;
 
-use cql_ffi::value::CassValueType;
+use cql_ffi::value::ValueType;
 use cql_ffi::row::Row;
 
 use cql_bindgen::CassResult as _CassResult;
@@ -90,9 +90,9 @@ impl CassResult {
         }
     }
 
-    pub fn column_type(&self, index: u64) -> CassValueType {
+    pub fn column_type(&self, index: u64) -> ValueType {
         unsafe {
-            CassValueType::build(cass_result_column_type(self.0, index))
+            ValueType::build(cass_result_column_type(self.0, index))
         }
     }
 

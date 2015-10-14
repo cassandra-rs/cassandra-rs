@@ -97,7 +97,7 @@ use cql_bindgen::cass_iterator_get_user_type_field_value;
 use cql_bindgen::CassDataType as _CassDataType;
 use cql_bindgen::CassUserType as _CassUserType;
 
-use cql_ffi::value::CassValueType;
+use cql_ffi::value::ValueType;
 use cql_ffi::error::CassError;
 
 pub struct CassDataType(pub *mut _CassDataType);
@@ -106,7 +106,7 @@ pub struct CassConstDataType(pub *const _CassDataType);
 pub struct CassUserType(pub *mut _CassUserType);
 
 impl CassDataType {
-    pub fn new(value_type: CassValueType) -> Self {
+    pub fn new(value_type: ValueType) -> Self {
         unsafe {
             CassDataType(cass_data_type_new(value_type as u32))
         }
@@ -130,9 +130,9 @@ impl CassDataType {
         }
     }
 
-    pub fn get_type(data_type: CassDataType) -> CassValueType {
+    pub fn get_type(data_type: CassDataType) -> ValueType {
         unsafe {
-            CassValueType::build(cass_data_type_type(data_type.0))
+            ValueType::build(cass_data_type_type(data_type.0))
         }
     }
 
@@ -341,7 +341,7 @@ impl CassDataType {
     }
 
     pub fn add_sub_value_type<S>(data_type: CassDataType,
-                                 sub_value_type: CassValueType)
+                                 sub_value_type: ValueType)
                                  -> Result<(), CassError>
         where S: Into<String>
     {
