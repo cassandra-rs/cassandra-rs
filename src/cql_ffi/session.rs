@@ -4,7 +4,7 @@
 
 use std::ffi::CString;
 
-use cql_ffi::batch::CassBatch;
+use cql_ffi::batch::Batch;
 use cql_ffi::future::Future;
 use cql_ffi::future::ResultFuture;
 use cql_ffi::future::PreparedFuture;
@@ -82,7 +82,7 @@ impl Session {
         }
     }
 
-    pub fn execute_batch(&self, batch: CassBatch) -> ResultFuture {
+    pub fn execute_batch(&self, batch: Batch) -> ResultFuture {
         ResultFuture(unsafe {
                 cass_session_execute_batch(self.0, batch.0)
             })

@@ -2,8 +2,8 @@ extern crate cassandra;
 use cassandra::Cluster;
 use cassandra::Session;
 use cassandra::CassStatement;
-use cassandra::CassBatch;
-use cassandra::CassBatchType;
+use cassandra::Batch;
+use cassandra::BatchType;
 use cassandra::PreparedStatement;
 use cassandra::CassError;
 
@@ -26,7 +26,7 @@ fn insert_into_batch_with_prepared<'a>(session: &mut Session,
                                        pairs: Vec<Pair>)
                                        -> Result<PreparedStatement, CassError> {
     let prepared = session.prepare(INSERT_QUERY).unwrap().wait().unwrap();
-    let mut batch = CassBatch::new(CassBatchType::LOGGED);
+    let mut batch = Batch::new(BatchType::LOGGED);
     for pair in pairs {
         let mut statement = prepared.bind();
         try!(statement.bind_string(0, pair.key));

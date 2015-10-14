@@ -9,17 +9,17 @@ use cql_bindgen::cass_batch_new;
 use cql_bindgen::CASS_BATCH_TYPE_LOGGED;
 use cql_bindgen::CASS_BATCH_TYPE_UNLOGGED;
 use cql_bindgen::CASS_BATCH_TYPE_COUNTER;
-pub use cql_bindgen::CassBatch as _CassBatch;
+pub use cql_bindgen::CassBatch as _Batch;
 
-pub struct CassBatch(pub *mut _CassBatch);
+pub struct Batch(pub *mut _Batch);
 
-pub enum CassBatchType {
+pub enum BatchType {
     LOGGED = CASS_BATCH_TYPE_LOGGED as isize,
     UNLOGGED = CASS_BATCH_TYPE_UNLOGGED as isize,
     COUNTER = CASS_BATCH_TYPE_COUNTER as isize,
 }
 
-impl Drop for CassBatch {
+impl Drop for Batch {
     fn drop(&mut self) {
         unsafe {
             cass_batch_free(self.0)
@@ -27,10 +27,10 @@ impl Drop for CassBatch {
     }
 }
 
-impl CassBatch {
-    pub fn new(_type: CassBatchType) -> CassBatch {
+impl Batch {
+    pub fn new(_type: BatchType) -> Batch {
         unsafe {
-            CassBatch(cass_batch_new(_type as u32))
+            Batch(cass_batch_new(_type as u32))
         }
     }
 

@@ -36,7 +36,7 @@ use cql_ffi::error::CassError;
 
 #[repr(C)]
 #[derive(Copy,Debug,Clone)]
-pub enum CassColumnType {
+pub enum ColumnType {
     PARTITION_KEY = 0,
     CLUSTERING_KEY = 1,
     REGULAR = 2,
@@ -45,9 +45,9 @@ pub enum CassColumnType {
     UNKNOWN = 5,
 }
 
-pub struct CassColumn(pub *const _CassValue);
+pub struct Column(pub *const _CassValue);
 
-impl Debug for CassColumn {
+impl Debug for Column {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.get_type() {
             CassValueType::UNKNOWN => write!(f, "UNKNOWN Cassandra type"),
@@ -93,7 +93,7 @@ impl Debug for CassColumn {
     }
 }
 
-impl Display for CassColumn {
+impl Display for Column {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.get_type() {
             CassValueType::UNKNOWN => write!(f, "UNKNOWN Cassandra type"),
@@ -141,17 +141,17 @@ impl Display for CassColumn {
 
 trait AsTypedColumn {
     type T;
-    fn get(col: CassColumn) -> Result<Self::T, CassError>;
+    fn get(col: Column) -> Result<Self::T, CassError>;
 }
 
 impl AsTypedColumn for bool {
     type T = Self;
-    fn get(col: CassColumn) -> Result<Self, CassError> {
+    fn get(col: Column) -> Result<Self, CassError> {
         col.get_bool()
     }
 }
 
-impl CassColumn {
+impl Column {
     pub fn get_type(&self) -> CassValueType {
         unsafe {
             CassValueType::build(cass_value_type(self.0))

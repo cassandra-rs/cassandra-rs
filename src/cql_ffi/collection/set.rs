@@ -161,7 +161,7 @@ impl SetIterator {
         CassIteratorType::new(cass_iterator_type(self.0))
     }
 
-    //~ unsafe fn get_column(&mut self) -> CassColumn {CassColumn(cass_iterator_get_column(self.0))}
+    //~ unsafe fn get_column(&mut self) -> Column {Column(cass_iterator_get_column(self.0))}
 
     pub fn get_value(&mut self) -> CassValue {
         unsafe {

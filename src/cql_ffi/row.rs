@@ -18,7 +18,7 @@ use std::iter;
 
 use cql_ffi::value::CassValue;
 use cql_ffi::error::CassError;
-use cql_ffi::column::CassColumn;
+use cql_ffi::column::Column;
 
 pub struct CassRow(pub *const _CassRow);
 
@@ -42,17 +42,17 @@ impl Display for CassRow {
 }
 
 impl CassRow {
-    pub fn get_column(&self, index: u64) -> Result<CassColumn, CassError> {
+    pub fn get_column(&self, index: u64) -> Result<Column, CassError> {
         unsafe {
             let col = cass_row_get_column(self.0, index);
             match col.is_null() {
                 true => Err(CassError::build(CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS)),
-                false => Ok(CassColumn(col)),
+                false => Ok(Column(col)),
             }
         }
     }
 
-    pub fn get_column_by_name<S>(&self, name: S) -> CassColumn
+    pub fn get_column_by_name<S>(&self, name: S) -> Column
         where S: Into<String>
     {
         unsafe {
@@ -60,7 +60,7 @@ impl CassRow {
             println!("name: {:?}", name);
             println!("self: {:?}", self);
         //unimplemented!();
-            CassColumn(cass_row_get_column_by_name(self.0, name.as_ptr()))
+            Column(cass_row_get_column_by_name(self.0, name.as_ptr()))
         }
     }
 }
@@ -78,13 +78,13 @@ impl Drop for RowIterator {
 
 impl iter::Iterator for RowIterator {
 
-    type Item = CassColumn;
+    type Item = Column;
 
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
                 0 => None,
-                _ => Some(CassColumn(cass_iterator_get_column(self.0))),
+                _ => Some(Column(cass_iterator_get_column(self.0))),
             }
         }
     }
@@ -92,13 +92,13 @@ impl iter::Iterator for RowIterator {
 
 impl<'a> Iterator for &'a RowIterator {
 
-    type Item = CassColumn;
+    type Item = Column;
 
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
                 0 => None,
-                _ => Some(CassColumn(cass_iterator_get_column(self.0))),
+                _ => Some(Column(cass_iterator_get_column(self.0))),
             }
         }
     }
@@ -115,7 +115,7 @@ impl Display for RowIterator {
 
 impl IntoIterator for CassRow {
 
-    type Item = CassColumn;
+    type Item = Column;
     type IntoIter = RowIterator;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -126,7 +126,7 @@ impl IntoIterator for CassRow {
 }
 
 impl<'a> IntoIterator for &'a CassRow {
-    type Item = CassColumn;
+    type Item = Column;
     type IntoIter = RowIterator;
     fn into_iter(self) -> Self::IntoIter {
         unsafe {
