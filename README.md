@@ -15,6 +15,9 @@ Or just
     cassandra="*"
 
 
+Here's a straightforward example found in simple.rs:
+
+
     extern crate cassandra;
     use cassandra::*;
 
@@ -27,7 +30,7 @@ Or just
         cluster
             .set_contact_points(CONTACT_POINTS).unwrap()
             .set_load_balance_round_robin().unwrap();
-        let session = Session::new().connect(&cluster).wait().unwrap();
+        let session = cluster.connect().unwrap();
         let result = session.execute(QUERY, 0).wait().unwrap();
         println!("{}",result);
         for row in result.iter() {
@@ -35,3 +38,5 @@ Or just
         }
         session.close().wait().unwrap();
     }
+
+There's additional examples included with the project in src/examples.
