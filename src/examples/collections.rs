@@ -12,7 +12,7 @@ static CREATE_TABLE:&'static str = "CREATE TABLE examples.collections (key text,
 fn insert_into_collections(session: &mut Session,
                            key: &str,
                            items: Vec<String>)
-                           -> Result<CassandraResult, CassError> {
+                           -> Result<CassandraResult, CassandraError> {
     let mut statement = Statement::new(INSERT_QUERY, 2);
     try!(statement.bind_string(0, key));
     let mut set = Set::new(2);
@@ -23,7 +23,7 @@ fn insert_into_collections(session: &mut Session,
     session.execute_statement(&statement).wait()
 }
 
-fn select_from_collections(session: &mut Session, key: &str) -> Result<(), CassError> {
+fn select_from_collections(session: &mut Session, key: &str) -> Result<(), CassandraError> {
     let mut statement = Statement::new(SELECT_QUERY, 1);
     try!(statement.bind_string(0, key));
     let result = try!(session.execute_statement(&statement).wait());

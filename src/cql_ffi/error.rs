@@ -53,10 +53,10 @@ use cql_bindgen::CASS_ERROR_LIB_MESSAGE_ENCODE;
 use cql_bindgen::CASS_ERROR_LIB_UNABLE_TO_INIT;
 use cql_bindgen::CASS_OK;
 
-use cql_bindgen::CassError as _CassError;
+use cql_bindgen::CassError as _CassandraError;
 
 #[repr(C)]
-pub enum CassErrorSource {
+pub enum CassandraErrorSource {
     NONE = 0isize,
     LIB = 1,
     SERVER = 2,
@@ -64,9 +64,9 @@ pub enum CassErrorSource {
     COMPRESSION = 4,
 }
 
-pub struct CassError(_CassError);
+pub struct CassandraError(_CassandraError);
 
-impl Error for CassError {
+impl Error for CassandraError {
     fn description(&self) -> &str {
         let c_buf: *const i8 = unsafe {
             self.desc()
@@ -78,7 +78,7 @@ impl Error for CassError {
     }
 }
 
-impl Display for CassError {
+impl Display for CassandraError {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let c_buf: *const i8 = unsafe {
             self.desc()
@@ -95,7 +95,7 @@ impl Display for CassError {
     }
 }
 
-impl Debug for CassError {
+impl Debug for CassandraError {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let c_buf: *const i8 = unsafe {
             self.desc()
@@ -114,7 +114,7 @@ impl Debug for CassError {
 
 #[derive(Debug,Eq,PartialEq,Copy,Clone)]
 #[repr(C)]
-pub enum CassErrorTypes {
+pub enum CassandraErrorTypes {
     CASS_OK = 0,
     LIB_BAD_PARAMS = 16777217,
     LIB_NO_STREAMS = 16777218,
@@ -162,72 +162,72 @@ pub enum CassErrorTypes {
     LAST_ENTRY = 50331654,
 }
 
-impl CassError {
-    pub fn wrap<T>(&self, wrappee: T) -> Result<T, CassError> {
+impl CassandraError {
+    pub fn wrap<T>(&self, wrappee: T) -> Result<T, CassandraError> {
         match self.0 {
             CASS_OK => Ok(wrappee),
-            err => Err(CassError::build(err)),
+            err => Err(CassandraError::build(err)),
         }
     }
 
-    pub fn build(val: u32) -> CassError {
+    pub fn build(val: u32) -> CassandraError {
         match val {
-            0 => CassError(CASS_OK),
-            1 => CassError(CASS_ERROR_LIB_BAD_PARAMS),
-            2 => CassError(CASS_ERROR_LIB_NO_STREAMS),
-            3 => CassError(CASS_ERROR_LIB_UNABLE_TO_INIT),
-            4 => CassError(CASS_ERROR_LIB_MESSAGE_ENCODE),
-            5 => CassError(CASS_ERROR_LIB_HOST_RESOLUTION),
-            6 => CassError(CASS_ERROR_LIB_UNEXPECTED_RESPONSE),
-            7 => CassError(CASS_ERROR_LIB_REQUEST_QUEUE_FULL),
-            8 => CassError(CASS_ERROR_LIB_NO_AVAILABLE_IO_THREAD),
-            9 => CassError(CASS_ERROR_LIB_WRITE_ERROR),
-            10 | 16777226 => CassError(CASS_ERROR_LIB_NO_HOSTS_AVAILABLE),
-            11 => CassError(CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS),
-            12 => CassError(CASS_ERROR_LIB_INVALID_ITEM_COUNT),
-            13 => CassError(CASS_ERROR_LIB_INVALID_VALUE_TYPE),
-            14 => CassError(CASS_ERROR_LIB_REQUEST_TIMED_OUT),
-            15 => CassError(CASS_ERROR_LIB_UNABLE_TO_SET_KEYSPACE),
-            16 => CassError(CASS_ERROR_LIB_CALLBACK_ALREADY_SET),
-            17 => CassError(CASS_ERROR_LIB_INVALID_STATEMENT_TYPE),
-            18 => CassError(CASS_ERROR_LIB_NAME_DOES_NOT_EXIST),
-            19 => CassError(CASS_ERROR_LIB_UNABLE_TO_DETERMINE_PROTOCOL),
-            20 => CassError(CASS_ERROR_LIB_NULL_VALUE),
-            21 => CassError(CASS_ERROR_LIB_NOT_IMPLEMENTED),
-            22 => CassError(CASS_ERROR_LIB_UNABLE_TO_CONNECT),
-            23 => CassError(CASS_ERROR_LIB_UNABLE_TO_CLOSE),
-            33554432 => CassError(CASS_ERROR_SERVER_SERVER_ERROR),
-            33554442 => CassError(CASS_ERROR_SERVER_PROTOCOL_ERROR),
-            33554688 => CassError(CASS_ERROR_SERVER_BAD_CREDENTIALS),
-            33558528 => CassError(CASS_ERROR_SERVER_UNAVAILABLE),
-            33558529 => CassError(CASS_ERROR_SERVER_OVERLOADED),
-            33558530 => CassError(CASS_ERROR_SERVER_IS_BOOTSTRAPPING),
-            33558531 => CassError(CASS_ERROR_SERVER_TRUNCATE_ERROR),
-            33558784 => CassError(CASS_ERROR_SERVER_WRITE_TIMEOUT),
-            33559040 => CassError(CASS_ERROR_SERVER_READ_TIMEOUT),
-            33562624 => CassError(CASS_ERROR_SERVER_SYNTAX_ERROR),
-            33562880 => CassError(CASS_ERROR_SERVER_UNAUTHORIZED),
-            33563136 => CassError(CASS_ERROR_SERVER_INVALID_QUERY),
-            33563392 => CassError(CASS_ERROR_SERVER_CONFIG_ERROR),
-            33563648 => CassError(CASS_ERROR_SERVER_ALREADY_EXISTS),
-            33563904 => CassError(CASS_ERROR_SERVER_UNPREPARED),
-            50331649 => CassError(CASS_ERROR_SSL_INVALID_CERT),
-            50331650 => CassError(CASS_ERROR_SSL_INVALID_PRIVATE_KEY),
-            50331651 => CassError(CASS_ERROR_SSL_NO_PEER_CERT),
-            50331652 => CassError(CASS_ERROR_SSL_INVALID_PEER_CERT),
-            50331653 => CassError(CASS_ERROR_SSL_IDENTITY_MISMATCH),
-            50331654 => CassError(CASS_ERROR_SSL_PROTOCOL_ERROR),
-            50331655 => CassError(CASS_ERROR_LAST_ENTRY),
+            0 => CassandraError(CASS_OK),
+            1 => CassandraError(CASS_ERROR_LIB_BAD_PARAMS),
+            2 => CassandraError(CASS_ERROR_LIB_NO_STREAMS),
+            3 => CassandraError(CASS_ERROR_LIB_UNABLE_TO_INIT),
+            4 => CassandraError(CASS_ERROR_LIB_MESSAGE_ENCODE),
+            5 => CassandraError(CASS_ERROR_LIB_HOST_RESOLUTION),
+            6 => CassandraError(CASS_ERROR_LIB_UNEXPECTED_RESPONSE),
+            7 => CassandraError(CASS_ERROR_LIB_REQUEST_QUEUE_FULL),
+            8 => CassandraError(CASS_ERROR_LIB_NO_AVAILABLE_IO_THREAD),
+            9 => CassandraError(CASS_ERROR_LIB_WRITE_ERROR),
+            10 | 16777226 => CassandraError(CASS_ERROR_LIB_NO_HOSTS_AVAILABLE),
+            11 => CassandraError(CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS),
+            12 => CassandraError(CASS_ERROR_LIB_INVALID_ITEM_COUNT),
+            13 => CassandraError(CASS_ERROR_LIB_INVALID_VALUE_TYPE),
+            14 => CassandraError(CASS_ERROR_LIB_REQUEST_TIMED_OUT),
+            15 => CassandraError(CASS_ERROR_LIB_UNABLE_TO_SET_KEYSPACE),
+            16 => CassandraError(CASS_ERROR_LIB_CALLBACK_ALREADY_SET),
+            17 => CassandraError(CASS_ERROR_LIB_INVALID_STATEMENT_TYPE),
+            18 => CassandraError(CASS_ERROR_LIB_NAME_DOES_NOT_EXIST),
+            19 => CassandraError(CASS_ERROR_LIB_UNABLE_TO_DETERMINE_PROTOCOL),
+            20 => CassandraError(CASS_ERROR_LIB_NULL_VALUE),
+            21 => CassandraError(CASS_ERROR_LIB_NOT_IMPLEMENTED),
+            22 => CassandraError(CASS_ERROR_LIB_UNABLE_TO_CONNECT),
+            23 => CassandraError(CASS_ERROR_LIB_UNABLE_TO_CLOSE),
+            33554432 => CassandraError(CASS_ERROR_SERVER_SERVER_ERROR),
+            33554442 => CassandraError(CASS_ERROR_SERVER_PROTOCOL_ERROR),
+            33554688 => CassandraError(CASS_ERROR_SERVER_BAD_CREDENTIALS),
+            33558528 => CassandraError(CASS_ERROR_SERVER_UNAVAILABLE),
+            33558529 => CassandraError(CASS_ERROR_SERVER_OVERLOADED),
+            33558530 => CassandraError(CASS_ERROR_SERVER_IS_BOOTSTRAPPING),
+            33558531 => CassandraError(CASS_ERROR_SERVER_TRUNCATE_ERROR),
+            33558784 => CassandraError(CASS_ERROR_SERVER_WRITE_TIMEOUT),
+            33559040 => CassandraError(CASS_ERROR_SERVER_READ_TIMEOUT),
+            33562624 => CassandraError(CASS_ERROR_SERVER_SYNTAX_ERROR),
+            33562880 => CassandraError(CASS_ERROR_SERVER_UNAUTHORIZED),
+            33563136 => CassandraError(CASS_ERROR_SERVER_INVALID_QUERY),
+            33563392 => CassandraError(CASS_ERROR_SERVER_CONFIG_ERROR),
+            33563648 => CassandraError(CASS_ERROR_SERVER_ALREADY_EXISTS),
+            33563904 => CassandraError(CASS_ERROR_SERVER_UNPREPARED),
+            50331649 => CassandraError(CASS_ERROR_SSL_INVALID_CERT),
+            50331650 => CassandraError(CASS_ERROR_SSL_INVALID_PRIVATE_KEY),
+            50331651 => CassandraError(CASS_ERROR_SSL_NO_PEER_CERT),
+            50331652 => CassandraError(CASS_ERROR_SSL_INVALID_PEER_CERT),
+            50331653 => CassandraError(CASS_ERROR_SSL_IDENTITY_MISMATCH),
+            50331654 => CassandraError(CASS_ERROR_SSL_PROTOCOL_ERROR),
+            50331655 => CassandraError(CASS_ERROR_LAST_ENTRY),
             err_no => {
                 debug!("unhandled error number: {}", err_no);
-                CassError(err_no)
+                CassandraError(err_no)
             }
         }
     }
 }
 
 
-impl CassError {
+impl CassandraError {
     pub unsafe fn desc(&self) -> *const i8 {
         cass_error_desc(self.0)
     }

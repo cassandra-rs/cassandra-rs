@@ -36,7 +36,7 @@ fn main() {
     session.close().wait().unwrap();
 }
 
-fn select_from_udt(session: &Session) -> Result<(), CassError> {
+fn select_from_udt(session: &Session) -> Result<(), CassandraError> {
     let query = "SELECT * FROM examples.udt";
     let statement = Statement::new(query, 0);
     let mut future = session.execute_statement(&statement);
@@ -71,7 +71,7 @@ fn select_from_udt(session: &Session) -> Result<(), CassError> {
     }
 }
 
-fn insert_into_udt(session: &Session, schema: Schema) -> Result<(), CassError> {
+fn insert_into_udt(session: &Session, schema: Schema) -> Result<(), CassandraError> {
     let query = "INSERT INTO examples.udt (id, address) VALUES (?, ?)";
     let mut statement = Statement::new(query, 2);
     let uuid_gen = UuidGen::new();

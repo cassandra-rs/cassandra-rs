@@ -4,7 +4,7 @@ use cassandra::Session;
 use cassandra::Uuid;
 use cassandra::Statement;
 use cassandra::CassandraResult;
-use cassandra::CassError;
+use cassandra::CassandraError;
 use cassandra::UuidGen;
 use cassandra::Cluster;
 
@@ -20,7 +20,7 @@ fn insert_into_log(session: &mut Session,
                    key: &str,
                    time: Uuid,
                    entry: &str)
-                   -> Result<CassandraResult, CassError> {
+                   -> Result<CassandraResult, CassandraError> {
     let mut statement = Statement::new(INSERT_QUERY, 3);
     statement.bind_string(0, key).unwrap();
     statement.bind_uuid(1, time).unwrap();
@@ -29,7 +29,7 @@ fn insert_into_log(session: &mut Session,
     future.wait()
 }
 
-fn select_from_log(session: &mut Session, key: &str) -> Result<CassandraResult, CassError> {
+fn select_from_log(session: &mut Session, key: &str) -> Result<CassandraResult, CassandraError> {
     let mut statement = Statement::new(SELECT_QUERY, 1);
     statement.bind_string(0, &key).unwrap();
     let mut future = session.execute_statement(&statement);

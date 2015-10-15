@@ -31,8 +31,8 @@ use cql_ffi::collection::set::SetIterator;
 use cql_ffi::inet::Inet;
 use cql_ffi::collection::map::MapIterator;
 use cql_ffi::udt::UserTypeIterator;
-use cql_ffi::error::CassErrorTypes;
-use cql_ffi::error::CassError;
+use cql_ffi::error::CassandraErrorTypes;
+use cql_ffi::error::CassandraError;
 
 #[repr(C)]
 #[derive(Copy,Debug,Clone)]
@@ -141,12 +141,12 @@ impl Display for Column {
 
 trait AsTypedColumn {
     type T;
-    fn get(col: Column) -> Result<Self::T, CassError>;
+    fn get(col: Column) -> Result<Self::T, CassandraError>;
 }
 
 impl AsTypedColumn for bool {
     type T = Self;
-    fn get(col: Column) -> Result<Self, CassError> {
+    fn get(col: Column) -> Result<Self, CassandraError> {
         col.get_bool()
     }
 }
@@ -158,11 +158,11 @@ impl Column {
         }
     }
 
-    pub unsafe fn get_inet(&self, mut output: Inet) -> Result<Inet, CassError> {
-        CassError::build(cass_value_get_inet(self.0,&mut output.0)).wrap(output)
+    pub unsafe fn get_inet(&self, mut output: Inet) -> Result<Inet, CassandraError> {
+        CassandraError::build(cass_value_get_inet(self.0,&mut output.0)).wrap(output)
     }
 
-    pub fn get_string(&self) -> Result<String, CassError> {
+    pub fn get_string(&self) -> Result<String, CassandraError> {
         unsafe {
             match cass_value_type(self.0) {
                 CASS_VALUE_TYPE_ASCII | CASS_VALUE_TYPE_TEXT | CASS_VALUE_TYPE_VARCHAR => {
@@ -174,81 +174,81 @@ impl Column {
                                                               message_length as usize);
                             Ok(str::from_utf8(slice).unwrap().to_owned())
                         }
-                        err => Err(CassError::build(err)),
+                        err => Err(CassandraError::build(err)),
                     }
 
 
                 }
-                err => Err(CassError::build(err)),
+                err => Err(CassandraError::build(err)),
             }
         }
     }
 
-    pub fn get_int32(&self) -> Result<i32, CassError> {
+    pub fn get_int32(&self) -> Result<i32, CassandraError> {
         unsafe {
             let mut output = mem::zeroed();
-            CassError::build(cass_value_get_int32(self.0,&mut output)).wrap(output)
+            CassandraError::build(cass_value_get_int32(self.0,&mut output)).wrap(output)
         }
     }
 
-    pub fn get_int64(&self) -> Result<i64, CassError> {
+    pub fn get_int64(&self) -> Result<i64, CassandraError> {
         unsafe {
             let mut output = mem::zeroed();
-            CassError::build(cass_value_get_int64(self.0,&mut output)).wrap(output)
+            CassandraError::build(cass_value_get_int64(self.0,&mut output)).wrap(output)
         }
     }
 
-    pub fn get_float(&self) -> Result<f32, CassError> {
+    pub fn get_float(&self) -> Result<f32, CassandraError> {
         unsafe {
             let mut output = mem::zeroed();
-            CassError::build(cass_value_get_float(self.0,&mut output)).wrap(output)
+            CassandraError::build(cass_value_get_float(self.0,&mut output)).wrap(output)
         }
     }
 
-    pub fn get_double(&self) -> Result<f64, CassError> {
+    pub fn get_double(&self) -> Result<f64, CassandraError> {
         unsafe {
             let mut output = mem::zeroed();
-            CassError::build(cass_value_get_double(self.0,&mut output)).wrap(output)
+            CassandraError::build(cass_value_get_double(self.0,&mut output)).wrap(output)
         }
     }
 
-    pub fn get_bool(&self) -> Result<bool, CassError> {
+    pub fn get_bool(&self) -> Result<bool, CassandraError> {
         unsafe {
             let mut output = mem::zeroed();
-            CassError::build(cass_value_get_bool(self.0,&mut output)).wrap(output > 0)
+            CassandraError::build(cass_value_get_bool(self.0,&mut output)).wrap(output > 0)
         }
     }
 
-    pub fn get_uuid(&self) -> Result<Uuid, CassError> {
+    pub fn get_uuid(&self) -> Result<Uuid, CassandraError> {
         unsafe {
             let mut output: Uuid = mem::zeroed();
-            CassError::build(cass_value_get_uuid(self.0,&mut output.0)).wrap(output)
+            CassandraError::build(cass_value_get_uuid(self.0,&mut output.0)).wrap(output)
         }
     }
 
-    pub fn map_iter(&self) -> Result<MapIterator, CassError> {
+    pub fn map_iter(&self) -> Result<MapIterator, CassandraError> {
         unsafe {
             match self.get_type() {
                 ValueType::MAP => Ok(MapIterator(cass_iterator_from_map(self.0))),
-                _ => Err(CassError::build(CassErrorTypes::LIB_INVALID_VALUE_TYPE as u32)),
+                _ => Err(CassandraError::build(CassandraErrorTypes::LIB_INVALID_VALUE_TYPE as u32)),
             }
         }
     }
 
-    pub fn set_iter(&self) -> Result<SetIterator, CassError> {
+    pub fn set_iter(&self) -> Result<SetIterator, CassandraError> {
         unsafe {
             match self.get_type() {
                 ValueType::SET => Ok(SetIterator(cass_iterator_from_collection(self.0))),
-                _ => Err(CassError::build(1)),
+                _ => Err(CassandraError::build(1)),
             }
         }
     }
 
-    pub fn use_type_iter(&self) -> Result<UserTypeIterator, CassError> {
+    pub fn use_type_iter(&self) -> Result<UserTypeIterator, CassandraError> {
         unsafe {
             match self.get_type() {
                 ValueType::UDT => Ok(UserTypeIterator(cass_iterator_from_user_type(self.0))),
-                _ => Err(CassError::build(1)),
+                _ => Err(CassandraError::build(1)),
             }
         }
     }

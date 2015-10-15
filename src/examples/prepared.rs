@@ -22,7 +22,7 @@ struct Basic {
 fn insert_into_basic(session: &mut Session,
                      key: &str,
                      basic: &mut Basic)
-                     -> Result<(), CassError> {
+                     -> Result<(), CassandraError> {
     println!("Creating statement");
     let mut statement = Statement::new(INSERT_QUERY, 6);
     statement
@@ -42,7 +42,7 @@ fn select_from_basic(session: &mut Session,
                      prepared: &PreparedStatement,
                      key: &str,
                      basic: &mut Basic)
-                     -> Result<(), CassError> {
+                     -> Result<(), CassandraError> {
     let mut statement = prepared.bind();
     try!(statement.bind_string(0, key));
     let mut future = session.execute_statement(&statement);

@@ -26,7 +26,7 @@ struct Basic {
 fn insert_into_basic(session: &mut Session,
                      key: &str,
                      basic: &Basic)
-                     -> Result<CassandraResult, CassError> {
+                     -> Result<CassandraResult, CassandraError> {
     let mut statement = Statement::new(INSERT_QUERY, 6);
     try!(statement.bind_string(0, key));
     try!(statement.bind_bool(1, basic.bln));
@@ -37,13 +37,13 @@ fn insert_into_basic(session: &mut Session,
     Ok(try!(session.execute_statement(&statement).wait()))
 }
 
-fn select_from_basic(session: &mut Session, key: &str) -> Result<Basic, CassError> {
+fn select_from_basic(session: &mut Session, key: &str) -> Result<Basic, CassandraError> {
     let mut statement = Statement::new(SELECT_QUERY, 1);
     try!(statement.bind_string(0, key));
     let result = try!(session.execute_statement(&statement).wait());
     println!("Result: \n{:?}\n",result);
     match result.first_row() {
-        None => Err(CassError::build(1)),
+        None => Err(CassandraError::build(1)),
         Some(row) => {
             Ok(Basic {
                 bln: try!(try!(row.get_column(1)).get_bool()),

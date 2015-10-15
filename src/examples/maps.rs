@@ -19,7 +19,7 @@ static INSERT_QUERY:&'static str ="INSERT INTO examples.maps (key, items) VALUES
 fn insert_into_maps(session: &mut Session,
                     key: &str,
                     items: Vec<Pair>)
-                    -> Result<(), CassError> {
+                    -> Result<(), CassandraError> {
     let mut statement = Statement::new(INSERT_QUERY, 2);
     statement.bind_string(0, key).unwrap();
 
@@ -33,7 +33,7 @@ fn insert_into_maps(session: &mut Session,
     Ok(())
 }
 
-fn select_from_maps(session: &mut Session, key: &str) -> Result<(), CassError> {
+fn select_from_maps(session: &mut Session, key: &str) -> Result<(), CassandraError> {
     let mut statement = Statement::new(SELECT_QUERY, 1);
     try!(statement.bind_string(0, key));
     let result = try!(session.execute_statement(&statement).wait());
@@ -55,7 +55,7 @@ fn main() {
     }
 }
 
-fn foo() -> Result<(), CassError> {
+fn foo() -> Result<(), CassandraError> {
     let mut cluster = Cluster::new();
     cluster
         .set_contact_points(CONTACT_POINTS).unwrap()

@@ -27,7 +27,7 @@ use cql_bindgen::CassTuple as _Tuple;
 use cql_ffi::uuid::Uuid;
 use cql_ffi::udt::DataType;
 use cql_ffi::udt::ConstDataType;
-use cql_ffi::error::CassError;
+use cql_ffi::error::CassandraError;
 
 pub struct Tuple(pub *mut _Tuple);
 
@@ -50,47 +50,47 @@ impl Tuple {
         }
     }
 
-    pub fn set_null(&mut self, index: u64) -> Result<(), CassError> {
+    pub fn set_null(&mut self, index: u64) -> Result<(), CassandraError> {
         unsafe {
-            CassError::build(
+            CassandraError::build(
                 cass_tuple_set_null(self.0, index)
             ).wrap(())
         }
     }
 
-    pub fn set_int32(&mut self, index: u64, value: i32) -> Result<(), CassError> {
+    pub fn set_int32(&mut self, index: u64, value: i32) -> Result<(), CassandraError> {
         unsafe {
-            CassError::build(
+            CassandraError::build(
                 cass_tuple_set_int32(self.0, index, value)
             ).wrap(())
         }
     }
 
-    pub fn set_int64(&mut self, index: u64, value: i64) -> Result<(), CassError> {
+    pub fn set_int64(&mut self, index: u64, value: i64) -> Result<(), CassandraError> {
         unsafe {
-            CassError::build(
+            CassandraError::build(
                 cass_tuple_set_int64(self.0, index, value)
             ).wrap(())
         }
     }
 
-    pub fn set_float(&mut self, index: u64, value: f32) -> Result<(), CassError> {
+    pub fn set_float(&mut self, index: u64, value: f32) -> Result<(), CassandraError> {
         unsafe {
-            CassError::build(cass_tuple_set_float(self.0, index, value)).wrap(())
+            CassandraError::build(cass_tuple_set_float(self.0, index, value)).wrap(())
         }
     }
 
-    pub fn set_double(&mut self, index: u64, value: f64) -> Result<(), CassError> {
+    pub fn set_double(&mut self, index: u64, value: f64) -> Result<(), CassandraError> {
         unsafe {
-            CassError::build(
+            CassandraError::build(
                 cass_tuple_set_double(self.0, index, value)
             ).wrap(())
         }
     }
 
-    pub fn set_bool(&mut self, index: u64, value: bool) -> Result<(), CassError> {
+    pub fn set_bool(&mut self, index: u64, value: bool) -> Result<(), CassandraError> {
         unsafe {
-            CassError::build(
+            CassandraError::build(
                 cass_tuple_set_bool(
                     self.0,
                     index,
@@ -100,21 +100,21 @@ impl Tuple {
         }
     }
 
-    pub fn set_string<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
+    pub fn set_string<S>(&mut self, index: u64, value: S) -> Result<(), CassandraError>
         where S: Into<String>
     {
         unsafe {
             let value = CString::new(value.into()).unwrap();
-            CassError::build(
+            CassandraError::build(
                 cass_tuple_set_string(self.0, index, value.as_ptr())
             ).wrap(())
         }
     }
 
-    pub fn set_inet(&mut self, index: u64, value: SocketAddr) -> Result<(), CassError> {
+    pub fn set_inet(&mut self, index: u64, value: SocketAddr) -> Result<(), CassandraError> {
         let inet = AsInet::as_cass_inet(&value);
         unsafe {
-            CassError::build(
+            CassandraError::build(
                 cass_tuple_set_inet(
                     self.0,
                     index,
@@ -124,9 +124,9 @@ impl Tuple {
         }
     }
 
-    pub fn set_bytes(&mut self, index: u64, value: Vec<u8>) -> Result<(), CassError> {
+    pub fn set_bytes(&mut self, index: u64, value: Vec<u8>) -> Result<(), CassandraError> {
         unsafe {
-            CassError::build(
+            CassandraError::build(
                 cass_tuple_set_bytes(
                     self.0,
                     index,
@@ -137,11 +137,11 @@ impl Tuple {
         }
     }
 
-    pub fn set_uuid<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
+    pub fn set_uuid<S>(&mut self, index: u64, value: S) -> Result<(), CassandraError>
         where S: Into<Uuid>
     {
         unsafe {
-            CassError::build(
+            CassandraError::build(
                 cass_tuple_set_uuid(self.0, index, value.into().0)
             ).wrap(())
         }

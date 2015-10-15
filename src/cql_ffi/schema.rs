@@ -8,7 +8,7 @@ use std::slice;
 use std::str;
 
 use cql_ffi::value::Value;
-use cql_ffi::error::CassError;
+use cql_ffi::error::CassandraError;
 use cql_ffi::collection::map::MapIterator;
 use cql_ffi::collection::set::SetIterator;
 
@@ -57,7 +57,7 @@ pub enum SchemaMetaType {
 //~ }
 
 impl SchemaMetaType {
-    pub fn build(val: isize) -> Result<Self, CassError> {
+    pub fn build(val: isize) -> Result<Self, CassandraError> {
         match val {
             0 => Ok(SchemaMetaType::KEYSPACE),
             1 => Ok(SchemaMetaType::TABLE),
@@ -102,7 +102,7 @@ impl Drop for Schema {
 
 
 impl SchemaMeta {
-    pub fn get_type(&self) -> Result<SchemaMetaType, CassError> {
+    pub fn get_type(&self) -> Result<SchemaMetaType, CassandraError> {
         unsafe {
             SchemaMetaType::build(cass_schema_meta_type(self.0) as isize)
         }

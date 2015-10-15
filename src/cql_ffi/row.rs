@@ -17,7 +17,7 @@ use std::iter::IntoIterator;
 use std::iter;
 
 use cql_ffi::value::Value;
-use cql_ffi::error::CassError;
+use cql_ffi::error::CassandraError;
 use cql_ffi::column::Column;
 
 pub struct Row(pub *const _Row);
@@ -42,11 +42,11 @@ impl Display for Row {
 }
 
 impl Row {
-    pub fn get_column(&self, index: u64) -> Result<Column, CassError> {
+    pub fn get_column(&self, index: u64) -> Result<Column, CassandraError> {
         unsafe {
             let col = cass_row_get_column(self.0, index);
             match col.is_null() {
-                true => Err(CassError::build(CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS)),
+                true => Err(CassandraError::build(CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS)),
                 false => Ok(Column(col)),
             }
         }

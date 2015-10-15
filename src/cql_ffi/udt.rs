@@ -98,7 +98,7 @@ use cql_bindgen::CassDataType as _DataType;
 use cql_bindgen::CassUserType as _UserType;
 
 use cql_ffi::value::ValueType;
-use cql_ffi::error::CassError;
+use cql_ffi::error::CassandraError;
 
 pub struct DataType(pub *mut _DataType);
 pub struct ConstDataType(pub *const _DataType);
@@ -136,12 +136,12 @@ impl DataType {
         }
     }
 
-    pub fn type_name<S>(data_type: DataType, type_name: S) -> Result<(), CassError>
+    pub fn type_name<S>(data_type: DataType, type_name: S) -> Result<(), CassandraError>
         where S: Into<String>
     {
         unsafe {
             let type_name = CString::new(type_name.into()).unwrap();
-            CassError::build(
+            CassandraError::build(
                 cass_data_type_type_name(
                     data_type.0,
                     &mut type_name.as_ptr(),
@@ -151,12 +151,12 @@ impl DataType {
         }
     }
 
-    pub fn set_type_name<S>(data_type: DataType, type_name: S) -> Result<(), CassError>
+    pub fn set_type_name<S>(data_type: DataType, type_name: S) -> Result<(), CassandraError>
         where S: Into<String>
     {
         unsafe {
             let type_name = CString::new(type_name.into()).unwrap();
-            CassError::build(
+            CassandraError::build(
                 cass_data_type_set_type_name(
                     data_type.0,
                     type_name.as_ptr())
@@ -165,12 +165,12 @@ impl DataType {
         }
     }
 
-    pub fn set_type_name_n<S>(data_type: DataType, type_name: S) -> Result<(), CassError>
+    pub fn set_type_name_n<S>(data_type: DataType, type_name: S) -> Result<(), CassandraError>
         where S: Into<String>
     {
         unsafe {
             let type_name = CString::new(type_name.into()).unwrap();
-            CassError::build(
+            CassandraError::build(
                 cass_data_type_set_type_name_n(
                     data_type.0,
                     type_name.as_ptr(),
@@ -180,12 +180,12 @@ impl DataType {
         }
     }
 
-    pub fn keyspace<S>(data_type: DataType, keyspace: S) -> Result<(), CassError>
+    pub fn keyspace<S>(data_type: DataType, keyspace: S) -> Result<(), CassandraError>
         where S: Into<String>
     {
         unsafe {
             let keyspace = CString::new(keyspace.into()).unwrap();
-            CassError::build(
+            CassandraError::build(
                 cass_data_type_keyspace(
                     data_type.0,
                     &mut(keyspace.as_ptr()),
@@ -195,12 +195,12 @@ impl DataType {
         }
     }
 
-    pub fn set_keyspace<S>(data_type: DataType, keyspace: S) -> Result<(), CassError>
+    pub fn set_keyspace<S>(data_type: DataType, keyspace: S) -> Result<(), CassandraError>
         where S: Into<String>
     {
         unsafe {
             let keyspace = CString::new(keyspace.into()).unwrap();
-            CassError::build(
+            CassandraError::build(
                 cass_data_type_set_keyspace(
                     data_type.0,
                     keyspace.as_ptr()
@@ -209,12 +209,12 @@ impl DataType {
         }
     }
 
-    pub fn set_keyspace_n<S>(data_type: DataType, keyspace: S) -> Result<(), CassError>
+    pub fn set_keyspace_n<S>(data_type: DataType, keyspace: S) -> Result<(), CassandraError>
         where S: Into<String>
     {
         unsafe {
             let keyspace = CString::new(keyspace.into()).unwrap();
-            CassError::build(
+            CassandraError::build(
                 cass_data_type_set_keyspace_n(
                     data_type.0,
                     keyspace.as_ptr(),
@@ -224,12 +224,12 @@ impl DataType {
         }
     }
 
-    pub fn class_name<S>(data_type: DataType, class_name: S) -> Result<(), CassError>
+    pub fn class_name<S>(data_type: DataType, class_name: S) -> Result<(), CassandraError>
         where S: Into<String>
     {
         unsafe {
             let class_name = CString::new(class_name.into()).unwrap();
-            CassError::build(
+            CassandraError::build(
                 cass_data_type_class_name(
                     data_type.0,
                     &mut class_name.as_ptr(),
@@ -240,12 +240,12 @@ impl DataType {
     }
 
 
-    pub fn set_class_name<S>(data_type: DataType, class_name: S) -> Result<(), CassError>
+    pub fn set_class_name<S>(data_type: DataType, class_name: S) -> Result<(), CassandraError>
         where S: Into<String>
     {
         unsafe {
             let class_name = CString::new(class_name.into()).unwrap();
-            CassError::build(
+            CassandraError::build(
                 cass_data_type_set_class_name(
                     data_type.0,
                     class_name.as_ptr()
@@ -254,12 +254,12 @@ impl DataType {
         }
     }
 
-    pub fn set_class_name_n<S>(data_type: DataType, class_name: S) -> Result<(), CassError>
+    pub fn set_class_name_n<S>(data_type: DataType, class_name: S) -> Result<(), CassandraError>
         where S: Into<String>
     {
         unsafe {
             let class_name = CString::new(class_name.into()).unwrap();
-            CassError::build(
+            CassandraError::build(
                 cass_data_type_set_class_name_n(
                     data_type.0,
                     class_name.as_ptr(),
@@ -296,12 +296,12 @@ impl DataType {
     }
 
 
-    pub fn sub_type_name<S>(data_type: DataType, index: u64, name: S) -> Result<(), CassError>
+    pub fn sub_type_name<S>(data_type: DataType, index: u64, name: S) -> Result<(), CassandraError>
         where S: Into<String>
     {
         unsafe {
             let name = CString::new(name.into()).unwrap();
-            CassError::build(
+            CassandraError::build(
                 cass_data_type_sub_type_name(
                     data_type.0,
                     index,
@@ -314,9 +314,9 @@ impl DataType {
 
     pub fn add_sub_type(data_type: DataType,
                         sub_data_type: DataType)
-                        -> Result<(), CassError> {
+                        -> Result<(), CassandraError> {
         unsafe {
-            CassError::build(
+            CassandraError::build(
                 cass_data_type_add_sub_type(data_type.0, sub_data_type.0)
             ).wrap(())
         }
@@ -325,12 +325,12 @@ impl DataType {
     pub fn add_sub_type_by_name<S>(data_type: DataType,
                                    name: S,
                                    sub_data_type: DataType)
-                                   -> Result<(), CassError>
+                                   -> Result<(), CassandraError>
         where S: Into<String>
     {
         unsafe {
             let name = CString::new(name.into()).unwrap();
-            CassError::build(
+            CassandraError::build(
                 cass_data_type_add_sub_type_by_name(
                     data_type.0,
                     name.as_ptr(),
@@ -342,11 +342,11 @@ impl DataType {
 
     pub fn add_sub_value_type<S>(data_type: DataType,
                                  sub_value_type: ValueType)
-                                 -> Result<(), CassError>
+                                 -> Result<(), CassandraError>
         where S: Into<String>
     {
         unsafe {
-            CassError::build(
+            CassandraError::build(
                 cass_data_type_add_sub_value_type(
                     data_type.0,
                     sub_value_type as u32
@@ -381,9 +381,9 @@ impl UserType {
         }
     }
 
-    pub fn set_null(&mut self, index: u64) -> Result<(), CassError> {
+    pub fn set_null(&mut self, index: u64) -> Result<(), CassandraError> {
         unsafe {
-            CassError::build(
+            CassandraError::build(
                 cass_user_type_set_null(
                     self.0,
                     index
@@ -392,9 +392,9 @@ impl UserType {
         }
     }
 
-    pub fn set_int32(&mut self, index: u64, value: i32) -> Result<(), CassError> {
+    pub fn set_int32(&mut self, index: u64, value: i32) -> Result<(), CassandraError> {
         unsafe {
-            CassError::build(
+            CassandraError::build(
                 cass_user_type_set_int32(
                     self.0,
                     index,
@@ -404,14 +404,14 @@ impl UserType {
         }
     }
 
-    pub fn set_int32_by_name<S>(&mut self, name: S, value: i32) -> Result<(), CassError>
+    pub fn set_int32_by_name<S>(&mut self, name: S, value: i32) -> Result<(), CassandraError>
         where S: Into<String>
     {
         unsafe {
             match CString::new(name.into()) {
                 Ok(name) => {
                     let rc = cass_user_type_set_int32_by_name(self.0, name.as_ptr(), value);
-                    CassError::build(rc).wrap(())
+                    CassandraError::build(rc).wrap(())
                 }
                 Err(err) => panic!("error: {}", err),
             }
@@ -419,18 +419,18 @@ impl UserType {
         }
     }
 
-    pub fn set_int64(&mut self, index: u64, value: i64) -> Result<(), CassError> {
+    pub fn set_int64(&mut self, index: u64, value: i64) -> Result<(), CassandraError> {
         unsafe {
-            CassError::build(cass_user_type_set_int64(self.0, index, value)).wrap(())
+            CassandraError::build(cass_user_type_set_int64(self.0, index, value)).wrap(())
         }
     }
 
-    pub fn set_int64_by_name<S>(&mut self, name: S, value: i64) -> Result<(), CassError>
+    pub fn set_int64_by_name<S>(&mut self, name: S, value: i64) -> Result<(), CassandraError>
         where S: Into<String>
     {
         unsafe {
             let name = CString::new(name.into()).unwrap();
-            CassError::build(
+            CassandraError::build(
                 cass_user_type_set_int64_by_name(
                     self.0,
                     name.as_ptr(),
@@ -440,9 +440,9 @@ impl UserType {
         }
     }
 
-    pub fn set_float(&mut self, index: u64, value: f32) -> Result<(), CassError> {
+    pub fn set_float(&mut self, index: u64, value: f32) -> Result<(), CassandraError> {
         unsafe {
-            CassError::build(
+            CassandraError::build(
                 cass_user_type_set_float(
                     self.0,
                     index,
@@ -452,12 +452,12 @@ impl UserType {
         }
     }
 
-    pub fn set_float_by_name<S>(&mut self, name: S, value: f32) -> Result<(), CassError>
+    pub fn set_float_by_name<S>(&mut self, name: S, value: f32) -> Result<(), CassandraError>
         where S: Into<String>
     {
         unsafe {
             let name = CString::new(name.into()).unwrap();
-            CassError::build(
+            CassandraError::build(
                 cass_user_type_set_float_by_name(
                     self.0,
                     name.as_ptr(),
@@ -467,18 +467,18 @@ impl UserType {
         }
     }
 
-    pub fn set_double(&mut self, index: u64, value: f64) -> Result<(), CassError> {
+    pub fn set_double(&mut self, index: u64, value: f64) -> Result<(), CassandraError> {
         unsafe {
-            CassError::build(cass_user_type_set_double(self.0, index, value)).wrap(())
+            CassandraError::build(cass_user_type_set_double(self.0, index, value)).wrap(())
         }
     }
 
-    pub fn set_double_by_name<S>(&mut self, name: S, value: f64) -> Result<(), CassError>
+    pub fn set_double_by_name<S>(&mut self, name: S, value: f64) -> Result<(), CassandraError>
         where S: Into<String>
     {
         unsafe {
             let name = CString::new(name.into()).unwrap();
-            CassError::build(
+            CassandraError::build(
                 cass_user_type_set_double_by_name(
                     self.0,
                     name.as_ptr(),
@@ -488,9 +488,9 @@ impl UserType {
         }
     }
 
-    pub fn set_bool(&mut self, index: u64, value: bool) -> Result<(), CassError> {
+    pub fn set_bool(&mut self, index: u64, value: bool) -> Result<(), CassandraError> {
         unsafe {
-            CassError::build(
+            CassandraError::build(
                 cass_user_type_set_bool(
                     self.0,
                     index,
@@ -500,22 +500,22 @@ impl UserType {
         }
     }
 
-    pub fn set_stringl<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
+    pub fn set_stringl<S>(&mut self, index: u64, value: S) -> Result<(), CassandraError>
         where S: Into<String>
     {
         unsafe {
             let value = CString::new(value.into()).unwrap();
-            CassError::build(cass_user_type_set_string(self.0, index, value.as_ptr())).wrap(())
+            CassandraError::build(cass_user_type_set_string(self.0, index, value.as_ptr())).wrap(())
         }
     }
 
-    pub fn set_string_by_name<S>(&mut self, name: S, value: S) -> Result<(), CassError>
+    pub fn set_string_by_name<S>(&mut self, name: S, value: S) -> Result<(), CassandraError>
         where S: Into<String>
     {
         unsafe {
             let name = CString::new(name.into()).unwrap();
             let value = CString::new(value.into()).unwrap();
-            CassError::build(
+            CassandraError::build(
                 cass_user_type_set_string_by_name(
                     self.0,
                     name.as_ptr(),
@@ -526,9 +526,9 @@ impl UserType {
     }
 
     //FIXME. right way to pass the vec?
-    pub fn set_bytes(&mut self, index: u64, value: Vec<u8>) -> Result<(), CassError> {
+    pub fn set_bytes(&mut self, index: u64, value: Vec<u8>) -> Result<(), CassandraError> {
         unsafe {
-            CassError::build(
+            CassandraError::build(
                 cass_user_type_set_bytes(
                     self.0,
                     index,
@@ -539,36 +539,36 @@ impl UserType {
         }
     }
 
-    pub fn set_uuid<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
+    pub fn set_uuid<S>(&mut self, index: u64, value: S) -> Result<(), CassandraError>
         where S: Into<Uuid>
     {
         unsafe {
-            CassError::build(cass_user_type_set_uuid(self.0, index, value.into().0)).wrap(())
+            CassandraError::build(cass_user_type_set_uuid(self.0, index, value.into().0)).wrap(())
         }
     }
 
-    pub fn set_inet<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
+    pub fn set_inet<S>(&mut self, index: u64, value: S) -> Result<(), CassandraError>
         where S: Into<Inet>
     {
         unsafe {
-            CassError::build(cass_user_type_set_inet(self.0, index, value.into().0)).wrap(())
+            CassandraError::build(cass_user_type_set_inet(self.0, index, value.into().0)).wrap(())
         }
     }
 
-    pub fn set_collection<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
+    pub fn set_collection<S>(&mut self, index: u64, value: S) -> Result<(), CassandraError>
         where S: Into<Set>
     {
         unsafe {
-            CassError::build(cass_user_type_set_collection(self.0, index, value.into().0)).wrap(())
+            CassandraError::build(cass_user_type_set_collection(self.0, index, value.into().0)).wrap(())
         }
     }
 
-    pub fn set_collection_by_name<S>(&mut self, name: S, value: Set) -> Result<(), CassError>
+    pub fn set_collection_by_name<S>(&mut self, name: S, value: Set) -> Result<(), CassandraError>
         where S: Into<String>
     {
         unsafe {
             let name = CString::new(name.into()).unwrap();
-            CassError::build(
+            CassandraError::build(
                 cass_user_type_set_collection_by_name(
                     self.0,
                     name.as_ptr(),
@@ -578,15 +578,15 @@ impl UserType {
         }
     }
 
-    pub fn set_tuple(&mut self, index: u64, value: Tuple) -> Result<(), CassError> {
+    pub fn set_tuple(&mut self, index: u64, value: Tuple) -> Result<(), CassandraError> {
         unsafe {
-            CassError::build(cass_user_type_set_tuple(self.0, index, value.0)).wrap(())
+            CassandraError::build(cass_user_type_set_tuple(self.0, index, value.0)).wrap(())
         }
     }
 
-    pub fn set_user_type(&mut self, index: u64, value: UserType) -> Result<(), CassError> {
+    pub fn set_user_type(&mut self, index: u64, value: UserType) -> Result<(), CassandraError> {
         unsafe {
-            CassError::build(cass_user_type_set_user_type(self.0, index, value.0)).wrap(())
+            CassandraError::build(cass_user_type_set_user_type(self.0, index, value.0)).wrap(())
         }
     }
 }

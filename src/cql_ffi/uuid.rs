@@ -22,7 +22,7 @@ use cql_bindgen::cass_uuid_string;
 //use cql_bindgen::raw2utf8;
 //use cql_bindgen::cass_uuid_from_string;
 
-//use cql_ffi::error::CassError;
+//use cql_ffi::error::CassandraError;
 
 const CASS_UUID_STRING_LENGTH:usize = 37;
 
@@ -98,8 +98,8 @@ impl Uuid {
         }
     }
 
-//    pub unsafe fn from_string(&mut self, str: *const c_char) -> Result<(),CassError> {
-//        CassError::build(cass_uuid_from_string(str,&mut self.0))
+//    pub unsafe fn from_string(&mut self, str: *const c_char) -> Result<(),CassandraError> {
+//        CassandraError::build(cass_uuid_from_string(str,&mut self.0))
 //    }
 }
 

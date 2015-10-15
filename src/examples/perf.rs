@@ -43,8 +43,8 @@
 //~ cass_cluster_set_max_connections_per_host(cluster, 2);
 //~ return cluster;
 //~ }
-//~ CassError connect_session(Session* session, const Cluster* cluster) {
-//~ CassError rc = CASS_OK;
+//~ CassandraError connect_session(Session* session, const Cluster* cluster) {
+//~ CassandraError rc = CASS_OK;
 //~ Future* future = cass_session_connect_keyspace(session, cluster, "examples");
 //~ cass_future_wait(future);
 //~ rc = cass_future_error_code(future);
@@ -54,8 +54,8 @@
 //~ cass_future_free(future);
 //~ return rc;
 //~ }
-//~ CassError execute_query(Session* session, const char* query) {
-//~ CassError rc = CASS_OK;
+//~ CassandraError execute_query(Session* session, const char* query) {
+//~ CassandraError rc = CASS_OK;
 //~ Future* future = NULL;
 //~ Statement* statement = cass_statement_new(cass_string_init(query), 0);
 //~ future = cass_session_execute(session, statement);
@@ -68,8 +68,8 @@
 //~ cass_statement_free(statement);
 //~ return rc;
 //~ }
-//~ CassError prepare_query(Session* session, CassString query, const PreparedStatement** prepared) {
-//~ CassError rc = CASS_OK;
+//~ CassandraError prepare_query(Session* session, CassString query, const PreparedStatement** prepared) {
+//~ CassandraError rc = CASS_OK;
 //~ Future* future = NULL;
 //~ future = cass_session_prepare(session, query);
 //~ cass_future_wait(future);
@@ -141,7 +141,7 @@
 //~ }
 //~ for (i = 0; i < NUM_CONCURRENT_REQUESTS; ++i) {
 //~ Future* future = futures[i];
-//~ CassError rc = cass_future_error_code(future);
+//~ CassandraError rc = cass_future_error_code(future);
 //~ if (rc != CASS_OK) {
 //~ print_error(future);
 //~ } else {
@@ -197,7 +197,7 @@
 //~ }
 //~ for (i = 0; i < NUM_CONCURRENT_REQUESTS; ++i) {
 //~ Future* future = futures[i];
-//~ CassError rc = cass_future_error_code(future);
+//~ CassandraError rc = cass_future_error_code(future);
 //~ if (rc != CASS_OK) {
 //~ print_error(future);
 //~ } else {

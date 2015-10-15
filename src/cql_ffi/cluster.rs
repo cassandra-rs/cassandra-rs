@@ -33,7 +33,7 @@ use cql_bindgen::cass_cluster_set_connect_timeout;
 use cql_bindgen::cass_cluster_set_latency_aware_routing;
 use cql_bindgen::cass_cluster_set_latency_aware_routing_settings;
 
-use cql_ffi::error::CassError;
+use cql_ffi::error::CassandraError;
 
 use cql_ffi::session::Session;
 
@@ -65,19 +65,19 @@ impl Cluster {
         }
     }
 
-    pub fn set_contact_points<S>(&mut self, contact_points: S) -> Result<&mut Self, CassError>
+    pub fn set_contact_points<S>(&mut self, contact_points: S) -> Result<&mut Self, CassandraError>
         where S: Into<String>
     {
         unsafe {
             let s = CString::new(contact_points.into()).unwrap();
-            let err = CassError::build(cass_cluster_set_contact_points(self.0, s.as_ptr()));
+            let err = CassandraError::build(cass_cluster_set_contact_points(self.0, s.as_ptr()));
             err.wrap(self)
         }
     }
 
-    pub fn set_port(&mut self, port: i32) -> Result<&mut Self, CassError> {
+    pub fn set_port(&mut self, port: i32) -> Result<&mut Self, CassandraError> {
         unsafe {
-            CassError::build(cass_cluster_set_port(self.0,port)).wrap(self)
+            CassandraError::build(cass_cluster_set_port(self.0,port)).wrap(self)
         }
     }
 
@@ -88,38 +88,38 @@ impl Cluster {
         }
     }
     /// Connect to Cassandra cluster
-    pub fn connect(&mut self) -> Result<Session, CassError> {
+    pub fn connect(&mut self) -> Result<Session, CassandraError> {
         Session::new().connect(&self).wait()
     }
 
-    pub fn set_protocol_version(&mut self, protocol_version: i32) -> Result<&mut Self, CassError> {
+    pub fn set_protocol_version(&mut self, protocol_version: i32) -> Result<&mut Self, CassandraError> {
         unsafe {
-            CassError::build(cass_cluster_set_protocol_version(self.0,protocol_version)).wrap(self)
+            CassandraError::build(cass_cluster_set_protocol_version(self.0,protocol_version)).wrap(self)
         }
     }
 
-    pub fn set_num_threads_io(&mut self, num_threads: u32) -> Result<&Self, CassError> {
+    pub fn set_num_threads_io(&mut self, num_threads: u32) -> Result<&Self, CassandraError> {
         unsafe {
-            CassError::build(cass_cluster_set_num_threads_io(self.0,num_threads)).wrap(self)
+            CassandraError::build(cass_cluster_set_num_threads_io(self.0,num_threads)).wrap(self)
         }
     }
 
-    pub unsafe fn set_queue_size_io(&mut self, queue_size: u32) -> Result<&mut Self, CassError> {
-        CassError::build(cass_cluster_set_queue_size_io(self.0,queue_size)).wrap(self)
+    pub unsafe fn set_queue_size_io(&mut self, queue_size: u32) -> Result<&mut Self, CassandraError> {
+        CassandraError::build(cass_cluster_set_queue_size_io(self.0,queue_size)).wrap(self)
     }
 
-    pub unsafe fn set_queue_size_event(&mut self, queue_size: u32) -> Result<&mut Self, CassError> {
-        CassError::build(cass_cluster_set_queue_size_event(self.0,queue_size)).wrap(self)
+    pub unsafe fn set_queue_size_event(&mut self, queue_size: u32) -> Result<&mut Self, CassandraError> {
+        CassandraError::build(cass_cluster_set_queue_size_event(self.0,queue_size)).wrap(self)
     }
 
-    pub unsafe fn set_queue_size_log(&mut self, queue_size: u32) -> Result<&mut Self, CassError> {
-        CassError::build(cass_cluster_set_queue_size_log(self.0,queue_size)).wrap(self)
+    pub unsafe fn set_queue_size_log(&mut self, queue_size: u32) -> Result<&mut Self, CassandraError> {
+        CassandraError::build(cass_cluster_set_queue_size_log(self.0,queue_size)).wrap(self)
     }
 
     pub unsafe fn set_core_connections_per_host(&mut self,
                                                 num_connections: u32)
-                                                -> Result<&mut Self, CassError> {
-        CassError::build(
+                                                -> Result<&mut Self, CassandraError> {
+        CassandraError::build(
             cass_cluster_set_core_connections_per_host(
                 self.0,
                 num_connections
@@ -129,8 +129,8 @@ impl Cluster {
 
     pub unsafe fn set_max_connections_per_host(&mut self,
                                                num_connections: u32)
-                                               -> Result<&mut Self, CassError> {
-        CassError::build(
+                                               -> Result<&mut Self, CassandraError> {
+        CassandraError::build(
             cass_cluster_set_max_connections_per_host(
                 self.0,
                 num_connections
@@ -145,8 +145,8 @@ impl Cluster {
 
     pub unsafe fn set_max_concurrent_creation(&mut self,
                                               num_connections: u32)
-                                              -> Result<&mut Self, CassError> {
-        CassError::build(
+                                              -> Result<&mut Self, CassandraError> {
+        CassandraError::build(
             cass_cluster_set_max_concurrent_creation(
                 self.0,
                 num_connections
@@ -156,8 +156,8 @@ impl Cluster {
 
     pub unsafe fn set_max_concurrent_requests_threshold(&mut self,
                                                         num_requests: u32)
-                                                        -> Result<&mut Self, CassError> {
-        CassError::build(
+                                                        -> Result<&mut Self, CassandraError> {
+        CassandraError::build(
             cass_cluster_set_max_concurrent_requests_threshold(
                 self.0,
                 num_requests
@@ -167,26 +167,26 @@ impl Cluster {
 
     pub unsafe fn set_max_requests_per_flush(&mut self,
                                              num_requests: u32)
-                                             -> Result<&mut Self, CassError> {
-        CassError::build(cass_cluster_set_max_requests_per_flush(self.0,num_requests)).wrap(self)
+                                             -> Result<&mut Self, CassandraError> {
+        CassandraError::build(cass_cluster_set_max_requests_per_flush(self.0,num_requests)).wrap(self)
     }
 
     pub unsafe fn set_write_bytes_high_water_mark(&mut self,
                                                   num_bytes: u32)
-                                                  -> Result<&mut Self, CassError> {
-        CassError::build(cass_cluster_set_write_bytes_high_water_mark(self.0,num_bytes)).wrap(self)
+                                                  -> Result<&mut Self, CassandraError> {
+        CassandraError::build(cass_cluster_set_write_bytes_high_water_mark(self.0,num_bytes)).wrap(self)
     }
 
     pub unsafe fn set_write_bytes_low_water_mark(&mut self,
                                                  num_bytes: u32)
-                                                 -> Result<&mut Self, CassError> {
-        CassError::build(cass_cluster_set_write_bytes_low_water_mark(self.0,num_bytes)).wrap(self)
+                                                 -> Result<&mut Self, CassandraError> {
+        CassandraError::build(cass_cluster_set_write_bytes_low_water_mark(self.0,num_bytes)).wrap(self)
     }
 
     pub unsafe fn set_pending_requests_high_water_mark(&mut self,
                                                        num_requests: u32)
-                                                       -> Result<&mut Self, CassError> {
-        CassError::build(
+                                                       -> Result<&mut Self, CassandraError> {
+        CassandraError::build(
             cass_cluster_set_pending_requests_high_water_mark(
                 self.0,num_requests
             )
@@ -195,8 +195,8 @@ impl Cluster {
 
     pub unsafe fn set_pending_requests_low_water_mark(&mut self,
                                                       num_requests: u32)
-                                                      -> Result<&mut Self, CassError> {
-        CassError::build(
+                                                      -> Result<&mut Self, CassandraError> {
+        CassandraError::build(
             cass_cluster_set_pending_requests_low_water_mark(
                 self.0,
                 num_requests
@@ -219,10 +219,10 @@ impl Cluster {
         self
     }
 
-    pub fn set_load_balance_round_robin(&mut self) -> Result<&Self, CassError> {
+    pub fn set_load_balance_round_robin(&mut self) -> Result<&Self, CassandraError> {
         unsafe {
             cass_cluster_set_load_balance_round_robin(self.0);
-            CassError::build(0).wrap(self)
+            CassandraError::build(0).wrap(self)
         }
     }
 
@@ -230,11 +230,11 @@ impl Cluster {
                                         local_dc: S,
                                         used_hosts_per_remote_dc: u32,
                                         allow_remote_dcs_for_local_cl: bool)
-                                        -> Result<&Self, CassError>
+                                        -> Result<&Self, CassandraError>
         where S: Into<String>
     {
         unsafe {
-            CassError::build({
+            CassandraError::build({
             let local_dc = CString::new(local_dc.into()).unwrap();
             cass_cluster_set_load_balance_dc_aware(
                 self.0,local_dc.as_ptr(),

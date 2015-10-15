@@ -14,7 +14,7 @@ static INSERT_QUERY:&'static str = "INSERT INTO paging (key, value) VALUES (?, ?
 
 //FIXME uuids not yet working
 fn insert_into_paging(session: &mut Session /* , uuid_gen:&mut UuidGen */)
-                      -> Result<Vec<Option<ResultFuture>>, CassError> {
+                      -> Result<Vec<Option<ResultFuture>>, CassandraError> {
     let mut futures = Vec::with_capacity(NUM_CONCURRENT_REQUESTS as usize);
     let mut results = Vec::with_capacity(NUM_CONCURRENT_REQUESTS as usize);
 
@@ -34,7 +34,7 @@ fn insert_into_paging(session: &mut Session /* , uuid_gen:&mut UuidGen */)
     Ok(results)
 }
 
-fn select_from_paging(session: &mut Session) -> Result<(), CassError> {
+fn select_from_paging(session: &mut Session) -> Result<(), CassandraError> {
     let has_more_pages = true;
     let mut statement = Statement::new(SELECT_QUERY, 0);
     statement.set_paging_size(100).unwrap();

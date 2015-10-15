@@ -16,7 +16,7 @@ unsafe fn create_cluster() -> *mut Cluster {
     cluster
 }
 
-unsafe fn connect_session(session: &mut Session, cluster: &mut Cluster) -> CassError {
+unsafe fn connect_session(session: &mut Session, cluster: &mut Cluster) -> CassandraError {
     let future: Future = &mut session.connect(cluster);
     future.wait();
     future

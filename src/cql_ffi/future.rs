@@ -2,7 +2,7 @@ use std::mem;
 use std::str;
 use std::slice;
 
-use cql_ffi::error::CassError;
+use cql_ffi::error::CassandraError;
 use cql_ffi::result::CassandraResult;
 use cql_ffi::prepared::PreparedStatement;
 
@@ -30,8 +30,8 @@ impl Drop for Future {
 impl Future {
 
 //    pub unsafe fn set_callback(&mut self, callback: FutureCallback, data: *mut c_void)
-//        -> Result<&Self,CassError> {
-//        CassError::build(cass_future_set_callback(self.0, callback.0, data)).wrap(self)
+//        -> Result<&Self,CassandraError> {
+//        CassandraError::build(cass_future_set_callback(self.0, callback.0, data)).wrap(self)
 //    }
 
     pub fn ready(&mut self) -> bool {
@@ -40,7 +40,7 @@ impl Future {
         }
     }
 
-    pub fn wait(self) -> Result<Self, CassError> {
+    pub fn wait(self) -> Result<Self, CassandraError> {
         unsafe {
             cass_future_wait(self.0);
             self.error_code()
@@ -53,9 +53,9 @@ impl Future {
         }
     }
 
-    fn error_code(self) -> Result<Self, CassError> {
+    fn error_code(self) -> Result<Self, CassandraError> {
         unsafe {
-            CassError::build(cass_future_error_code(self.0)).wrap(self)
+            CassandraError::build(cass_future_error_code(self.0)).wrap(self)
         }
     }
 
@@ -84,16 +84,16 @@ impl Drop for ResultFuture {
 
 impl ResultFuture {
 
-    pub fn wait(&mut self) -> Result<CassandraResult, CassError> {
+    pub fn wait(&mut self) -> Result<CassandraResult, CassandraError> {
         unsafe {
             cass_future_wait(self.0);
             self.error_code()
         }
     }
 
-    pub fn error_code(&mut self) -> Result<CassandraResult, CassError> {
+    pub fn error_code(&mut self) -> Result<CassandraResult, CassandraError> {
         unsafe {
-            CassError::build(cass_future_error_code(self.0)).wrap(self.get())
+            CassandraError::build(cass_future_error_code(self.0)).wrap(self.get())
         }
     }
 
@@ -129,16 +129,16 @@ impl Drop for PreparedFuture {
 
 impl PreparedFuture {
 
-    pub fn wait(&mut self) -> Result<PreparedStatement, CassError> {
+    pub fn wait(&mut self) -> Result<PreparedStatement, CassandraError> {
         unsafe {
             cass_future_wait(self.0);
             self.error_code()
         }
     }
 
-    pub fn error_code(&mut self) -> Result<PreparedStatement, CassError> {
+    pub fn error_code(&mut self) -> Result<PreparedStatement, CassandraError> {
         unsafe {
-            CassError::build(cass_future_error_code(self.0)).wrap(self.get())
+            CassandraError::build(cass_future_error_code(self.0)).wrap(self.get())
         }
     }
 

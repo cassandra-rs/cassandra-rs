@@ -10,7 +10,7 @@ static CREATE_KEYSPACE:&'static str = "CREATE KEYSPACE examples WITH replication
 static CREATE_TABLE:&'static str = "CREATE TABLE examples.schema_meta (key text, value bigint, \
                                     PRIMARY KEY (key));";
 
-unsafe fn print_keyspace(session: &mut Session, keyspace: &str) -> Result<(), CassError> {
+unsafe fn print_keyspace(session: &mut Session, keyspace: &str) -> Result<(), CassandraError> {
     let schema = session.get_schema();
     let keyspace_meta = schema.get_keyspace(keyspace);
     try!(print_schema_meta(&keyspace_meta, 0));
@@ -20,7 +20,7 @@ unsafe fn print_keyspace(session: &mut Session, keyspace: &str) -> Result<(), Ca
 unsafe fn print_table(session: &mut Session,
                       keyspace: &str,
                       table: &str)
-                      -> Result<(), CassError> {
+                      -> Result<(), CassandraError> {
     let keyspace_meta = session.get_schema().get_keyspace(keyspace);
     let table_meta = keyspace_meta.get_entry(table);
     try!(print_schema_meta(&table_meta, 0));
@@ -136,7 +136,7 @@ unsafe fn print_schema_meta_fields(meta: &SchemaMeta, indent: u32) {
     }
 }
 
-unsafe fn print_schema_meta_entries(meta: &SchemaMeta, indent: u32) -> Result<(), CassError> {
+unsafe fn print_schema_meta_entries(meta: &SchemaMeta, indent: u32) -> Result<(), CassandraError> {
     let mut entries = meta.iterator();
 
     while cass_iterator_next(entries.0) > 0 {
@@ -145,7 +145,7 @@ unsafe fn print_schema_meta_entries(meta: &SchemaMeta, indent: u32) -> Result<()
     Ok(())
 }
 
-unsafe fn print_schema_meta(meta: &SchemaMeta, indent: u32) -> Result<(), CassError> {
+unsafe fn print_schema_meta(meta: &SchemaMeta, indent: u32) -> Result<(), CassandraError> {
     print_indent(indent);
     match try!(meta.get_type()) {
         SchemaMetaType::KEYSPACE => {

@@ -25,7 +25,7 @@ fn insert_into_basic(session: &mut Session,
                      prepared: PreparedStatement,
                      key: &str,
                      basic: Basic)
-                     -> Result<CassandraResult, CassError> {
+                     -> Result<CassandraResult, CassandraError> {
     println!("key={:?}",key);
     let mut statement = prepared.bind();
     statement.bind_string_by_name("key", key).unwrap()
@@ -42,7 +42,7 @@ unsafe fn select_from_basic(session: &mut Session,
                             prepared: &PreparedStatement,
                             key: &str,
                             basic: &mut Basic)
-                            -> Result<CassandraResult, CassError> {
+                            -> Result<CassandraResult, CassandraError> {
     let mut statement = prepared.bind();
     statement.bind_string_by_name("key", key).unwrap();
     match session.execute_statement(&statement).wait() {
