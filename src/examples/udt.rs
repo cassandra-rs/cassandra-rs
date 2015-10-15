@@ -80,7 +80,7 @@ fn insert_into_udt(session: &Session, schema: Schema) -> Result<(), CassError> {
     let id = uuid_gen.get_time();
     let id_str = id.to_string();
     let mut address = UserType::new(udt_address);
-    let mut phone = CassSet::new(2);
+    let mut phone = Set::new(2);
     let mut phone_numbers = UserType::new(udt_phone);
     phone_numbers.set_int32_by_name("phone1", 0 + 1).unwrap();
     phone_numbers.set_int32_by_name("phone2", 0 + 2).unwrap();

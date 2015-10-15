@@ -15,7 +15,7 @@ fn insert_into_collections(session: &mut Session,
                            -> Result<CassResult, CassError> {
     let mut statement = Statement::new(INSERT_QUERY, 2);
     try!(statement.bind_string(0, key));
-    let mut set = CassSet::new(2);
+    let mut set = Set::new(2);
     for item in items {
         try!(set.append_string(&item));
     }

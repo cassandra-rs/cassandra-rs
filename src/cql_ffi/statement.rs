@@ -1,6 +1,6 @@
 use std::ffi::CString;
 
-use cql_ffi::collection::set::CassSet;
+use cql_ffi::collection::set::Set;
 use cql_ffi::collection::map::Map;
 use cql_ffi::collection::list::List;
 use cql_ffi::error::CassError;
@@ -221,7 +221,7 @@ impl Statement {
         }
     }
 
-    pub fn bind_set(&mut self, index: u64, collection: CassSet) -> Result<&mut Self, CassError> {
+    pub fn bind_set(&mut self, index: u64, collection: Set) -> Result<&mut Self, CassError> {
         unsafe {
             CassError::build(
                 cass_statement_bind_collection(self.0,index,collection.0)
@@ -454,7 +454,7 @@ impl Statement {
 
     pub fn bind_set_by_name(&mut self,
                             name: &str,
-                            collection: CassSet)
+                            collection: Set)
                             -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();

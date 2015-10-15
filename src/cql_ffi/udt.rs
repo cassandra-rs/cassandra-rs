@@ -6,7 +6,7 @@ use std::str;
 use cql_ffi::value::CassValue;
 use cql_ffi::uuid::Uuid;
 use cql_ffi::inet::Inet;
-use cql_ffi::collection::set::CassSet;
+use cql_ffi::collection::set::Set;
 use cql_ffi::tuple::Tuple;
 
 use cql_bindgen::cass_data_type_new;
@@ -556,14 +556,14 @@ impl UserType {
     }
 
     pub fn set_collection<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
-        where S: Into<CassSet>
+        where S: Into<Set>
     {
         unsafe {
             CassError::build(cass_user_type_set_collection(self.0, index, value.into().0)).wrap(())
         }
     }
 
-    pub fn set_collection_by_name<S>(&mut self, name: S, value: CassSet) -> Result<(), CassError>
+    pub fn set_collection_by_name<S>(&mut self, name: S, value: Set) -> Result<(), CassError>
         where S: Into<String>
     {
         unsafe {

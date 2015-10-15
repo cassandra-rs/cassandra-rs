@@ -33,18 +33,18 @@ use cql_ffi::inet::Inet;
 use cql_bindgen::cass_collection_append_user_type;
 
 
-pub struct CassSet(pub *mut _CassCollection);
+pub struct Set(pub *mut _CassCollection);
 
-impl Drop for CassSet {
+impl Drop for Set {
     fn drop(&mut self) {
         self.free()
     }
 }
 
-impl CassSet {
-    pub fn new(item_count: u64) -> CassSet {
+impl Set {
+    pub fn new(item_count: u64) -> Set {
         unsafe {
-            CassSet(cass_collection_new(CassCollectionType::SET as u32, item_count))
+            Set(cass_collection_new(CassCollectionType::SET as u32, item_count))
         }
     }
 
