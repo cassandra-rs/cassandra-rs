@@ -22,12 +22,12 @@ use cql_ffi::value::CassValue;
 use cql_ffi::collection::collection::CassCollectionType;
 use cql_ffi::error::CassError;
 use cql_ffi::uuid::Uuid;
-use cql_ffi::inet::CassInet;
+use cql_ffi::inet::Inet;
 
-pub struct CassList(pub *mut _CassCollection);
+pub struct List(pub *mut _CassCollection);
 
 
-impl Drop for CassList {
+impl Drop for List {
     fn drop(&mut self) {
         unsafe {
             cass_collection_free(self.0)
@@ -35,10 +35,10 @@ impl Drop for CassList {
     }
 }
 
-impl CassList {
-    pub fn new(item_count: u64) -> CassList {
+impl List {
+    pub fn new(item_count: u64) -> List {
         unsafe {
-            CassList(cass_collection_new(CassCollectionType::LIST as u32, item_count))
+            List(cass_collection_new(CassCollectionType::LIST as u32, item_count))
         }
     }
 
@@ -95,7 +95,7 @@ impl CassList {
         }
     }
 
-    pub fn append_inet(&mut self, value: CassInet) -> Result<&Self, CassError> {
+    pub fn append_inet(&mut self, value: Inet) -> Result<&Self, CassError> {
         unsafe {
             CassError::build(cass_collection_append_inet(self.0,value.0)).wrap(self)
         }

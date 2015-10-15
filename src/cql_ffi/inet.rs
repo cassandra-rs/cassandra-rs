@@ -1,5 +1,5 @@
 //use cql_ffi::types::cass_uint8_t;
-use cql_bindgen::CassInet as _CassInet;
+use cql_bindgen::CassInet as _Inet;
 use cql_bindgen::cass_inet_init_v4;
 use cql_bindgen::cass_inet_init_v6;
 use std::net::SocketAddr;
@@ -8,47 +8,47 @@ use std::net::Ipv6Addr;
 use std::default::Default;
 
 #[repr(C)]
-pub struct CassInet(pub _CassInet);
+pub struct Inet(pub _Inet);
 
-impl Default for CassInet {
-    fn default() -> CassInet {
+impl Default for Inet {
+    fn default() -> Inet {
         unsafe {
             ::std::mem::zeroed()
         }
     }
 }
 
-pub trait AsCassInet {
-    fn as_cass_inet(&self) -> CassInet;
+pub trait AsInet {
+    fn as_cass_inet(&self) -> Inet;
 }
 
-impl AsCassInet for SocketAddr {
-    fn as_cass_inet(&self) -> CassInet {
+impl AsInet for SocketAddr {
+    fn as_cass_inet(&self) -> Inet {
         match *self {
             SocketAddr::V4(ipv4_addr) => {
                 unsafe {
-                    CassInet(cass_inet_init_v4(ipv4_addr.ip().octets().as_ptr()))
+                    Inet(cass_inet_init_v4(ipv4_addr.ip().octets().as_ptr()))
                 }
             }
             SocketAddr::V6(ipv6_addr) => {
                 unsafe {
                     let seg = ipv6_addr.ip().segments();
                 //FIXME does this really work?
-                    CassInet(cass_inet_init_v6(seg.as_ptr() as *const u8))
+                    Inet(cass_inet_init_v6(seg.as_ptr() as *const u8))
                 }
             }
         }
-        //~ let foo:_CassInet = Default::default();
-        //~ CassInet(foo)
+        //~ let foo:_Inet = Default::default();
+        //~ Inet(foo)
     }
 }
 
-pub trait FromCassInet {
-    fn from_cass_inet(inet: CassInet) -> Self;
+pub trait FromInet {
+    fn from_cass_inet(inet: Inet) -> Self;
 }
 
-impl FromCassInet for Ipv4Addr {
-    fn from_cass_inet(inet: CassInet) -> Self {
+impl FromInet for Ipv4Addr {
+    fn from_cass_inet(inet: Inet) -> Self {
         let raw_addr: [u8; 16] = inet.0.address;
         match inet.0.address_length {
             4 => Ipv4Addr::new(raw_addr[0], raw_addr[1], raw_addr[2], raw_addr[3]),
@@ -58,8 +58,8 @@ impl FromCassInet for Ipv4Addr {
     }
 }
 
-impl FromCassInet for Ipv6Addr {
-    fn from_cass_inet(inet: CassInet) -> Self {
+impl FromInet for Ipv6Addr {
+    fn from_cass_inet(inet: Inet) -> Self {
         let raw_addr: [u8; 16] = inet.0.address;
         match inet.0.address_length {
             4 => panic!(),
@@ -76,16 +76,16 @@ impl FromCassInet for Ipv6Addr {
     }
 }
 
-impl CassInet {
-    pub fn cass_inet_init_v4(address: *const u8) -> CassInet {
+impl Inet {
+    pub fn cass_inet_init_v4(address: *const u8) -> Inet {
         unsafe {
-            CassInet(cass_inet_init_v4(address))
+            Inet(cass_inet_init_v4(address))
         }
     }
 
-    pub fn cass_inet_init_v6(address: *const u8) -> CassInet {
+    pub fn cass_inet_init_v6(address: *const u8) -> Inet {
         unsafe {
-            CassInet(cass_inet_init_v6(address))
+            Inet(cass_inet_init_v6(address))
         }
     }
 }

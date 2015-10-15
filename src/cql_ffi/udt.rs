@@ -5,7 +5,7 @@ use std::str;
 
 use cql_ffi::value::CassValue;
 use cql_ffi::uuid::Uuid;
-use cql_ffi::inet::CassInet;
+use cql_ffi::inet::Inet;
 use cql_ffi::collection::set::CassSet;
 use cql_ffi::tuple::CassTuple;
 
@@ -548,7 +548,7 @@ impl UserType {
     }
 
     pub fn set_inet<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
-        where S: Into<CassInet>
+        where S: Into<Inet>
     {
         unsafe {
             CassError::build(cass_user_type_set_inet(self.0, index, value.into().0)).wrap(())

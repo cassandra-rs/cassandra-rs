@@ -24,7 +24,7 @@ use cql_bindgen::cass_iterator_get_map_key;
 use cql_ffi::value::CassValue;
 use cql_ffi::error::CassError;
 use cql_ffi::uuid::Uuid;
-use cql_ffi::inet::CassInet;
+use cql_ffi::inet::Inet;
 use cql_ffi::collection::collection::CassCollectionType;
 
 pub struct Map(pub *mut _CassCollection);
@@ -95,7 +95,7 @@ impl Map {
         }
     }
 
-    pub fn append_inet(&mut self, value: CassInet) -> Result<&Self, CassError> {
+    pub fn append_inet(&mut self, value: Inet) -> Result<&Self, CassError> {
         unsafe {
             CassError::build(cass_collection_append_inet(self.0,value.0)).wrap(self)
         }

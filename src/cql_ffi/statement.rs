@@ -2,10 +2,10 @@ use std::ffi::CString;
 
 use cql_ffi::collection::set::CassSet;
 use cql_ffi::collection::map::Map;
-use cql_ffi::collection::list::CassList;
+use cql_ffi::collection::list::List;
 use cql_ffi::error::CassError;
 use cql_ffi::uuid::Uuid;
-use cql_ffi::inet::CassInet;
+use cql_ffi::inet::Inet;
 use cql_ffi::result::CassResult;
 use cql_ffi::consistency::Consistency;
 use cql_ffi::udt::UserType;
@@ -229,7 +229,7 @@ impl Statement {
         }
     }
 
-    pub fn bind_list(&mut self, index: u64, collection: CassList) -> Result<&mut Self, CassError> {
+    pub fn bind_list(&mut self, index: u64, collection: List) -> Result<&mut Self, CassError> {
         unsafe {
             CassError::build(
                 cass_statement_bind_collection(self.0,index,collection.0)
@@ -245,7 +245,7 @@ impl Statement {
         }
     }
 
-    pub fn bind_inet(&mut self, index: u64, value: CassInet) -> Result<&mut Self, CassError> {
+    pub fn bind_inet(&mut self, index: u64, value: Inet) -> Result<&mut Self, CassError> {
         unsafe {
             CassError::build(
                 cass_statement_bind_inet(self.0,index, value.0)
@@ -405,7 +405,7 @@ impl Statement {
 
     pub fn bind_inet_by_name(&mut self,
                              name: &str,
-                             value: CassInet)
+                             value: Inet)
                              -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();

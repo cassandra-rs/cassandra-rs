@@ -7,7 +7,7 @@ use std::str;
 use std::slice;
 
 use cql_ffi::error::CassError;
-use cql_ffi::inet::CassInet;
+use cql_ffi::inet::Inet;
 use cql_ffi::uuid::Uuid;
 use cql_ffi::collection::map::MapIterator;
 use cql_ffi::collection::set::SetIterator;
@@ -352,7 +352,7 @@ impl CassValue {
         //~ err.wrap(string)
     //~ }}
 
-    pub unsafe fn get_inet(&self, mut output: CassInet) -> Result<CassInet, CassError> {
+    pub unsafe fn get_inet(&self, mut output: Inet) -> Result<Inet, CassError> {
         CassError::build(cass_value_get_inet(self.0,&mut output.0)).wrap(output)
     }
 

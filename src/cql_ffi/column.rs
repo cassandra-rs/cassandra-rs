@@ -28,7 +28,7 @@ use cql_ffi::uuid::Uuid;
 //use cql_ffi::udt::UserType;
 use cql_ffi::value::ValueType;
 use cql_ffi::collection::set::SetIterator;
-use cql_ffi::inet::CassInet;
+use cql_ffi::inet::Inet;
 use cql_ffi::collection::map::MapIterator;
 use cql_ffi::udt::UserTypeIterator;
 use cql_ffi::error::CassErrorTypes;
@@ -158,7 +158,7 @@ impl Column {
         }
     }
 
-    pub unsafe fn get_inet(&self, mut output: CassInet) -> Result<CassInet, CassError> {
+    pub unsafe fn get_inet(&self, mut output: Inet) -> Result<Inet, CassError> {
         CassError::build(cass_value_get_inet(self.0,&mut output.0)).wrap(output)
     }
 
