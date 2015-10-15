@@ -13,7 +13,7 @@ use cql_ffi::collection::map::MapIterator;
 use cql_ffi::collection::set::SetIterator;
 
 //use cql_ffi::udt::DataType;
-use cql_ffi::udt::CassConstDataType;
+use cql_ffi::udt::ConstDataType;
 use cql_bindgen::CassSchema as _Schema;
 use cql_bindgen::CassSchemaMeta as _SchemaMeta;
 use cql_bindgen::CassSchemaMetaField as _SchemaMetaField;
@@ -75,13 +75,13 @@ impl Schema {
         }
     }
 
-    pub fn get_udt<S>(&self, keyspace: S, type_name: S) -> CassConstDataType
+    pub fn get_udt<S>(&self, keyspace: S, type_name: S) -> ConstDataType
         where S: Into<String>
     {
         unsafe {
             let keyspace = CString::new(keyspace.into()).unwrap();
             let type_name = CString::new(type_name.into()).unwrap();
-            CassConstDataType(cass_schema_get_udt(self.0, keyspace.as_ptr(), type_name.as_ptr()))
+            ConstDataType(cass_schema_get_udt(self.0, keyspace.as_ptr(), type_name.as_ptr()))
         }
     }
 

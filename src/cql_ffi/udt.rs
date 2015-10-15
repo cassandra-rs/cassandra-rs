@@ -101,7 +101,7 @@ use cql_ffi::value::ValueType;
 use cql_ffi::error::CassError;
 
 pub struct DataType(pub *mut _DataType);
-pub struct CassConstDataType(pub *const _DataType);
+pub struct ConstDataType(pub *const _DataType);
 
 pub struct UserType(pub *mut _UserType);
 
@@ -269,27 +269,27 @@ impl DataType {
         }
     }
 
-    pub fn sub_data_type(data_type: DataType, index: u64) -> CassConstDataType {
+    pub fn sub_data_type(data_type: DataType, index: u64) -> ConstDataType {
         unsafe {
-            CassConstDataType(cass_data_type_sub_data_type(data_type.0, index))
+            ConstDataType(cass_data_type_sub_data_type(data_type.0, index))
         }
     }
 
-    pub fn sub_data_type_by_name<S>(data_type: DataType, name: S) -> CassConstDataType
+    pub fn sub_data_type_by_name<S>(data_type: DataType, name: S) -> ConstDataType
         where S: Into<String>
     {
         unsafe {
             let name = CString::new(name.into()).unwrap();
-            CassConstDataType(cass_data_type_sub_data_type_by_name(data_type.0, name.as_ptr()))
+            ConstDataType(cass_data_type_sub_data_type_by_name(data_type.0, name.as_ptr()))
         }
     }
 
-    pub fn sub_data_type_by_name_n<S>(data_type: DataType, name: S) -> CassConstDataType
+    pub fn sub_data_type_by_name_n<S>(data_type: DataType, name: S) -> ConstDataType
         where S: Into<String>
     {
         unsafe {
             let name = CString::new(name.into()).unwrap();
-            CassConstDataType(cass_data_type_sub_data_type_by_name_n(data_type.0,
+            ConstDataType(cass_data_type_sub_data_type_by_name_n(data_type.0,
                                                                      name.as_ptr(),
                                                                      name.as_bytes().len() as u64))
         }
@@ -369,15 +369,15 @@ impl DataType {
 //}
 
 impl UserType {
-    pub fn new(data_type: CassConstDataType) -> Self {
+    pub fn new(data_type: ConstDataType) -> Self {
         unsafe {
             UserType(cass_user_type_new_from_data_type(data_type.0))
         }
     }
 
-    pub fn data_type(&self) -> CassConstDataType {
+    pub fn data_type(&self) -> ConstDataType {
         unsafe {
-            CassConstDataType(cass_user_type_data_type(self.0))
+            ConstDataType(cass_user_type_data_type(self.0))
         }
     }
 
