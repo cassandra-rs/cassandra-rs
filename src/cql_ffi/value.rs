@@ -14,7 +14,7 @@ use cql_ffi::collection::set::SetIterator;
 use cql_ffi::error::CassErrorTypes;
 use cql_ffi::udt::UserTypeIterator;
 
-use cql_bindgen::CassValue as _CassValue;
+use cql_bindgen::CassValue as _Value;
 use cql_bindgen::cass_value_secondary_sub_type;
 use cql_bindgen::cass_value_primary_sub_type;
 use cql_bindgen::cass_value_item_count;
@@ -64,7 +64,7 @@ use cql_bindgen::CASS_VALUE_TYPE_LAST_ENTRY;
 
 use std::mem;
 
-pub struct CassValue(*const _CassValue);
+pub struct Value(*const _Value);
 
 #[derive(Debug)]
 pub enum ValueType {
@@ -124,7 +124,7 @@ impl ValueType {
     }
 }
 
-impl Debug for CassValue {
+impl Debug for Value {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.is_null() {
             true => Ok(()),
@@ -167,7 +167,7 @@ impl Debug for CassValue {
     }
 }
 
-impl Display for CassValue {
+impl Display for Value {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.is_null() {
             true => Ok(()),
@@ -204,10 +204,10 @@ impl Display for CassValue {
     }
 }
 
-impl CassValue {
-    pub fn new(value: *const _CassValue) -> Self {
-//        println!("building value: {:?}", CassValue(value).get_type());
-        CassValue(value)
+impl Value {
+    pub fn new(value: *const _Value) -> Self {
+//        println!("building value: {:?}", Value(value).get_type());
+        Value(value)
     }
 
     pub fn fill_uuid(&self, mut uuid: Uuid) -> Result<Uuid, CassError> {

@@ -16,7 +16,7 @@ use std::ffi::CString;
 use std::iter::IntoIterator;
 use std::iter;
 
-use cql_ffi::value::CassValue;
+use cql_ffi::value::Value;
 use cql_ffi::error::CassError;
 use cql_ffi::column::Column;
 
@@ -26,7 +26,7 @@ impl Debug for Row {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         for column in self {
             //println!("foo:{:?}",column);
-            try!(write!(f, "{:?}\t", CassValue::new(column.0)));
+            try!(write!(f, "{:?}\t", Value::new(column.0)));
         }
         Ok(())
     }
@@ -35,7 +35,7 @@ impl Debug for Row {
 impl Display for Row {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         for column in self {
-            try!(write!(f, "{}\t", CassValue::new(column.0)));
+            try!(write!(f, "{}\t", Value::new(column.0)));
         }
         Ok(())
     }
@@ -107,7 +107,7 @@ impl<'a> Iterator for &'a RowIterator {
 impl Display for RowIterator {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         for item in self {
-            try!(write!(f, "{}\t", CassValue::new(item.0)));
+            try!(write!(f, "{}\t", Value::new(item.0)));
         }
         Ok(())
     }

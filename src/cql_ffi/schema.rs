@@ -7,7 +7,7 @@ use std::mem;
 use std::slice;
 use std::str;
 
-use cql_ffi::value::CassValue;
+use cql_ffi::value::Value;
 use cql_ffi::error::CassError;
 use cql_ffi::collection::map::MapIterator;
 use cql_ffi::collection::set::SetIterator;
@@ -158,9 +158,9 @@ impl SchemaMetaField {
         }
     }
 
-    pub fn get_value(&self) -> CassValue {
+    pub fn get_value(&self) -> Value {
         unsafe {
-            CassValue::new(cass_schema_meta_field_value(self.0))
+            Value::new(cass_schema_meta_field_value(self.0))
         }
     }
 }

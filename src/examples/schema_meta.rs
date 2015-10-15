@@ -52,7 +52,7 @@ fn print_indent(indent: u32) {
     }
 }
 
-unsafe fn print_schema_value(value: &CassValue) {
+unsafe fn print_schema_value(value: &Value) {
 
     match value.get_type() {
         ValueType::INT => {
@@ -92,7 +92,7 @@ unsafe fn print_schema_value(value: &CassValue) {
     }
 }
 
-unsafe fn print_schema_list(value: &CassValue) {
+unsafe fn print_schema_list(value: &Value) {
     let mut is_first = true;
     print!("[ ");
     for item in value.as_set_iterator().unwrap() {
@@ -106,7 +106,7 @@ unsafe fn print_schema_list(value: &CassValue) {
     print!(" ]");
 }
 
-unsafe fn print_schema_map(value: &CassValue) {
+unsafe fn print_schema_map(value: &Value) {
     let mut is_first = true;
     print!("[[ ");
     for (key,value) in value.as_map_iterator().unwrap() {

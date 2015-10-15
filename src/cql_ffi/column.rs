@@ -22,7 +22,7 @@ use cql_bindgen::cass_iterator_from_map;
 use cql_bindgen::cass_iterator_from_user_type;
 use cql_bindgen::cass_iterator_from_collection;
 use cql_bindgen::cass_value_type;
-use cql_bindgen::CassValue as _CassValue;
+use cql_bindgen::CassValue as _Value;
 
 use cql_ffi::uuid::Uuid;
 //use cql_ffi::udt::UserType;
@@ -45,7 +45,7 @@ pub enum ColumnType {
     UNKNOWN = 5,
 }
 
-pub struct Column(pub *const _CassValue);
+pub struct Column(pub *const _Value);
 
 impl Debug for Column {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {

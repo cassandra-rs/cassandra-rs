@@ -3,7 +3,7 @@ use std::mem;
 use std::slice;
 use std::str;
 
-use cql_ffi::value::CassValue;
+use cql_ffi::value::Value;
 use cql_ffi::uuid::Uuid;
 use cql_ffi::inet::Inet;
 use cql_ffi::collection::set::Set;
@@ -602,7 +602,7 @@ impl Drop for UserTypeIterator {
 }
 
 impl Iterator for UserTypeIterator {
-    type Item = (String,CassValue);
+    type Item = (String,Value);
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
@@ -617,7 +617,7 @@ impl Iterator for UserTypeIterator {
                     let key = str::from_utf8(slice).unwrap().to_owned();
 
                     let field_value = cass_iterator_get_user_type_field_value(self.0);
-                    Some((key, CassValue::new(field_value)))
+                    Some((key, Value::new(field_value)))
                 }
             }
         }
@@ -625,8 +625,8 @@ impl Iterator for UserTypeIterator {
 }
 
 impl UserTypeIterator {
-//    pub fn get_field_name(&mut self)-> CassValue {unsafe{
+//    pub fn get_field_name(&mut self)-> Value {unsafe{
 //
-//        CassValue::new(cass_iterator_get_user_type_field_name(self.0))
+//        Value::new(cass_iterator_get_user_type_field_name(self.0))
 //    }}
 }

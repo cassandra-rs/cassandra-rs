@@ -22,7 +22,7 @@ use cql_bindgen::cass_iterator_get_schema_meta;
 use cql_bindgen::cass_iterator_get_schema_meta_field;
 
 use cql_ffi::udt::UserType;
-use cql_ffi::value::CassValue;
+use cql_ffi::value::Value;
 use cql_ffi::cass_iterator::CassIteratorType;
 use cql_ffi::schema::SchemaMetaField;
 use cql_ffi::schema::SchemaMeta;//use cql_bindgen::cass_collection_append_decimal;
@@ -145,7 +145,7 @@ impl Drop for SetIterator {
 }
 
 impl Iterator for SetIterator {
-    type Item = CassValue;
+    type Item = Value;
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
@@ -163,9 +163,9 @@ impl SetIterator {
 
     //~ unsafe fn get_column(&mut self) -> Column {Column(cass_iterator_get_column(self.0))}
 
-    pub fn get_value(&mut self) -> CassValue {
+    pub fn get_value(&mut self) -> Value {
         unsafe {
-            CassValue::new(cass_iterator_get_value(self.0))
+            Value::new(cass_iterator_get_value(self.0))
         }
     }
 

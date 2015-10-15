@@ -21,7 +21,7 @@ use cql_bindgen::cass_iterator_get_map_key;
 
 //use cql_bindgen::cass_collection_append_decimal;
 
-use cql_ffi::value::CassValue;
+use cql_ffi::value::Value;
 use cql_ffi::error::CassError;
 use cql_ffi::uuid::Uuid;
 use cql_ffi::inet::Inet;
@@ -111,18 +111,18 @@ impl Map {
 pub struct MapIterator(pub *mut _CassIterator);
 
 impl MapIterator {
-    pub fn get_key(&mut self) -> CassValue {
+    pub fn get_key(&mut self) -> Value {
         unsafe {
-            CassValue::new(cass_iterator_get_map_key(self.0))
+            Value::new(cass_iterator_get_map_key(self.0))
         }
     }
-    pub fn get_value(&mut self) -> CassValue {
+    pub fn get_value(&mut self) -> Value {
         unsafe {
-            CassValue::new(cass_iterator_get_map_value(self.0))
+            Value::new(cass_iterator_get_map_value(self.0))
         }
     }
 
-    pub fn get_pair(&mut self) -> Result<(CassValue, CassValue), CassError> {
+    pub fn get_pair(&mut self) -> Result<(Value, Value), CassError> {
         Ok((self.get_key(), self.get_value()))
     }
 
@@ -138,7 +138,7 @@ impl Drop for MapIterator {
 }
 
 impl Iterator for MapIterator {
-    type Item = (CassValue,CassValue);
+    type Item = (Value,Value);
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {

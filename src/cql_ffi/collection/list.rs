@@ -18,7 +18,7 @@ use cql_bindgen::cass_collection_append_string;
 use cql_bindgen::cass_collection_append_inet;
 //use cql_bindgen::cass_collection_append_decimal;
 
-use cql_ffi::value::CassValue;
+use cql_ffi::value::Value;
 use cql_ffi::collection::collection::CassCollectionType;
 use cql_ffi::error::CassError;
 use cql_ffi::uuid::Uuid;
@@ -119,7 +119,7 @@ impl Drop for ListIterator {
 }
 
 impl Iterator for ListIterator {
-    type Item = CassValue;
+    type Item = Value;
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
@@ -131,9 +131,9 @@ impl Iterator for ListIterator {
 }
 
 impl ListIterator {
-    pub fn get_value(&mut self) -> CassValue {
+    pub fn get_value(&mut self) -> Value {
         unsafe {
-            CassValue::new(cass_iterator_get_value(self.0))
+            Value::new(cass_iterator_get_value(self.0))
         }
     }
 }
