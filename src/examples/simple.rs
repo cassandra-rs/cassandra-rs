@@ -10,7 +10,7 @@ fn main() {
     cluster
         .set_contact_points(CONTACT_POINTS).unwrap()
         .set_load_balance_round_robin().unwrap();
-    let session = Session::new().connect(&cluster).wait().unwrap();
+    let session = cluster.connect().unwrap();
     let result = session.execute(QUERY, 0).wait().unwrap();
     println!("{}",result);
     for row in result.iter() {
