@@ -1,7 +1,7 @@
 use std::ffi::CString;
 
 use cql_ffi::error::CassError;
-use cql_bindgen::CassSsl as _CassSsl;
+use cql_bindgen::CassSsl as _Ssl;
 use cql_bindgen::cass_ssl_new;
 use cql_bindgen::cass_ssl_free;
 use cql_bindgen::cass_ssl_add_trusted_cert;
@@ -10,9 +10,9 @@ use cql_bindgen::cass_ssl_set_verify_flags;
 use cql_bindgen::cass_ssl_set_cert;
 use cql_bindgen::cass_ssl_set_private_key;
 
-pub struct CassSsl(pub *mut _CassSsl);
+pub struct Ssl(pub *mut _Ssl);
 
-impl Drop for CassSsl {
+impl Drop for Ssl {
     fn drop(&mut self) {
         unsafe {
             cass_ssl_free(self.0)
@@ -20,10 +20,10 @@ impl Drop for CassSsl {
     }
 }
 
-impl CassSsl {
-    pub fn new() -> CassSsl {
+impl Ssl {
+    pub fn new() -> Ssl {
         unsafe {
-            CassSsl(cass_ssl_new())
+            Ssl(cass_ssl_new())
         }
     }
 

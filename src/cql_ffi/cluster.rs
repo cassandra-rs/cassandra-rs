@@ -1,4 +1,4 @@
-use cql_ffi::ssl::CassSsl;
+use cql_ffi::ssl::Ssl;
 use cql_bindgen::CassCluster as _Cluster;
 use std::ffi::CString;
 
@@ -81,7 +81,7 @@ impl Cluster {
         }
     }
 
-    pub fn set_ssl(&mut self, ssl: &mut CassSsl) -> &Self {
+    pub fn set_ssl(&mut self, ssl: &mut Ssl) -> &Self {
         unsafe {
             cass_cluster_set_ssl(self.0, ssl.0);
             self
