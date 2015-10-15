@@ -23,18 +23,18 @@ use std::ffi::CString;
 
 use cql_ffi::inet::AsInet;
 use std::net::SocketAddr;
-use cql_bindgen::CassTuple as _CassTuple;
+use cql_bindgen::CassTuple as _Tuple;
 use cql_ffi::uuid::Uuid;
 use cql_ffi::udt::DataType;
 use cql_ffi::udt::ConstDataType;
 use cql_ffi::error::CassError;
 
-pub struct CassTuple(pub *mut _CassTuple);
+pub struct Tuple(pub *mut _Tuple);
 
-impl CassTuple {
+impl Tuple {
     pub fn new(item_count: u64) -> Self {
         unsafe {
-            CassTuple(cass_tuple_new(item_count))
+            Tuple(cass_tuple_new(item_count))
         }
     }
 
@@ -44,9 +44,9 @@ impl CassTuple {
         }
     }
 
-    pub fn new_from_data_type(data_type: DataType) -> CassTuple {
+    pub fn new_from_data_type(data_type: DataType) -> Tuple {
         unsafe {
-            CassTuple(cass_tuple_new_from_data_type(data_type.0))
+            Tuple(cass_tuple_new_from_data_type(data_type.0))
         }
     }
 
@@ -148,7 +148,7 @@ impl CassTuple {
     }
 }
 
-impl Drop for CassTuple {
+impl Drop for Tuple {
     fn drop(&mut self) {
         unsafe {
             cass_tuple_free(self.0)

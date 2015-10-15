@@ -7,7 +7,7 @@ use cql_ffi::value::CassValue;
 use cql_ffi::uuid::Uuid;
 use cql_ffi::inet::Inet;
 use cql_ffi::collection::set::CassSet;
-use cql_ffi::tuple::CassTuple;
+use cql_ffi::tuple::Tuple;
 
 use cql_bindgen::cass_data_type_new;
 use cql_bindgen::CassIterator as _CassIterator;
@@ -578,7 +578,7 @@ impl UserType {
         }
     }
 
-    pub fn set_tuple(&mut self, index: u64, value: CassTuple) -> Result<(), CassError> {
+    pub fn set_tuple(&mut self, index: u64, value: Tuple) -> Result<(), CassError> {
         unsafe {
             CassError::build(cass_user_type_set_tuple(self.0, index, value.0)).wrap(())
         }
