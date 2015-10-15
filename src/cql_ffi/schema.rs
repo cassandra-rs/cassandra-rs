@@ -12,7 +12,7 @@ use cql_ffi::error::CassError;
 use cql_ffi::collection::map::MapIterator;
 use cql_ffi::collection::set::SetIterator;
 
-//use cql_ffi::udt::CassDataType;
+//use cql_ffi::udt::DataType;
 use cql_ffi::udt::CassConstDataType;
 use cql_bindgen::CassSchema as _Schema;
 use cql_bindgen::CassSchemaMeta as _SchemaMeta;

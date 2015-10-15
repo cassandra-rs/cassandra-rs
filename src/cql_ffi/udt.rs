@@ -94,49 +94,49 @@ use cql_bindgen::cass_user_type_set_user_type;
 use cql_bindgen::cass_iterator_get_user_type_field_name;
 use cql_bindgen::cass_iterator_get_user_type_field_value;
 
-use cql_bindgen::CassDataType as _CassDataType;
+use cql_bindgen::CassDataType as _DataType;
 use cql_bindgen::CassUserType as _UserType;
 
 use cql_ffi::value::ValueType;
 use cql_ffi::error::CassError;
 
-pub struct CassDataType(pub *mut _CassDataType);
-pub struct CassConstDataType(pub *const _CassDataType);
+pub struct DataType(pub *mut _DataType);
+pub struct CassConstDataType(pub *const _DataType);
 
 pub struct UserType(pub *mut _UserType);
 
-impl CassDataType {
+impl DataType {
     pub fn new(value_type: ValueType) -> Self {
         unsafe {
-            CassDataType(cass_data_type_new(value_type as u32))
+            DataType(cass_data_type_new(value_type as u32))
         }
     }
 
-    pub fn new_from_existing(data_type: CassDataType) -> Self {
+    pub fn new_from_existing(data_type: DataType) -> Self {
         unsafe {
-            CassDataType(cass_data_type_new_from_existing(data_type.0))
+            DataType(cass_data_type_new_from_existing(data_type.0))
         }
     }
 
-    pub fn new_tuple(item_count: u64) -> CassDataType {
+    pub fn new_tuple(item_count: u64) -> DataType {
         unsafe {
-            CassDataType(cass_data_type_new_tuple(item_count))
+            DataType(cass_data_type_new_tuple(item_count))
         }
     }
 
-    pub fn new_udt(field_count: u64) -> CassDataType {
+    pub fn new_udt(field_count: u64) -> DataType {
         unsafe {
-            CassDataType(cass_data_type_new_udt(field_count))
+            DataType(cass_data_type_new_udt(field_count))
         }
     }
 
-    pub fn get_type(data_type: CassDataType) -> ValueType {
+    pub fn get_type(data_type: DataType) -> ValueType {
         unsafe {
             ValueType::build(cass_data_type_type(data_type.0))
         }
     }
 
-    pub fn type_name<S>(data_type: CassDataType, type_name: S) -> Result<(), CassError>
+    pub fn type_name<S>(data_type: DataType, type_name: S) -> Result<(), CassError>
         where S: Into<String>
     {
         unsafe {
@@ -151,7 +151,7 @@ impl CassDataType {
         }
     }
 
-    pub fn set_type_name<S>(data_type: CassDataType, type_name: S) -> Result<(), CassError>
+    pub fn set_type_name<S>(data_type: DataType, type_name: S) -> Result<(), CassError>
         where S: Into<String>
     {
         unsafe {
@@ -165,7 +165,7 @@ impl CassDataType {
         }
     }
 
-    pub fn set_type_name_n<S>(data_type: CassDataType, type_name: S) -> Result<(), CassError>
+    pub fn set_type_name_n<S>(data_type: DataType, type_name: S) -> Result<(), CassError>
         where S: Into<String>
     {
         unsafe {
@@ -180,7 +180,7 @@ impl CassDataType {
         }
     }
 
-    pub fn keyspace<S>(data_type: CassDataType, keyspace: S) -> Result<(), CassError>
+    pub fn keyspace<S>(data_type: DataType, keyspace: S) -> Result<(), CassError>
         where S: Into<String>
     {
         unsafe {
@@ -195,7 +195,7 @@ impl CassDataType {
         }
     }
 
-    pub fn set_keyspace<S>(data_type: CassDataType, keyspace: S) -> Result<(), CassError>
+    pub fn set_keyspace<S>(data_type: DataType, keyspace: S) -> Result<(), CassError>
         where S: Into<String>
     {
         unsafe {
@@ -209,7 +209,7 @@ impl CassDataType {
         }
     }
 
-    pub fn set_keyspace_n<S>(data_type: CassDataType, keyspace: S) -> Result<(), CassError>
+    pub fn set_keyspace_n<S>(data_type: DataType, keyspace: S) -> Result<(), CassError>
         where S: Into<String>
     {
         unsafe {
@@ -224,7 +224,7 @@ impl CassDataType {
         }
     }
 
-    pub fn class_name<S>(data_type: CassDataType, class_name: S) -> Result<(), CassError>
+    pub fn class_name<S>(data_type: DataType, class_name: S) -> Result<(), CassError>
         where S: Into<String>
     {
         unsafe {
@@ -240,7 +240,7 @@ impl CassDataType {
     }
 
 
-    pub fn set_class_name<S>(data_type: CassDataType, class_name: S) -> Result<(), CassError>
+    pub fn set_class_name<S>(data_type: DataType, class_name: S) -> Result<(), CassError>
         where S: Into<String>
     {
         unsafe {
@@ -254,7 +254,7 @@ impl CassDataType {
         }
     }
 
-    pub fn set_class_name_n<S>(data_type: CassDataType, class_name: S) -> Result<(), CassError>
+    pub fn set_class_name_n<S>(data_type: DataType, class_name: S) -> Result<(), CassError>
         where S: Into<String>
     {
         unsafe {
@@ -269,13 +269,13 @@ impl CassDataType {
         }
     }
 
-    pub fn sub_data_type(data_type: CassDataType, index: u64) -> CassConstDataType {
+    pub fn sub_data_type(data_type: DataType, index: u64) -> CassConstDataType {
         unsafe {
             CassConstDataType(cass_data_type_sub_data_type(data_type.0, index))
         }
     }
 
-    pub fn sub_data_type_by_name<S>(data_type: CassDataType, name: S) -> CassConstDataType
+    pub fn sub_data_type_by_name<S>(data_type: DataType, name: S) -> CassConstDataType
         where S: Into<String>
     {
         unsafe {
@@ -284,7 +284,7 @@ impl CassDataType {
         }
     }
 
-    pub fn sub_data_type_by_name_n<S>(data_type: CassDataType, name: S) -> CassConstDataType
+    pub fn sub_data_type_by_name_n<S>(data_type: DataType, name: S) -> CassConstDataType
         where S: Into<String>
     {
         unsafe {
@@ -296,7 +296,7 @@ impl CassDataType {
     }
 
 
-    pub fn sub_type_name<S>(data_type: CassDataType, index: u64, name: S) -> Result<(), CassError>
+    pub fn sub_type_name<S>(data_type: DataType, index: u64, name: S) -> Result<(), CassError>
         where S: Into<String>
     {
         unsafe {
@@ -312,8 +312,8 @@ impl CassDataType {
         }
     }
 
-    pub fn add_sub_type(data_type: CassDataType,
-                        sub_data_type: CassDataType)
+    pub fn add_sub_type(data_type: DataType,
+                        sub_data_type: DataType)
                         -> Result<(), CassError> {
         unsafe {
             CassError::build(
@@ -322,9 +322,9 @@ impl CassDataType {
         }
     }
 
-    pub fn add_sub_type_by_name<S>(data_type: CassDataType,
+    pub fn add_sub_type_by_name<S>(data_type: DataType,
                                    name: S,
-                                   sub_data_type: CassDataType)
+                                   sub_data_type: DataType)
                                    -> Result<(), CassError>
         where S: Into<String>
     {
@@ -340,7 +340,7 @@ impl CassDataType {
         }
     }
 
-    pub fn add_sub_value_type<S>(data_type: CassDataType,
+    pub fn add_sub_value_type<S>(data_type: DataType,
                                  sub_value_type: ValueType)
                                  -> Result<(), CassError>
         where S: Into<String>
@@ -356,7 +356,7 @@ impl CassDataType {
     }
 }
 
-//impl Drop for CassDataType {
+//impl Drop for DataType {
 //    fn drop(&mut self) {unsafe{
 //        cass_data_type_free(&mut self.0)
 //    }}

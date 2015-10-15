@@ -25,7 +25,7 @@ use cql_ffi::inet::AsCassInet;
 use std::net::SocketAddr;
 use cql_bindgen::CassTuple as _CassTuple;
 use cql_ffi::uuid::Uuid;
-use cql_ffi::udt::CassDataType;
+use cql_ffi::udt::DataType;
 use cql_ffi::udt::CassConstDataType;
 use cql_ffi::error::CassError;
 
@@ -44,7 +44,7 @@ impl CassTuple {
         }
     }
 
-    pub fn new_from_data_type(data_type: CassDataType) -> CassTuple {
+    pub fn new_from_data_type(data_type: DataType) -> CassTuple {
         unsafe {
             CassTuple(cass_tuple_new_from_data_type(data_type.0))
         }
