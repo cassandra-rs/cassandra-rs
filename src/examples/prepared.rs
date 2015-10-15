@@ -30,10 +30,11 @@ fn insert_into_basic(session: &mut Session,
         .bind_bool(1, basic.bln).unwrap()
         .bind_float(2, basic.flt).unwrap()
         .bind_double(3, basic.dbl).unwrap()
-        .bind_int32(4, basic.i32).unwrap();
-//        .bind_int64(5, basic.i64).unwrap();
+        .bind_int32(4, basic.i32).unwrap()
+        .bind_int64(5, basic.i64).unwrap();
     println!("Executing insert statement");
     try!(session.execute_statement(&statement).wait());
+    println!("Insert execute OK");
     Ok(())
 }
 
@@ -68,7 +69,7 @@ fn main() {
     cluster.set_protocol_version(3).unwrap();
     println!("Proto set");
     let mut session = cluster.connect().unwrap();
-    
+
     println!("Connected");
     let mut input = Basic { bln: true, flt: 0.001f32, dbl: 0.0002f64, i32: 1, i64: 2 };
     let mut output = Basic { bln: false, flt: 0f32, dbl: 0f64, i32: 0, i64: 0 };
@@ -77,6 +78,7 @@ fn main() {
     println!("Creating table");
     session.execute(CREATE_TABLE,0);
 
+    println!("Basic insertions");
     insert_into_basic(&mut session, "prepared_test", &mut input).unwrap();
     println!("Preparing");
     match session.prepare(SELECT_QUERY).unwrap().wait() {
