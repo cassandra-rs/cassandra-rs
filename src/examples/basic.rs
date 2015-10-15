@@ -26,7 +26,7 @@ struct Basic {
 fn insert_into_basic(session: &mut Session,
                      key: &str,
                      basic: &Basic)
-                     -> Result<CassResult, CassError> {
+                     -> Result<CassandraResult, CassError> {
     let mut statement = Statement::new(INSERT_QUERY, 6);
     try!(statement.bind_string(0, key));
     try!(statement.bind_bool(1, basic.bln));

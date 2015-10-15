@@ -3,7 +3,7 @@ use std::str;
 use std::slice;
 
 use cql_ffi::error::CassError;
-use cql_ffi::result::CassResult;
+use cql_ffi::result::CassandraResult;
 use cql_ffi::prepared::PreparedStatement;
 
 use cql_bindgen::CassFuture as _Future;
@@ -84,14 +84,14 @@ impl Drop for ResultFuture {
 
 impl ResultFuture {
 
-    pub fn wait(&mut self) -> Result<CassResult, CassError> {
+    pub fn wait(&mut self) -> Result<CassandraResult, CassError> {
         unsafe {
             cass_future_wait(self.0);
             self.error_code()
         }
     }
 
-    pub fn error_code(&mut self) -> Result<CassResult, CassError> {
+    pub fn error_code(&mut self) -> Result<CassandraResult, CassError> {
         unsafe {
             CassError::build(cass_future_error_code(self.0)).wrap(self.get())
         }
@@ -109,9 +109,9 @@ impl ResultFuture {
     }
 
 
-    pub fn get(&mut self) -> CassResult {
+    pub fn get(&mut self) -> CassandraResult {
         unsafe {
-            CassResult(cass_future_get_result(self.0))
+            CassandraResult(cass_future_get_result(self.0))
         }
     }
 }

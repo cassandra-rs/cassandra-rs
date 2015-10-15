@@ -12,7 +12,7 @@ static CREATE_TABLE:&'static str = "CREATE TABLE examples.collections (key text,
 fn insert_into_collections(session: &mut Session,
                            key: &str,
                            items: Vec<String>)
-                           -> Result<CassResult, CassError> {
+                           -> Result<CassandraResult, CassError> {
     let mut statement = Statement::new(INSERT_QUERY, 2);
     try!(statement.bind_string(0, key));
     let mut set = Set::new(2);

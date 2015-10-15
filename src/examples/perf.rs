@@ -201,7 +201,7 @@
 //~ if (rc != CASS_OK) {
 //~ print_error(future);
 //~ } else {
-//~ const CassResult* result = cass_future_get_result(future);
+//~ const CassandraResult* result = cass_future_get_result(future);
 //~ assert(cass_result_column_count(result) == 6);
 //~ cass_result_free(result);
 //~ num_requests++;

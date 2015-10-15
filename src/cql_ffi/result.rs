@@ -13,7 +13,7 @@ use std::str;
 use cql_ffi::value::ValueType;
 use cql_ffi::row::Row;
 
-use cql_bindgen::CassResult as _CassResult;
+use cql_bindgen::CassResult as _CassandraResult;
 use cql_bindgen::CassIterator as _CassIterator;
 use cql_bindgen::cass_iterator_free;
 use cql_bindgen::cass_iterator_next;
@@ -28,9 +28,9 @@ use cql_bindgen::cass_result_has_more_pages;
 use cql_bindgen::cass_iterator_from_result;
 //use cql_bindgen::cass_result_column_data_type;
 
-pub struct CassResult(pub *const _CassResult);
+pub struct CassandraResult(pub *const _CassandraResult);
 
-impl Debug for CassResult {
+impl Debug for CassandraResult {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         try!(write!(f, "Result row count: {:?}\n", self.row_count()));
         for row in self.iter() {
@@ -40,7 +40,7 @@ impl Debug for CassResult {
     }
 }
 
-impl Display for CassResult {
+impl Display for CassandraResult {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         try!(write!(f, "Result row count: {:?}\n", self.row_count()));
         for row in self.iter() {
@@ -50,7 +50,7 @@ impl Display for CassResult {
     }
 }
 
-impl Drop for CassResult {
+impl Drop for CassandraResult {
     fn drop(&mut self) {
         unsafe {
             self.free()
@@ -58,7 +58,7 @@ impl Drop for CassResult {
     }
 }
 
-impl CassResult {
+impl CassandraResult {
     unsafe fn free(&mut self) {
         cass_result_free(self.0)
     }
@@ -75,7 +75,7 @@ impl CassResult {
         }
     }
 
-                                    //~ result: *const CassResult, index: size_t,
+                                    //~ result: *const CassandraResult, index: size_t,
                                    //~ name: *mut *const ::libc::c_char,
                                    //~ name_length: *mut size_t
 
@@ -150,7 +150,7 @@ impl ResultIterator {
 
 }
 
-impl IntoIterator for CassResult {
+impl IntoIterator for CassandraResult {
 
     type Item = Row;
     type IntoIter = ResultIterator;
@@ -160,7 +160,7 @@ impl IntoIterator for CassResult {
     }
 }
 
-//impl<'a> IntoIterator for &'a CassResult {
+//impl<'a> IntoIterator for &'a CassandraResult {
 //    type Item = Row;
 //    type IntoIter = ResultIterator;
 //

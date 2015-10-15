@@ -6,7 +6,7 @@ use cql_ffi::collection::list::List;
 use cql_ffi::error::CassError;
 use cql_ffi::uuid::Uuid;
 use cql_ffi::inet::Inet;
-use cql_ffi::result::CassResult;
+use cql_ffi::result::CassandraResult;
 use cql_ffi::consistency::Consistency;
 use cql_ffi::udt::UserType;
 
@@ -125,7 +125,7 @@ impl Statement {
         }
     }
 
-    pub fn set_paging_state(&mut self, result: &CassResult) -> Result<&mut Self, CassError> {
+    pub fn set_paging_state(&mut self, result: &CassandraResult) -> Result<&mut Self, CassError> {
         unsafe {
             try!(
                 CassError::build(
