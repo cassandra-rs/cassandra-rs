@@ -239,53 +239,32 @@ impl Cluster {
             cass_cluster_set_load_balance_dc_aware(
                 self.0,local_dc.as_ptr(),
                 used_hosts_per_remote_dc,
-                if allow_remote_dcs_for_local_cl {1} else {0}
+                allow_remote_dcs_for_local_cl as u32
             )
         }).wrap(self)
         }
     }
 
     pub unsafe fn set_token_aware_routing(&mut self, enabled: bool) -> &Self {
-        cass_cluster_set_token_aware_routing(self.0,
-                                             if enabled {
-                1
-            } else {
-                0
-            });
+        cass_cluster_set_token_aware_routing(self.0, enabled as u32);
         self
     }
 
     pub fn set_tcp_nodelay(&mut self, enable: bool) -> &Self {
         unsafe {
-            cass_cluster_set_tcp_nodelay(self.0,
-                                         if enable {
-                    1
-                } else {
-                    0
-                });
+            cass_cluster_set_tcp_nodelay(self.0, enable as u32);
             self
         }
     }
 
     pub unsafe fn set_tcp_keepalive(&mut self, enable: bool, delay_secs: u32) -> &Self {
-        cass_cluster_set_tcp_keepalive(self.0,
-                                       if enable {
-                1
-            } else {
-                0
-            },
-                                       delay_secs);
+        cass_cluster_set_tcp_keepalive(self.0, enable as u32, delay_secs);
         self
     }
 
     pub fn set_latency_aware_routing(&mut self, enabled: bool) -> &Self {
         unsafe {
-            cass_cluster_set_latency_aware_routing(self.0,
-                                                   if enabled {
-                    1
-                } else {
-                    0
-                });
+            cass_cluster_set_latency_aware_routing(self.0,enabled as u32);
             self
         }
     }
