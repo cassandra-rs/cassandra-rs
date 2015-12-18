@@ -53,6 +53,20 @@ use cql_bindgen::CASS_ERROR_LIB_MESSAGE_ENCODE;
 use cql_bindgen::CASS_ERROR_LIB_UNABLE_TO_INIT;
 use cql_bindgen::CASS_OK;
 
+use cql_bindgen::cass_error_num_arg_types;
+use cql_bindgen::cass_error_result_arg_type;
+use cql_bindgen::cass_error_result_code;
+use cql_bindgen::cass_error_result_consistency;
+use cql_bindgen::cass_error_result_data_present;
+use cql_bindgen::cass_error_result_free;
+use cql_bindgen::cass_error_result_function;
+use cql_bindgen::cass_error_result_keyspace;
+use cql_bindgen::cass_error_result_num_failures;
+use cql_bindgen::cass_error_result_responses_received;
+use cql_bindgen::cass_error_result_responses_required;
+use cql_bindgen::cass_error_result_table;
+use cql_bindgen::cass_error_result_write_type;
+
 use cql_bindgen::CassError as _CassandraError;
 
 #[repr(C)]
@@ -68,24 +82,16 @@ pub struct CassandraError(_CassandraError);
 
 impl Error for CassandraError {
     fn description(&self) -> &str {
-        let c_buf: *const i8 = unsafe {
-            self.desc()
-        };
-        let buf: &[u8] = unsafe {
-            CStr::from_ptr(c_buf).to_bytes()
-        };
+        let c_buf: *const i8 = self.desc();
+        let buf: &[u8] = unsafe { CStr::from_ptr(c_buf).to_bytes() };
         from_utf8(buf).unwrap()
     }
 }
 
 impl Display for CassandraError {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        let c_buf: *const i8 = unsafe {
-            self.desc()
-        };
-        let buf: &[u8] = unsafe {
-            CStr::from_ptr(c_buf).to_bytes()
-        };
+        let c_buf: *const i8 = self.desc();
+        let buf: &[u8] = unsafe { CStr::from_ptr(c_buf).to_bytes() };
         match str::from_utf8(buf) {
             Ok(str_slice) => {
                 write!(f, "{}", str_slice)
@@ -97,12 +103,8 @@ impl Display for CassandraError {
 
 impl Debug for CassandraError {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        let c_buf: *const i8 = unsafe {
-            self.desc()
-        };
-        let buf: &[u8] = unsafe {
-            CStr::from_ptr(c_buf).to_bytes()
-        };
+        let c_buf: *const i8 = self.desc();
+        let buf: &[u8] = unsafe { CStr::from_ptr(c_buf).to_bytes() };
         match str::from_utf8(buf) {
             Ok(str_slice) => {
                 write!(f, "{:?}", str_slice)
@@ -228,11 +230,12 @@ impl CassandraError {
 
 
 impl CassandraError {
-    pub unsafe fn desc(&self) -> *const i8 {
+    pub fn desc(&self) -> *const i8 {unsafe{
         cass_error_desc(self.0)
-    }
+    }}
+    
     pub fn debug(&self) {
-        println!("{:?}",self)
+        println!("{:?}", self)
     }
 
 }

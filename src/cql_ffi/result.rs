@@ -26,7 +26,8 @@ use cql_bindgen::cass_result_column_type;
 use cql_bindgen::cass_result_first_row;
 use cql_bindgen::cass_result_has_more_pages;
 use cql_bindgen::cass_iterator_from_result;
-//use cql_bindgen::cass_result_column_data_type;
+use cql_bindgen::cass_result_column_data_type;
+use cql_bindgen::cass_result_paging_state_token;
 
 pub struct CassandraResult(pub *const _CassandraResult);
 
@@ -34,7 +35,7 @@ impl Debug for CassandraResult {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         try!(write!(f, "Result row count: {:?}\n", self.row_count()));
         for row in self.iter() {
-            try!(write!(f, "{:?}\n",row));
+            try!(write!(f, "{:?}\n", row));
         }
         Ok(())
     }
@@ -44,7 +45,7 @@ impl Display for CassandraResult {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         try!(write!(f, "Result row count: {:?}\n", self.row_count()));
         for row in self.iter() {
-            try!(write!(f, "{}\n",row));
+            try!(write!(f, "{}\n", row));
         }
         Ok(())
     }
@@ -52,9 +53,7 @@ impl Display for CassandraResult {
 
 impl Drop for CassandraResult {
     fn drop(&mut self) {
-        unsafe {
-            self.free()
-        }
+        unsafe { self.free() }
     }
 }
 
@@ -64,20 +63,16 @@ impl CassandraResult {
     }
 
     pub fn row_count(&self) -> u64 {
-        unsafe {
-            cass_result_row_count(self.0) as u64
-        }
+        unsafe { cass_result_row_count(self.0) as u64 }
     }
 
     pub fn column_count(&self) -> u64 {
-        unsafe {
-            cass_result_column_count(self.0) as u64
-        }
+        unsafe { cass_result_column_count(self.0) as u64 }
     }
 
-                                    //~ result: *const CassandraResult, index: size_t,
-                                   //~ name: *mut *const ::libc::c_char,
-                                   //~ name_length: *mut size_t
+    // ~ result: *const CassandraResult, index: size_t,
+    // ~ name: *mut *const ::libc::c_char,
+    // ~ name_length: *mut size_t
 
 
     pub fn column_name(&self, index: u64) -> String {
@@ -91,9 +86,7 @@ impl CassandraResult {
     }
 
     pub fn column_type(&self, index: u64) -> ValueType {
-        unsafe {
-            ValueType::build(cass_result_column_type(self.0, index))
-        }
+        unsafe { ValueType::build(cass_result_column_type(self.0, index)) }
     }
 
     pub fn first_row(&self) -> Option<Row> {
@@ -106,15 +99,11 @@ impl CassandraResult {
     }
 
     pub fn has_more_pages(&self) -> bool {
-        unsafe {
-            cass_result_has_more_pages(self.0) > 0
-        }
+        unsafe { cass_result_has_more_pages(self.0) > 0 }
     }
 
     pub fn iter(&self) -> ResultIterator {
-        unsafe {
-            ResultIterator(cass_iterator_from_result(self.0))
-        }
+        unsafe { ResultIterator(cass_iterator_from_result(self.0)) }
     }
 
 }
@@ -123,9 +112,7 @@ pub struct ResultIterator(pub *mut _CassIterator);
 
 impl Drop for ResultIterator {
     fn drop(&mut self) {
-        unsafe {
-            cass_iterator_free(self.0)
-        }
+        unsafe { cass_iterator_free(self.0) }
     }
 }
 
@@ -143,9 +130,7 @@ impl Iterator for ResultIterator {
 
 impl ResultIterator {
     pub fn get_row(&mut self) -> Row {
-        unsafe {
-            Row(cass_iterator_get_row(self.0))
-        }
+        unsafe { Row(cass_iterator_get_row(self.0)) }
     }
 
 }
@@ -160,11 +145,11 @@ impl IntoIterator for CassandraResult {
     }
 }
 
-//impl<'a> IntoIterator for &'a CassandraResult {
+// impl<'a> IntoIterator for &'a CassandraResult {
 //    type Item = Row;
 //    type IntoIter = ResultIterator;
 //
 //    fn into_iter(self) -> Self::IntoIter {unsafe{
 //        ResultIterator(cass_iterator_from_result(self.0))
 //    }}
-//}
+// }

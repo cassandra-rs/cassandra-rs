@@ -17,15 +17,9 @@ use cql_bindgen::cass_iterator_free;
 use cql_bindgen::cass_iterator_type;
 use cql_bindgen::cass_iterator_next;
 use cql_bindgen::cass_iterator_get_value;
-//use cql_bindgen::cass_iterator_fields_from_schema_meta;
-use cql_bindgen::cass_iterator_get_schema_meta;
-use cql_bindgen::cass_iterator_get_schema_meta_field;
-
 use cql_ffi::udt::UserType;
 use cql_ffi::value::Value;
 use cql_ffi::cass_iterator::CassIteratorType;
-use cql_ffi::schema::SchemaMetaField;
-use cql_ffi::schema::SchemaMeta;//use cql_bindgen::cass_collection_append_decimal;
 use cql_ffi::collection::collection::CassCollectionType;
 use cql_ffi::error::CassandraError;
 use cql_ffi::uuid::Uuid;
@@ -43,45 +37,31 @@ impl Drop for Set {
 
 impl Set {
     pub fn new(item_count: u64) -> Set {
-        unsafe {
-            Set(cass_collection_new(CassCollectionType::SET as u32, item_count))
-        }
+        unsafe { Set(cass_collection_new(CassCollectionType::SET as u32, item_count)) }
     }
 
     fn free(&mut self) {
-        unsafe {
-            cass_collection_free(self.0)
-        }
+        unsafe { cass_collection_free(self.0) }
     }
 
     pub fn append_int32(&mut self, value: i32) -> Result<&Self, CassandraError> {
-        unsafe {
-            CassandraError::build(cass_collection_append_int32(self.0,value)).wrap(self)
-        }
+        unsafe { CassandraError::build(cass_collection_append_int32(self.0, value)).wrap(self) }
     }
 
     pub fn append_int64(&mut self, value: i64) -> Result<&Self, CassandraError> {
-        unsafe {
-            CassandraError::build(cass_collection_append_int64(self.0,value)).wrap(self)
-        }
+        unsafe { CassandraError::build(cass_collection_append_int64(self.0, value)).wrap(self) }
     }
 
     pub fn append_float(&mut self, value: f32) -> Result<&Self, CassandraError> {
-        unsafe {
-            CassandraError::build(cass_collection_append_float(self.0,value)).wrap(self)
-        }
+        unsafe { CassandraError::build(cass_collection_append_float(self.0, value)).wrap(self) }
     }
 
     pub fn append_double(&mut self, value: f64) -> Result<&Self, CassandraError> {
-        unsafe {
-            CassandraError::build(cass_collection_append_double(self.0,value)).wrap(self)
-        }
+        unsafe { CassandraError::build(cass_collection_append_double(self.0, value)).wrap(self) }
     }
 
     pub fn append_bool(&mut self, value: bool) -> Result<&Self, CassandraError> {
-        unsafe {
-            CassandraError::build(cass_collection_append_bool(self.0,if value {1} else {0})).wrap(self)
-        }
+        unsafe { CassandraError::build(cass_collection_append_bool(self.0, if value { 1 } else { 0 })).wrap(self) }
     }
 
     pub fn append_string(&mut self, value: &str) -> Result<&Self, CassandraError> {
@@ -94,53 +74,45 @@ impl Set {
 
     pub fn append_bytes(&mut self, value: Vec<u8>) -> Result<&Self, CassandraError> {
         unsafe {
-            let bytes = cass_collection_append_bytes(self.0,
-                                                     value[..].as_ptr(),
-                                                     value.len() as u64);
+            let bytes = cass_collection_append_bytes(self.0, value[..].as_ptr(), value.len() as u64);
             CassandraError::build(bytes).wrap(self)
         }
     }
 
     pub fn append_uuid(&mut self, value: Uuid) -> Result<&Self, CassandraError> {
-        unsafe {
-            CassandraError::build(cass_collection_append_uuid(self.0,value.0)).wrap(self)
-        }
+        unsafe { CassandraError::build(cass_collection_append_uuid(self.0, value.0)).wrap(self) }
     }
 
     pub fn append_inet(&mut self, value: Inet) -> Result<&Self, CassandraError> {
-        unsafe {
-            CassandraError::build(cass_collection_append_inet(self.0,value.0)).wrap(self)
-        }
+        unsafe { CassandraError::build(cass_collection_append_inet(self.0, value.0)).wrap(self) }
     }
 
     pub fn append_user_type(&mut self, value: UserType) -> Result<&Self, CassandraError> {
-        unsafe {
-            CassandraError::build(cass_collection_append_user_type(self.0,value.0)).wrap(self)
-        }
+        unsafe { CassandraError::build(cass_collection_append_user_type(self.0, value.0)).wrap(self) }
     }
 
-//    pub fn append_decimal(&mut self, value: String) -> Result<&Self,CassandraError> {unsafe{
-//        CassandraError::build(cass_collection_append_decimal(self.0,value)).wrap(self)
+// pub fn append_decimal(&mut self, value: String) ->
+// Result<&Self,CassandraError> {unsafe{
+// CassandraError::build(cass_collection_append_decimal(self.0,value)).
+// wrap(self)
 //    }}
 }
 
 
 pub struct SetIterator(pub *mut _CassIterator);
 
-//impl<'a> Display for &'a SetIterator {
+// impl<'a> Display for &'a SetIterator {
 //    fn fmt(&self, f:&mut Formatter) -> fmt::Result {
 //        for item in self {
 //            try!(write!(f, "{}\t", item));
 //        }
 //        Ok(())
 //    }
-//}
+// }
 
 impl Drop for SetIterator {
     fn drop(&mut self) {
-        unsafe {
-            cass_iterator_free(self.0)
-        }
+        unsafe { cass_iterator_free(self.0) }
     }
 }
 
@@ -157,27 +129,22 @@ impl Iterator for SetIterator {
 }
 
 impl SetIterator {
-    pub unsafe fn get_type(&mut self) -> CassIteratorType {
+    pub fn get_type(&mut self) -> CassIteratorType {unsafe{
         CassIteratorType::new(cass_iterator_type(self.0))
-    }
+    }}
 
-    //~ unsafe fn get_column(&mut self) -> Column {Column(cass_iterator_get_column(self.0))}
+    // ~ unsafe fn get_column(&mut self) -> Column
+    // {Column(cass_iterator_get_column(self.0))}
 
     pub fn get_value(&mut self) -> Value {
-        unsafe {
-            Value::new(cass_iterator_get_value(self.0))
-        }
+        unsafe { Value::new(cass_iterator_get_value(self.0)) }
     }
 
-    pub fn get_schema_meta(&mut self) -> SchemaMeta {
-        unsafe {
-            SchemaMeta(cass_iterator_get_schema_meta(self.0))
-        }
-    }
+//    pub fn get_schema_meta(&mut self) -> SchemaMeta {
+//        unsafe { SchemaMeta(cass_iterator_get_schema_meta(self.0)) }
+//    }
 
-    pub fn get_schema_meta_field(&mut self) -> SchemaMetaField {
-        unsafe {
-            SchemaMetaField(cass_iterator_get_schema_meta_field(&mut *self.0))
-        }
-    }
+//    pub fn get_schema_meta_field(&mut self) -> SchemaMetaField {
+//        unsafe { SchemaMetaField(cass_iterator_get_schema_meta_field(&mut *self.0)) }
+//    }
 }

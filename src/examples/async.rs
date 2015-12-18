@@ -23,7 +23,7 @@ fn insert_into_async(session: &mut Session, key: String) -> Result<(), Cassandra
     let query = "INSERT INTO examples.async (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, \
                  ?);";
     let mut futures = Vec::<ResultFuture>::new();
-    for i in (0..NUM_CONCURRENT_REQUESTS) {
+    for i in 0..NUM_CONCURRENT_REQUESTS {
         let key: String = key.clone() + &i.to_string();
         let mut statement = Statement::new(query, 6);
         statement

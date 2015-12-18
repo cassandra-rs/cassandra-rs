@@ -4,6 +4,10 @@ use cql_bindgen::CassError;
 use cql_bindgen::CassConsistency;
 use cql_bindgen::cass_batch_set_consistency;
 use cql_bindgen::cass_batch_add_statement;
+use cql_bindgen::cass_batch_set_custom_payload;
+use cql_bindgen::cass_batch_set_retry_policy;
+use cql_bindgen::cass_batch_set_serial_consistency;
+use cql_bindgen::cass_batch_set_timestamp;
 use cql_bindgen::cass_batch_free;
 use cql_bindgen::cass_batch_new;
 use cql_bindgen::CASS_BATCH_TYPE_LOGGED;
@@ -21,17 +25,13 @@ pub enum BatchType {
 
 impl Drop for Batch {
     fn drop(&mut self) {
-        unsafe {
-            cass_batch_free(self.0)
-        }
+        unsafe { cass_batch_free(self.0) }
     }
 }
 
 impl Batch {
     pub fn new(_type: BatchType) -> Batch {
-        unsafe {
-            Batch(cass_batch_new(_type as u32))
-        }
+        unsafe { Batch(cass_batch_new(_type as u32)) }
     }
 
     pub fn set_consistency(&mut self, consistency: CassConsistency) -> Result<&Self, CassError> {

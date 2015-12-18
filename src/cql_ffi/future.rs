@@ -12,32 +12,33 @@ use cql_bindgen::cass_future_error_message;
 use cql_bindgen::cass_future_wait_timed;
 use cql_bindgen::cass_future_wait;
 use cql_bindgen::cass_future_ready;
-//use cql_bindgen::cass_future_set_callback;
 use cql_bindgen::cass_future_error_code;
 use cql_bindgen::cass_future_get_result;
 use cql_bindgen::cass_future_get_prepared;
+use cql_bindgen::cass_future_custom_payload_item;
+use cql_bindgen::cass_future_custom_payload_item_count;
+use cql_bindgen::cass_future_get_error_result;
+use cql_bindgen::cass_future_set_callback;
 
 pub struct Future(pub *mut _Future);
 
 impl Drop for Future {
     fn drop(&mut self) {
-        unsafe {
-            cass_future_free(self.0)
-        }
+        unsafe { cass_future_free(self.0) }
     }
 }
 
 impl Future {
 
-//    pub unsafe fn set_callback(&mut self, callback: FutureCallback, data: *mut c_void)
-//        -> Result<&Self,CassandraError> {
-//        CassandraError::build(cass_future_set_callback(self.0, callback.0, data)).wrap(self)
-//    }
+    // pub fn set_callback(&mut self, callback: FutureCallback, data:
+    // *mut c_void)
+    //        -> Result<&Self,CassandraError> {unsafe{
+    // CassandraError::build(cass_future_set_callback(self.0, callback.0,
+    // data)).wrap(self)
+    //    }}
 
     pub fn ready(&mut self) -> bool {
-        unsafe {
-            cass_future_ready(self.0) > 0
-        }
+        unsafe { cass_future_ready(self.0) > 0 }
     }
 
     pub fn wait(self) -> Result<Self, CassandraError> {
@@ -48,15 +49,11 @@ impl Future {
     }
 
     pub fn wait_timed(&mut self, timeout_us: u64) -> bool {
-        unsafe {
-            cass_future_wait_timed(self.0, timeout_us) > 0
-        }
+        unsafe { cass_future_wait_timed(self.0, timeout_us) > 0 }
     }
 
     fn error_code(self) -> Result<Self, CassandraError> {
-        unsafe {
-            CassandraError::build(cass_future_error_code(self.0)).wrap(self)
-        }
+        unsafe { CassandraError::build(cass_future_error_code(self.0)).wrap(self) }
     }
 
     pub fn error_message(&mut self) -> String {
@@ -76,9 +73,7 @@ pub struct ResultFuture(pub *mut _Future);
 
 impl Drop for ResultFuture {
     fn drop(&mut self) {
-        unsafe {
-            cass_future_free(self.0)
-        }
+        unsafe { cass_future_free(self.0) }
     }
 }
 
@@ -92,9 +87,7 @@ impl ResultFuture {
     }
 
     pub fn error_code(&mut self) -> Result<CassandraResult, CassandraError> {
-        unsafe {
-            CassandraError::build(cass_future_error_code(self.0)).wrap(self.get())
-        }
+        unsafe { CassandraError::build(cass_future_error_code(self.0)).wrap(self.get()) }
     }
 
     pub fn error_message(&mut self) -> String {
@@ -110,9 +103,7 @@ impl ResultFuture {
 
 
     pub fn get(&mut self) -> CassandraResult {
-        unsafe {
-            CassandraResult(cass_future_get_result(self.0))
-        }
+        unsafe { CassandraResult(cass_future_get_result(self.0)) }
     }
 }
 
@@ -121,9 +112,7 @@ pub struct PreparedFuture(pub *mut _Future);
 
 impl Drop for PreparedFuture {
     fn drop(&mut self) {
-        unsafe {
-            cass_future_free(self.0)
-        }
+        unsafe { cass_future_free(self.0) }
     }
 }
 
@@ -137,9 +126,7 @@ impl PreparedFuture {
     }
 
     pub fn error_code(&mut self) -> Result<PreparedStatement, CassandraError> {
-        unsafe {
-            CassandraError::build(cass_future_error_code(self.0)).wrap(self.get())
-        }
+        unsafe { CassandraError::build(cass_future_error_code(self.0)).wrap(self.get()) }
     }
 
     pub fn error_message(&mut self) -> String {
@@ -154,9 +141,7 @@ impl PreparedFuture {
     }
 
     pub fn get(&mut self) -> PreparedStatement {
-        unsafe {
-            PreparedStatement(cass_future_get_prepared(self.0))
-        }
+        unsafe { PreparedStatement(cass_future_get_prepared(self.0)) }
     }
 
 }

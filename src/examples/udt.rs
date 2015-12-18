@@ -71,12 +71,12 @@ fn select_from_udt(session: &Session) -> Result<(), CassandraError> {
     }
 }
 
-fn insert_into_udt(session: &Session, schema: Schema) -> Result<(), CassandraError> {
+fn insert_into_udt(session: &Session) -> Result<(), CassandraError> {
     let query = "INSERT INTO examples.udt (id, address) VALUES (?, ?)";
     let mut statement = Statement::new(query, 2);
     let uuid_gen = UuidGen::new();
     let udt_address = schema.get_udt("examples", "address");
-    let udt_phone = Schema::get_udt(&schema, "examples", "phone_numbers");
+    let udt_phone = cass_keyspace_meta_user_type_by_name(&schema, "examples", "phone_numbers");
     let id = uuid_gen.get_time();
     let id_str = id.to_string();
     let mut address = UserType::new(udt_address);

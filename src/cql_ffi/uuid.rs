@@ -19,12 +19,12 @@ use cql_bindgen::cass_uuid_max_from_time;
 use cql_bindgen::cass_uuid_timestamp;
 use cql_bindgen::cass_uuid_version;
 use cql_bindgen::cass_uuid_string;
-//use cql_bindgen::raw2utf8;
-//use cql_bindgen::cass_uuid_from_string;
+// use cql_bindgen::raw2utf8;
+use cql_bindgen::cass_uuid_from_string;
 
-//use cql_ffi::error::CassandraError;
+// use cql_ffi::error::CassandraError;
 
-const CASS_UUID_STRING_LENGTH:usize = 37;
+const CASS_UUID_STRING_LENGTH: usize = 37;
 
 
 #[derive(Copy,Clone)]
@@ -32,9 +32,7 @@ pub struct Uuid(pub _Uuid);
 
 impl ::std::default::Default for Uuid {
     fn default() -> Uuid {
-        unsafe {
-            ::std::mem::zeroed()
-        }
+        unsafe { ::std::mem::zeroed() }
     }
 }
 
@@ -42,9 +40,7 @@ pub struct UuidGen(pub *mut _UuidGen);
 
 impl Drop for UuidGen {
     fn drop(&mut self) {
-        unsafe {
-            cass_uuid_gen_free(self.0)
-        }
+        unsafe { cass_uuid_gen_free(self.0) }
     }
 }
 
@@ -62,33 +58,25 @@ impl Display for Uuid {
 
 impl Uuid {
     pub fn min_from_time(&mut self, time: u64) {
-        unsafe {
-            cass_uuid_min_from_time(time, &mut self.0)
-        }
+        unsafe { cass_uuid_min_from_time(time, &mut self.0) }
     }
 
     pub fn max_from_time(&mut self, time: u64) {
-        unsafe {
-            cass_uuid_max_from_time(time, &mut self.0)
-        }
+        unsafe { cass_uuid_max_from_time(time, &mut self.0) }
     }
 
     pub fn timestamp(&self) -> u64 {
-        unsafe {
-            cass_uuid_timestamp(self.0)
-        }
+        unsafe { cass_uuid_timestamp(self.0) }
     }
 
     pub fn version(&self) -> u8 {
-        unsafe {
-            cass_uuid_version(self.0)
-        }
+        unsafe { cass_uuid_version(self.0) }
     }
 
-    //FIXME
+    // FIXME
     pub fn to_string(&self) -> String {
         unsafe {
-            let mut time_str: [i8; CASS_UUID_STRING_LENGTH] = [0;CASS_UUID_STRING_LENGTH];
+            let mut time_str: [i8; CASS_UUID_STRING_LENGTH] = [0; CASS_UUID_STRING_LENGTH];
 
             cass_uuid_string(self.0, time_str[..].as_mut_ptr());
             let mut output: i8 = mem::zeroed();
@@ -98,22 +86,19 @@ impl Uuid {
         }
     }
 
-//    pub unsafe fn from_string(&mut self, str: *const c_char) -> Result<(),CassandraError> {
+// pub fn from_string(&mut self, str: *const c_char) ->
+// Result<(),CassandraError> {unsafe{
 //        CassandraError::build(cass_uuid_from_string(str,&mut self.0))
-//    }
+//    }}
 }
 
 impl UuidGen {
     pub fn new() -> Self {
-        unsafe {
-            UuidGen(cass_uuid_gen_new())
-        }
+        unsafe { UuidGen(cass_uuid_gen_new()) }
     }
 
     pub fn new_with_node(node: u64) -> UuidGen {
-        unsafe {
-            UuidGen(cass_uuid_gen_new_with_node(node))
-        }
+        unsafe { UuidGen(cass_uuid_gen_new_with_node(node)) }
     }
 
     pub fn get_time(&self) -> Uuid {
@@ -125,9 +110,7 @@ impl UuidGen {
     }
 
     pub fn fill_random(&self, mut output: Uuid) {
-        unsafe {
-            cass_uuid_gen_random(self.0, &mut output.0)
-        }
+        unsafe { cass_uuid_gen_random(self.0, &mut output.0) }
     }
 
     pub fn random(&self) -> Uuid {
@@ -139,8 +122,6 @@ impl UuidGen {
     }
 
     pub fn with_time(&self, timestamp: u64, mut output: Uuid) {
-        unsafe {
-            cass_uuid_gen_from_time(self.0, timestamp, &mut output.0)
-        }
+        unsafe { cass_uuid_gen_from_time(self.0, timestamp, &mut output.0) }
     }
 }

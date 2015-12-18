@@ -10,7 +10,7 @@ use cql_ffi::future::ResultFuture;
 use cql_ffi::future::PreparedFuture;
 use cql_ffi::error::CassandraError;
 use cql_ffi::statement::Statement;
-use cql_ffi::schema::Schema;
+//use cql_ffi::schema::Schema;
 use cql_ffi::cluster::Cluster;
 use cql_bindgen::CassFuture as _Future;
 use cql_bindgen::cass_future_free;
@@ -25,8 +25,9 @@ use cql_bindgen::cass_session_connect;
 use cql_bindgen::cass_session_prepare;
 use cql_bindgen::cass_session_execute;
 use cql_bindgen::cass_session_execute_batch;
-use cql_bindgen::cass_session_get_schema;
+use cql_bindgen::cass_session_get_schema_meta;
 use cql_bindgen::cass_session_connect_keyspace;
+use cql_bindgen::cass_session_get_metrics;
 
 pub struct Session(pub *mut _Session);
 
@@ -35,9 +36,7 @@ unsafe impl Send for Session{}
 
 impl Drop for Session {
     fn drop(&mut self) {
-        unsafe {
-            cass_session_free(self.0)
-        }
+        unsafe { cass_session_free(self.0) }
     }
 }
 
@@ -45,21 +44,15 @@ impl Session {
     /// Create a new Cassanda session.
     /// It's recommended to use Cluster.connect() instead
     pub fn new() -> Session {
-        unsafe {
-            Session(cass_session_new())
-        }
+        unsafe { Session(cass_session_new()) }
     }
 
     pub fn close(self) -> Future {
-        unsafe {
-            Future(cass_session_close(self.0))
-        }
+        unsafe { Future(cass_session_close(self.0)) }
     }
 
     pub fn connect(self, cluster: &Cluster) -> SessionFuture {
-        unsafe {
-            SessionFuture(cass_session_connect(self.0, cluster.0), self)
-        }
+        unsafe { SessionFuture(cass_session_connect(self.0, cluster.0), self) }
     }
 
     pub fn prepare(&self, query: &str) -> Result<PreparedFuture, CassandraError> {
@@ -70,36 +63,24 @@ impl Session {
     }
 
     pub fn execute(&self, statement: &str, parameter_count: u64) -> ResultFuture {
-        unsafe {
-            ResultFuture(cass_session_execute(self.0,
-                                              Statement::new(statement,parameter_count).0))
-        }
+        unsafe { ResultFuture(cass_session_execute(self.0, Statement::new(statement, parameter_count).0)) }
     }
 
     pub fn execute_statement(&self, statement: &Statement) -> ResultFuture {
-        unsafe {
-            ResultFuture(cass_session_execute(self.0, statement.0))
-        }
+        unsafe { ResultFuture(cass_session_execute(self.0, statement.0)) }
     }
 
     pub fn execute_batch(&self, batch: Batch) -> ResultFuture {
-        ResultFuture(unsafe {
-                cass_session_execute_batch(self.0, batch.0)
-            })
+        ResultFuture(unsafe { cass_session_execute_batch(self.0, batch.0) })
     }
 
-    pub fn get_schema(&self) -> Schema {
-        unsafe {
-            Schema(cass_session_get_schema(self.0))
-        }
-    }
+//    pub fn get_schema(&self) -> Schema {
+//        unsafe { Schema(cass_session_get_schema(self.0)) }
+//    }
 
-    pub unsafe fn connect_keyspace(&self,
-                                   cluster: Cluster,
-                                   keyspace: *const ::libc::c_char)
-                                   -> Future {
+    pub fn connect_keyspace(&self, cluster: Cluster, keyspace: *const ::libc::c_char) -> Future {unsafe{
         Future(cass_session_connect_keyspace(self.0, cluster.0, keyspace))
-    }
+    }}
 }
 
 pub struct SessionFuture(pub *mut _Future, pub Session);

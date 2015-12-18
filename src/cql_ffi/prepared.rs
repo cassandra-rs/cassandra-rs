@@ -3,10 +3,9 @@ use cql_ffi::statement::Statement;
 use cql_bindgen::CassPrepared as _PreparedStatement;
 use cql_bindgen::cass_prepared_free;
 use cql_bindgen::cass_prepared_bind;
-//use cql_bindgen::cass_prepared_parameter_name;
-//use cql_bindgen::cass_prepared_parameter_data_type;
-//use cql_bindgen::cass_prepared_parameter_data_type_by_name;
-//use cql_bindgen::cass_prepared_parameter_data_type_by_name_n;
+use cql_bindgen::cass_prepared_parameter_name;
+use cql_bindgen::cass_prepared_parameter_data_type;
+use cql_bindgen::cass_prepared_parameter_data_type_by_name;
 
 /// A statement that has been prepared against at least one Cassandra node.
 /// Instances of this class should not be created directly, but through Session.prepare().
@@ -17,16 +16,12 @@ unsafe impl Send for PreparedStatement{}
 
 impl Drop for PreparedStatement {
     fn drop(&mut self) {
-        unsafe {
-            cass_prepared_free(self.0)
-        }
+        unsafe { cass_prepared_free(self.0) }
     }
 }
 
 impl PreparedStatement {
     pub fn bind(&self) -> Statement {
-        unsafe {
-            Statement(cass_prepared_bind(self.0))
-        }
+        unsafe { Statement(cass_prepared_bind(self.0)) }
     }
 }

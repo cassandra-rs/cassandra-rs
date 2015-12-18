@@ -25,7 +25,7 @@ pub struct Row(pub *const _Row);
 impl Debug for Row {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         for column in self {
-            //println!("foo:{:?}",column);
+            // println!("foo:{:?}",column);
             try!(write!(f, "{:?}\t", Value::new(column.0)));
         }
         Ok(())
@@ -59,7 +59,7 @@ impl Row {
             let name = CString::new(name.into()).unwrap();
             println!("name: {:?}", name);
             println!("self: {:?}", self);
-        //unimplemented!();
+            // unimplemented!();
             Column(cass_row_get_column_by_name(self.0, name.as_ptr()))
         }
     }
@@ -70,9 +70,7 @@ pub struct RowIterator(pub *mut _CassIterator);
 
 impl Drop for RowIterator {
     fn drop(&mut self) {
-        unsafe {
-            cass_iterator_free(self.0)
-        }
+        unsafe { cass_iterator_free(self.0) }
     }
 }
 
@@ -119,9 +117,7 @@ impl IntoIterator for Row {
     type IntoIter = RowIterator;
 
     fn into_iter(self) -> Self::IntoIter {
-        unsafe {
-            RowIterator(cass_iterator_from_row(self.0))
-        }
+        unsafe { RowIterator(cass_iterator_from_row(self.0)) }
     }
 }
 
@@ -129,8 +125,6 @@ impl<'a> IntoIterator for &'a Row {
     type Item = Column;
     type IntoIter = RowIterator;
     fn into_iter(self) -> Self::IntoIter {
-        unsafe {
-            RowIterator(cass_iterator_from_row(self.0))
-        }
+        unsafe { RowIterator(cass_iterator_from_row(self.0)) }
     }
 }

@@ -5,23 +5,23 @@ license = "Apache-2.0"
 homepage = "https://github.com/tupshin/cassandra-rust"
 repository = "https://github.com/tupshin/cassandra-rust"
 name = "cassandra"
-version = "0.4.2"
+version = "0.5.0"
 authors = ["Tupshin Harper <tupshin@tupshin.com>"]
 build = "build.rs"
-
 
 [lib]
 name = "cassandra"
 
 [dependencies]
-libc = "0.1.*"
-num = "0.1.*"
-log = "0.3.*"
-cql_bindgen = "0.1.*"
+libc = "0.2"
+num = "0.1"
+log = "0.3"
+cql_bindgen = "0.2"
 # clippy = "*"
+rusty-cheddar = "0.1"
 
-# [depdencies.clippy]
-# git = "https://github.com:Manishearth/rust-clippy.git"
+# [dependencies.clippy]
+# git = "https://github.com/Manishearth/rust-clippy.git"
 
 [[bin]]
 name="async"
@@ -59,17 +59,17 @@ path="src/examples/paging.rs"
 name="prepared"
 path="src/examples/prepared.rs"
 
-[[bin]]
-name="schema_meta"
-path="src/examples/schema_meta.rs"
+# [[bin]]
+# name="schema_meta"
+# path="src/examples/schema_meta.rs"
 
 [[bin]]
 name="simple"
 path="src/examples/simple.rs"
 
-[[bin]]
-name="udt"
-path="src/examples/udt.rs"
+# [[bin]]
+# name="udt"
+# path="src/examples/udt.rs"
 
 [[bin]]
 name="uuids"

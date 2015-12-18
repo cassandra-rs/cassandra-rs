@@ -9,15 +9,16 @@ use cql_bindgen::cass_tuple_set_float;
 use cql_bindgen::cass_tuple_set_double;
 use cql_bindgen::cass_tuple_set_bool;
 use cql_bindgen::cass_tuple_set_string;
-//use cql_bindgen::cass_tuple_set_string_n;
 use cql_bindgen::cass_tuple_set_bytes;
 use cql_bindgen::cass_tuple_set_uuid;
 use cql_bindgen::cass_tuple_set_inet;
-//use cql_bindgen::cass_tuple_set_decimal;
-//use cql_bindgen::cass_tuple_set_collection;
-//use cql_bindgen::cass_tuple_set_tuple;
-//use cql_bindgen::cass_tuple_set_user_type;
-//use cql_bindgen::cass_iterator_from_tuple;
+use cql_bindgen::cass_tuple_set_collection;
+use cql_bindgen::cass_tuple_set_user_type;
+use cql_bindgen::cass_tuple_set_uint32;
+use cql_bindgen::cass_tuple_set_tuple;
+use cql_bindgen::cass_tuple_set_int8;
+use cql_bindgen::cass_tuple_set_int16;
+use cql_bindgen::cass_tuple_set_decimal;
 
 use std::ffi::CString;
 
@@ -33,71 +34,39 @@ pub struct Tuple(pub *mut _Tuple);
 
 impl Tuple {
     pub fn new(item_count: u64) -> Self {
-        unsafe {
-            Tuple(cass_tuple_new(item_count))
-        }
+        unsafe { Tuple(cass_tuple_new(item_count)) }
     }
 
     pub fn data_type(&mut self) -> ConstDataType {
-        unsafe {
-            ConstDataType(cass_tuple_data_type(self.0))
-        }
+        unsafe { ConstDataType(cass_tuple_data_type(self.0)) }
     }
 
     pub fn new_from_data_type(data_type: DataType) -> Tuple {
-        unsafe {
-            Tuple(cass_tuple_new_from_data_type(data_type.0))
-        }
+        unsafe { Tuple(cass_tuple_new_from_data_type(data_type.0)) }
     }
 
     pub fn set_null(&mut self, index: u64) -> Result<(), CassandraError> {
-        unsafe {
-            CassandraError::build(
-                cass_tuple_set_null(self.0, index)
-            ).wrap(())
-        }
+        unsafe { CassandraError::build(cass_tuple_set_null(self.0, index)).wrap(()) }
     }
 
     pub fn set_int32(&mut self, index: u64, value: i32) -> Result<(), CassandraError> {
-        unsafe {
-            CassandraError::build(
-                cass_tuple_set_int32(self.0, index, value)
-            ).wrap(())
-        }
+        unsafe { CassandraError::build(cass_tuple_set_int32(self.0, index, value)).wrap(()) }
     }
 
     pub fn set_int64(&mut self, index: u64, value: i64) -> Result<(), CassandraError> {
-        unsafe {
-            CassandraError::build(
-                cass_tuple_set_int64(self.0, index, value)
-            ).wrap(())
-        }
+        unsafe { CassandraError::build(cass_tuple_set_int64(self.0, index, value)).wrap(()) }
     }
 
     pub fn set_float(&mut self, index: u64, value: f32) -> Result<(), CassandraError> {
-        unsafe {
-            CassandraError::build(cass_tuple_set_float(self.0, index, value)).wrap(())
-        }
+        unsafe { CassandraError::build(cass_tuple_set_float(self.0, index, value)).wrap(()) }
     }
 
     pub fn set_double(&mut self, index: u64, value: f64) -> Result<(), CassandraError> {
-        unsafe {
-            CassandraError::build(
-                cass_tuple_set_double(self.0, index, value)
-            ).wrap(())
-        }
+        unsafe { CassandraError::build(cass_tuple_set_double(self.0, index, value)).wrap(()) }
     }
 
     pub fn set_bool(&mut self, index: u64, value: bool) -> Result<(), CassandraError> {
-        unsafe {
-            CassandraError::build(
-                cass_tuple_set_bool(
-                    self.0,
-                    index,
-                    if value {1} else {0}
-                )
-            ).wrap(())
-        }
+        unsafe { CassandraError::build(cass_tuple_set_bool(self.0, index, if value { 1 } else { 0 })).wrap(()) }
     }
 
     pub fn set_string<S>(&mut self, index: u64, value: S) -> Result<(), CassandraError>
@@ -105,53 +74,30 @@ impl Tuple {
     {
         unsafe {
             let value = CString::new(value.into()).unwrap();
-            CassandraError::build(
-                cass_tuple_set_string(self.0, index, value.as_ptr())
-            ).wrap(())
+            CassandraError::build(cass_tuple_set_string(self.0, index, value.as_ptr())).wrap(())
         }
     }
 
     pub fn set_inet(&mut self, index: u64, value: SocketAddr) -> Result<(), CassandraError> {
         let inet = AsInet::as_cass_inet(&value);
-        unsafe {
-            CassandraError::build(
-                cass_tuple_set_inet(
-                    self.0,
-                    index,
-                    inet.0,
-                )
-            ).wrap(())
-        }
+        unsafe { CassandraError::build(cass_tuple_set_inet(self.0, index, inet.0)).wrap(()) }
     }
 
     pub fn set_bytes(&mut self, index: u64, value: Vec<u8>) -> Result<(), CassandraError> {
         unsafe {
-            CassandraError::build(
-                cass_tuple_set_bytes(
-                    self.0,
-                    index,
-                    value.as_ptr(),
-                    value.len() as u64
-                )
-            ).wrap(())
+            CassandraError::build(cass_tuple_set_bytes(self.0, index, value.as_ptr(), value.len() as u64)).wrap(())
         }
     }
 
     pub fn set_uuid<S>(&mut self, index: u64, value: S) -> Result<(), CassandraError>
         where S: Into<Uuid>
     {
-        unsafe {
-            CassandraError::build(
-                cass_tuple_set_uuid(self.0, index, value.into().0)
-            ).wrap(())
-        }
+        unsafe { CassandraError::build(cass_tuple_set_uuid(self.0, index, value.into().0)).wrap(()) }
     }
 }
 
 impl Drop for Tuple {
     fn drop(&mut self) {
-        unsafe {
-            cass_tuple_free(self.0)
-        }
+        unsafe { cass_tuple_free(self.0) }
     }
 }
