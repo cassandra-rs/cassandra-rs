@@ -91,11 +91,11 @@ impl Set {
         unsafe { CassandraError::build(cass_collection_append_user_type(self.0, value.0)).wrap(self) }
     }
 
-// pub fn append_decimal(&mut self, value: String) ->
-// Result<&Self,CassandraError> {unsafe{
-// CassandraError::build(cass_collection_append_decimal(self.0,value)).
-// wrap(self)
-//    }}
+    // pub fn append_decimal(&mut self, value: String) ->
+    // Result<&Self,CassandraError> {unsafe{
+    // CassandraError::build(cass_collection_append_decimal(self.0,value)).
+    // wrap(self)
+    //    }}
 }
 
 
@@ -129,9 +129,9 @@ impl Iterator for SetIterator {
 }
 
 impl SetIterator {
-    pub fn get_type(&mut self) -> CassIteratorType {unsafe{
-        CassIteratorType::new(cass_iterator_type(self.0))
-    }}
+    pub fn get_type(&mut self) -> CassIteratorType {
+        unsafe { CassIteratorType::new(cass_iterator_type(self.0)) }
+    }
 
     // ~ unsafe fn get_column(&mut self) -> Column
     // {Column(cass_iterator_get_column(self.0))}
@@ -140,11 +140,11 @@ impl SetIterator {
         unsafe { Value::new(cass_iterator_get_value(self.0)) }
     }
 
-//    pub fn get_schema_meta(&mut self) -> SchemaMeta {
-//        unsafe { SchemaMeta(cass_iterator_get_schema_meta(self.0)) }
-//    }
+    //    pub fn get_schema_meta(&mut self) -> SchemaMeta {
+    //        unsafe { SchemaMeta(cass_iterator_get_schema_meta(self.0)) }
+    //    }
 
-//    pub fn get_schema_meta_field(&mut self) -> SchemaMetaField {
-//        unsafe { SchemaMetaField(cass_iterator_get_schema_meta_field(&mut *self.0)) }
-//    }
+    //    pub fn get_schema_meta_field(&mut self) -> SchemaMetaField {
+    //        unsafe { SchemaMetaField(cass_iterator_get_schema_meta_field(&mut *self.0)) }
+    //    }
 }

@@ -496,8 +496,8 @@ impl Iterator for UserTypeIterator {
 }
 
 impl UserTypeIterator {
-//    pub fn get_field_name(&mut self)-> Value {unsafe{
-//
-//        Value::new(cass_iterator_get_user_type_field_name(self.0))
-//    }}
+    //    pub fn get_field_name(&mut self)-> Value {unsafe{
+    //
+    //        Value::new(cass_iterator_get_user_type_field_name(self.0))
+    //    }}
 }

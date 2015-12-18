@@ -18,8 +18,6 @@ pub enum LogLevel {
     LAST_ENTRY = 7,
 }
 
-pub type CassLogCallback =
-    ::std::option::Option<extern "C" fn (
-        message: *const CassLogMessage,
-        data: *mut ::libc::c_void
-    )>;
+pub type CassLogCallback = ::std::option::Option<extern "C" fn(message: *const CassLogMessage,
+                                                                 data: *mut ::libc::c_void)
+                                                                >;

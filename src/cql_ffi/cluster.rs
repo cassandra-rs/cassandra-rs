@@ -65,7 +65,6 @@ impl Drop for Cluster {
 }
 
 impl Cluster {
-
     ///Creates a new cluster instance
     pub fn new() -> Cluster {
         unsafe { Cluster(cass_cluster_new()) }
@@ -142,9 +141,9 @@ impl Cluster {
         }
     }
 
-    pub fn set_max_requests_per_flush(&mut self, num_requests: u32) -> Result<&mut Self, CassandraError> {unsafe{
-        CassandraError::build(cass_cluster_set_max_requests_per_flush(self.0, num_requests)).wrap(self)
-    }}
+    pub fn set_max_requests_per_flush(&mut self, num_requests: u32) -> Result<&mut Self, CassandraError> {
+        unsafe { CassandraError::build(cass_cluster_set_max_requests_per_flush(self.0, num_requests)).wrap(self) }
+    }
 
     pub fn set_write_bytes_high_water_mark(&mut self, num_bytes: u32) -> Result<&mut Self, CassandraError> {
         unsafe { CassandraError::build(cass_cluster_set_write_bytes_high_water_mark(self.0, num_bytes)).wrap(self) }

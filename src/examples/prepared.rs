@@ -2,13 +2,13 @@ extern crate cassandra;
 
 use cassandra::*;
 
-static CREATE_KEYSPACE:&'static str = "CREATE KEYSPACE examples WITH replication = { \'class\': \
-                                       \'SimpleStrategy\', \'replication_factor\': \'3\' };";
-static CREATE_TABLE:&'static str = "CREATE TABLE examples.basic (key text, bln boolean, flt float, \
-                                    dbl double, i32 int, i64 bigint, PRIMARY KEY (key));";
-static INSERT_QUERY:&'static str = "INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) \
-                                    VALUES (?, ?, ?, ?, ?, ?);";
-static SELECT_QUERY:&'static str = "SELECT * FROM examples.basic WHERE key = ?";
+static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE examples WITH replication = { \'class\': \'SimpleStrategy\', \
+                                        \'replication_factor\': \'3\' };";
+static CREATE_TABLE: &'static str = "CREATE TABLE examples.basic (key text, bln boolean, flt float, dbl double, i32 \
+                                     int, i64 bigint, PRIMARY KEY (key));";
+static INSERT_QUERY: &'static str = "INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, \
+                                     ?);";
+static SELECT_QUERY: &'static str = "SELECT * FROM examples.basic WHERE key = ?";
 
 #[derive(Debug,PartialEq)]
 struct Basic {
@@ -19,19 +19,21 @@ struct Basic {
     i64: i64,
 }
 
-fn insert_into_basic(session: &mut Session,
-                     key: &str,
-                     basic: &mut Basic)
-                     -> Result<(), CassandraError> {
+fn insert_into_basic(session: &mut Session, key: &str, basic: &mut Basic) -> Result<(), CassandraError> {
     println!("Creating statement");
     let mut statement = Statement::new(INSERT_QUERY, 6);
-    statement
-        .bind_string(0, key).unwrap()
-        .bind_bool(1, basic.bln).unwrap()
-        .bind_float(2, basic.flt).unwrap()
-        .bind_double(3, basic.dbl).unwrap()
-        .bind_int32(4, basic.i32).unwrap()
-        .bind_int64(5, basic.i64).unwrap();
+    statement.bind_string(0, key)
+             .unwrap()
+             .bind_bool(1, basic.bln)
+             .unwrap()
+             .bind_float(2, basic.flt)
+             .unwrap()
+             .bind_double(3, basic.dbl)
+             .unwrap()
+             .bind_int32(4, basic.i32)
+             .unwrap()
+             .bind_int64(5, basic.i64)
+             .unwrap();
     println!("Executing insert statement");
     try!(session.execute_statement(&statement).wait());
     println!("Insert execute OK");
@@ -59,7 +61,7 @@ fn select_from_basic(session: &mut Session,
             }
             Ok(())
         }
-        Err(err) => panic!("{:?}",err),
+        Err(err) => panic!("{:?}", err),
     }
 }
 
@@ -71,12 +73,24 @@ fn main() {
     let mut session = cluster.connect().unwrap();
 
     println!("Connected");
-    let mut input = Basic { bln: true, flt: 0.001f32, dbl: 0.0002f64, i32: 1, i64: 2 };
-    let mut output = Basic { bln: false, flt: 0f32, dbl: 0f64, i32: 0, i64: 0 };
+    let mut input = Basic {
+        bln: true,
+        flt: 0.001f32,
+        dbl: 0.0002f64,
+        i32: 1,
+        i64: 2,
+    };
+    let mut output = Basic {
+        bln: false,
+        flt: 0f32,
+        dbl: 0f64,
+        i32: 0,
+        i64: 0,
+    };
     println!("Executing create keyspace");
-    session.execute(CREATE_KEYSPACE,0);
+    session.execute(CREATE_KEYSPACE, 0);
     println!("Creating table");
-    session.execute(CREATE_TABLE,0);
+    session.execute(CREATE_TABLE, 0);
 
     println!("Basic insertions");
     insert_into_basic(&mut session, "prepared_test", &mut input).unwrap();
@@ -84,8 +98,8 @@ fn main() {
     match session.prepare(SELECT_QUERY).unwrap().wait() {
         Ok(prepared) => {
             select_from_basic(&mut session, &prepared, "prepared_test", &mut output).unwrap();
-            println!("input: {:?}\nouput: {:?}", input,output);
-            assert_eq!(input,output);
+            println!("input: {:?}\nouput: {:?}", input, output);
+            assert_eq!(input, output);
         }
         Err(err) => panic!(err),
     }

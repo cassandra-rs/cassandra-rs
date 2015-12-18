@@ -83,13 +83,11 @@ impl Map {
         unsafe { CassandraError::build(cass_collection_append_inet(self.0, value.0)).wrap(self) }
     }
 
-// pub fn append_decimal<'a>(&'a mut self, value: String) -> Result<&'a
-// Self,CassandraError> {unsafe{
-// CassandraError::build(cass_collection_append_decimal(self.0,value)).
-// wrap(self)
-//    }}
-
-
+    // pub fn append_decimal<'a>(&'a mut self, value: String) -> Result<&'a
+    // Self,CassandraError> {unsafe{
+    // CassandraError::build(cass_collection_append_decimal(self.0,value)).
+    // wrap(self)
+    //    }}
 }
 
 pub struct MapIterator(pub *mut _CassIterator);
@@ -105,7 +103,6 @@ impl MapIterator {
     pub fn get_pair(&mut self) -> Result<(Value, Value), CassandraError> {
         Ok((self.get_key(), self.get_value()))
     }
-
 }
 
 

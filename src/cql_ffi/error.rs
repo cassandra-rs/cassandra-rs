@@ -93,9 +93,7 @@ impl Display for CassandraError {
         let c_buf: *const i8 = self.desc();
         let buf: &[u8] = unsafe { CStr::from_ptr(c_buf).to_bytes() };
         match str::from_utf8(buf) {
-            Ok(str_slice) => {
-                write!(f, "{}", str_slice)
-            }
+            Ok(str_slice) => write!(f, "{}", str_slice),
             Err(err) => panic!("unreachable? {:?}", err),
         }
     }
@@ -106,9 +104,7 @@ impl Debug for CassandraError {
         let c_buf: *const i8 = self.desc();
         let buf: &[u8] = unsafe { CStr::from_ptr(c_buf).to_bytes() };
         match str::from_utf8(buf) {
-            Ok(str_slice) => {
-                write!(f, "{:?}", str_slice)
-            }
+            Ok(str_slice) => write!(f, "{:?}", str_slice),
             Err(err) => panic!("unreachable? {:?}", err),
         }
     }
@@ -230,12 +226,11 @@ impl CassandraError {
 
 
 impl CassandraError {
-    pub fn desc(&self) -> *const i8 {unsafe{
-        cass_error_desc(self.0)
-    }}
-    
+    pub fn desc(&self) -> *const i8 {
+        unsafe { cass_error_desc(self.0) }
+    }
+
     pub fn debug(&self) {
         println!("{:?}", self)
     }
-
 }

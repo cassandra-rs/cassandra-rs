@@ -10,7 +10,7 @@ use cql_ffi::future::ResultFuture;
 use cql_ffi::future::PreparedFuture;
 use cql_ffi::error::CassandraError;
 use cql_ffi::statement::Statement;
-//use cql_ffi::schema::Schema;
+// use cql_ffi::schema::Schema;
 use cql_ffi::cluster::Cluster;
 use cql_bindgen::CassFuture as _Future;
 use cql_bindgen::cass_future_free;
@@ -31,8 +31,8 @@ use cql_bindgen::cass_session_get_metrics;
 
 pub struct Session(pub *mut _Session);
 
-unsafe impl Sync for Session{}
-unsafe impl Send for Session{}
+unsafe impl Sync for Session {}
+unsafe impl Send for Session {}
 
 impl Drop for Session {
     fn drop(&mut self) {
@@ -74,13 +74,13 @@ impl Session {
         ResultFuture(unsafe { cass_session_execute_batch(self.0, batch.0) })
     }
 
-//    pub fn get_schema(&self) -> Schema {
-//        unsafe { Schema(cass_session_get_schema(self.0)) }
-//    }
+    //    pub fn get_schema(&self) -> Schema {
+    //        unsafe { Schema(cass_session_get_schema(self.0)) }
+    //    }
 
-    pub fn connect_keyspace(&self, cluster: Cluster, keyspace: *const ::libc::c_char) -> Future {unsafe{
-        Future(cass_session_connect_keyspace(self.0, cluster.0, keyspace))
-    }}
+    pub fn connect_keyspace(&self, cluster: Cluster, keyspace: *const ::libc::c_char) -> Future {
+        unsafe { Future(cass_session_connect_keyspace(self.0, cluster.0, keyspace)) }
+    }
 }
 
 pub struct SessionFuture(pub *mut _Future, pub Session);

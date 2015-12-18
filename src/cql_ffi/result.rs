@@ -105,7 +105,6 @@ impl CassandraResult {
     pub fn iter(&self) -> ResultIterator {
         unsafe { ResultIterator(cass_iterator_from_result(self.0)) }
     }
-
 }
 
 pub struct ResultIterator(pub *mut _CassIterator);
@@ -132,11 +131,9 @@ impl ResultIterator {
     pub fn get_row(&mut self) -> Row {
         unsafe { Row(cass_iterator_get_row(self.0)) }
     }
-
 }
 
 impl IntoIterator for CassandraResult {
-
     type Item = Row;
     type IntoIter = ResultIterator;
 

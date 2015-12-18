@@ -29,7 +29,7 @@ use cql_bindgen::cass_column_meta_name;
 use cql_bindgen::cass_column_meta_type;
 
 use cql_bindgen::cass_iterator_from_map;
-//use cql_bindgen::cass_iterator_from_user_type;
+// use cql_bindgen::cass_iterator_from_user_type;
 use cql_bindgen::cass_iterator_from_collection;
 use cql_bindgen::cass_value_type;
 use cql_bindgen::CassValue as _Value;
@@ -166,9 +166,9 @@ impl Column {
         unsafe { ValueType::build(cass_value_type(self.0)) }
     }
 
-    pub fn get_inet(&self, mut output: Inet) -> Result<Inet, CassandraError> {unsafe{
-        CassandraError::build(cass_value_get_inet(self.0, &mut output.0)).wrap(output)
-    }}
+    pub fn get_inet(&self, mut output: Inet) -> Result<Inet, CassandraError> {
+        unsafe { CassandraError::build(cass_value_get_inet(self.0, &mut output.0)).wrap(output) }
+    }
 
     pub fn get_string(&self) -> Result<String, CassandraError> {
         unsafe {
@@ -251,14 +251,12 @@ impl Column {
         }
     }
 
-//    pub fn use_type_iter(&self) -> Result<UserTypeIterator, CassandraError> {
-//        unsafe {
-//            match self.get_type() {
-//                ValueType::UDT => Ok(UserTypeIterator(cass_iterator_from_user_type(self.0))),
-//                _ => Err(CassandraError::build(1)),
-//            }
-//        }
-//    }
-
-
+    //    pub fn use_type_iter(&self) -> Result<UserTypeIterator, CassandraError> {
+    //        unsafe {
+    //            match self.get_type() {
+    //                ValueType::UDT => Ok(UserTypeIterator(cass_iterator_from_user_type(self.0))),
+    //                _ => Err(CassandraError::build(1)),
+    //            }
+    //        }
+    //    }
 }

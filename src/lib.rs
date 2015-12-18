@@ -41,7 +41,7 @@ extern crate cql_bindgen;
 
 
 mod cql_ffi {
-	pub mod udf;
+    pub mod udf;
     pub mod consistency;
     pub mod inet;
     pub mod uuid;

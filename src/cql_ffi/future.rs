@@ -29,7 +29,6 @@ impl Drop for Future {
 }
 
 impl Future {
-
     // pub fn set_callback(&mut self, callback: FutureCallback, data:
     // *mut c_void)
     //        -> Result<&Self,CassandraError> {unsafe{
@@ -66,7 +65,6 @@ impl Future {
             str::from_utf8(slice).unwrap().to_owned()
         }
     }
-
 }
 
 pub struct ResultFuture(pub *mut _Future);
@@ -78,7 +76,6 @@ impl Drop for ResultFuture {
 }
 
 impl ResultFuture {
-
     pub fn wait(&mut self) -> Result<CassandraResult, CassandraError> {
         unsafe {
             cass_future_wait(self.0);
@@ -117,7 +114,6 @@ impl Drop for PreparedFuture {
 }
 
 impl PreparedFuture {
-
     pub fn wait(&mut self) -> Result<PreparedStatement, CassandraError> {
         unsafe {
             cass_future_wait(self.0);
@@ -143,5 +139,4 @@ impl PreparedFuture {
     pub fn get(&mut self) -> PreparedStatement {
         unsafe { PreparedStatement(cass_future_get_prepared(self.0)) }
     }
-
 }

@@ -7,20 +7,19 @@ use cassandra::BatchType;
 use cassandra::PreparedStatement;
 use cassandra::CassandraError;
 
-//use cql_ffi::AsContactPoints;
+// use cql_ffi::AsContactPoints;
 
 struct Pair<'a> {
     key: &'a str,
     value: &'a str,
 }
 
-static CREATE_KEYSPACE:&'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \
-                                       \'class\': \'SimpleStrategy\', \'replication_factor\': \
-                                       \'1\' };";
-static CREATE_TABLE:&'static str = "CREATE TABLE IF NOT EXISTS examples.pairs (key text, value \
-                                    text, PRIMARY KEY (key));";
-static INSERT_QUERY:&'static str = "INSERT INTO examples.pairs (key, value) VALUES (?, ?)";
-static SELECT_QUERY:&'static str = "SELECT * from examples.pairs";
+static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
+                                        \'SimpleStrategy\', \'replication_factor\': \'1\' };";
+static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.pairs (key text, value text, PRIMARY KEY \
+                                     (key));";
+static INSERT_QUERY: &'static str = "INSERT INTO examples.pairs (key, value) VALUES (?, ?)";
+static SELECT_QUERY: &'static str = "SELECT * from examples.pairs";
 
 fn insert_into_batch_with_prepared<'a>(session: &mut Session,
                                        pairs: Vec<Pair>)
@@ -41,8 +40,8 @@ fn insert_into_batch_with_prepared<'a>(session: &mut Session,
 }
 
 pub fn verify_batch(session: &mut Session) {
-    let result = session.execute(SELECT_QUERY,0).wait().unwrap();
-    println!("{:?}",result);
+    let result = session.execute(SELECT_QUERY, 0).wait().unwrap();
+    println!("{:?}", result);
 }
 
 fn main() {
@@ -57,8 +56,8 @@ fn main() {
         Pair{key:"d", value:"4"},
     );
 
-    session.execute(CREATE_KEYSPACE,0).wait().unwrap();
-    session.execute_statement(&Statement::new(CREATE_TABLE,0)).wait().unwrap();
+    session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
+    session.execute_statement(&Statement::new(CREATE_TABLE, 0)).wait().unwrap();
     insert_into_batch_with_prepared(&mut session, pairs).unwrap();
     verify_batch(&mut session);
     session.close();

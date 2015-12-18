@@ -91,14 +91,13 @@ impl List {
         unsafe { CassandraError::build(cass_collection_append_inet(self.0, value.0)).wrap(self) }
     }
 
-// FIXME rust doesn't have good decimal support yet
-// pub fn append_decimal<'a>(&'a mut self, value: String) -> Result<&'a
-// Self,CassandraError> {unsafe{
-// CassandraError::build(cass_collection_append_decimal(self.0,value)).
-// wrap(self)
-//    }}
-
-    }
+    // FIXME rust doesn't have good decimal support yet
+    // pub fn append_decimal<'a>(&'a mut self, value: String) -> Result<&'a
+    // Self,CassandraError> {unsafe{
+    // CassandraError::build(cass_collection_append_decimal(self.0,value)).
+    // wrap(self)
+    //    }}
+}
 
 pub struct ListIterator(pub *mut _CassIterator);
 

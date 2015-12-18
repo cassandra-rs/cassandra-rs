@@ -75,7 +75,6 @@ impl Drop for RowIterator {
 }
 
 impl iter::Iterator for RowIterator {
-
     type Item = Column;
 
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
@@ -89,7 +88,6 @@ impl iter::Iterator for RowIterator {
 }
 
 impl<'a> Iterator for &'a RowIterator {
-
     type Item = Column;
 
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
@@ -112,7 +110,6 @@ impl Display for RowIterator {
 }
 
 impl IntoIterator for Row {
-
     type Item = Column;
     type IntoIter = RowIterator;
 

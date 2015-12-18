@@ -86,10 +86,10 @@ impl Uuid {
         }
     }
 
-// pub fn from_string(&mut self, str: *const c_char) ->
-// Result<(),CassandraError> {unsafe{
-//        CassandraError::build(cass_uuid_from_string(str,&mut self.0))
-//    }}
+    // pub fn from_string(&mut self, str: *const c_char) ->
+    // Result<(),CassandraError> {unsafe{
+    //        CassandraError::build(cass_uuid_from_string(str,&mut self.0))
+    //    }}
 }
 
 impl UuidGen {

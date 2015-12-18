@@ -8,13 +8,12 @@ use cassandra::CassandraError;
 use cassandra::UuidGen;
 use cassandra::Cluster;
 
-static INSERT_QUERY:&'static str = "INSERT INTO examples.log (key, time, entry) VALUES (?, ?, ?);";
-static SELECT_QUERY:&'static str = "SELECT * FROM examples.log WHERE key = ?";
-static CREATE_KEYSPACE:&'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \
-                                       \'class\': \'SimpleStrategy\', \'replication_factor\': \
-                                       \'3\' };";
-static CREATE_TABLE:&'static str = "CREATE TABLE IF NOT EXISTS examples.log (key text, time \
-                                    timeuuid, entry text, PRIMARY KEY (key, time));";
+static INSERT_QUERY: &'static str = "INSERT INTO examples.log (key, time, entry) VALUES (?, ?, ?);";
+static SELECT_QUERY: &'static str = "SELECT * FROM examples.log WHERE key = ?";
+static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
+                                        \'SimpleStrategy\', \'replication_factor\': \'3\' };";
+static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.log (key text, time timeuuid, entry text, \
+                                     PRIMARY KEY (key, time));";
 
 fn insert_into_log(session: &mut Session,
                    key: &str,
@@ -51,12 +50,12 @@ fn main() {
     insert_into_log(session, "test", uuid_gen.get_time(), "Log entry #3").unwrap();
     insert_into_log(session, "test", uuid_gen.get_time(), "Log entry #4").unwrap();
     let results = select_from_log(session, "test").unwrap();
-//		for row in results.iter() {
-//		let time = row.get_column(1).unwrap();
-//		let entry = try!(row.get_column(2).unwrap();
-//		let time_str = time.get_string();
-//		println!("{:?}.{:?}", time_str, entry.get_string());
-//	}
+    // 		for row in results.iter() {
+    // 		let time = row.get_column(1).unwrap();
+    // 		let entry = try!(row.get_column(2).unwrap();
+    // 		let time_str = time.get_string();
+    // 		println!("{:?}.{:?}", time_str, entry.get_string());
+    // 	}
 
     println!("{:?}", results);
 }

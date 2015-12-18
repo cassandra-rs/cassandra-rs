@@ -31,7 +31,7 @@ use cql_bindgen::cass_value_get_double;
 use cql_bindgen::cass_value_get_float;
 use cql_bindgen::cass_value_get_int64;
 use cql_bindgen::cass_value_get_int32;
-//use cql_bindgen::cass_iterator_from_user_type;
+// use cql_bindgen::cass_iterator_from_user_type;
 use cql_bindgen::cass_iterator_from_collection;
 use cql_bindgen::cass_iterator_from_map;
 use cql_bindgen::cass_value_data_type;
@@ -128,41 +128,43 @@ impl Debug for Value {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.is_null() {
             true => Ok(()),
-            false => match self.get_type() {
-                ValueType::UNKNOWN => write!(f, "{:?}", "unknown"),
-                ValueType::CUSTOM => write!(f, "{:?}", "custom"),
-                ValueType::ASCII => write!(f, "{:?}", self.get_string().unwrap()),
-                ValueType::BIGINT => write!(f, "{:?}", self.get_int64().unwrap()),
-                ValueType::VARCHAR => write!(f, "{:?}", self.get_string().unwrap()),
-                ValueType::BOOLEAN => write!(f, "{:?}", self.get_bool().unwrap()),
-                ValueType::DOUBLE => write!(f, "{:?}", self.get_double().unwrap()),
-                ValueType::FLOAT => write!(f, "{:?}", self.get_float().unwrap()),
-                ValueType::INT => write!(f, "{:?}", self.get_int32().unwrap()),
-                ValueType::TIMEUUID => write!(f, "TIMEUUID: {:?}", self.get_uuid().unwrap()),
-                ValueType::SET => {
-                    try!(write!(f, "["));
-                    for item in self.as_set_iterator().unwrap() {
-                        try!(write!(f, "SET {:?} ", item))
+            false => {
+                match self.get_type() {
+                    ValueType::UNKNOWN => write!(f, "{:?}", "unknown"),
+                    ValueType::CUSTOM => write!(f, "{:?}", "custom"),
+                    ValueType::ASCII => write!(f, "{:?}", self.get_string().unwrap()),
+                    ValueType::BIGINT => write!(f, "{:?}", self.get_int64().unwrap()),
+                    ValueType::VARCHAR => write!(f, "{:?}", self.get_string().unwrap()),
+                    ValueType::BOOLEAN => write!(f, "{:?}", self.get_bool().unwrap()),
+                    ValueType::DOUBLE => write!(f, "{:?}", self.get_double().unwrap()),
+                    ValueType::FLOAT => write!(f, "{:?}", self.get_float().unwrap()),
+                    ValueType::INT => write!(f, "{:?}", self.get_int32().unwrap()),
+                    ValueType::TIMEUUID => write!(f, "TIMEUUID: {:?}", self.get_uuid().unwrap()),
+                    ValueType::SET => {
+                        try!(write!(f, "["));
+                        for item in self.as_set_iterator().unwrap() {
+                            try!(write!(f, "SET {:?} ", item))
+                        }
+                        try!(write!(f, "]"));
+                        Ok(())
                     }
-                    try!(write!(f, "]"));
-                    Ok(())
-                }
-                ValueType::MAP => {
-                    for item in self.as_map_iterator().unwrap() {
-                        try!(write!(f, "MAP {:?}:{:?}", item.0, item.1))
+                    ValueType::MAP => {
+                        for item in self.as_map_iterator().unwrap() {
+                            try!(write!(f, "MAP {:?}:{:?}", item.0, item.1))
+                        }
+                        Ok(())
                     }
-                    Ok(())
-                }
-                ValueType::UDT => {
-                    //                    for item in self.as_map_iterator().unwrap() {
-                    //                        try!(write!(f, "MAP {:?}:{:?}", item.0,item.1))
-                    //                    }
-                    Ok(())
-                }
+                    ValueType::UDT => {
+                        //                    for item in self.as_map_iterator().unwrap() {
+                        //                        try!(write!(f, "MAP {:?}:{:?}", item.0,item.1))
+                        //                    }
+                        Ok(())
+                    }
 
-                // FIXME
-                err => write!(f, "{:?}", err),
-            },
+                    // FIXME
+                    err => write!(f, "{:?}", err),
+                }
+            }
         }
     }
 }
@@ -171,35 +173,37 @@ impl Display for Value {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.is_null() {
             true => Ok(()),
-            false => match self.get_type() {
-                ValueType::UNKNOWN => write!(f, "{}", "unknown"),
-                ValueType::CUSTOM => write!(f, "{}", "custom"),
-                ValueType::ASCII => write!(f, "{}", self.get_string().unwrap()),
-                ValueType::BIGINT => write!(f, "{}", self.get_int64().unwrap()),
-                ValueType::VARCHAR => write!(f, "{}", self.get_string().unwrap()),
-                ValueType::BOOLEAN => write!(f, "{}", self.get_bool().unwrap()),
-                ValueType::DOUBLE => write!(f, "{}", self.get_double().unwrap()),
-                ValueType::FLOAT => write!(f, "{}", self.get_float().unwrap()),
-                ValueType::INT => write!(f, "{}", self.get_int32().unwrap()),
-                ValueType::TIMEUUID => write!(f, "TIMEUUID: {}", self.get_uuid().unwrap()),
-                ValueType::SET => {
-                    try!(write!(f, "["));
-                    for item in self.as_set_iterator().unwrap() {
-                        try!(write!(f, "{} ", item))
+            false => {
+                match self.get_type() {
+                    ValueType::UNKNOWN => write!(f, "{}", "unknown"),
+                    ValueType::CUSTOM => write!(f, "{}", "custom"),
+                    ValueType::ASCII => write!(f, "{}", self.get_string().unwrap()),
+                    ValueType::BIGINT => write!(f, "{}", self.get_int64().unwrap()),
+                    ValueType::VARCHAR => write!(f, "{}", self.get_string().unwrap()),
+                    ValueType::BOOLEAN => write!(f, "{}", self.get_bool().unwrap()),
+                    ValueType::DOUBLE => write!(f, "{}", self.get_double().unwrap()),
+                    ValueType::FLOAT => write!(f, "{}", self.get_float().unwrap()),
+                    ValueType::INT => write!(f, "{}", self.get_int32().unwrap()),
+                    ValueType::TIMEUUID => write!(f, "TIMEUUID: {}", self.get_uuid().unwrap()),
+                    ValueType::SET => {
+                        try!(write!(f, "["));
+                        for item in self.as_set_iterator().unwrap() {
+                            try!(write!(f, "{} ", item))
+                        }
+                        try!(write!(f, "]"));
+                        Ok(())
                     }
-                    try!(write!(f, "]"));
-                    Ok(())
-                }
-                ValueType::MAP => {
-                    for item in self.as_map_iterator().unwrap() {
-                        try!(write!(f, "MAP {}:{}", item.0, item.1))
+                    ValueType::MAP => {
+                        for item in self.as_map_iterator().unwrap() {
+                            try!(write!(f, "MAP {}:{}", item.0, item.1))
+                        }
+                        Ok(())
                     }
-                    Ok(())
-                }
 
-                // FIXME
-                err => write!(f, "{:?}", err),
-            },
+                    // FIXME
+                    err => write!(f, "{:?}", err),
+                }
+            }
         }
     }
 }
@@ -287,14 +291,14 @@ impl Value {
         }
     }
 
-//    pub fn as_user_type_iterator(&self) -> Result<UserTypeIterator, CassandraError> {
-//        unsafe {
-//            match self.get_type() {
-//                ValueType::UDT => Ok(UserTypeIterator(cass_iterator_from_user_type(self.0))),
-//                _ => Err(CassandraError::build(CassandraErrorTypes::LIB_INVALID_VALUE_TYPE as u32)),
-//            }
-//        }
-//    }
+    //    pub fn as_user_type_iterator(&self) -> Result<UserTypeIterator, CassandraError> {
+    //        unsafe {
+    //            match self.get_type() {
+    //                ValueType::UDT => Ok(UserTypeIterator(cass_iterator_from_user_type(self.0))),
+    //                _ => Err(CassandraError::build(CassandraErrorTypes::LIB_INVALID_VALUE_TYPE as u32)),
+    //            }
+    //        }
+    //    }
 
 
     // ~ pub fn map_iter(&self) -> Result<MapIterator,CassandraError> {unsafe{
@@ -338,9 +342,9 @@ impl Value {
     // ~ err.wrap(string)
     // ~ }}
 
-    pub fn get_inet(&self, mut output: Inet) -> Result<Inet, CassandraError> {unsafe{
-        CassandraError::build(cass_value_get_inet(self.0, &mut output.0)).wrap(output)
-    }}
+    pub fn get_inet(&self, mut output: Inet) -> Result<Inet, CassandraError> {
+        unsafe { CassandraError::build(cass_value_get_inet(self.0, &mut output.0)).wrap(output) }
+    }
 
     pub fn get_int32(&self) -> Result<i32, CassandraError> {
         unsafe {
@@ -383,5 +387,4 @@ impl Value {
             CassandraError::build(cass_value_get_uuid(self.0, &mut output.0)).wrap(output)
         }
     }
-
 }
