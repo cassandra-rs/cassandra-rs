@@ -1,0 +1,6 @@
+use cql_bindgen::cass_keyspace_meta_aggregate_by_name;
+use cql_bindgen::cass_keyspace_meta_field_by_name;
+use cql_bindgen::cass_keyspace_meta_function_by_name;
+use cql_bindgen::cass_keyspace_meta_name;
+use cql_bindgen::cass_keyspace_meta_table_by_name;
+use cql_bindgen::cass_keyspace_meta_user_type_by_name;
