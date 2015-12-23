@@ -8,10 +8,7 @@ static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE examples WITH replicatio
                                         \'replication_factor\': \'1\' };";
 static CREATE_TABLE: &'static str = "CREATE TABLE examples.collections (key text, items set<text>, PRIMARY KEY (key))";
 
-fn insert_into_collections(session: &mut Session,
-                           key: &str,
-                           items: Vec<String>)
-                           -> Result<CassandraResult, CassandraError> {
+fn insert_into_collections(session: &mut Session, key: &str, items: Vec<String>) -> Result<CassResult, CassError> {
     let mut statement = Statement::new(INSERT_QUERY, 2);
     try!(statement.bind_string(0, key));
     let mut set = Set::new(2);
@@ -22,7 +19,7 @@ fn insert_into_collections(session: &mut Session,
     session.execute_statement(&statement).wait()
 }
 
-fn select_from_collections(session: &mut Session, key: &str) -> Result<(), CassandraError> {
+fn select_from_collections(session: &mut Session, key: &str) -> Result<(), CassError> {
     let mut statement = Statement::new(SELECT_QUERY, 1);
     try!(statement.bind_string(0, key));
     let result = try!(session.execute_statement(&statement).wait());
@@ -40,12 +37,12 @@ fn select_from_collections(session: &mut Session, key: &str) -> Result<(), Cassa
 fn main() {
 
     let mut cluster = Cluster::new();
-    cluster.set_contact_points("127.0.0.1").unwrap();
+    cluster.set_contact_points(vec!["127.0.0.1"]).unwrap();
     let session = &mut Session::new().connect(&cluster).wait().unwrap();
 
     let items = vec!["apple".to_string(), "orange".to_string(), "banana".to_string(), "mango".to_string()];
-    session.execute(CREATE_KEYSPACE, 0);
-    session.execute(CREATE_TABLE, 0);
+    session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
+    session.execute(CREATE_TABLE, 0).wait().unwrap();
     insert_into_collections(session, "test", items).unwrap();
     select_from_collections(session, "test").unwrap();
 }

@@ -1,21 +1,29 @@
-// use cql_ffi::types::cass_uint8_t;
+use std::str::FromStr;
+use std::string::ToString;
+use std::mem;
+use std::ffi::CString;
+use std::ffi::NulError;
+use std::ffi::CStr;
+
 use cql_bindgen::CassInet as _Inet;
 use cql_bindgen::cass_inet_init_v4;
 use cql_bindgen::cass_inet_init_v6;
 use cql_bindgen::cass_inet_string;
 use cql_bindgen::cass_inet_from_string;
+use cql_bindgen::CASS_OK;
 use std::net::SocketAddr;
 use std::net::Ipv4Addr;
 use std::net::Ipv6Addr;
 use std::default::Default;
 
+use cql_ffi::error::CassError;
+use cql_ffi::error::CassLibError;
+
 #[repr(C)]
 pub struct Inet(pub _Inet);
 
 impl Default for Inet {
-    fn default() -> Inet {
-        unsafe { ::std::mem::zeroed() }
-    }
+    fn default() -> Inet { unsafe { ::std::mem::zeroed() } }
 }
 
 pub trait AsInet {
@@ -36,6 +44,37 @@ impl AsInet for SocketAddr {
         }
         // ~ let foo:_Inet = Default::default();
         // ~ Inet(foo)
+    }
+}
+
+pub enum InetParseError {
+    NulInString(NulError),
+    LibBadParams(CassLibError),
+}
+
+impl FromStr for Inet {
+    type Err = CassError;
+
+    fn from_str(s: &str) -> Result<Self, CassError> {
+        unsafe {
+            let mut inet = mem::zeroed();
+
+            let s = try!(CString::new(s));
+            match cass_inet_from_string(s.as_ptr(), &mut inet) {
+                CASS_OK => Ok(Inet(inet)),
+                err => Err(CassError::build(err)),
+            }
+        }
+    }
+}
+
+impl ToString for Inet {
+    fn to_string(&self) -> String {
+        unsafe {
+            let mut inet_str = mem::zeroed();
+            cass_inet_string(self.0, &mut inet_str);
+            CStr::from_ptr(&inet_str).to_string_lossy().into_owned()
+        }
     }
 }
 
@@ -75,11 +114,7 @@ impl FromInet for Ipv6Addr {
 }
 
 impl Inet {
-    pub fn cass_inet_init_v4(address: *const u8) -> Inet {
-        unsafe { Inet(cass_inet_init_v4(address)) }
-    }
+    pub fn cass_inet_init_v4(address: *const u8) -> Inet { unsafe { Inet(cass_inet_init_v4(address)) } }
 
-    pub fn cass_inet_init_v6(address: *const u8) -> Inet {
-        unsafe { Inet(cass_inet_init_v6(address)) }
-    }
+    pub fn cass_inet_init_v6(address: *const u8) -> Inet { unsafe { Inet(cass_inet_init_v6(address)) } }
 }

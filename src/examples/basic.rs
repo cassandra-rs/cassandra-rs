@@ -21,7 +21,7 @@ struct Basic {
     i64: i64,
 }
 
-fn insert_into_basic(session: &mut Session, key: &str, basic: &Basic) -> Result<CassandraResult, CassandraError> {
+fn insert_into_basic(session: &mut Session, key: &str, basic: &Basic) -> Result<CassResult, CassError> {
     let mut statement = Statement::new(INSERT_QUERY, 6);
     try!(statement.bind_string(0, key));
     try!(statement.bind_bool(1, basic.bln));
@@ -32,13 +32,13 @@ fn insert_into_basic(session: &mut Session, key: &str, basic: &Basic) -> Result<
     Ok(try!(session.execute_statement(&statement).wait()))
 }
 
-fn select_from_basic(session: &mut Session, key: &str) -> Result<Basic, CassandraError> {
+fn select_from_basic(session: &mut Session, key: &str) -> Result<Basic, CassError> {
     let mut statement = Statement::new(SELECT_QUERY, 1);
     try!(statement.bind_string(0, key));
     let result = try!(session.execute_statement(&statement).wait());
     println!("Result: \n{:?}\n", result);
     match result.first_row() {
-        None => Err(CassandraError::build(1)),
+        None => Err(CassError::build(1)),
         Some(row) => {
             Ok(Basic {
                 bln: try!(try!(row.get_column(1)).get_bool()),
@@ -62,7 +62,8 @@ fn main() {
     };
 
     let mut cluster = Cluster::new();
-    cluster.set_contact_points(CONTACT_POINTS)
+    let contact_points: Vec<&str> = vec![CONTACT_POINTS];
+    cluster.set_contact_points(contact_points)
            .unwrap()
            .set_load_balance_round_robin()
            .unwrap();
@@ -71,8 +72,8 @@ fn main() {
 
     match session_future {
         Ok(mut session) => {
-            session.execute(CREATE_KEYSPACE, 0);
-            session.execute(CREATE_TABLE, 0);
+            session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
+            session.execute(CREATE_TABLE, 0).wait().unwrap();
 
             insert_into_basic(&mut session, "test", &input).unwrap();
             let output = select_from_basic(&mut session, "test").unwrap();

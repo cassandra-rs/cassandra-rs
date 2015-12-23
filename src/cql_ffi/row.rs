@@ -17,7 +17,7 @@ use std::iter::IntoIterator;
 use std::iter;
 
 use cql_ffi::value::Value;
-use cql_ffi::error::CassandraError;
+use cql_ffi::error::CassError;
 use cql_ffi::column::Column;
 
 pub struct Row(pub *const _Row);
@@ -42,11 +42,11 @@ impl Display for Row {
 }
 
 impl Row {
-    pub fn get_column(&self, index: u64) -> Result<Column, CassandraError> {
+    pub fn get_column(&self, index: u64) -> Result<Column, CassError> {
         unsafe {
             let col = cass_row_get_column(self.0, index);
             match col.is_null() {
-                true => Err(CassandraError::build(CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS)),
+                true => Err(CassError::build(CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS)),
                 false => Ok(Column(col)),
             }
         }
@@ -69,9 +69,7 @@ pub struct RowIterator(pub *mut _CassIterator);
 
 
 impl Drop for RowIterator {
-    fn drop(&mut self) {
-        unsafe { cass_iterator_free(self.0) }
-    }
+    fn drop(&mut self) { unsafe { cass_iterator_free(self.0) } }
 }
 
 impl iter::Iterator for RowIterator {
@@ -113,15 +111,13 @@ impl IntoIterator for Row {
     type Item = Column;
     type IntoIter = RowIterator;
 
-    fn into_iter(self) -> Self::IntoIter {
-        unsafe { RowIterator(cass_iterator_from_row(self.0)) }
-    }
+    ///Creates a new iterator for the specified row. This can be
+    ///used to iterate over columns in a row.
+    fn into_iter(self) -> Self::IntoIter { unsafe { RowIterator(cass_iterator_from_row(self.0)) } }
 }
 
 impl<'a> IntoIterator for &'a Row {
     type Item = Column;
     type IntoIter = RowIterator;
-    fn into_iter(self) -> Self::IntoIter {
-        unsafe { RowIterator(cass_iterator_from_row(self.0)) }
-    }
+    fn into_iter(self) -> Self::IntoIter { unsafe { RowIterator(cass_iterator_from_row(self.0)) } }
 }

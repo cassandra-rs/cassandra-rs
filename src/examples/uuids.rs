@@ -3,8 +3,8 @@ extern crate cassandra;
 use cassandra::Session;
 use cassandra::Uuid;
 use cassandra::Statement;
-use cassandra::CassandraResult;
-use cassandra::CassandraError;
+use cassandra::CassResult;
+use cassandra::CassError;
 use cassandra::UuidGen;
 use cassandra::Cluster;
 
@@ -15,11 +15,7 @@ static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples W
 static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.log (key text, time timeuuid, entry text, \
                                      PRIMARY KEY (key, time));";
 
-fn insert_into_log(session: &mut Session,
-                   key: &str,
-                   time: Uuid,
-                   entry: &str)
-                   -> Result<CassandraResult, CassandraError> {
+fn insert_into_log(session: &mut Session, key: &str, time: Uuid, entry: &str) -> Result<CassResult, CassError> {
     let mut statement = Statement::new(INSERT_QUERY, 3);
     statement.bind_string(0, key).unwrap();
     statement.bind_uuid(1, time).unwrap();
@@ -28,7 +24,7 @@ fn insert_into_log(session: &mut Session,
     future.wait()
 }
 
-fn select_from_log(session: &mut Session, key: &str) -> Result<CassandraResult, CassandraError> {
+fn select_from_log(session: &mut Session, key: &str) -> Result<CassResult, CassError> {
     let mut statement = Statement::new(SELECT_QUERY, 1);
     statement.bind_string(0, &key).unwrap();
     let mut future = session.execute_statement(&statement);
@@ -39,11 +35,11 @@ fn select_from_log(session: &mut Session, key: &str) -> Result<CassandraResult, 
 fn main() {
     let uuid_gen = UuidGen::new();
     let mut cluster = Cluster::new();
-    cluster.set_contact_points("127.0.0.1").unwrap();
+    cluster.set_contact_points(vec!["127.0.0.1"]).unwrap();
     let session = &mut Session::new().connect(&cluster).wait().unwrap();
 
-    session.execute(CREATE_KEYSPACE, 0);
-    session.execute(CREATE_TABLE, 0);
+    session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
+    session.execute(CREATE_TABLE, 0).wait().unwrap();
     println!("uuid_gen = {:?}", uuid_gen.get_time());
     insert_into_log(session, "test", uuid_gen.get_time(), "Log entry #1").unwrap();
     insert_into_log(session, "test", uuid_gen.get_time(), "Log entry #2").unwrap();

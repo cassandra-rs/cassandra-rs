@@ -3,9 +3,11 @@ use std::fmt;
 use std::fmt::Display;
 use std::fmt::Debug;
 use std::mem;
-use std::ffi::CStr;
+use std::ffi::{CStr, CString};
 use std::str;
 
+
+use cql_bindgen::CASS_OK;
 use cql_bindgen::CassUuid as _Uuid;
 use cql_bindgen::CassUuidGen as _UuidGen;
 use cql_bindgen::cass_uuid_gen_new;
@@ -22,7 +24,7 @@ use cql_bindgen::cass_uuid_string;
 // use cql_bindgen::raw2utf8;
 use cql_bindgen::cass_uuid_from_string;
 
-// use cql_ffi::error::CassandraError;
+use cql_ffi::error::CassError;
 
 const CASS_UUID_STRING_LENGTH: usize = 37;
 
@@ -31,47 +33,31 @@ const CASS_UUID_STRING_LENGTH: usize = 37;
 pub struct Uuid(pub _Uuid);
 
 impl ::std::default::Default for Uuid {
-    fn default() -> Uuid {
-        unsafe { ::std::mem::zeroed() }
-    }
+    fn default() -> Uuid { unsafe { ::std::mem::zeroed() } }
 }
 
 pub struct UuidGen(pub *mut _UuidGen);
 
 impl Drop for UuidGen {
-    fn drop(&mut self) {
-        unsafe { cass_uuid_gen_free(self.0) }
-    }
+    fn drop(&mut self) { unsafe { cass_uuid_gen_free(self.0) } }
 }
 
 impl Debug for Uuid {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "{:?}", self.to_string())
-    }
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result { write!(f, "{:?}", self.to_string()) }
 }
 
 impl Display for Uuid {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "{}", self.to_string())
-    }
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result { write!(f, "{}", self.to_string()) }
 }
 
 impl Uuid {
-    pub fn min_from_time(&mut self, time: u64) {
-        unsafe { cass_uuid_min_from_time(time, &mut self.0) }
-    }
+    pub fn min_from_time(&mut self, time: u64) { unsafe { cass_uuid_min_from_time(time, &mut self.0) } }
 
-    pub fn max_from_time(&mut self, time: u64) {
-        unsafe { cass_uuid_max_from_time(time, &mut self.0) }
-    }
+    pub fn max_from_time(&mut self, time: u64) { unsafe { cass_uuid_max_from_time(time, &mut self.0) } }
 
-    pub fn timestamp(&self) -> u64 {
-        unsafe { cass_uuid_timestamp(self.0) }
-    }
+    pub fn timestamp(&self) -> u64 { unsafe { cass_uuid_timestamp(self.0) } }
 
-    pub fn version(&self) -> u8 {
-        unsafe { cass_uuid_version(self.0) }
-    }
+    pub fn version(&self) -> u8 { unsafe { cass_uuid_version(self.0) } }
 
     // FIXME
     pub fn to_string(&self) -> String {
@@ -86,20 +72,21 @@ impl Uuid {
         }
     }
 
-    // pub fn from_string(&mut self, str: *const c_char) ->
-    // Result<(),CassandraError> {unsafe{
-    //        CassandraError::build(cass_uuid_from_string(str,&mut self.0))
-    //    }}
+    pub fn from_string(str: &str) -> Result<Uuid, CassError> {
+        unsafe {
+            let mut uuid = mem::zeroed();
+            match cass_uuid_from_string(try!(CString::new(str)).as_ptr(), &mut uuid) {
+                CASS_OK => Ok(Uuid(uuid)),
+                err => Err(CassError::build(err)),
+            }
+        }
+    }
 }
 
 impl UuidGen {
-    pub fn new() -> Self {
-        unsafe { UuidGen(cass_uuid_gen_new()) }
-    }
+    pub fn new() -> Self { unsafe { UuidGen(cass_uuid_gen_new()) } }
 
-    pub fn new_with_node(node: u64) -> UuidGen {
-        unsafe { UuidGen(cass_uuid_gen_new_with_node(node)) }
-    }
+    pub fn new_with_node(node: u64) -> UuidGen { unsafe { UuidGen(cass_uuid_gen_new_with_node(node)) } }
 
     pub fn get_time(&self) -> Uuid {
         unsafe {
@@ -109,9 +96,7 @@ impl UuidGen {
         }
     }
 
-    pub fn fill_random(&self, mut output: Uuid) {
-        unsafe { cass_uuid_gen_random(self.0, &mut output.0) }
-    }
+    pub fn fill_random(&self, mut output: Uuid) { unsafe { cass_uuid_gen_random(self.0, &mut output.0) } }
 
     pub fn random(&self) -> Uuid {
         unsafe {

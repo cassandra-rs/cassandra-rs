@@ -19,7 +19,7 @@ struct Basic {
     i64: i64,
 }
 
-fn insert_into_basic(session: &mut Session, key: &str, basic: &mut Basic) -> Result<(), CassandraError> {
+fn insert_into_basic(session: &mut Session, key: &str, basic: &mut Basic) -> Result<(), CassError> {
     println!("Creating statement");
     let mut statement = Statement::new(INSERT_QUERY, 6);
     statement.bind_string(0, key)
@@ -45,7 +45,7 @@ fn select_from_basic(session: &mut Session,
                      prepared: &PreparedStatement,
                      key: &str,
                      basic: &mut Basic)
-                     -> Result<(), CassandraError> {
+                     -> Result<(), CassError> {
     let mut statement = prepared.bind();
     try!(statement.bind_string(0, key));
     let mut future = session.execute_statement(&statement);
@@ -67,7 +67,7 @@ fn select_from_basic(session: &mut Session,
 
 fn main() {
     let mut cluster = Cluster::new();
-    cluster.set_contact_points("127.0.0.1").unwrap();
+    cluster.set_contact_points(vec!["127.0.0.1"]).unwrap();
     cluster.set_protocol_version(3).unwrap();
     println!("Proto set");
     let mut session = cluster.connect().unwrap();
@@ -88,9 +88,9 @@ fn main() {
         i64: 0,
     };
     println!("Executing create keyspace");
-    session.execute(CREATE_KEYSPACE, 0);
+    session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
     println!("Creating table");
-    session.execute(CREATE_TABLE, 0);
+    session.execute(CREATE_TABLE, 0).wait().unwrap();
 
     println!("Basic insertions");
     insert_into_basic(&mut session, "prepared_test", &mut input).unwrap();

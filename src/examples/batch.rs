@@ -5,7 +5,7 @@ use cassandra::Statement;
 use cassandra::Batch;
 use cassandra::BatchType;
 use cassandra::PreparedStatement;
-use cassandra::CassandraError;
+use cassandra::CassError;
 
 // use cql_ffi::AsContactPoints;
 
@@ -23,7 +23,7 @@ static SELECT_QUERY: &'static str = "SELECT * from examples.pairs";
 
 fn insert_into_batch_with_prepared<'a>(session: &mut Session,
                                        pairs: Vec<Pair>)
-                                       -> Result<PreparedStatement, CassandraError> {
+                                       -> Result<PreparedStatement, CassError> {
     let prepared = session.prepare(INSERT_QUERY).unwrap().wait().unwrap();
     let mut batch = Batch::new(BatchType::LOGGED);
     for pair in pairs {
@@ -32,7 +32,7 @@ fn insert_into_batch_with_prepared<'a>(session: &mut Session,
         try!(statement.bind_string(1, pair.value));
         match batch.add_statement(statement) {
             Ok(_) => {}
-            Err(err) => return Err(CassandraError::build(err)),
+            Err(err) => return Err(CassError::build(err)),
         }
     }
     try!(session.execute_batch(batch).wait());
@@ -46,7 +46,7 @@ pub fn verify_batch(session: &mut Session) {
 
 fn main() {
     let mut cluster = Cluster::new();
-    cluster.set_contact_points("127.0.0.1").unwrap();
+    cluster.set_contact_points(vec!["127.0.0.1"]).unwrap();
     let mut session = Session::new().connect(&mut cluster).wait().unwrap();
 
     let pairs = vec!(

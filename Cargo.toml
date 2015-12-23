@@ -17,6 +17,8 @@ libc = "0.2"
 num = "0.1"
 log = "0.3"
 cql_bindgen = "0.2"
+decimal = "0.2"
+chrono = "0.2"
 # clippy = "*"
 rusty-cheddar = "0.1"
 

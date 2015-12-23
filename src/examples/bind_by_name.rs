@@ -23,7 +23,7 @@ fn insert_into_basic(session: &mut Session,
                      prepared: PreparedStatement,
                      key: &str,
                      basic: Basic)
-                     -> Result<CassandraResult, CassandraError> {
+                     -> Result<CassResult, CassError> {
     println!("key={:?}", key);
     let mut statement = prepared.bind();
     statement.bind_string_by_name("key", key)
@@ -46,7 +46,7 @@ unsafe fn select_from_basic(session: &mut Session,
                             prepared: &PreparedStatement,
                             key: &str,
                             basic: &mut Basic)
-                            -> Result<CassandraResult, CassandraError> {
+                            -> Result<CassResult, CassError> {
     let mut statement = prepared.bind();
     statement.bind_string_by_name("key", key).unwrap();
     match session.execute_statement(&statement).wait() {
@@ -68,7 +68,7 @@ unsafe fn select_from_basic(session: &mut Session,
 fn main() {
     unsafe {
         let mut cluster = Cluster::new();
-        cluster.set_contact_points("127.0.0.1").unwrap();
+        cluster.set_contact_points(vec!["127.0.0.1"]).unwrap();
 
         match Session::new().connect(&cluster).wait() {
             Ok(mut session) => {

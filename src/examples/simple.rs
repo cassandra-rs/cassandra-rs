@@ -3,11 +3,11 @@ use cassandra::*;
 
 static QUERY: &'static str = "SELECT keyspace_name FROM system.schema_keyspaces;";
 static COL_NAME: &'static str = "keyspace_name";
-static CONTACT_POINTS: &'static str = "127.0.0.1";
 
 fn main() {
     let mut cluster = Cluster::new();
-    cluster.set_contact_points(CONTACT_POINTS)
+    let contact_points: Vec<&str> = vec!["127.0.0.1"];
+    cluster.set_contact_points(contact_points)
            .unwrap()
            .set_load_balance_round_robin()
            .unwrap();

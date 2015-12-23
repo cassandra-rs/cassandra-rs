@@ -15,7 +15,7 @@ static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.maps (k
 static SELECT_QUERY: &'static str = "SELECT items FROM examples.maps WHERE key = ?";
 static INSERT_QUERY: &'static str = "INSERT INTO examples.maps (key, items) VALUES (?, ?);";
 
-fn insert_into_maps(session: &mut Session, key: &str, items: Vec<Pair>) -> Result<(), CassandraError> {
+fn insert_into_maps(session: &mut Session, key: &str, items: Vec<Pair>) -> Result<(), CassError> {
     let mut statement = Statement::new(INSERT_QUERY, 2);
     statement.bind_string(0, key).unwrap();
 
@@ -29,7 +29,7 @@ fn insert_into_maps(session: &mut Session, key: &str, items: Vec<Pair>) -> Resul
     Ok(())
 }
 
-fn select_from_maps(session: &mut Session, key: &str) -> Result<(), CassandraError> {
+fn select_from_maps(session: &mut Session, key: &str) -> Result<(), CassError> {
     let mut statement = Statement::new(SELECT_QUERY, 1);
     try!(statement.bind_string(0, key));
     let result = try!(session.execute_statement(&statement).wait());
@@ -51,9 +51,9 @@ fn main() {
     }
 }
 
-fn foo() -> Result<(), CassandraError> {
+fn foo() -> Result<(), CassError> {
     let mut cluster = Cluster::new();
-    cluster.set_contact_points(CONTACT_POINTS)
+    cluster.set_contact_points(vec![CONTACT_POINTS])
            .unwrap()
            .set_load_balance_round_robin()
            .unwrap();

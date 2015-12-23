@@ -9,7 +9,7 @@ use cassandra::Session;
 use cassandra::Statement;
 use cassandra::Cluster;
 use cassandra::ResultFuture;
-use cassandra::CassandraError;
+use cassandra::CassError;
 
 static NUM_CONCURRENT_REQUESTS: usize = 100;
 static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
@@ -17,7 +17,7 @@ static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples W
 static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.async (key text, bln boolean, flt float, dbl \
                                      double, i32 int, i64 bigint, PRIMARY KEY (key));";
 
-fn insert_into_async(session: &mut Session, key: String) -> Result<(), CassandraError> {
+fn insert_into_async(session: &mut Session, key: String) -> Result<(), CassError> {
     let query = "INSERT INTO examples.async (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, ?);";
     let mut futures = Vec::<ResultFuture>::new();
     for i in 0..NUM_CONCURRENT_REQUESTS {
@@ -41,7 +41,7 @@ fn insert_into_async(session: &mut Session, key: String) -> Result<(), Cassandra
     block_async(futures)
 }
 
-pub fn block_async(mut futures: Vec<ResultFuture>) -> Result<(), CassandraError> {
+pub fn block_async(mut futures: Vec<ResultFuture>) -> Result<(), CassError> {
     for future in &mut futures {
         let result = try!(future.wait());
         println!("result={:?}", result);
@@ -52,12 +52,12 @@ pub fn block_async(mut futures: Vec<ResultFuture>) -> Result<(), CassandraError>
 
 pub fn main() {
     let mut cluster = Cluster::new();
-    cluster.set_contact_points("127.0.0.1").unwrap();
+    cluster.set_contact_points(vec!["127.0.0.1"]).unwrap();
     match Session::new().connect(&cluster).wait() {
         Ok(mut session) => {
             session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
             session.execute(CREATE_TABLE, 0).wait().unwrap();
-            session.execute("USE examples", 0);
+            session.execute("USE examples", 0).wait().unwrap();
             insert_into_async(&mut session, "test".to_owned()).unwrap();
             session.close().wait().unwrap();
         }
