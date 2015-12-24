@@ -2,7 +2,7 @@ extern crate cql_ffi;
 
 use std::slice;
 
-use cql_ffi::*;
+use cassandra::*;
 
 unsafe fn print_error(future: &mut Future) {
     let message = future.error_message();

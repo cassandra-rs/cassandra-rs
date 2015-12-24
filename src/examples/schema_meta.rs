@@ -1,9 +1,9 @@
 extern crate cassandra;
-extern crate cql_bindgen;
+extern crate cassandra_sys;
 
 use cassandra::*;
 
-use cql_bindgen::cass_iterator_next;
+use cassandra_sys::cass_iterator_next;
 
 static CREATE_KEYSPACE:&'static str = "CREATE KEYSPACE examples WITH replication = { \'class\': \
                                        \'SimpleStrategy\', \'replication_factor\': \'3\' };";

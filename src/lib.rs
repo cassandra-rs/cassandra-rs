@@ -1,5 +1,5 @@
-#![feature(plugin)]
-#![plugin(cheddar)]
+// #![feature(plugin)]
+// #![plugin(cheddar)]
 
 extern crate libc;
 #[macro_use]
@@ -7,47 +7,47 @@ extern crate log;
 extern crate decimal;
 extern crate chrono;
 
-pub use cql_ffi::consistency::*;
-pub use cql_ffi::inet::*;
-pub use cql_ffi::uuid::*;
-pub use cql_ffi::cluster::*;
-pub use cql_ffi::session::*;
-pub use cql_ffi::statement::*;
-pub use cql_ffi::batch::*;
-pub use cql_ffi::future::*;
-pub use cql_ffi::prepared::*;
-pub use cql_ffi::result::*;
-pub use cql_ffi::row::*;
-pub use cql_ffi::value::*;
-pub use cql_ffi::collection::*;
-pub use cql_ffi::ssl::*;
-pub use cql_ffi::schema::keyspace_meta::*;
-pub use cql_ffi::schema::column_meta::*;
-pub use cql_ffi::schema::schema_meta::*;
-pub use cql_ffi::schema::table_meta::*;
-pub use cql_ffi::schema::function_meta::*;
-pub use cql_ffi::schema::aggregate_meta::*;
-pub use cql_ffi::error::*;
-pub use cql_ffi::helpers::*;
-pub use cql_ffi::log::*;
-pub use cql_ffi::column::*;
-pub use cql_ffi::tuple::*;
-pub use cql_ffi::user_type::*;
-pub use cql_ffi::data_type::*;
-pub use cql_ffi::policy::retry::*;
-pub use cql_ffi::aggregate::*;
-pub use cql_ffi::custom_payload::*;
-pub use cql_ffi::time::*;
-pub use cql_ffi::util::*;
-pub use cql_ffi::metrics::*;
-pub use cql_ffi::iterator::*;
-pub use cql_ffi::write_type::*;
-pub use cql_ffi::field::*;
+pub use cassandra::consistency::*;
+pub use cassandra::inet::*;
+pub use cassandra::uuid::*;
+pub use cassandra::cluster::*;
+pub use cassandra::session::*;
+pub use cassandra::statement::*;
+pub use cassandra::batch::*;
+pub use cassandra::future::*;
+pub use cassandra::prepared::*;
+pub use cassandra::result::*;
+pub use cassandra::row::*;
+pub use cassandra::value::*;
+pub use cassandra::collection::*;
+pub use cassandra::ssl::*;
+pub use cassandra::schema::keyspace_meta::*;
+pub use cassandra::schema::column_meta::*;
+pub use cassandra::schema::schema_meta::*;
+pub use cassandra::schema::table_meta::*;
+pub use cassandra::schema::function_meta::*;
+pub use cassandra::schema::aggregate_meta::*;
+pub use cassandra::error::*;
+pub use cassandra::helpers::*;
+pub use cassandra::log::*;
+pub use cassandra::column::*;
+pub use cassandra::tuple::*;
+pub use cassandra::user_type::*;
+pub use cassandra::data_type::*;
+pub use cassandra::policy::retry::*;
+pub use cassandra::aggregate::*;
+pub use cassandra::custom_payload::*;
+pub use cassandra::time::*;
+pub use cassandra::util::*;
+pub use cassandra::metrics::*;
+pub use cassandra::iterator::*;
+pub use cassandra::write_type::*;
+pub use cassandra::field::*;
 
-extern crate cql_bindgen;
+extern crate cassandra_sys;
 
 
-mod cql_ffi {
+mod cassandra {
     pub mod consistency;
     pub mod field;
     pub mod inet;

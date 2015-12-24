@@ -4,10 +4,11 @@ use cassandra::*;
 
 static CONTACT_POINTS: &'static str = "127.0.0.1";
 static NUM_CONCURRENT_REQUESTS: isize = 100;
-static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
-                                        \'SimpleStrategy\', \'replication_factor\': \'1\' };";
-static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.paging (key ascii, value text, PRIMARY KEY \
-                                     (key));";
+static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = \
+                                        { \'class\': \'SimpleStrategy\', \'replication_factor\': \
+                                        \'1\' };";
+static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.paging (key ascii, value \
+                                     text, PRIMARY KEY (key));";
 static SELECT_QUERY: &'static str = "SELECT * FROM paging";
 static INSERT_QUERY: &'static str = "INSERT INTO paging (key, value) VALUES (?, ?);";
 

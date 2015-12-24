@@ -10,12 +10,17 @@ use cassandra::Cluster;
 
 static INSERT_QUERY: &'static str = "INSERT INTO examples.log (key, time, entry) VALUES (?, ?, ?);";
 static SELECT_QUERY: &'static str = "SELECT * FROM examples.log WHERE key = ?";
-static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
-                                        \'SimpleStrategy\', \'replication_factor\': \'3\' };";
-static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.log (key text, time timeuuid, entry text, \
-                                     PRIMARY KEY (key, time));";
+static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = \
+                                        { \'class\': \'SimpleStrategy\', \'replication_factor\': \
+                                        \'3\' };";
+static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.log (key text, time \
+                                     timeuuid, entry text, PRIMARY KEY (key, time));";
 
-fn insert_into_log(session: &mut Session, key: &str, time: Uuid, entry: &str) -> Result<CassResult, CassError> {
+fn insert_into_log(session: &mut Session,
+                   key: &str,
+                   time: Uuid,
+                   entry: &str)
+                   -> Result<CassResult, CassError> {
     let mut statement = Statement::new(INSERT_QUERY, 3);
     statement.bind_string(0, key).unwrap();
     statement.bind_uuid(1, time).unwrap();

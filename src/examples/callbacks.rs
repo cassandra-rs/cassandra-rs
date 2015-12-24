@@ -2,7 +2,7 @@
 extern crate cql_ffi;
 use std::ffi::CString;
 use std::slice;
-use cql_ffi::*;
+use cassandra::*;
 
 //~ uv_mutex_t mutex;
 //~ uv_cond_t cond;

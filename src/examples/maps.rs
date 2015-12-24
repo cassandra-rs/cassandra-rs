@@ -8,10 +8,11 @@ struct Pair<'a> {
 }
 const CONTACT_POINTS: &'static str = "127.0.0.1";
 
-static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
-                                        \'SimpleStrategy\', \'replication_factor\': \'3\' };";
-static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.maps (key text, items map<text, int>, \
-                                     PRIMARY KEY (key))";
+static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = \
+                                        { \'class\': \'SimpleStrategy\', \'replication_factor\': \
+                                        \'3\' };";
+static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.maps (key text, items \
+                                     map<text, int>, PRIMARY KEY (key))";
 static SELECT_QUERY: &'static str = "SELECT items FROM examples.maps WHERE key = ?";
 static INSERT_QUERY: &'static str = "INSERT INTO examples.maps (key, items) VALUES (?, ?);";
 

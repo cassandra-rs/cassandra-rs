@@ -7,17 +7,18 @@ use cassandra::BatchType;
 use cassandra::PreparedStatement;
 use cassandra::CassError;
 
-// use cql_ffi::AsContactPoints;
+// use cassandra::AsContactPoints;
 
 struct Pair<'a> {
     key: &'a str,
     value: &'a str,
 }
 
-static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
-                                        \'SimpleStrategy\', \'replication_factor\': \'1\' };";
-static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.pairs (key text, value text, PRIMARY KEY \
-                                     (key));";
+static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = \
+                                        { \'class\': \'SimpleStrategy\', \'replication_factor\': \
+                                        \'1\' };";
+static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.pairs (key text, value \
+                                     text, PRIMARY KEY (key));";
 static INSERT_QUERY: &'static str = "INSERT INTO examples.pairs (key, value) VALUES (?, ?)";
 static SELECT_QUERY: &'static str = "SELECT * from examples.pairs";
 

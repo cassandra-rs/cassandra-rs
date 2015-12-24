@@ -4,12 +4,14 @@ use cassandra::*;
 
 const CONTACT_POINTS: &'static str = "127.0.0.1";
 
-const CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
-                                       \'SimpleStrategy\', \'replication_factor\': \'1\' };";
-const CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.basic (key text, bln boolean, flt float, dbl \
-                                    double, i32 int, i64 bigint, PRIMARY KEY (key));";
-const INSERT_QUERY: &'static str = "INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, \
-                                    ?);";
+const CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = \
+                                       { \'class\': \'SimpleStrategy\', \'replication_factor\': \
+                                       \'1\' };";
+const CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.basic (key text, bln \
+                                    boolean, flt float, dbl double, i32 int, i64 bigint, PRIMARY \
+                                    KEY (key));";
+const INSERT_QUERY: &'static str = "INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) \
+                                    VALUES (?, ?, ?, ?, ?, ?);";
 const SELECT_QUERY: &'static str = "SELECT * FROM examples.basic WHERE key = ?";
 
 #[derive(Debug,PartialEq,Clone,Copy)]
@@ -21,7 +23,10 @@ struct Basic {
     i64: i64,
 }
 
-fn insert_into_basic(session: &mut Session, key: &str, basic: &Basic) -> Result<CassResult, CassError> {
+fn insert_into_basic(session: &mut Session,
+                     key: &str,
+                     basic: &Basic)
+                     -> Result<CassResult, CassError> {
     let mut statement = Statement::new(INSERT_QUERY, 6);
     try!(statement.bind_string(0, key));
     try!(statement.bind_bool(1, basic.bln));

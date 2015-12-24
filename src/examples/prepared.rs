@@ -2,12 +2,12 @@ extern crate cassandra;
 
 use cassandra::*;
 
-static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE examples WITH replication = { \'class\': \'SimpleStrategy\', \
-                                        \'replication_factor\': \'3\' };";
-static CREATE_TABLE: &'static str = "CREATE TABLE examples.basic (key text, bln boolean, flt float, dbl double, i32 \
-                                     int, i64 bigint, PRIMARY KEY (key));";
-static INSERT_QUERY: &'static str = "INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, \
-                                     ?);";
+static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE examples WITH replication = { \'class\': \
+                                        \'SimpleStrategy\', \'replication_factor\': \'3\' };";
+static CREATE_TABLE: &'static str = "CREATE TABLE examples.basic (key text, bln boolean, flt \
+                                     float, dbl double, i32 int, i64 bigint, PRIMARY KEY (key));";
+static INSERT_QUERY: &'static str = "INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) \
+                                     VALUES (?, ?, ?, ?, ?, ?);";
 static SELECT_QUERY: &'static str = "SELECT * FROM examples.basic WHERE key = ?";
 
 #[derive(Debug,PartialEq)]
