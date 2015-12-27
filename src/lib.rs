@@ -35,7 +35,6 @@ pub use cassandra::tuple::*;
 pub use cassandra::user_type::*;
 pub use cassandra::data_type::*;
 pub use cassandra::policy::retry::*;
-pub use cassandra::aggregate::*;
 pub use cassandra::custom_payload::*;
 pub use cassandra::time::*;
 pub use cassandra::util::*;
@@ -73,7 +72,6 @@ mod cassandra {
     pub mod data_type;
     pub mod tuple;
     pub mod policy;
-    pub mod aggregate;
     pub mod custom_payload;
     pub mod time;
     pub mod util;

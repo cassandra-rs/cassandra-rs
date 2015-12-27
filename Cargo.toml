@@ -61,9 +61,9 @@ path="src/examples/paging.rs"
 name="prepared"
 path="src/examples/prepared.rs"
 
-# [[bin]]
-# name="schema_meta"
-# path="src/examples/schema_meta.rs"
+[[bin]]
+name="schema_meta"
+path="src/examples/schema_meta.rs"
 
 [[bin]]
 name="simple"

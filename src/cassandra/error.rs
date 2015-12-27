@@ -193,24 +193,30 @@ impl CassError {
     pub fn wrap<T>(self, wrappee: T) -> Result<T, CassError> {
         match self {
             CassError::Server(ref err) => {
+                println!("server: {}", err.0);
                 match err.0 {
                     CASS_OK => Ok(wrappee),
                     err => Err(CassError::build(err)),
                 }
             }
             CassError::Lib(ref err) => {
+                println!("lib: {}", err.0);
                 match err.0 {
                     CASS_OK => Ok(wrappee),
                     err => Err(CassError::build(err)),
                 }
             }
             CassError::Ssl(ref err) => {
+                println!("ssl: {}", err.0);
                 match err.0 {
                     CASS_OK => Ok(wrappee),
                     err => Err(CassError::build(err)),
                 }
             }
-            CassError::Rust(err) => Err(CassError::Rust(err)),
+            CassError::Rust(err) => {
+                println!("rust");
+                Err(CassError::Rust(err))
+            }	
 
         }
 
@@ -222,7 +228,7 @@ impl CassError {
 
     pub fn build(val: u32) -> CassError {
         match val {
-            // 0 => CassError(CASS_OK),
+            0 => CassError::Lib(CassLibError(CASS_OK)),
             1 => CassError::Lib(CassLibError(CASS_ERROR_LIB_BAD_PARAMS)),
             2 => CassError::Lib(CassLibError(CASS_ERROR_LIB_NO_STREAMS)),
             3 => CassError::Lib(CassLibError(CASS_ERROR_LIB_UNABLE_TO_INIT)),
@@ -269,8 +275,7 @@ impl CassError {
             50331654 => CassError::Ssl(CassSslError(CASS_ERROR_SSL_PROTOCOL_ERROR)),
             50331655 => CassError::Ssl(CassSslError(CASS_ERROR_LAST_ENTRY)),
             err_no => {
-                debug!("unhandled error number: {}", err_no);
-                unimplemented!();
+                panic!("unhandled error number: {}", err_no);
                 // CassError(err_no)
             }
         }

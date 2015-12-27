@@ -24,7 +24,7 @@ impl SchemaMeta {
     }
 
     ///Gets the keyspace metadata for the provided keyspace name.
-    pub fn cass_schema_meta_keyspace_by_name(&self, keyspace: &str) -> KeyspaceMeta {
+    pub fn get_keyspace_by_name(&self, keyspace: &str) -> KeyspaceMeta {
         unsafe {
             KeyspaceMeta(cass_schema_meta_keyspace_by_name(self.0, keyspace.as_ptr() as *const i8))
         }

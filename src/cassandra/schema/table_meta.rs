@@ -39,7 +39,7 @@ impl TableMeta {
     }
 
     ///Gets the name of the table.
-    pub fn name(&self) -> String {
+    pub fn get_name(&self) -> String {
         unsafe {
             let mut name = mem::zeroed();
             let mut name_length = mem::zeroed();

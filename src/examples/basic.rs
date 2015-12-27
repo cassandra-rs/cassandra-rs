@@ -49,8 +49,8 @@ fn select_from_basic(session: &mut Session, key: &str) -> Result<Basic, CassErro
                 bln: try!(try!(row.get_column(1)).get_bool()),
                 dbl: try!(try!(row.get_column(2)).get_double()),
                 flt: try!(try!(row.get_column(3)).get_float()),
-                i32: try!(try!(row.get_column(4)).get_int32()),
-                i64: try!(try!(row.get_column(5)).get_int64()),
+                i32: try!(try!(row.get_column(4)).get_i32()),
+                i64: try!(try!(row.get_column(5)).get_i64()),
             })
         }
     }

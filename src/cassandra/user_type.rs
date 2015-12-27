@@ -39,16 +39,14 @@ use cassandra_sys::cass_user_type_set_collection_by_name;
 use cassandra_sys::cass_user_type_set_tuple;
 use cassandra_sys::cass_user_type_set_user_type;
 use cassandra_sys::CassUserType as _CassUserType;
-use cassandra_sys::cass_iterator_fields_from_user_type;
 
-use cassandra::value::Value;
 use cassandra::uuid::Uuid;
 use cassandra::inet::Inet;
 use cassandra::collection::Set;
 use cassandra::tuple::Tuple;
 use cassandra::error::CassError;
 use cassandra::data_type::ConstDataType;
-use cassandra::iterator::FieldIterator;
+//use cassandra::iterator::FieldIterator;
 
 pub struct UserType(pub *mut _CassUserType);
 
@@ -65,7 +63,6 @@ impl Drop for UserType {
 // }
 
 impl UserType {
-	
     ///Gets the data type of a user defined type.
     pub fn data_type(&self) -> ConstDataType {
         unsafe { ConstDataType(cass_user_type_data_type(self.0)) }

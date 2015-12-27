@@ -16,10 +16,11 @@ use cassandra_sys::cass_iterator_get_column_meta;
 use cassandra_sys::cass_iterator_get_user_type;
 use cassandra_sys::cass_iterator_get_value;
 use cassandra_sys::cass_iterator_next;
-use cassandra_sys::cass_iterator_get_user_type_field_name;
-use cassandra_sys::cass_iterator_get_user_type_field_value;
+//use cassandra_sys::cass_iterator_get_user_type_field_name;
+//use cassandra_sys::cass_iterator_get_user_type_field_value;
 use cassandra::error::CassError;
 use cassandra::value::Value;
+use cassandra::field::Field;
 use cassandra::data_type::ConstDataType;
 use cassandra::schema::keyspace_meta::KeyspaceMeta;
 use cassandra::schema::table_meta::TableMeta;
@@ -66,9 +67,7 @@ impl Iterator for UserTypeIterator {
         unsafe {
             match cass_iterator_next(self.0) {
                 0 => None,
-                _ => {
-                    Some(ConstDataType(cass_iterator_get_user_type(self.0)))
-                }
+                _ => Some(ConstDataType(cass_iterator_get_user_type(self.0))),
             }
         }
     }
@@ -141,7 +140,7 @@ impl Iterator for ColumnIterator {
 pub struct FieldIterator(pub *mut _CassIterator);
 
 impl Iterator for FieldIterator {
-    type Item = (String, Value);
+    type Item = Field;
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
@@ -155,7 +154,10 @@ impl Iterator for FieldIterator {
                                                               name_length as usize);
                             let name = str::from_utf8(slice).unwrap();
                             let value = cass_iterator_get_meta_field_value(self.0);
-                            Some((name.to_owned(), Value(value)))
+                            Some(Field {
+                                name: name.to_owned(),
+                                value: value,
+                            })
                         }
                         err => panic!("FIXME: no error handling. Err {}", err),
                     }
@@ -164,6 +166,7 @@ impl Iterator for FieldIterator {
         }
     }
 }
+
 
 // pub struct CassIteratorType(_CassIteratorType);
 

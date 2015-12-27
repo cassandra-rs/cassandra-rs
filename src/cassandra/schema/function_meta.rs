@@ -29,7 +29,7 @@ impl FunctionMeta {
     }
 
     ///Gets the name of the function.
-    pub fn name(&self) -> String {
+    pub fn get_name(&self) -> String {
         unsafe {
             let mut name = mem::zeroed();
             let mut name_length = mem::zeroed();

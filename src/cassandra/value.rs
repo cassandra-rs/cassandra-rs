@@ -134,12 +134,12 @@ impl Debug for Value {
                     ValueType::UNKNOWN => write!(f, "{:?}", "unknown"),
                     ValueType::CUSTOM => write!(f, "{:?}", "custom"),
                     ValueType::ASCII => write!(f, "{:?}", self.get_string().unwrap()),
-                    ValueType::BIGINT => write!(f, "{:?}", self.get_int64().unwrap()),
+                    ValueType::BIGINT => write!(f, "{:?}", self.get_i64().unwrap()),
                     ValueType::VARCHAR => write!(f, "{:?}", self.get_string().unwrap()),
                     ValueType::BOOLEAN => write!(f, "{:?}", self.get_bool().unwrap()),
-                    ValueType::DOUBLE => write!(f, "{:?}", self.get_double().unwrap()),
-                    ValueType::FLOAT => write!(f, "{:?}", self.get_float().unwrap()),
-                    ValueType::INT => write!(f, "{:?}", self.get_int32().unwrap()),
+                    ValueType::DOUBLE => write!(f, "{:?}", self.get_dbl().unwrap()),
+                    ValueType::FLOAT => write!(f, "{:?}", self.get_flt().unwrap()),
+                    ValueType::INT => write!(f, "{:?}", self.get_i32().unwrap()),
                     ValueType::TIMEUUID => write!(f, "TIMEUUID: {:?}", self.get_uuid().unwrap()),
                     ValueType::SET => {
                         try!(write!(f, "["));
@@ -179,12 +179,12 @@ impl Display for Value {
                     ValueType::UNKNOWN => write!(f, "{}", "unknown"),
                     ValueType::CUSTOM => write!(f, "{}", "custom"),
                     ValueType::ASCII => write!(f, "{}", self.get_string().unwrap()),
-                    ValueType::BIGINT => write!(f, "{}", self.get_int64().unwrap()),
+                    ValueType::BIGINT => write!(f, "{}", self.get_i64().unwrap()),
                     ValueType::VARCHAR => write!(f, "{}", self.get_string().unwrap()),
                     ValueType::BOOLEAN => write!(f, "{}", self.get_bool().unwrap()),
-                    ValueType::DOUBLE => write!(f, "{}", self.get_double().unwrap()),
-                    ValueType::FLOAT => write!(f, "{}", self.get_float().unwrap()),
-                    ValueType::INT => write!(f, "{}", self.get_int32().unwrap()),
+                    ValueType::DOUBLE => write!(f, "{}", self.get_dbl().unwrap()),
+                    ValueType::FLOAT => write!(f, "{}", self.get_flt().unwrap()),
+                    ValueType::INT => write!(f, "{}", self.get_i32().unwrap()),
                     ValueType::TIMEUUID => write!(f, "TIMEUUID: {}", self.get_uuid().unwrap()),
                     ValueType::SET => {
                         try!(write!(f, "["));
@@ -355,28 +355,28 @@ impl Value {
         unsafe { CassError::build(cass_value_get_inet(self.0, &mut output.0)).wrap(output) }
     }
 
-    pub fn get_int32(&self) -> Result<i32, CassError> {
+    pub fn get_i32(&self) -> Result<i32, CassError> {
         unsafe {
             let mut output = mem::zeroed();
             CassError::build(cass_value_get_int32(self.0, &mut output)).wrap(output)
         }
     }
 
-    pub fn get_int64(&self) -> Result<i64, CassError> {
+    pub fn get_i64(&self) -> Result<i64, CassError> {
         unsafe {
             let mut output = mem::zeroed();
             CassError::build(cass_value_get_int64(self.0, &mut output)).wrap(output)
         }
     }
 
-    pub fn get_float(&self) -> Result<f32, CassError> {
+    pub fn get_flt(&self) -> Result<f32, CassError> {
         unsafe {
             let mut output = mem::zeroed();
             CassError::build(cass_value_get_float(self.0, &mut output)).wrap(output)
         }
     }
 
-    pub fn get_double(&self) -> Result<f64, CassError> {
+    pub fn get_dbl(&self) -> Result<f64, CassError> {
         unsafe {
             let mut output = mem::zeroed();
             CassError::build(cass_value_get_double(self.0, &mut output)).wrap(output)

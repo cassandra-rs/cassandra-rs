@@ -18,18 +18,18 @@ use cassandra_sys::cass_aggregate_meta_field_by_name;
 use cassandra::schema::function_meta::FunctionMeta;
 use cassandra::data_type::ConstDataType;
 use cassandra::value::Value;
-use cassandra::iterator::AggregateIterator;
+use cassandra::iterator::FieldIterator;
 
 pub struct AggregateMeta(pub *const _CassAggregateMeta);
 
 impl AggregateMeta {
-    pub fn fields_iter(&self) -> AggregateIterator {
-        unsafe { AggregateIterator(cass_iterator_fields_from_aggregate_meta(self.0)) }
+    pub fn fields_iter(&self) -> FieldIterator {
+        unsafe { FieldIterator(cass_iterator_fields_from_aggregate_meta(self.0)) }
     }
 
 
     /// Gets the name of the aggregate.
-    pub fn name(&self) -> String {
+    pub fn get_name(&self) -> String {
         unsafe {
             let mut name = mem::zeroed();
             let mut name_length = mem::zeroed();

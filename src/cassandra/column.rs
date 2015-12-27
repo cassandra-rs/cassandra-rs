@@ -28,10 +28,12 @@ use cassandra_sys::cass_iterator_from_map;
 use cassandra_sys::cass_iterator_from_collection;
 use cassandra_sys::cass_value_type;
 use cassandra_sys::CassValue as _Value;
+use cassandra_sys::cass_iterator_fields_from_user_type;
 
 use cassandra::uuid::Uuid;
 use cassandra::value::ValueType;
 use cassandra::iterator::SetIterator;
+use cassandra::iterator::UserTypeIterator;
 use cassandra::inet::Inet;
 use cassandra::iterator::MapIterator;
 use cassandra::error::CassErrorTypes;
@@ -173,23 +175,28 @@ impl AsTypedColumn for bool {
 }
 
 impl Column {
+    ///Gets the type of this column.
     pub fn get_type(&self) -> ValueType {
         unsafe { ValueType::build(cass_value_type(self.0)) }
     }
 
+    ///Gets the inet from this column or errors if you ask for the wrong type
     pub fn get_inet(&self, mut output: Inet) -> Result<Inet, CassError> {
         unsafe { CassError::build(cass_value_get_inet(self.0, &mut output.0)).wrap(output) }
     }
 
-    pub fn get_uint32(&self, mut output: u32) -> Result<u32, CassError> {
+    ///Gets the u32 from this column or errors if you ask for the wrong type
+    pub fn get_u32(&self, mut output: u32) -> Result<u32, CassError> {
         unsafe { CassError::build(cass_value_get_uint32(self.0, &mut output)).wrap(output) }
     }
 
-    pub fn get_int8(&self, mut output: i8) -> Result<i8, CassError> {
+    ///Gets the i8 from this column or errors if you ask for the wrong type
+    pub fn get_i8(&self, mut output: i8) -> Result<i8, CassError> {
         unsafe { CassError::build(cass_value_get_int8(self.0, &mut output)).wrap(output) }
     }
 
-    pub fn get_int16(&self, mut output: i16) -> Result<i16, CassError> {
+    ///Gets the i16 from this column or errors if you ask for the wrong type
+    pub fn get_i16(&self, mut output: i16) -> Result<i16, CassError> {
         unsafe { CassError::build(cass_value_get_int16(self.0, &mut output)).wrap(output) }
     }
 
@@ -199,6 +206,7 @@ impl Column {
     //        // unsafe { CassError::build(cass_value_get_decimal(self.0, &mut output)).wrap(output) }
     //    }
 
+    ///Gets the string from this column or errors if you ask for the wrong type
     pub fn get_string(&self) -> Result<String, CassError> {
         unsafe {
             match cass_value_type(self.0) {
@@ -221,20 +229,23 @@ impl Column {
         }
     }
 
-    pub fn get_int32(&self) -> Result<i32, CassError> {
+    ///Gets the i32 from this column or errors if you ask for the wrong type
+    pub fn get_i32(&self) -> Result<i32, CassError> {
         unsafe {
             let mut output = mem::zeroed();
             CassError::build(cass_value_get_int32(self.0, &mut output)).wrap(output)
         }
     }
 
-    pub fn get_int64(&self) -> Result<i64, CassError> {
+    ///Gets the i64 from this column or errors if you ask for the wrong type
+    pub fn get_i64(&self) -> Result<i64, CassError> {
         unsafe {
             let mut output = mem::zeroed();
             CassError::build(cass_value_get_int64(self.0, &mut output)).wrap(output)
         }
     }
 
+    ///Gets the float from this column or errors if you ask for the wrong type
     pub fn get_float(&self) -> Result<f32, CassError> {
         unsafe {
             let mut output = mem::zeroed();
@@ -242,6 +253,7 @@ impl Column {
         }
     }
 
+    ///Gets the double from this column or errors if you ask for the wrong type
     pub fn get_double(&self) -> Result<f64, CassError> {
         unsafe {
             let mut output = mem::zeroed();
@@ -249,6 +261,7 @@ impl Column {
         }
     }
 
+    ///Gets the bool from this column or errors if you ask for the wrong type
     pub fn get_bool(&self) -> Result<bool, CassError> {
         unsafe {
             let mut output = mem::zeroed();
@@ -256,6 +269,7 @@ impl Column {
         }
     }
 
+    ///Gets the uuid from this column or errors if you ask for the wrong type
     pub fn get_uuid(&self) -> Result<Uuid, CassError> {
         unsafe {
             let mut output: Uuid = mem::zeroed();
@@ -263,6 +277,7 @@ impl Column {
         }
     }
 
+    ///Gets an iterator over the map in this column or errors if you ask for the wrong type
     pub fn map_iter(&self) -> Result<MapIterator, CassError> {
         unsafe {
             match self.get_type() {
@@ -272,6 +287,7 @@ impl Column {
         }
     }
 
+    ///Gets an iterator over the set in this column or errors if you ask for the wrong type
     pub fn set_iter(&self) -> Result<SetIterator, CassError> {
         unsafe {
             match self.get_type() {
@@ -281,12 +297,13 @@ impl Column {
         }
     }
 
-    //    pub fn use_type_iter(&self) -> Result<UserTypeIterator, CassError> {
-    //        unsafe {
-    //            match self.get_type() {
-    //                ValueType::UDT => Ok(UserTypeIterator(cass_iterator_from_user_type(self.0))),
-    //                _ => Err(CassError::build(1)),
-    //            }
-    //        }
-    //    }
+    ///Gets an iterator over the fields of the user type in this column or errors if you ask for the wrong type
+    pub fn use_type_iter(&self) -> Result<UserTypeIterator, CassError> {
+        unsafe {
+            match self.get_type() {
+                ValueType::UDT => Ok(UserTypeIterator(cass_iterator_fields_from_user_type(self.0))),
+                _ => Err(CassError::build(1)),
+            }
+        }
+    }
 }

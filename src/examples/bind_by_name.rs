@@ -55,11 +55,11 @@ unsafe fn select_from_basic(session: &mut Session,
         Ok(result) => {
             println!("{:?}", result);
             for row in result.iter() {
-                basic.bln = try!(row.get_column_by_name("BLN").get_bool());
+                basic.bln = try!(row.get_column_by_name("bln").get_bool());
                 basic.dbl = try!(row.get_column_by_name("dbl").get_double());
                 basic.flt = try!(row.get_column_by_name("flt").get_float());
-                basic.i32 = try!(row.get_column_by_name("i32").get_int32());
-                basic.i64 = try!(row.get_column_by_name("i64").get_int64());
+                basic.i32 = try!(row.get_column_by_name("i32").get_i32());
+                basic.i64 = try!(row.get_column_by_name("i64").get_i64());
             }
             Ok(result)
         }

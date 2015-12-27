@@ -28,7 +28,7 @@ use cassandra_sys::cass_iterator_from_map;
 use cassandra_sys::cass_iterator_from_collection;
 use cassandra_sys::cass_value_type;
 use cassandra_sys::CassValue as _Value;
-
+//use cassandra_sys::cass_iterator_get_meta_field_name;
 use cassandra::uuid::Uuid;
 use cassandra::value::ValueType;
 use cassandra::iterator::SetIterator;
@@ -67,8 +67,8 @@ impl FieldType {
 }
 
 pub struct Field {
-    key: String,
-    value: *const _Value,
+    pub name: String,
+    pub value: *const _Value,
 }
 
 impl Debug for Field {
@@ -174,6 +174,10 @@ impl Display for Field {
 // }
 //
 impl Field {
+    pub fn get_name(&self) -> String {
+        self.name.clone()
+    }
+
     pub fn get_type(&self) -> ValueType {
         unsafe { ValueType::build(cass_value_type(self.value)) }
     }
