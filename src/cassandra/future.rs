@@ -38,10 +38,7 @@ impl Drop for Future {
 
 impl Future {
     ///Sets a callback that is called when a future is set
-    pub fn set_callback(&mut self,
-                        callback: FutureCallback,
-                        data: *mut c_void)
-                        -> Result<&Self, CassError> {
+    pub fn set_callback(&mut self, callback: FutureCallback, data: *mut c_void) -> Result<&Self, CassError> {
         unsafe { CassError::build(cass_future_set_callback(self.0, callback.0, data)).wrap(self) }
     }
 
@@ -112,17 +109,10 @@ impl Future {
             let name_length = mem::zeroed();
             let value = mem::zeroed();
             let value_length = mem::zeroed();
-            match cass_future_custom_payload_item(self.0,
-                                                  index,
-                                                  name,
-                                                  name_length,
-                                                  value,
-                                                  value_length) {
+            match cass_future_custom_payload_item(self.0, index, name, name_length, value, value_length) {
                 CASS_OK => {
-                    let name: &[u8] = slice::from_raw_parts(name as *const u8,
-                                                            name_length as usize);
-                    let value: &[u8] = slice::from_raw_parts(value as *const u8,
-                                                             value_length as usize);
+                    let name: &[u8] = slice::from_raw_parts(name as *const u8, name_length as usize);
+                    let value: &[u8] = slice::from_raw_parts(value as *const u8, value_length as usize);
                     Ok((str::from_utf8(name).unwrap().to_owned(),
                         str::from_utf8(value).unwrap().to_owned()))
                 }

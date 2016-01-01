@@ -125,22 +125,12 @@ impl Tuple {
 
     ///Sets a "boolean" in a tuple at the specified index.
     pub fn set_bool(&mut self, index: u64, value: bool) -> Result<(), CassError> {
-        unsafe {
-            CassError::build(cass_tuple_set_bool(self.0,
-                                                 index,
-                                                 if value {
-                                                     1
-                                                 } else {
-                                                     0
-                                                 }))
-                .wrap(())
-        }
+        unsafe { CassError::build(cass_tuple_set_bool(self.0, index, if value { 1 } else { 0 })).wrap(()) }
     }
 
     ///Sets an "ascii", "text" or "varchar" in a tuple at the specified index.
     pub fn set_string<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
-        where S: Into<String>
-    {
+        where S: Into<String> {
         unsafe {
             let value = CString::new(value.into()).unwrap();
             CassError::build(cass_tuple_set_string(self.0, index, value.as_ptr())).wrap(())
@@ -149,19 +139,12 @@ impl Tuple {
 
     ///Sets a "blob", "varint" or "custom" in a tuple at the specified index.
     pub fn set_bytes(&mut self, index: u64, value: Vec<u8>) -> Result<(), CassError> {
-        unsafe {
-            CassError::build(cass_tuple_set_bytes(self.0,
-                                                  index,
-                                                  value.as_ptr(),
-                                                  value.len() as u64))
-                .wrap(())
-        }
+        unsafe { CassError::build(cass_tuple_set_bytes(self.0, index, value.as_ptr(), value.len() as u64)).wrap(()) }
     }
 
     ///Sets a "uuid" or "timeuuid" in a tuple at the specified index.
     pub fn set_uuid<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
-        where S: Into<Uuid>
-    {
+        where S: Into<Uuid> {
         unsafe { CassError::build(cass_tuple_set_uuid(self.0, index, value.into().0)).wrap(()) }
     }
 
@@ -173,11 +156,8 @@ impl Tuple {
 
     ///Sets a "list", "map" or "set" in a tuple at the specified index.
     pub fn set_collection<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
-        where S: Into<Set>
-    {
-        unsafe {
-            CassError::build(cass_tuple_set_collection(self.0, index, value.into().0)).wrap(())
-        }
+        where S: Into<Set> {
+        unsafe { CassError::build(cass_tuple_set_collection(self.0, index, value.into().0)).wrap(()) }
     }
 
     ///Sets a "tuple" in a tuple at the specified index.

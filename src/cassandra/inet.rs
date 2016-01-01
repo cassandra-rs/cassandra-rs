@@ -35,9 +35,7 @@ pub trait AsInet {
 impl AsInet for SocketAddr {
     fn as_cass_inet(&self) -> Inet {
         match *self {
-            SocketAddr::V4(ipv4_addr) => unsafe {
-                Inet(cass_inet_init_v4(ipv4_addr.ip().octets().as_ptr()))
-            },
+            SocketAddr::V4(ipv4_addr) => unsafe { Inet(cass_inet_init_v4(ipv4_addr.ip().octets().as_ptr())) },
             SocketAddr::V6(ipv6_addr) => {
                 unsafe {
                     let seg = ipv6_addr.ip().segments();

@@ -238,9 +238,7 @@ impl Value {
             let output_size = mem::zeroed();
             let result = cass_value_get_bytes(self.0, &mut output, output_size);
             // let output:*mut u8 = &mut*output;
-            let slice: Vec<*const u8> = Vec::from_raw_parts(&mut output,
-                                                            output_size as usize,
-                                                            output_size as usize);
+            let slice: Vec<*const u8> = Vec::from_raw_parts(&mut output, output_size as usize, output_size as usize);
             let r = CassError::build(result);
             r.wrap(slice)
         }
@@ -327,9 +325,7 @@ impl Value {
             cass_value_get_string(self.0, &mut message, &mut (message_length));
 
             let slice = slice::from_raw_parts(message as *const u8, message_length as usize);
-            let err = CassError::build(cass_value_get_string(self.0,
-                                                             &mut message,
-                                                             &mut (message_length)));
+            let err = CassError::build(cass_value_get_string(self.0, &mut message, &mut (message_length)));
             err.wrap(str::from_utf8(slice).unwrap().to_owned())
         }
     }

@@ -96,11 +96,7 @@ impl TableMeta {
         // fixme replace CassValule with a custom type
         unsafe {
             let value = cass_table_meta_field_by_name(self.0, name.as_ptr() as *const i8);
-            if value.is_null() {
-                None
-            } else {
-                Some(Value(value))
-            }
+            if value.is_null() { None } else { Some(Value(value)) }
 
         }
     }

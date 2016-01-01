@@ -124,21 +124,14 @@ impl Statement {
     ///
     ///<b>Default:</b> CASS_CONSISTENCY_LOCAL_ONE
     pub fn set_consistency(&mut self, consistency: Consistency) -> Result<&Self, CassError> {
-        unsafe {
-            CassError::build(cass_statement_set_consistency(self.0, consistency.0)).wrap(self)
-        }
+        unsafe { CassError::build(cass_statement_set_consistency(self.0, consistency.0)).wrap(self) }
     }
 
     /// Sets the statement's serial consistency level.
     ///
     ///<b>Default:</b> Not set
-    pub fn set_serial_consistency(&mut self,
-                                  serial_consistency: Consistency)
-                                  -> Result<&mut Self, CassError> {
-        unsafe {
-            CassError::build(cass_statement_set_serial_consistency(self.0, serial_consistency.0))
-                .wrap(self)
-        }
+    pub fn set_serial_consistency(&mut self, serial_consistency: Consistency) -> Result<&mut Self, CassError> {
+        unsafe { CassError::build(cass_statement_set_serial_consistency(self.0, serial_consistency.0)).wrap(self) }
     }
 
     ///Sets the statement's page size.
@@ -182,9 +175,7 @@ impl Statement {
 
     /// Sets the statement's retry policy.
     pub fn set_retry_policy(&mut self, retry_policy: RetryPolicy) -> Result<&Self, CassError> {
-        unsafe {
-            CassError::build(cass_statement_set_retry_policy(self.0, retry_policy.0)).wrap(self)
-        }
+        unsafe { CassError::build(cass_statement_set_retry_policy(self.0, retry_policy.0)).wrap(self) }
     }
 
     ///Sets the statement's custom payload.
@@ -217,8 +208,7 @@ impl Statement {
     pub fn bind_int8_by_name(&mut self, name: &str, value: i8) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_int8_by_name(self.0, name.as_ptr(), value))
-                .wrap(self)
+            CassError::build(cass_statement_bind_int8_by_name(self.0, name.as_ptr(), value)).wrap(self)
         }
     }
 
@@ -231,8 +221,7 @@ impl Statement {
     pub fn bind_int16_by_name(&mut self, name: &str, value: i16) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_int16_by_name(self.0, name.as_ptr(), value))
-                .wrap(self)
+            CassError::build(cass_statement_bind_int16_by_name(self.0, name.as_ptr(), value)).wrap(self)
         }
     }
 
@@ -245,8 +234,7 @@ impl Statement {
     pub fn bind_int32_by_name(&mut self, name: &str, value: i32) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_int32_by_name(self.0, name.as_ptr(), value))
-                .wrap(self)
+            CassError::build(cass_statement_bind_int32_by_name(self.0, name.as_ptr(), value)).wrap(self)
         }
     }
 
@@ -262,8 +250,7 @@ impl Statement {
     pub fn bind_uint32_by_name(&mut self, name: &str, value: u32) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_uint32_by_name(self.0, name.as_ptr(), value))
-                .wrap(self)
+            CassError::build(cass_statement_bind_uint32_by_name(self.0, name.as_ptr(), value)).wrap(self)
         }
     }
 
@@ -298,8 +285,7 @@ impl Statement {
     pub fn bind_float_by_name(&mut self, name: &str, value: f32) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_float_by_name(self.0, name.as_ptr(), value))
-                .wrap(self)
+            CassError::build(cass_statement_bind_float_by_name(self.0, name.as_ptr(), value)).wrap(self)
         }
     }
 
@@ -315,23 +301,13 @@ impl Statement {
     pub fn bind_double_by_name(&mut self, name: &str, value: f64) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_double_by_name(self.0, name.as_ptr(), value))
-                .wrap(self)
+            CassError::build(cass_statement_bind_double_by_name(self.0, name.as_ptr(), value)).wrap(self)
         }
     }
 
     ///Binds a "boolean" to a query or bound statement at the specified index.
     pub fn bind_bool(&mut self, index: u64, value: bool) -> Result<&mut Self, CassError> {
-        unsafe {
-            CassError::build(cass_statement_bind_bool(self.0,
-                                                      index,
-                                                      if value {
-                                                          1
-                                                      } else {
-                                                          0
-                                                      }))
-                .wrap(self)
-        }
+        unsafe { CassError::build(cass_statement_bind_bool(self.0, index, if value { 1 } else { 0 })).wrap(self) }
     }
 
     /// Binds a "boolean" to all the values with the specified name.
@@ -341,13 +317,7 @@ impl Statement {
     pub fn bind_bool_by_name(&mut self, name: &str, value: bool) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_bool_by_name(self.0,
-                                                              name.as_ptr(),
-                                                              if value {
-                                                                  1
-                                                              } else {
-                                                                  0
-                                                              }))
+            CassError::build(cass_statement_bind_bool_by_name(self.0, name.as_ptr(), if value { 1 } else { 0 }))
                 .wrap(self)
         }
     }
@@ -378,11 +348,7 @@ impl Statement {
     ///Binds a "blob", "varint" or "custom" to a query or bound statement at the specified index.
     pub fn bind_bytes(&mut self, index: u64, value: Vec<u8>) -> Result<&mut Self, CassError> {
         unsafe {
-            CassError::build(cass_statement_bind_bytes(self.0,
-                                                       index,
-                                                       value.as_ptr(),
-                                                       value.len() as u64))
-                .wrap(self)
+            CassError::build(cass_statement_bind_bytes(self.0, index, value.as_ptr(), value.len() as u64)).wrap(self)
         }
     }
 
@@ -391,17 +357,11 @@ impl Statement {
     ///
     ///This can only be used with statements created by
     ///cass_prepared_bind().
-    pub fn bind_bytes_by_name(&mut self,
-                              name: &str,
-                              mut value: Vec<u8>)
-                              -> Result<&mut Self, CassError> {
+    pub fn bind_bytes_by_name(&mut self, name: &str, mut value: Vec<u8>) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
             let val = value.as_mut_ptr();
-            let result = cass_statement_bind_bytes_by_name(self.0,
-                                                           name.as_ptr(),
-                                                           val,
-                                                           value.len() as u64);
+            let result = cass_statement_bind_bytes_by_name(self.0, name.as_ptr(), val, value.len() as u64);
             CassError::build(result).wrap(self)
         }
     }
@@ -419,8 +379,7 @@ impl Statement {
     pub fn bind_uuid_by_name(&mut self, name: &str, value: Uuid) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_uuid_by_name(self.0, name.as_ptr(), value.0))
-                .wrap(self)
+            CassError::build(cass_statement_bind_uuid_by_name(self.0, name.as_ptr(), value.0)).wrap(self)
         }
     }
 
@@ -433,8 +392,7 @@ impl Statement {
     pub fn bind_inet_by_name(&mut self, name: &str, value: Inet) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_inet_by_name(self.0, name.as_ptr(), value.0))
-                .wrap(self)
+            CassError::build(cass_statement_bind_inet_by_name(self.0, name.as_ptr(), value.0)).wrap(self)
         }
     }
 
@@ -477,9 +435,7 @@ impl Statement {
 
     ///Bind a "map" to a query or bound statement at the specified index.
     pub fn bind_map(&mut self, index: u64, collection: Map) -> Result<&mut Self, CassError> {
-        unsafe {
-            CassError::build(cass_statement_bind_collection(self.0, index, collection.0)).wrap(self)
-        }
+        unsafe { CassError::build(cass_statement_bind_collection(self.0, index, collection.0)).wrap(self) }
     }
 
     ///Bind a "map" to all the values with the
@@ -487,23 +443,15 @@ impl Statement {
     ///
     ///This can only be used with statements created by
     ///cass_prepared_bind().
-    pub fn bind_map_by_name(&mut self,
-                            name: &str,
-                            collection: Map)
-                            -> Result<&mut Self, CassError> {
+    pub fn bind_map_by_name(&mut self, name: &str, collection: Map) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_collection_by_name(self.0,
-                                                                    name.as_ptr(),
-                                                                    collection.0))
-                .wrap(self)
+            CassError::build(cass_statement_bind_collection_by_name(self.0, name.as_ptr(), collection.0)).wrap(self)
         }
     }
     ///Bind a "set" to a query or bound statement at the specified index.
     pub fn bind_set(&mut self, index: u64, collection: Set) -> Result<&mut Self, CassError> {
-        unsafe {
-            CassError::build(cass_statement_bind_collection(self.0, index, collection.0)).wrap(self)
-        }
+        unsafe { CassError::build(cass_statement_bind_collection(self.0, index, collection.0)).wrap(self) }
     }
 
     ///Bind a "set" to all the values with the
@@ -511,24 +459,16 @@ impl Statement {
     ///
     ///This can only be used with statements created by
     ///cass_prepared_bind().
-    pub fn bind_set_by_name(&mut self,
-                            name: &str,
-                            collection: Set)
-                            -> Result<&mut Self, CassError> {
+    pub fn bind_set_by_name(&mut self, name: &str, collection: Set) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_collection_by_name(self.0,
-                                                                    name.as_ptr(),
-                                                                    collection.0))
-                .wrap(self)
+            CassError::build(cass_statement_bind_collection_by_name(self.0, name.as_ptr(), collection.0)).wrap(self)
         }
     }
 
     ///Bind a "list" to a query or bound statement at the specified index.
     pub fn bind_list(&mut self, index: u64, collection: List) -> Result<&mut Self, CassError> {
-        unsafe {
-            CassError::build(cass_statement_bind_collection(self.0, index, collection.0)).wrap(self)
-        }
+        unsafe { CassError::build(cass_statement_bind_collection(self.0, index, collection.0)).wrap(self) }
     }
 
     ///Bind a "list" to all the values with the
@@ -536,16 +476,10 @@ impl Statement {
     ///
     ///This can only be used with statements created by
     ///cass_prepared_bind().
-    pub fn bind_list_by_name(&mut self,
-                             name: &str,
-                             collection: List)
-                             -> Result<&mut Self, CassError> {
+    pub fn bind_list_by_name(&mut self, name: &str, collection: List) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_collection_by_name(self.0,
-                                                                    name.as_ptr(),
-                                                                    collection.0))
-                .wrap(self)
+            CassError::build(cass_statement_bind_collection_by_name(self.0, name.as_ptr(), collection.0)).wrap(self)
         }
     }
 
@@ -561,29 +495,22 @@ impl Statement {
     pub fn bind_tuple_by_name(&mut self, name: &str, value: Tuple) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_tuple_by_name(self.0, name.as_ptr(), value.0))
-                .wrap(self)
+            CassError::build(cass_statement_bind_tuple_by_name(self.0, name.as_ptr(), value.0)).wrap(self)
         }
     }
 
     ///Bind a user defined type to a query or bound statement at the
     ///specified index.
     pub fn bind_user_type(&mut self, index: u64, value: UserType) -> Result<&mut Self, CassError> {
-        unsafe {
-            CassError::build(cass_statement_bind_user_type(self.0, index, value.0)).wrap(self)
-        }
+        unsafe { CassError::build(cass_statement_bind_user_type(self.0, index, value.0)).wrap(self) }
     }
 
     ///Bind a user defined type to a query or bound statement with the
     ///specified name.
-    pub fn bind_user_type_by_name(&mut self,
-                                  name: &str,
-                                  value: UserType)
-                                  -> Result<&mut Self, CassError> {
+    pub fn bind_user_type_by_name(&mut self, name: &str, value: UserType) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_user_type_by_name(self.0, name.as_ptr(), value.0))
-                .wrap(self)
+            CassError::build(cass_statement_bind_user_type_by_name(self.0, name.as_ptr(), value.0)).wrap(self)
         }
     }
 }

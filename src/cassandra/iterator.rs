@@ -16,8 +16,8 @@ use cassandra_sys::cass_iterator_get_column_meta;
 use cassandra_sys::cass_iterator_get_user_type;
 use cassandra_sys::cass_iterator_get_value;
 use cassandra_sys::cass_iterator_next;
-//use cassandra_sys::cass_iterator_get_user_type_field_name;
-//use cassandra_sys::cass_iterator_get_user_type_field_value;
+// use cassandra_sys::cass_iterator_get_user_type_field_name;
+// use cassandra_sys::cass_iterator_get_user_type_field_value;
 use cassandra::error::CassError;
 use cassandra::value::Value;
 use cassandra::field::Field;
@@ -150,8 +150,7 @@ impl Iterator for FieldIterator {
                     let mut name_length = mem::zeroed();
                     match cass_iterator_get_meta_field_name(self.0, &mut name, &mut name_length) {
                         CASS_OK => {
-                            let slice = slice::from_raw_parts(name as *const u8,
-                                                              name_length as usize);
+                            let slice = slice::from_raw_parts(name as *const u8, name_length as usize);
                             let name = str::from_utf8(slice).unwrap();
                             let value = cass_iterator_get_meta_field_value(self.0);
                             Some(Field {

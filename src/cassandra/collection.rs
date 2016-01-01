@@ -93,15 +93,7 @@ pub trait CassCollection {
 
     ///Appends a "boolean" to the collection.
     fn append_bool(&mut self, value: bool) -> Result<&Self, CassError> {
-        unsafe {
-            CassError::build(cass_collection_append_bool(self.inner(),
-                                                         if value {
-                                                             1
-                                                         } else {
-                                                             0
-                                                         }))
-                .wrap(self)
-        }
+        unsafe { CassError::build(cass_collection_append_bool(self.inner(), if value { 1 } else { 0 })).wrap(self) }
     }
 
     ///Appends an "ascii", "text" or "varchar" to the collection.
@@ -116,9 +108,7 @@ pub trait CassCollection {
     /// Appends a "blob", "varint" or "custom" to the collection.
     fn append_bytes(&mut self, value: Vec<u8>) -> Result<&Self, CassError> {
         unsafe {
-            let bytes = cass_collection_append_bytes(self.inner(),
-                                                     value[..].as_ptr(),
-                                                     value.len() as u64);
+            let bytes = cass_collection_append_bytes(self.inner(), value[..].as_ptr(), value.len() as u64);
             CassError::build(bytes).wrap(self)
         }
     }
@@ -135,23 +125,17 @@ pub trait CassCollection {
 
     ///Appends a "list" to the collection.
     fn append_list(&mut self, value: List) -> Result<&Self, CassError> {
-        unsafe {
-            CassError::build(cass_collection_append_collection(self.inner(), value.0)).wrap(self)
-        }
+        unsafe { CassError::build(cass_collection_append_collection(self.inner(), value.0)).wrap(self) }
     }
 
     ///Appends a "set" to the collection.
     fn append_set(&mut self, value: Set) -> Result<&Self, CassError> {
-        unsafe {
-            CassError::build(cass_collection_append_collection(self.inner(), value.0)).wrap(self)
-        }
+        unsafe { CassError::build(cass_collection_append_collection(self.inner(), value.0)).wrap(self) }
     }
 
     ///Appends a "map" to the collection.
     fn append_map(&mut self, value: Map) -> Result<&Self, CassError> {
-        unsafe {
-            CassError::build(cass_collection_append_collection(self.inner(), value.0)).wrap(self)
-        }
+        unsafe { CassError::build(cass_collection_append_collection(self.inner(), value.0)).wrap(self) }
     }
 
     ///Appends a "tuple" to the collection.
@@ -161,9 +145,7 @@ pub trait CassCollection {
 
     ///Appends a "udt" to the collection.
     fn append_user_type(&mut self, value: UserType) -> Result<&Self, CassError> {
-        unsafe {
-            CassError::build(cass_collection_append_user_type(self.inner(), value.0)).wrap(self)
-        }
+        unsafe { CassError::build(cass_collection_append_user_type(self.inner(), value.0)).wrap(self) }
     }
 }
 

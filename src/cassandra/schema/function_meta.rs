@@ -80,13 +80,7 @@ impl FunctionMeta {
 
     ///Gets whether a function is called on "null".
     pub fn called_on_null_input(&self) -> bool {
-        unsafe {
-            if cass_function_meta_called_on_null_input(self.0) > 0 {
-                true
-            } else {
-                false
-            }
-        }
+        unsafe { if cass_function_meta_called_on_null_input(self.0) > 0 { true } else { false } }
     }
 
     ///Gets the number of arguments this function takes.
@@ -101,11 +95,7 @@ impl FunctionMeta {
             let mut name_length = mem::zeroed();
             let mut data_type = mem::zeroed();
 
-            match cass_function_meta_argument(self.0,
-                                              index,
-                                              &mut name,
-                                              &mut name_length,
-                                              &mut data_type) {
+            match cass_function_meta_argument(self.0, index, &mut name, &mut name_length, &mut data_type) {
                 CASS_OK => Ok(()),
                 err => Err(CassError::build(err)),
             }
@@ -130,8 +120,6 @@ impl FunctionMeta {
     ///Gets a metadata field for the provided name. Metadata fields allow direct
     ///access to the column data found in the underlying "functions" metadata table.
     pub fn field_by_name(&self, name: &str) -> Value {
-        unsafe {
-            Value(cass_function_meta_field_by_name(self.0, CString::new(name).unwrap().as_ptr()))
-        }
+        unsafe { Value(cass_function_meta_field_by_name(self.0, CString::new(name).unwrap().as_ptr())) }
     }
 }

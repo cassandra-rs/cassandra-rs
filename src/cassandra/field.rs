@@ -28,7 +28,7 @@ use cassandra_sys::cass_iterator_from_map;
 use cassandra_sys::cass_iterator_from_collection;
 use cassandra_sys::cass_value_type;
 use cassandra_sys::CassValue as _Value;
-//use cassandra_sys::cass_iterator_get_meta_field_name;
+// use cassandra_sys::cass_iterator_get_meta_field_name;
 use cassandra::uuid::Uuid;
 use cassandra::value::ValueType;
 use cassandra::iterator::SetIterator;
@@ -212,8 +212,7 @@ impl Field {
                     let mut message_length = mem::zeroed();
                     match cass_value_get_string(self.value, &mut message, &mut message_length) {
                         CASS_OK => {
-                            let slice = slice::from_raw_parts(message as *const u8,
-                                                              message_length as usize);
+                            let slice = slice::from_raw_parts(message as *const u8, message_length as usize);
                             Ok(str::from_utf8(slice).unwrap().to_owned())
                         }
                         err => Err(CassError::build(err)),

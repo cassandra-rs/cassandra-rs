@@ -215,8 +215,7 @@ impl Column {
                     let mut message_length = mem::zeroed();
                     match cass_value_get_string(self.0, &mut message, &mut message_length) {
                         CASS_OK => {
-                            let slice = slice::from_raw_parts(message as *const u8,
-                                                              message_length as usize);
+                            let slice = slice::from_raw_parts(message as *const u8, message_length as usize);
                             Ok(str::from_utf8(slice).unwrap().to_owned())
                         }
                         err => Err(CassError::build(err)),

@@ -80,9 +80,7 @@ impl Session {
 
     ///Execute a query or bound statement.
     pub fn execute(&self, statement: &str, parameter_count: u64) -> ResultFuture {
-        unsafe {
-            ResultFuture(cass_session_execute(self.0, Statement::new(statement, parameter_count).0))
-        }
+        unsafe { ResultFuture(cass_session_execute(self.0, Statement::new(statement, parameter_count).0)) }
     }
 
     /// Execute a batch statement.

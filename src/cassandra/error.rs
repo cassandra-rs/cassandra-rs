@@ -216,7 +216,7 @@ impl CassError {
             CassError::Rust(err) => {
                 println!("rust");
                 Err(CassError::Rust(err))
-            }	
+            }
 
         }
 
@@ -352,13 +352,7 @@ impl CassErrorResult {
     ///   <li>CASS_ERROR_SERVER_READ_FAILURE</li>
     /// </ul>
     pub fn data_present(&self) -> bool {
-        unsafe {
-            if cass_error_result_data_present(self.0) > 0 {
-                true
-            } else {
-                false
-            }
-        }
+        unsafe { if cass_error_result_data_present(self.0) > 0 { true } else { false } }
     }
 
 
@@ -453,9 +447,7 @@ impl CassError {
                 &CassError::Server(ref err) => CassError::pointer_to_string(cass_error_desc(err.0)),
                 &CassError::Rust(ref err) => {
                     match err {
-                        &CassRustError::NulInString(_) => {
-                            "Tried to create a CString with a nul in the middle"
-                        }
+                        &CassRustError::NulInString(_) => "Tried to create a CString with a nul in the middle",
                     }
                 }
             }

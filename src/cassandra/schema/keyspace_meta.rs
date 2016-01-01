@@ -43,26 +43,16 @@ impl KeyspaceMeta {
     ///Gets the table metadata for the provided table name.
     pub fn table_by_name(&self, name: &str) -> Option<TableMeta> {
         unsafe {
-            let value = cass_keyspace_meta_table_by_name(self.0,
-                                                         CString::new(name).unwrap().as_ptr());
-            if value.is_null() {
-                None
-            } else {
-                Some(TableMeta(value))
-            }
+            let value = cass_keyspace_meta_table_by_name(self.0, CString::new(name).unwrap().as_ptr());
+            if value.is_null() { None } else { Some(TableMeta(value)) }
         }
     }
 
     ///Gets the data type for the provided type name.
     pub fn user_type_by_name(&self, name: &str) -> Option<ConstDataType> {
         unsafe {
-            let value = cass_keyspace_meta_user_type_by_name(self.0,
-                                                             CString::new(name).unwrap().as_ptr());
-            if value.is_null() {
-                None
-            } else {
-                Some(ConstDataType(value))
-            }
+            let value = cass_keyspace_meta_user_type_by_name(self.0, CString::new(name).unwrap().as_ptr());
+            if value.is_null() { None } else { Some(ConstDataType(value)) }
         }
     }
 
@@ -74,11 +64,7 @@ impl KeyspaceMeta {
                                                             CString::new(arguments.join(","))
                                                                 .unwrap()
                                                                 .as_ptr());
-            if value.is_null() {
-                None
-            } else {
-                Some(FunctionMeta(value))
-            }
+            if value.is_null() { None } else { Some(FunctionMeta(value)) }
         }
     }
 
@@ -90,11 +76,7 @@ impl KeyspaceMeta {
                                                            CString::new(arguments.join(","))
                                                                .unwrap()
                                                                .as_ptr());
-            if agg.is_null() {
-                None
-            } else {
-                Some(AggregateMeta(agg))
-            }
+            if agg.is_null() { None } else { Some(AggregateMeta(agg)) }
         }
     }
 
@@ -124,13 +106,8 @@ impl KeyspaceMeta {
     ///access to the column data found in the underlying "keyspaces" metadata table.
     pub fn field_by_name(&self, name: &str) -> Option<MetadataFieldValue> {
         unsafe {
-            let value = cass_keyspace_meta_field_by_name(self.0,
-                                                         CString::new(name).unwrap().as_ptr());
-            if value.is_null() {
-                None
-            } else {
-                Some(MetadataFieldValue(value))
-            }
+            let value = cass_keyspace_meta_field_by_name(self.0, CString::new(name).unwrap().as_ptr());
+            if value.is_null() { None } else { Some(MetadataFieldValue(value)) }
         }
     }
 }

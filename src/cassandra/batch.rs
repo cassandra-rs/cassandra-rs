@@ -113,9 +113,7 @@ impl Batch {
     }
 
     ///Sets the batch's custom payload.
-    pub fn set_custom_payload(&mut self,
-                              custom_payload: CustomPayload)
-                              -> Result<&Self, CassError> {
+    pub fn set_custom_payload(&mut self, custom_payload: CustomPayload) -> Result<&Self, CassError> {
         unsafe {
             match cass_batch_set_custom_payload(self.0, custom_payload.0) {
                 0 => Ok(self),

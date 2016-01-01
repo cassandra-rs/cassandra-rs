@@ -87,8 +87,7 @@ impl AggregateMeta {
     ///access to the column data found in the underlying "aggregates" metadata table.
     pub fn field_by_name(&self, name: &str) -> Option<Value> {
         unsafe {
-            let agg = cass_aggregate_meta_field_by_name(self.0,
-                                                        CString::new(name).unwrap().as_ptr());
+            let agg = cass_aggregate_meta_field_by_name(self.0, CString::new(name).unwrap().as_ptr());
             match agg.is_null() {
                 true => None,
                 false => Some(Value(agg)),

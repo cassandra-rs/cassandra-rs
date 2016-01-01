@@ -53,8 +53,7 @@ impl Row {
     }
 
     pub fn get_column_by_name<S>(&self, name: S) -> Column
-        where S: Into<String>
-    {
+        where S: Into<String> {
         unsafe {
             let name = CString::new(name.into()).unwrap();
             println!("name: {:?}", name);
