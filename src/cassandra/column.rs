@@ -182,22 +182,22 @@ impl Column {
 
     ///Gets the inet from this column or errors if you ask for the wrong type
     pub fn get_inet(&self, mut output: Inet) -> Result<Inet, CassError> {
-        unsafe { CassError::build(cass_value_get_inet(self.0, &mut output.0)).wrap(output) }
+        unsafe { CassError::build(cass_value_get_inet(self.0, &mut output.0), None).wrap(output) }
     }
 
     ///Gets the u32 from this column or errors if you ask for the wrong type
     pub fn get_u32(&self, mut output: u32) -> Result<u32, CassError> {
-        unsafe { CassError::build(cass_value_get_uint32(self.0, &mut output)).wrap(output) }
+        unsafe { CassError::build(cass_value_get_uint32(self.0, &mut output), None).wrap(output) }
     }
 
     ///Gets the i8 from this column or errors if you ask for the wrong type
     pub fn get_i8(&self, mut output: i8) -> Result<i8, CassError> {
-        unsafe { CassError::build(cass_value_get_int8(self.0, &mut output)).wrap(output) }
+        unsafe { CassError::build(cass_value_get_int8(self.0, &mut output), None).wrap(output) }
     }
 
     ///Gets the i16 from this column or errors if you ask for the wrong type
     pub fn get_i16(&self, mut output: i16) -> Result<i16, CassError> {
-        unsafe { CassError::build(cass_value_get_int16(self.0, &mut output)).wrap(output) }
+        unsafe { CassError::build(cass_value_get_int16(self.0, &mut output), None).wrap(output) }
     }
 
     //    pub fn get_decimal(&self, mut output: d128) -> Result<d128, CassError> {
@@ -218,12 +218,12 @@ impl Column {
                             let slice = slice::from_raw_parts(message as *const u8, message_length as usize);
                             Ok(str::from_utf8(slice).unwrap().to_owned())
                         }
-                        err => Err(CassError::build(err)),
+                        err => Err(CassError::build(err, None)),
                     }
 
 
                 }
-                err => Err(CassError::build(err)),
+                err => Err(CassError::build(err, None)),
             }
         }
     }
@@ -232,7 +232,7 @@ impl Column {
     pub fn get_i32(&self) -> Result<i32, CassError> {
         unsafe {
             let mut output = mem::zeroed();
-            CassError::build(cass_value_get_int32(self.0, &mut output)).wrap(output)
+            CassError::build(cass_value_get_int32(self.0, &mut output), None).wrap(output)
         }
     }
 
@@ -240,7 +240,7 @@ impl Column {
     pub fn get_i64(&self) -> Result<i64, CassError> {
         unsafe {
             let mut output = mem::zeroed();
-            CassError::build(cass_value_get_int64(self.0, &mut output)).wrap(output)
+            CassError::build(cass_value_get_int64(self.0, &mut output), None).wrap(output)
         }
     }
 
@@ -248,7 +248,7 @@ impl Column {
     pub fn get_float(&self) -> Result<f32, CassError> {
         unsafe {
             let mut output = mem::zeroed();
-            CassError::build(cass_value_get_float(self.0, &mut output)).wrap(output)
+            CassError::build(cass_value_get_float(self.0, &mut output), None).wrap(output)
         }
     }
 
@@ -256,7 +256,7 @@ impl Column {
     pub fn get_double(&self) -> Result<f64, CassError> {
         unsafe {
             let mut output = mem::zeroed();
-            CassError::build(cass_value_get_double(self.0, &mut output)).wrap(output)
+            CassError::build(cass_value_get_double(self.0, &mut output), None).wrap(output)
         }
     }
 
@@ -264,7 +264,7 @@ impl Column {
     pub fn get_bool(&self) -> Result<bool, CassError> {
         unsafe {
             let mut output = mem::zeroed();
-            CassError::build(cass_value_get_bool(self.0, &mut output)).wrap(output > 0)
+            CassError::build(cass_value_get_bool(self.0, &mut output), None).wrap(output > 0)
         }
     }
 
@@ -272,7 +272,7 @@ impl Column {
     pub fn get_uuid(&self) -> Result<Uuid, CassError> {
         unsafe {
             let mut output: Uuid = mem::zeroed();
-            CassError::build(cass_value_get_uuid(self.0, &mut output.0)).wrap(output)
+            CassError::build(cass_value_get_uuid(self.0, &mut output.0), None).wrap(output)
         }
     }
 
@@ -281,7 +281,7 @@ impl Column {
         unsafe {
             match self.get_type() {
                 ValueType::MAP => Ok(MapIterator(cass_iterator_from_map(self.0))),
-                _ => Err(CassError::build(CassErrorTypes::LIB_INVALID_VALUE_TYPE as u32)),
+                _ => Err(CassError::build(CassErrorTypes::LIB_INVALID_VALUE_TYPE as u32, None)),
             }
         }
     }
@@ -291,7 +291,7 @@ impl Column {
         unsafe {
             match self.get_type() {
                 ValueType::SET => Ok(SetIterator(cass_iterator_from_collection(self.0))),
-                _ => Err(CassError::build(1)),
+                _ => Err(CassError::build(1, None)),
             }
         }
     }
@@ -301,7 +301,7 @@ impl Column {
         unsafe {
             match self.get_type() {
                 ValueType::UDT => Ok(UserTypeIterator(cass_iterator_fields_from_user_type(self.0))),
-                _ => Err(CassError::build(1)),
+                _ => Err(CassError::build(1, None)),
             }
         }
     }

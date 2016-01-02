@@ -1,4 +1,5 @@
 extern crate cassandra;
+
 use cassandra::Cluster;
 use cassandra::Session;
 use cassandra::Statement;
@@ -7,24 +8,19 @@ use cassandra::BatchType;
 use cassandra::PreparedStatement;
 use cassandra::CassError;
 
-// use cassandra::AsContactPoints;
-
 struct Pair<'a> {
     key: &'a str,
     value: &'a str,
 }
 
-static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = \
-                                        { \'class\': \'SimpleStrategy\', \'replication_factor\': \
-                                        \'1\' };";
-static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.pairs (key text, value \
-                                     text, PRIMARY KEY (key));";
+static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
+                                        \'SimpleStrategy\', \'replication_factor\': \'1\' };";
+static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.pairs (key text, value text, PRIMARY KEY \
+                                     (key));";
 static INSERT_QUERY: &'static str = "INSERT INTO examples.pairs (key, value) VALUES (?, ?)";
 static SELECT_QUERY: &'static str = "SELECT * from examples.pairs";
 
-fn insert_into_batch_with_prepared<'a>(session: &mut Session,
-                                       pairs: Vec<Pair>)
-                                       -> Result<PreparedStatement, CassError> {
+fn insert_into_batch_with_prepared(session: &mut Session, pairs: Vec<Pair>) -> Result<PreparedStatement, CassError> {
     let prepared = session.prepare(INSERT_QUERY).unwrap().wait().unwrap();
     let mut batch = Batch::new(BatchType::LOGGED);
     for pair in pairs {
@@ -33,7 +29,7 @@ fn insert_into_batch_with_prepared<'a>(session: &mut Session,
         try!(statement.bind_string(1, pair.value));
         match batch.add_statement(statement) {
             Ok(_) => {}
-            Err(err) => return Err(CassError::build(err)),
+            Err(err) => return Err(CassError::build(err, None)),
         }
     }
     try!(session.execute_batch(batch).wait());

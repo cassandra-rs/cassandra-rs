@@ -39,7 +39,7 @@ impl Drop for Future {
 impl Future {
     ///Sets a callback that is called when a future is set
     pub fn set_callback(&mut self, callback: FutureCallback, data: *mut c_void) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_future_set_callback(self.0, callback.0, data)).wrap(self) }
+        unsafe { CassError::build(cass_future_set_callback(self.0, callback.0, data), None).wrap(self) }
     }
 
     ///Gets the set status of the future.
@@ -78,7 +78,7 @@ impl Future {
     ///Gets the error code from future. If the future is not ready this method will
     // wait for the future to be set.
     fn error_code(self) -> Result<(), CassError> {
-        unsafe { CassError::build(cass_future_error_code(self.0)).wrap(()) }
+        unsafe { CassError::build(cass_future_error_code(self.0), None).wrap(()) }
     }
 
     ///Gets the error message from future. If the future is not ready this method will
@@ -141,7 +141,7 @@ impl ResultFuture {
     }
 
     pub fn error_code(&mut self) -> Result<CassResult, CassError> {
-        unsafe { CassError::build(cass_future_error_code(self.0)).wrap(self.get()) }
+        unsafe { CassError::build(cass_future_error_code(self.0), None).wrap(self.get()) }
     }
 
     pub fn error_message(&mut self) -> String {
@@ -179,7 +179,7 @@ impl PreparedFuture {
     }
 
     pub fn error_code(&mut self) -> Result<PreparedStatement, CassError> {
-        unsafe { CassError::build(cass_future_error_code(self.0)).wrap(self.get()) }
+        unsafe { CassError::build(cass_future_error_code(self.0), None).wrap(self.get()) }
     }
 
     pub fn error_message(&mut self) -> String {

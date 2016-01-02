@@ -19,11 +19,6 @@ log = "0.3"
 cassandra-sys = "0.2"
 decimal = "0.2"
 chrono = "0.2"
-# clippy = "*"
-# rusty-cheddar = "0.1"
-
-# [dependencies.clippy]
-# git = "https://github.com/Manishearth/rust-clippy.git"
 
 [[bin]]
 name="async"

@@ -1,6 +1,3 @@
-// #![feature(plugin)]
-// #![plugin(clippy)]
-
 extern crate num;
 extern crate cassandra;
 
@@ -12,16 +9,13 @@ use cassandra::ResultFuture;
 use cassandra::CassError;
 
 static NUM_CONCURRENT_REQUESTS: usize = 100;
-static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = \
-                                        { \'class\': \'SimpleStrategy\', \'replication_factor\': \
-                                        \'1\' };";
-static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.async (key text, bln \
-                                     boolean, flt float, dbl double, i32 int, i64 bigint, PRIMARY \
-                                     KEY (key));";
+static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
+                                        \'SimpleStrategy\', \'replication_factor\': \'1\' };";
+static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.async (key text, bln boolean, flt float, dbl \
+                                     double, i32 int, i64 bigint, PRIMARY KEY (key));";
 
 fn insert_into_async(session: &mut Session, key: String) -> Result<(), CassError> {
-    let query = "INSERT INTO examples.async (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, \
-                 ?);";
+    let query = "INSERT INTO examples.async (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, ?);";
     let mut futures = Vec::<ResultFuture>::new();
     for i in 0..NUM_CONCURRENT_REQUESTS {
         let key: String = key.clone() + &i.to_string();

@@ -45,7 +45,7 @@ impl TableMeta {
             let mut name_length = mem::zeroed();
             cass_table_meta_name(self.0, &mut name, &mut name_length);
             let slice = slice::from_raw_parts(name as *const u8, name_length as usize);
-            str::from_utf8(slice).unwrap().to_string()
+            str::from_utf8(slice).unwrap().to_owned()
         }
     }
 
@@ -68,10 +68,7 @@ impl TableMeta {
     pub fn partition_key(&self, index: u64) -> Option<ColumnMeta> {
         unsafe {
             let key = cass_table_meta_partition_key(self.0, index);
-            match key.is_null() {
-                true => None,
-                false => Some(ColumnMeta(key)),
-            }
+            if key.is_null() { None } else { Some(ColumnMeta(key)) }
         }
     }
 
@@ -84,10 +81,7 @@ impl TableMeta {
     pub fn cluster_key(&self, index: u64) -> Option<ColumnMeta> {
         unsafe {
             let key = cass_table_meta_clustering_key(self.0, index);
-            match key.is_null() {
-                true => None,
-                false => Some(ColumnMeta(key)),
-            }
+            if key.is_null() { None } else { Some(ColumnMeta(key)) }
         }
     }
 

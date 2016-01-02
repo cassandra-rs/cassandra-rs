@@ -184,19 +184,19 @@ impl Field {
 
 
     pub fn get_inet(&self, mut output: Inet) -> Result<Inet, CassError> {
-        unsafe { CassError::build(cass_value_get_inet(self.value, &mut output.0)).wrap(output) }
+        unsafe { CassError::build(cass_value_get_inet(self.value, &mut output.0), None).wrap(output) }
     }
 
     pub fn get_uint32(&self, mut output: u32) -> Result<u32, CassError> {
-        unsafe { CassError::build(cass_value_get_uint32(self.value, &mut output)).wrap(output) }
+        unsafe { CassError::build(cass_value_get_uint32(self.value, &mut output), None).wrap(output) }
     }
 
     pub fn get_int8(&self, mut output: i8) -> Result<i8, CassError> {
-        unsafe { CassError::build(cass_value_get_int8(self.value, &mut output)).wrap(output) }
+        unsafe { CassError::build(cass_value_get_int8(self.value, &mut output), None).wrap(output) }
     }
 
     pub fn get_int16(&self, mut output: i16) -> Result<i16, CassError> {
-        unsafe { CassError::build(cass_value_get_int16(self.value, &mut output)).wrap(output) }
+        unsafe { CassError::build(cass_value_get_int16(self.value, &mut output), None).wrap(output) }
     }
     //    //    pub fn get_decimal(&self, mut output: d128) -> Result<d128, CassError> {
     //    //        let _ = output;
@@ -215,12 +215,12 @@ impl Field {
                             let slice = slice::from_raw_parts(message as *const u8, message_length as usize);
                             Ok(str::from_utf8(slice).unwrap().to_owned())
                         }
-                        err => Err(CassError::build(err)),
+                        err => Err(CassError::build(err, None)),
                     }
 
 
                 }
-                err => Err(CassError::build(err)),
+                err => Err(CassError::build(err, None)),
             }
         }
     }
@@ -228,42 +228,42 @@ impl Field {
     pub fn get_int32(&self) -> Result<i32, CassError> {
         unsafe {
             let mut output = mem::zeroed();
-            CassError::build(cass_value_get_int32(self.value, &mut output)).wrap(output)
+            CassError::build(cass_value_get_int32(self.value, &mut output), None).wrap(output)
         }
     }
 
     pub fn get_int64(&self) -> Result<i64, CassError> {
         unsafe {
             let mut output = mem::zeroed();
-            CassError::build(cass_value_get_int64(self.value, &mut output)).wrap(output)
+            CassError::build(cass_value_get_int64(self.value, &mut output), None).wrap(output)
         }
     }
 
     pub fn get_float(&self) -> Result<f32, CassError> {
         unsafe {
             let mut output = mem::zeroed();
-            CassError::build(cass_value_get_float(self.value, &mut output)).wrap(output)
+            CassError::build(cass_value_get_float(self.value, &mut output), None).wrap(output)
         }
     }
 
     pub fn get_double(&self) -> Result<f64, CassError> {
         unsafe {
             let mut output = mem::zeroed();
-            CassError::build(cass_value_get_double(self.value, &mut output)).wrap(output)
+            CassError::build(cass_value_get_double(self.value, &mut output), None).wrap(output)
         }
     }
 
     pub fn get_bool(&self) -> Result<bool, CassError> {
         unsafe {
             let mut output = mem::zeroed();
-            CassError::build(cass_value_get_bool(self.value, &mut output)).wrap(output > 0)
+            CassError::build(cass_value_get_bool(self.value, &mut output), None).wrap(output > 0)
         }
     }
 
     pub fn get_uuid(&self) -> Result<Uuid, CassError> {
         unsafe {
             let mut output: Uuid = mem::zeroed();
-            CassError::build(cass_value_get_uuid(self.value, &mut output.0)).wrap(output)
+            CassError::build(cass_value_get_uuid(self.value, &mut output.0), None).wrap(output)
         }
     }
 
@@ -271,7 +271,7 @@ impl Field {
         unsafe {
             match self.get_type() {
                 ValueType::MAP => Ok(MapIterator(cass_iterator_from_map(self.value))),
-                _ => Err(CassError::build(CassErrorTypes::LIB_INVALID_VALUE_TYPE as u32)),
+                _ => Err(CassError::build(CassErrorTypes::LIB_INVALID_VALUE_TYPE as u32, None)),
             }
         }
     }
@@ -280,7 +280,7 @@ impl Field {
         unsafe {
             match self.get_type() {
                 ValueType::SET => Ok(SetIterator(cass_iterator_from_collection(self.value))),
-                _ => Err(CassError::build(1)),
+                _ => Err(CassError::build(1, None)),
             }
         }
     }

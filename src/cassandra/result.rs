@@ -118,7 +118,8 @@ impl CassResult {
 
             CassError::build(cass_result_paging_state_token(self.0,
                                                             &mut paging_state.as_ptr(),
-                                                            &mut (paging_state.to_bytes().len() as u64)))
+                                                            &mut (paging_state.to_bytes().len() as u64)),
+                             None)
                 .wrap(self)
         }
     }

@@ -82,7 +82,8 @@ impl DataType {
             let type_name = CString::new(type_name.into()).unwrap();
             CassError::build(cass_data_type_type_name(data_type.0,
                                                       &mut type_name.as_ptr(),
-                                                      &mut (type_name.as_bytes().len() as u64)))
+                                                      &mut (type_name.as_bytes().len() as u64)),
+                             None)
                 .wrap(())
         }
     }
@@ -94,7 +95,9 @@ impl DataType {
         where S: Into<String> {
         unsafe {
             let type_name = CString::new(type_name.into()).unwrap();
-            CassError::build(cass_data_type_set_type_name(data_type.0, type_name.as_ptr())).wrap(())
+            CassError::build(cass_data_type_set_type_name(data_type.0, type_name.as_ptr()),
+                             None)
+                .wrap(())
         }
     }
 
@@ -107,7 +110,8 @@ impl DataType {
             let keyspace = CString::new(keyspace.into()).unwrap();
             CassError::build(cass_data_type_keyspace(data_type.0,
                                                      &mut (keyspace.as_ptr()),
-                                                     &mut (keyspace.as_bytes().len() as u64)))
+                                                     &mut (keyspace.as_bytes().len() as u64)),
+                             None)
                 .wrap(())
         }
     }
@@ -119,7 +123,9 @@ impl DataType {
         where S: Into<String> {
         unsafe {
             let keyspace = CString::new(keyspace.into()).unwrap();
-            CassError::build(cass_data_type_set_keyspace(data_type.0, keyspace.as_ptr())).wrap(())
+            CassError::build(cass_data_type_set_keyspace(data_type.0, keyspace.as_ptr()),
+                             None)
+                .wrap(())
         }
     }
 
@@ -132,7 +138,8 @@ impl DataType {
             let class_name = CString::new(class_name.into()).unwrap();
             CassError::build(cass_data_type_class_name(data_type.0,
                                                        &mut class_name.as_ptr(),
-                                                       &mut (class_name.as_bytes().len() as u64)))
+                                                       &mut (class_name.as_bytes().len() as u64)),
+                             None)
                 .wrap(())
         }
     }
@@ -144,7 +151,9 @@ impl DataType {
         where S: Into<String> {
         unsafe {
             let class_name = CString::new(class_name.into()).unwrap();
-            CassError::build(cass_data_type_set_class_name(self.0, class_name.as_ptr())).wrap(())
+            CassError::build(cass_data_type_set_class_name(self.0, class_name.as_ptr()),
+                             None)
+                .wrap(())
         }
     }
 
@@ -185,7 +194,8 @@ impl DataType {
             CassError::build(cass_data_type_sub_type_name(data_type.0,
                                                           index,
                                                           &mut name.as_ptr(),
-                                                          &mut (name.as_bytes().len() as u64)))
+                                                          &mut (name.as_bytes().len() as u64)),
+                             None)
                 .wrap(())
         }
     }
@@ -194,7 +204,7 @@ impl DataType {
     ///
     ///<b>Note:</b> Only valid for tuple and collection data types.
     pub fn add_sub_type(&self, sub_data_type: DataType) -> Result<(), CassError> {
-        unsafe { CassError::build(cass_data_type_add_sub_type(self.0, sub_data_type.0)).wrap(()) }
+        unsafe { CassError::build(cass_data_type_add_sub_type(self.0, sub_data_type.0), None).wrap(()) }
     }
 
     ///Gets the sub-data type of a UDT (user defined type) at the specified index.
@@ -204,7 +214,9 @@ impl DataType {
         where S: Into<String> {
         unsafe {
             let name = CString::new(name.into()).unwrap();
-            CassError::build(cass_data_type_add_sub_type_by_name(self.0, name.as_ptr(), sub_data_type.0)).wrap(())
+            CassError::build(cass_data_type_add_sub_type_by_name(self.0, name.as_ptr(), sub_data_type.0),
+                             None)
+                .wrap(())
         }
     }
 
@@ -213,7 +225,11 @@ impl DataType {
     ///<b>Note:</b> Only valid for tuple and collection data types.
     pub fn add_sub_value_type<S>(&self, sub_value_type: ValueType) -> Result<(), CassError>
         where S: Into<String> {
-        unsafe { CassError::build(cass_data_type_add_sub_value_type(self.0, sub_value_type as u32)).wrap(()) }
+        unsafe {
+            CassError::build(cass_data_type_add_sub_value_type(self.0, sub_value_type as u32),
+                             None)
+                .wrap(())
+        }
     }
 
     ///Adds a sub-data type to a tuple or collection using a value type.
@@ -225,7 +241,8 @@ impl DataType {
             let name = CString::new(name).unwrap();
             CassError::build(cass_data_type_add_sub_value_type_by_name(self.0,
                                                                        name.as_ptr(),
-                                                                       name.to_bytes().len() as u32))
+                                                                       name.to_bytes().len() as u32),
+                             None)
                 .wrap(())
         }
 

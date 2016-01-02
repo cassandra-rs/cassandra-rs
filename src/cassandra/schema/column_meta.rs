@@ -26,11 +26,11 @@ impl ColumnMeta {
     ///Gets the name of the column.
     pub fn name(&self) -> String {
         unsafe {
-            let name = mem::zeroed();
-            let name_length = mem::zeroed();
-            cass_column_meta_name(self.0, name, name_length);
+            let mut name = mem::zeroed();
+            let mut name_length = mem::zeroed();
+            cass_column_meta_name(self.0, &mut name, &mut name_length);
             let slice = slice::from_raw_parts(name as *const u8, name_length as usize);
-            str::from_utf8(slice).unwrap().to_string()
+            str::from_utf8(slice).unwrap().to_owned()
         }
     }
 
@@ -49,10 +49,7 @@ impl ColumnMeta {
     pub fn field_by_name(&self, name: &str) -> Option<Value> {
         unsafe {
             let field = cass_column_meta_field_by_name(self.0, CString::new(name).unwrap().as_ptr());
-            match field.is_null() {
-                true => None,
-                false => Some(Value(field)),
-            }
+            if field.is_null() { None } else { Some(Value(field)) }
         }
     }
 }

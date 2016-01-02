@@ -88,7 +88,7 @@ impl Cluster {
             let points = contact_points.join(",");
             println!("p:{}:", points);
             let s = CString::new(points).unwrap();
-            let err = CassError::build(cass_cluster_set_contact_points(self.0, s.as_ptr()));
+            let err = CassError::build(cass_cluster_set_contact_points(self.0, s.as_ptr()), None);
             err.wrap(self)
         }
     }
@@ -99,7 +99,7 @@ impl Cluster {
     /// Default: 9042
     /// ```
     pub fn set_port(&mut self, port: i32) -> Result<&mut Self, CassError> {
-        unsafe { CassError::build(cass_cluster_set_port(self.0, port)).wrap(self) }
+        unsafe { CassError::build(cass_cluster_set_port(self.0, port), None).wrap(self) }
     }
 
 
@@ -123,7 +123,11 @@ impl Cluster {
     ///Default: version 4
     /// ```
     pub fn set_protocol_version(&mut self, protocol_version: i32) -> Result<&mut Self, CassError> {
-        unsafe { CassError::build(cass_cluster_set_protocol_version(self.0, protocol_version)).wrap(self) }
+        unsafe {
+            CassError::build(cass_cluster_set_protocol_version(self.0, protocol_version),
+                             None)
+                .wrap(self)
+        }
     }
 
     /// Sets the number of IO threads. This is the number of threads
@@ -133,7 +137,7 @@ impl Cluster {
     /// Default: 1
     /// ```
     pub fn set_num_threads_io(&mut self, num_threads: u32) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_cluster_set_num_threads_io(self.0, num_threads)).wrap(self) }
+        unsafe { CassError::build(cass_cluster_set_num_threads_io(self.0, num_threads), None).wrap(self) }
     }
 
     /// Sets the size of the fixed size queue that stores pending requests.
@@ -142,7 +146,7 @@ impl Cluster {
     /// Default: 8192
     /// ```
     pub fn set_queue_size_io(&mut self, queue_size: u32) -> Result<&mut Self, CassError> {
-        unsafe { CassError::build(cass_cluster_set_queue_size_io(self.0, queue_size)).wrap(self) }
+        unsafe { CassError::build(cass_cluster_set_queue_size_io(self.0, queue_size), None).wrap(self) }
     }
 
     /// Sets the size of the fixed size queue that stores events.
@@ -151,7 +155,7 @@ impl Cluster {
     /// Default: 8192
     /// ```
     pub fn set_queue_size_event(&mut self, queue_size: u32) -> Result<&mut Self, CassError> {
-        unsafe { CassError::build(cass_cluster_set_queue_size_event(self.0, queue_size)).wrap(self) }
+        unsafe { CassError::build(cass_cluster_set_queue_size_event(self.0, queue_size), None).wrap(self) }
     }
 
     /// Sets the size of the fixed size queue that stores log messages.
@@ -160,7 +164,7 @@ impl Cluster {
     /// Default: 8192
     /// ```
     pub fn set_queue_size_log(&mut self, queue_size: u32) -> Result<&mut Self, CassError> {
-        unsafe { CassError::build(cass_cluster_set_queue_size_log(self.0, queue_size)).wrap(self) }
+        unsafe { CassError::build(cass_cluster_set_queue_size_log(self.0, queue_size), None).wrap(self) }
     }
 
     ///Sets the number of connections made to each server in each
@@ -170,7 +174,11 @@ impl Cluster {
     /// Default: 1
     /// ```
     pub fn set_core_connections_per_host(&mut self, num_connections: u32) -> Result<&mut Self, CassError> {
-        unsafe { CassError::build(cass_cluster_set_core_connections_per_host(self.0, num_connections)).wrap(self) }
+        unsafe {
+            CassError::build(cass_cluster_set_core_connections_per_host(self.0, num_connections),
+                             None)
+                .wrap(self)
+        }
     }
 
     /// Sets the maximum number of connections made to each server in each
@@ -180,7 +188,11 @@ impl Cluster {
     /// Default: 2
     /// ```
     pub fn set_max_connections_per_host(&mut self, num_connections: u32) -> Result<&mut Self, CassError> {
-        unsafe { CassError::build(cass_cluster_set_max_connections_per_host(self.0, num_connections)).wrap(self) }
+        unsafe {
+            CassError::build(cass_cluster_set_max_connections_per_host(self.0, num_connections),
+                             None)
+                .wrap(self)
+        }
     }
 
     ///Sets the amount of time to wait before attempting to reconnect.
@@ -202,7 +214,11 @@ impl Cluster {
     /// ```
     ///Default: 1
     pub fn set_max_concurrent_creation(&mut self, num_connections: u32) -> Result<&mut Self, CassError> {
-        unsafe { CassError::build(cass_cluster_set_max_concurrent_creation(self.0, num_connections)).wrap(self) }
+        unsafe {
+            CassError::build(cass_cluster_set_max_concurrent_creation(self.0, num_connections),
+                             None)
+                .wrap(self)
+        }
     }
 
     ///Sets the threshold for the maximum number of concurrent requests in-flight
@@ -212,7 +228,11 @@ impl Cluster {
     /// ```
     /// Default: 100
     pub fn set_max_concurrent_requests_threshold(&mut self, num_requests: u32) -> Result<&mut Self, CassError> {
-        unsafe { CassError::build(cass_cluster_set_max_concurrent_requests_threshold(self.0, num_requests)).wrap(self) }
+        unsafe {
+            CassError::build(cass_cluster_set_max_concurrent_requests_threshold(self.0, num_requests),
+                             None)
+                .wrap(self)
+        }
     }
 
     ///Sets the maximum number of requests processed by an IO worker
@@ -221,7 +241,11 @@ impl Cluster {
     /// ```
     ///Default: 128
     pub fn set_max_requests_per_flush(&mut self, num_requests: u32) -> Result<&mut Self, CassError> {
-        unsafe { CassError::build(cass_cluster_set_max_requests_per_flush(self.0, num_requests)).wrap(self) }
+        unsafe {
+            CassError::build(cass_cluster_set_max_requests_per_flush(self.0, num_requests),
+                             None)
+                .wrap(self)
+        }
     }
 
     /// Sets the high water mark for the number of bytes outstanding
@@ -231,7 +255,11 @@ impl Cluster {
     /// ```
     /// Default: 64KB
     pub fn set_write_bytes_high_water_mark(&mut self, num_bytes: u32) -> Result<&mut Self, CassError> {
-        unsafe { CassError::build(cass_cluster_set_write_bytes_high_water_mark(self.0, num_bytes)).wrap(self) }
+        unsafe {
+            CassError::build(cass_cluster_set_write_bytes_high_water_mark(self.0, num_bytes),
+                             None)
+                .wrap(self)
+        }
     }
 
     /// Sets the low water mark for the number of bytes outstanding
@@ -241,7 +269,11 @@ impl Cluster {
     /// ```
     /// Default: 32KB
     pub fn set_write_bytes_low_water_mark(&mut self, num_bytes: u32) -> Result<&mut Self, CassError> {
-        unsafe { CassError::build(cass_cluster_set_write_bytes_low_water_mark(self.0, num_bytes)).wrap(self) }
+        unsafe {
+            CassError::build(cass_cluster_set_write_bytes_low_water_mark(self.0, num_bytes),
+                             None)
+                .wrap(self)
+        }
     }
 
     ///Sets the high water mark for the number of requests queued waiting
@@ -252,7 +284,11 @@ impl Cluster {
     /// ```
     /// Default: 256
     pub fn set_pending_requests_high_water_mark(&mut self, num_requests: u32) -> Result<&mut Self, CassError> {
-        unsafe { CassError::build(cass_cluster_set_pending_requests_high_water_mark(self.0, num_requests)).wrap(self) }
+        unsafe {
+            CassError::build(cass_cluster_set_pending_requests_high_water_mark(self.0, num_requests),
+                             None)
+                .wrap(self)
+        }
     }
 
     ///Sets the low water mark for the number of requests queued waiting
@@ -263,7 +299,11 @@ impl Cluster {
     ///```
     /// Default: 128
     pub fn set_pending_requests_low_water_mark(&mut self, num_requests: u32) -> Result<&mut Self, CassError> {
-        unsafe { CassError::build(cass_cluster_set_pending_requests_low_water_mark(self.0, num_requests)).wrap(self) }
+        unsafe {
+            CassError::build(cass_cluster_set_pending_requests_low_water_mark(self.0, num_requests),
+                             None)
+                .wrap(self)
+        }
     }
 
     /// Sets the timeout for connecting to a node.
@@ -304,7 +344,7 @@ impl Cluster {
         unsafe {
             cass_cluster_set_load_balance_round_robin(self.0);
         }
-        CassError::build(0).wrap(self)
+        CassError::build(0, None).wrap(self)
     }
 
     ///Configures the cluster to use DC-aware load balancing.
@@ -323,12 +363,13 @@ impl Cluster {
         where S: Into<String> {
         unsafe {
             CassError::build({
-                let local_dc = CString::new(local_dc.into()).unwrap();
-                cass_cluster_set_load_balance_dc_aware(self.0,
-                                                       local_dc.as_ptr(),
-                                                       used_hosts_per_remote_dc,
-                                                       allow_remote_dcs_for_local_cl as u32)
-            })
+                                 let local_dc = CString::new(local_dc.into()).unwrap();
+                                 cass_cluster_set_load_balance_dc_aware(self.0,
+                                                                        local_dc.as_ptr(),
+                                                                        used_hosts_per_remote_dc,
+                                                                        allow_remote_dcs_for_local_cl as u32)
+                             },
+                             None)
                 .wrap(self)
         }
     }

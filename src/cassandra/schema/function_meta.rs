@@ -36,7 +36,7 @@ impl FunctionMeta {
             cass_function_meta_name(self.0, &mut name, &mut name_length);
             str::from_utf8(slice::from_raw_parts(name as *const u8, name_length as usize))
                 .unwrap()
-                .to_string()
+                .to_owned()
         }
     }
 
@@ -50,7 +50,7 @@ impl FunctionMeta {
             cass_function_meta_full_name(self.0, &mut name, &mut name_length);
             str::from_utf8(slice::from_raw_parts(name as *const u8, name_length as usize))
                 .unwrap()
-                .to_string()
+                .to_owned()
         }
     }
 
@@ -62,7 +62,7 @@ impl FunctionMeta {
             cass_function_meta_body(self.0, &mut name, &mut name_length);
             str::from_utf8(slice::from_raw_parts(name as *const u8, name_length as usize))
                 .unwrap()
-                .to_string()
+                .to_owned()
         }
     }
 
@@ -74,13 +74,13 @@ impl FunctionMeta {
             cass_function_meta_language(self.0, &mut name, &mut name_length);
             str::from_utf8(slice::from_raw_parts(name as *const u8, name_length as usize))
                 .unwrap()
-                .to_string()
+                .to_owned()
         }
     }
 
     ///Gets whether a function is called on "null".
     pub fn called_on_null_input(&self) -> bool {
-        unsafe { if cass_function_meta_called_on_null_input(self.0) > 0 { true } else { false } }
+        unsafe { cass_function_meta_called_on_null_input(self.0) != 0 }
     }
 
     ///Gets the number of arguments this function takes.
@@ -97,7 +97,7 @@ impl FunctionMeta {
 
             match cass_function_meta_argument(self.0, index, &mut name, &mut name_length, &mut data_type) {
                 CASS_OK => Ok(()),
-                err => Err(CassError::build(err)),
+                err => Err(CassError::build(err, None)),
             }
         }
     }

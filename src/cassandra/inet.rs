@@ -64,7 +64,7 @@ impl FromStr for Inet {
             let s = try!(CString::new(s));
             match cass_inet_from_string(s.as_ptr(), &mut inet) {
                 CASS_OK => Ok(Inet(inet)),
-                err => Err(CassError::build(err)),
+                err => Err(CassError::build(err, None)),
             }
         }
     }

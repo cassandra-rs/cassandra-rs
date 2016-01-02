@@ -2,12 +2,12 @@ extern crate cassandra;
 
 use cassandra::*;
 
-static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE examples WITH replication = { \'class\': \
-                                        \'SimpleStrategy\', \'replication_factor\': \'3\' };";
-static CREATE_TABLE: &'static str = "CREATE TABLE examples.basic (key text, bln boolean, flt \
-                                     float, dbl double, i32 int, i64 bigint, PRIMARY KEY (key));";
-static INSERT_QUERY: &'static str = "INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) \
-                                     VALUES (?, ?, ?, ?, ?, ?);";
+static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
+                                        \'SimpleStrategy\', \'replication_factor\': \'1\' };";
+static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.basic (key text, bln boolean, flt float, dbl \
+                                     double, i32 int, i64 bigint, PRIMARY KEY (key));";
+static INSERT_QUERY: &'static str = "INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, \
+                                     ?);";
 static SELECT_QUERY: &'static str = "SELECT * FROM examples.basic WHERE key = ?";
 
 #[derive(Debug,PartialEq)]
@@ -41,10 +41,7 @@ fn insert_into_basic(session: &mut Session, key: &str, basic: &mut Basic) -> Res
 }
 
 
-fn select_from_basic(session: &mut Session,
-                     prepared: &PreparedStatement,
-                     key: &str,
-                     basic: &mut Basic)
+fn select_from_basic(session: &mut Session, prepared: &PreparedStatement, key: &str, basic: &mut Basic)
                      -> Result<(), CassError> {
     let mut statement = prepared.bind();
     try!(statement.bind_string(0, key));

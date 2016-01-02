@@ -1,8 +1,7 @@
 use std::fmt::{Debug, Display, Formatter};
-use std::fmt;
+use std::{fmt, mem, slice, str};
 use std::ffi::{CStr, CString, NulError};
 use std::error::Error;
-use std::str::from_utf8;
 
 use cassandra_sys::cass_error_desc;
 use cassandra_sys::CASS_ERROR_LIB_BAD_PARAMS;
@@ -85,12 +84,17 @@ pub enum CassRustError {
 }
 
 pub enum CassError {
-    Lib(CassLibError),
+    Lib {
+        err: CassLibError,
+    },
     Server(CassServerError),
     Ssl(CassSslError),
     Rust(CassRustError),
 }
-pub struct CassLibError(_CassError);
+pub struct CassLibError {
+    err: _CassError,
+    msg: String,
+}
 pub struct CassServerError(_CassError);
 pub struct CassSslError(_CassError);
 
@@ -196,21 +200,20 @@ impl CassError {
                 println!("server: {}", err.0);
                 match err.0 {
                     CASS_OK => Ok(wrappee),
-                    err => Err(CassError::build(err)),
+                    _ => Err(CassError::build(err.0, None)),
                 }
             }
-            CassError::Lib(ref err) => {
-                println!("lib: {}", err.0);
-                match err.0 {
+            CassError::Lib{ref err} => {
+                match err.err {
                     CASS_OK => Ok(wrappee),
-                    err => Err(CassError::build(err)),
+                    _ => Err(CassError::build(err.err, Some(&err.msg))),
                 }
             }
             CassError::Ssl(ref err) => {
                 println!("ssl: {}", err.0);
                 match err.0 {
                     CASS_OK => Ok(wrappee),
-                    err => Err(CassError::build(err)),
+                    _ => Err(CassError::build(err.0, None)),
                 }
             }
             CassError::Rust(err) => {
@@ -219,39 +222,215 @@ impl CassError {
             }
 
         }
-
     }
 
     pub fn build_from_rust(err: CassRustError) -> CassError {
         CassError::Rust(err)
     }
 
-    pub fn build(val: u32) -> CassError {
+    pub fn build(val: u32, msg: Option<&str>) -> CassError {
+        let msg = msg.unwrap_or("").to_owned();
         match val {
-            0 => CassError::Lib(CassLibError(CASS_OK)),
-            1 => CassError::Lib(CassLibError(CASS_ERROR_LIB_BAD_PARAMS)),
-            2 => CassError::Lib(CassLibError(CASS_ERROR_LIB_NO_STREAMS)),
-            3 => CassError::Lib(CassLibError(CASS_ERROR_LIB_UNABLE_TO_INIT)),
-            4 => CassError::Lib(CassLibError(CASS_ERROR_LIB_MESSAGE_ENCODE)),
-            5 => CassError::Lib(CassLibError(CASS_ERROR_LIB_HOST_RESOLUTION)),
-            6 => CassError::Lib(CassLibError(CASS_ERROR_LIB_UNEXPECTED_RESPONSE)),
-            7 => CassError::Lib(CassLibError(CASS_ERROR_LIB_REQUEST_QUEUE_FULL)),
-            8 => CassError::Lib(CassLibError(CASS_ERROR_LIB_NO_AVAILABLE_IO_THREAD)),
-            9 => CassError::Lib(CassLibError(CASS_ERROR_LIB_WRITE_ERROR)),
-            10 | 16777226 => CassError::Lib(CassLibError(CASS_ERROR_LIB_NO_HOSTS_AVAILABLE)),
-            11 => CassError::Lib(CassLibError(CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS)),
-            12 => CassError::Lib(CassLibError(CASS_ERROR_LIB_INVALID_ITEM_COUNT)),
-            13 => CassError::Lib(CassLibError(CASS_ERROR_LIB_INVALID_VALUE_TYPE)),
-            14 => CassError::Lib(CassLibError(CASS_ERROR_LIB_REQUEST_TIMED_OUT)),
-            15 => CassError::Lib(CassLibError(CASS_ERROR_LIB_UNABLE_TO_SET_KEYSPACE)),
-            16 => CassError::Lib(CassLibError(CASS_ERROR_LIB_CALLBACK_ALREADY_SET)),
-            17 => CassError::Lib(CassLibError(CASS_ERROR_LIB_INVALID_STATEMENT_TYPE)),
-            18 => CassError::Lib(CassLibError(CASS_ERROR_LIB_NAME_DOES_NOT_EXIST)),
-            19 => CassError::Lib(CassLibError(CASS_ERROR_LIB_UNABLE_TO_DETERMINE_PROTOCOL)),
-            20 => CassError::Lib(CassLibError(CASS_ERROR_LIB_NULL_VALUE)),
-            21 => CassError::Lib(CassLibError(CASS_ERROR_LIB_NOT_IMPLEMENTED)),
-            22 => CassError::Lib(CassLibError(CASS_ERROR_LIB_UNABLE_TO_CONNECT)),
-            23 => CassError::Lib(CassLibError(CASS_ERROR_LIB_UNABLE_TO_CLOSE)),
+            0 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_OK,
+                        msg: msg,
+                    },
+                }
+            }
+            1 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_BAD_PARAMS,
+                        msg: msg,
+                    },
+                }
+            }
+            2 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_NO_STREAMS,
+                        msg: msg,
+                    },
+                }
+            }
+            3 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_UNABLE_TO_INIT,
+                        msg: msg,
+                    },
+                }
+            }
+            4 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_MESSAGE_ENCODE,
+                        msg: msg,
+                    },
+                }
+            }
+            5 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_HOST_RESOLUTION,
+                        msg: msg,
+                    },
+                }
+            }
+            6 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_UNEXPECTED_RESPONSE,
+                        msg: msg,
+                    },
+                }
+            }
+            7 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_REQUEST_QUEUE_FULL,
+                        msg: msg,
+                    },
+                }
+            }
+            8 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_NO_AVAILABLE_IO_THREAD,
+                        msg: msg,
+                    },
+                }
+            }
+            9 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_WRITE_ERROR,
+                        msg: msg,
+                    },
+                }
+            }
+            10 | 16777226 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_NO_HOSTS_AVAILABLE,
+                        msg: msg,
+                    },
+                }
+            }
+            11 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS,
+                        msg: msg,
+                    },
+                }
+            }
+            12 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_INVALID_ITEM_COUNT,
+                        msg: msg,
+                    },
+                }
+            }
+            13 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_INVALID_VALUE_TYPE,
+                        msg: msg,
+                    },
+                }
+            }
+            14 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_REQUEST_TIMED_OUT,
+                        msg: msg,
+                    },
+                }
+            }
+            15 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_UNABLE_TO_SET_KEYSPACE,
+                        msg: msg,
+                    },
+                }
+            }
+            16 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_CALLBACK_ALREADY_SET,
+                        msg: msg,
+                    },
+                }
+            }
+            17 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_INVALID_STATEMENT_TYPE,
+                        msg: msg,
+                    },
+                }
+            }
+            18 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_NAME_DOES_NOT_EXIST,
+                        msg: msg,
+                    },
+                }
+            }
+            19 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_UNABLE_TO_DETERMINE_PROTOCOL,
+                        msg: msg,
+                    },
+                }
+            }
+            20 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_NULL_VALUE,
+                        msg: msg,
+                    },
+                }
+            }
+            21 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_NOT_IMPLEMENTED,
+                        msg: msg,
+                    },
+                }
+            }
+            22 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_UNABLE_TO_CONNECT,
+                        msg: msg,
+                    },
+                }
+            }
+            23 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_UNABLE_TO_CLOSE,
+                        msg: msg,
+                    },
+                }
+            }
+            16777229 => {
+                CassError::Lib {
+                    err: CassLibError {
+                        err: CASS_ERROR_LIB_INVALID_VALUE_TYPE,
+                        msg: msg,
+                    },
+                }
+            }
             33554432 => CassError::Server(CassServerError(CASS_ERROR_SERVER_SERVER_ERROR)),
             33554442 => CassError::Server(CassServerError(CASS_ERROR_SERVER_PROTOCOL_ERROR)),
             33554688 => CassError::Server(CassServerError(CASS_ERROR_SERVER_BAD_CREDENTIALS)),
@@ -352,7 +531,7 @@ impl CassErrorResult {
     ///   <li>CASS_ERROR_SERVER_READ_FAILURE</li>
     /// </ul>
     pub fn data_present(&self) -> bool {
-        unsafe { if cass_error_result_data_present(self.0) > 0 { true } else { false } }
+        unsafe { cass_error_result_data_present(self.0) != 0 }
     }
 
 
@@ -372,39 +551,48 @@ impl CassErrorResult {
     ///   <li>CASS_ERROR_SERVER_ALREADY_EXISTS</li>
     ///   <li>CASS_ERROR_SERVER_FUNCTION_FAILURE</li>
     ///</ul>
-    pub fn keyspace(&self, function: &str) -> Result<(), CassError> {
+    pub fn keyspace(&self) -> String {
         unsafe {
-            match cass_error_result_keyspace(self.0,
-                                             &mut (function.as_ptr() as *const i8),
-                                             &mut (function.len() as u64)) {
-                CASS_OK => Ok(()),
-                err => Err(CassError::build(err)),
+            let mut name = mem::zeroed();
+            let mut length = mem::zeroed();
+            match cass_error_result_keyspace(self.0, &mut name, &mut length) {
+                CASS_OK => {
+                    let slice = slice::from_raw_parts(name as *const u8, length as usize);
+                    str::from_utf8(slice).unwrap().to_owned()
+                }
+                err => panic!("impossible: {}", err),
             }
         }
     }
 
     ///Gets the affected table for the already exists error
     ///(CASS_ERROR_SERVER_ALREADY_EXISTS) result type.
-    pub fn table(&self, table: &str) -> Result<(), CassError> {
+    pub fn table(&self) -> String {
         unsafe {
-            match cass_error_result_table(self.0,
-                                          &mut (table.as_ptr() as *const i8),
-                                          &mut (table.len() as u64)) {
-                CASS_OK => Ok(()),
-                err => Err(CassError::build(err)),
+            let mut name = mem::zeroed();
+            let mut length = mem::zeroed();
+            match cass_error_result_table(self.0, &mut name, &mut length) {
+                CASS_OK => {
+                    let slice = slice::from_raw_parts(name as *const u8, length as usize);
+                    str::from_utf8(slice).unwrap().to_owned()
+                }
+                err => panic!("impossible: {}", err),
             }
         }
     }
 
     ///Gets the affected function for the function failure error
     ///(CASS_ERROR_SERVER_FUNCTION_FAILURE) result type.
-    pub fn function(&self, function: &str) -> Result<(), CassError> {
+    pub fn function(&self) -> String {
         unsafe {
-            match cass_error_result_function(self.0,
-                                             &mut (function.as_ptr() as *const i8),
-                                             &mut (function.len() as u64)) {
-                CASS_OK => Ok(()),
-                err => Err(CassError::build(err)),
+            let mut name = mem::zeroed();
+            let mut length = mem::zeroed();
+            match cass_error_result_function(self.0, &mut name, &mut length) {
+                CASS_OK => {
+                    let slice = slice::from_raw_parts(name as *const u8, length as usize);
+                    str::from_utf8(slice).unwrap().to_owned()
+                }
+                err => panic!("impossible: {}", err),
             }
         }
     }
@@ -436,25 +624,21 @@ impl Drop for CassErrorResult {
 impl CassError {
     fn pointer_to_string<'a>(c_buf: *const i8) -> &'a str {
         let buf: &[u8] = unsafe { CStr::from_ptr(c_buf).to_bytes() };
-        from_utf8(buf).unwrap()
+        str::from_utf8(buf).unwrap()
     }
 
     pub fn desc(&self) -> &str {
         unsafe {
-            match self {
-                &CassError::Lib(ref err) => CassError::pointer_to_string(cass_error_desc(err.0)),
-                &CassError::Ssl(ref err) => CassError::pointer_to_string(cass_error_desc(err.0)),
-                &CassError::Server(ref err) => CassError::pointer_to_string(cass_error_desc(err.0)),
-                &CassError::Rust(ref err) => {
-                    match err {
-                        &CassRustError::NulInString(_) => "Tried to create a CString with a nul in the middle",
+            match *self {
+                CassError::Lib{ref err} => CassError::pointer_to_string(cass_error_desc(err.err)),
+                CassError::Ssl(ref err) => CassError::pointer_to_string(cass_error_desc(err.0)),
+                CassError::Server(ref err) => CassError::pointer_to_string(cass_error_desc(err.0)),
+                CassError::Rust(ref err) => {
+                    match *err {
+                        CassRustError::NulInString(_) => "Tried to create a CString with a nul in the middle",
                     }
                 }
             }
         }
-    }
-
-    pub fn debug(&self) {
-        println!("{:?}", self)
     }
 }

@@ -129,7 +129,7 @@ impl SessionFuture {
         unsafe {
             let code = cass_future_error_code(self.0);
             cass_future_free(self.0);
-            CassError::build(code).wrap(self.1)
+            CassError::build(code, None).wrap(self.1)
         }
     }
 }

@@ -93,7 +93,7 @@ impl Uuid {
             let mut uuid = mem::zeroed();
             match cass_uuid_from_string(try!(CString::new(str)).as_ptr(), &mut uuid) {
                 CASS_OK => Ok(Uuid(uuid)),
-                err => Err(CassError::build(err)),
+                err => Err(CassError::build(err, None)),
             }
         }
     }

@@ -1,7 +1,7 @@
 extern crate cassandra;
 use cassandra::*;
 
-static QUERY: &'static str = "SELECT keyspace_name FROM system.schema_keyspaces;";
+static QUERY: &'static str = "SELECT keyspace_name FROM system_schema.keyspaces;";
 static COL_NAME: &'static str = "keyspace_name";
 
 fn main() {

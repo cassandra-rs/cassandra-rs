@@ -45,9 +45,10 @@ impl Row {
     pub fn get_column(&self, index: u64) -> Result<Column, CassError> {
         unsafe {
             let col = cass_row_get_column(self.0, index);
-            match col.is_null() {
-                true => Err(CassError::build(CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS)),
-                false => Ok(Column(col)),
+            if col.is_null() {
+                Err(CassError::build(CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS, None))
+            } else {
+                Ok(Column(col))
             }
         }
     }

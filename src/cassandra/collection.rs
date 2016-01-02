@@ -57,43 +57,47 @@ pub trait CassCollection {
 
     ///Appends a "tinyint" to the collection.
     fn append_int8(&mut self, value: i8) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_collection_append_int8(self.inner(), value)).wrap(self) }
+        unsafe { CassError::build(cass_collection_append_int8(self.inner(), value), None).wrap(self) }
     }
 
     /// Appends an "smallint" to the collection.
     fn append_int16(&mut self, value: i16) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_collection_append_int16(self.inner(), value)).wrap(self) }
+        unsafe { CassError::build(cass_collection_append_int16(self.inner(), value), None).wrap(self) }
     }
 
     ///Appends an "int" to the collection.
     fn append_int32(&mut self, value: i32) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_collection_append_int32(self.inner(), value)).wrap(self) }
+        unsafe { CassError::build(cass_collection_append_int32(self.inner(), value), None).wrap(self) }
     }
 
     ///Appends a "date" to the collection.
     fn append_uint32(&mut self, value: u32) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_collection_append_uint32(self.inner(), value)).wrap(self) }
+        unsafe { CassError::build(cass_collection_append_uint32(self.inner(), value), None).wrap(self) }
     }
 
     ///Appends a "bigint", "counter", "timestamp" or "time" to the
     ///collection.
     fn append_int64(&mut self, value: i64) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_collection_append_int64(self.inner(), value)).wrap(self) }
+        unsafe { CassError::build(cass_collection_append_int64(self.inner(), value), None).wrap(self) }
     }
 
     ///Appends a "float" to the collection.
     fn append_float(&mut self, value: f32) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_collection_append_float(self.inner(), value)).wrap(self) }
+        unsafe { CassError::build(cass_collection_append_float(self.inner(), value), None).wrap(self) }
     }
 
     ///Appends a "double" to the collection.
     fn append_double(&mut self, value: f64) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_collection_append_double(self.inner(), value)).wrap(self) }
+        unsafe { CassError::build(cass_collection_append_double(self.inner(), value), None).wrap(self) }
     }
 
     ///Appends a "boolean" to the collection.
     fn append_bool(&mut self, value: bool) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_collection_append_bool(self.inner(), if value { 1 } else { 0 })).wrap(self) }
+        unsafe {
+            CassError::build(cass_collection_append_bool(self.inner(), if value { 1 } else { 0 }),
+                             None)
+                .wrap(self)
+        }
     }
 
     ///Appends an "ascii", "text" or "varchar" to the collection.
@@ -101,7 +105,7 @@ pub trait CassCollection {
         unsafe {
             let cstr = CString::new(value).unwrap();
             let result = cass_collection_append_string(self.inner(), cstr.as_ptr());
-            CassError::build(result).wrap(self)
+            CassError::build(result, None).wrap(self)
         }
     }
 
@@ -109,43 +113,59 @@ pub trait CassCollection {
     fn append_bytes(&mut self, value: Vec<u8>) -> Result<&Self, CassError> {
         unsafe {
             let bytes = cass_collection_append_bytes(self.inner(), value[..].as_ptr(), value.len() as u64);
-            CassError::build(bytes).wrap(self)
+            CassError::build(bytes, None).wrap(self)
         }
     }
 
     ///Appends a "uuid" or "timeuuid"  to the collection.
     fn append_uuid(&mut self, value: Uuid) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_collection_append_uuid(self.inner(), value.0)).wrap(self) }
+        unsafe { CassError::build(cass_collection_append_uuid(self.inner(), value.0), None).wrap(self) }
     }
 
     ///Appends an "inet" to the collection.
     fn append_inet(&mut self, value: Inet) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_collection_append_inet(self.inner(), value.0)).wrap(self) }
+        unsafe { CassError::build(cass_collection_append_inet(self.inner(), value.0), None).wrap(self) }
     }
 
     ///Appends a "list" to the collection.
     fn append_list(&mut self, value: List) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_collection_append_collection(self.inner(), value.0)).wrap(self) }
+        unsafe {
+            CassError::build(cass_collection_append_collection(self.inner(), value.0),
+                             None)
+                .wrap(self)
+        }
     }
 
     ///Appends a "set" to the collection.
     fn append_set(&mut self, value: Set) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_collection_append_collection(self.inner(), value.0)).wrap(self) }
+        unsafe {
+            CassError::build(cass_collection_append_collection(self.inner(), value.0),
+                             None)
+                .wrap(self)
+        }
     }
 
     ///Appends a "map" to the collection.
     fn append_map(&mut self, value: Map) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_collection_append_collection(self.inner(), value.0)).wrap(self) }
+        unsafe {
+            CassError::build(cass_collection_append_collection(self.inner(), value.0),
+                             None)
+                .wrap(self)
+        }
     }
 
     ///Appends a "tuple" to the collection.
     fn append_tuple(&mut self, value: Tuple) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_collection_append_tuple(self.inner(), value.0)).wrap(self) }
+        unsafe { CassError::build(cass_collection_append_tuple(self.inner(), value.0), None).wrap(self) }
     }
 
     ///Appends a "udt" to the collection.
     fn append_user_type(&mut self, value: UserType) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_collection_append_user_type(self.inner(), value.0)).wrap(self) }
+        unsafe {
+            CassError::build(cass_collection_append_user_type(self.inner(), value.0),
+                             None)
+                .wrap(self)
+        }
     }
 }
 

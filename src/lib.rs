@@ -1,6 +1,3 @@
-// #![feature(plugin)]
-// #![plugin(cheddar)]
-
 extern crate libc;
 #[macro_use]
 extern crate log;

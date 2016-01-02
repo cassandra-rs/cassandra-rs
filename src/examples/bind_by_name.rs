@@ -10,21 +10,16 @@ struct Basic {
     i64: i64,
 }
 
-static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = \
-                                        { \'class\': \'SimpleStrategy\', \'replication_factor\': \
-                                        \'3\' };";
-static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.basic (key text, bln \
-                                     boolean, flt float, dbl double,i32 int, i64 bigint, PRIMARY \
-                                     KEY (key));";
-static INSERT_QUERY: &'static str = "INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) \
-                                     VALUES (?, ?, ?, ?, ?, ?);";
+static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
+                                        \'SimpleStrategy\', \'replication_factor\': \'3\' };";
+static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.basic (key text, bln boolean, flt float, dbl \
+                                     double,i32 int, i64 bigint, PRIMARY KEY (key));";
+static INSERT_QUERY: &'static str = "INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, \
+                                     ?);";
 static SELECT_QUERY: &'static str = "SELECT * FROM examples.basic WHERE key = ?";
 
 // fixme row key sent is null?
-fn insert_into_basic(session: &mut Session,
-                     prepared: PreparedStatement,
-                     key: &str,
-                     basic: Basic)
+fn insert_into_basic(session: &mut Session, prepared: PreparedStatement, key: &str, basic: Basic)
                      -> Result<CassResult, CassError> {
     println!("key={:?}", key);
     let mut statement = prepared.bind();
@@ -44,10 +39,7 @@ fn insert_into_basic(session: &mut Session,
     session.execute_statement(&statement).wait()
 }
 
-unsafe fn select_from_basic(session: &mut Session,
-                            prepared: &PreparedStatement,
-                            key: &str,
-                            basic: &mut Basic)
+unsafe fn select_from_basic(session: &mut Session, prepared: &PreparedStatement, key: &str, basic: &mut Basic)
                             -> Result<CassResult, CassError> {
     let mut statement = prepared.bind();
     statement.bind_string_by_name("key", key).unwrap();
@@ -92,18 +84,13 @@ fn main() {
                 session.execute(CREATE_TABLE, 0).wait().unwrap();
                 match session.prepare(INSERT_QUERY).unwrap().wait() {
                     Ok(insert_prepared) => {
-                        insert_into_basic(&mut session, insert_prepared, "prepared_test", input)
-                            .unwrap();
+                        insert_into_basic(&mut session, insert_prepared, "prepared_test", input).unwrap();
                     }
                     Err(err) => println!("error: {:?}", err),
                 }
                 match session.prepare(SELECT_QUERY).unwrap().wait() {
                     Ok(ref mut select_prepared) => {
-                        select_from_basic(&mut session,
-                                          &select_prepared,
-                                          "prepared_test",
-                                          &mut output)
-                            .unwrap();
+                        select_from_basic(&mut session, &select_prepared, "prepared_test", &mut output).unwrap();
                         assert_eq!(input, output);
                         println!("results matched: {:?}", output);
                     }

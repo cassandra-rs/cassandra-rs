@@ -4,15 +4,12 @@ use cassandra::*;
 
 static INSERT_QUERY: &'static str = "INSERT INTO examples.collections (key, items) VALUES (?, ?);";
 static SELECT_QUERY: &'static str = "SELECT items FROM examples.collections WHERE key = ?";
-static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE examples WITH replication = { \'class\': \
+static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
                                         \'SimpleStrategy\', \'replication_factor\': \'1\' };";
-static CREATE_TABLE: &'static str = "CREATE TABLE examples.collections (key text, items \
-                                     set<text>, PRIMARY KEY (key))";
+static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.collections (key text, items set<text>, \
+                                     PRIMARY KEY (key))";
 
-fn insert_into_collections(session: &mut Session,
-                           key: &str,
-                           items: Vec<String>)
-                           -> Result<CassResult, CassError> {
+fn insert_into_collections(session: &mut Session, key: &str, items: Vec<String>) -> Result<CassResult, CassError> {
     let mut statement = Statement::new(INSERT_QUERY, 2);
     try!(statement.bind_string(0, key));
     let mut set = Set::new(2);
@@ -44,10 +41,7 @@ fn main() {
     cluster.set_contact_points(vec!["127.0.0.1"]).unwrap();
     let session = &mut Session::new().connect(&cluster).wait().unwrap();
 
-    let items = vec!["apple".to_string(),
-                     "orange".to_string(),
-                     "banana".to_string(),
-                     "mango".to_string()];
+    let items = vec!["apple".to_string(), "orange".to_string(), "banana".to_string(), "mango".to_string()];
     session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
     session.execute(CREATE_TABLE, 0).wait().unwrap();
     insert_into_collections(session, "test", items).unwrap();
