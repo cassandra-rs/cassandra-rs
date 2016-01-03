@@ -1,6 +1,7 @@
 extern crate cassandra;
 
 use cassandra::*;
+use std::str::FromStr;
 
 static INSERT_QUERY: &'static str = "INSERT INTO examples.collections (key, items) VALUES (?, ?);";
 static SELECT_QUERY: &'static str = "SELECT items FROM examples.collections WHERE key = ?";
@@ -38,7 +39,7 @@ fn select_from_collections(session: &mut Session, key: &str) -> Result<(), CassE
 fn main() {
 
     let mut cluster = Cluster::new();
-    cluster.set_contact_points(vec!["127.0.0.1"]).unwrap();
+    cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
     let session = &mut Session::new().connect(&cluster).wait().unwrap();
 
     let items = vec!["apple".to_string(), "orange".to_string(), "banana".to_string(), "mango".to_string()];

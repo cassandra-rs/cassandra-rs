@@ -1,8 +1,6 @@
 extern crate cassandra;
-
+use std::str::FromStr;
 use cassandra::*;
-
-const CONTACT_POINTS: &'static str = "127.0.0.1";
 
 const CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
                                        \'SimpleStrategy\', \'replication_factor\': \'1\' };";
@@ -62,11 +60,8 @@ fn main() {
     };
 
     let mut cluster = Cluster::new();
-    let contact_points: Vec<&str> = vec![CONTACT_POINTS];
-    cluster.set_contact_points(contact_points)
-           .unwrap()
-           .set_load_balance_round_robin()
-           .unwrap();
+    cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
+    cluster.set_load_balance_round_robin().unwrap();
 
     let session_future = Session::new().connect(&cluster).wait();
 

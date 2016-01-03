@@ -1,5 +1,6 @@
 extern crate cassandra;
 use cassandra::*;
+use std::str::FromStr;
 
 #[derive(Clone,Copy,Debug,PartialEq)]
 struct Basic {
@@ -18,23 +19,17 @@ static INSERT_QUERY: &'static str = "INSERT INTO examples.basic (key, bln, flt, 
                                      ?);";
 static SELECT_QUERY: &'static str = "SELECT * FROM examples.basic WHERE key = ?";
 
-// fixme row key sent is null?
 fn insert_into_basic(session: &mut Session, prepared: PreparedStatement, key: &str, basic: Basic)
                      -> Result<CassResult, CassError> {
     println!("key={:?}", key);
     let mut statement = prepared.bind();
-    statement.bind_string_by_name("key", key)
-             .unwrap()
-             .bind_bool_by_name("BLN", basic.bln)
-             .unwrap()
-             .bind_float_by_name("FLT", basic.flt)
-             .unwrap()
-             .bind_double_by_name("\"dbl\"", basic.dbl)
-             .unwrap()
-             .bind_int32_by_name("i32", basic.i32)
-             .unwrap()
-             .bind_int64_by_name("I64", basic.i64)
-             .unwrap();
+
+    try!(statement.bind_string_by_name("key", key));
+    try!(statement.bind_bool_by_name("bln", basic.bln));
+    try!(statement.bind_float_by_name("flt", basic.flt));
+    try!(statement.bind_double_by_name("dbl", basic.dbl));
+    try!(statement.bind_int32_by_name("i32", basic.i32));
+    try!(statement.bind_int64_by_name("i64", basic.i64));
 
     session.execute_statement(&statement).wait()
 }
@@ -62,7 +57,7 @@ unsafe fn select_from_basic(session: &mut Session, prepared: &PreparedStatement,
 fn main() {
     unsafe {
         let mut cluster = Cluster::new();
-        cluster.set_contact_points(vec!["127.0.0.1"]).unwrap();
+        cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
 
         match Session::new().connect(&cluster).wait() {
             Ok(mut session) => {

@@ -1,12 +1,6 @@
 extern crate cassandra;
-
-use cassandra::Cluster;
-use cassandra::Session;
-use cassandra::Statement;
-use cassandra::Batch;
-use cassandra::BatchType;
-use cassandra::PreparedStatement;
-use cassandra::CassError;
+use std::str::FromStr;
+use cassandra::*;
 
 struct Pair<'a> {
     key: &'a str,
@@ -43,7 +37,7 @@ pub fn verify_batch(session: &mut Session) {
 
 fn main() {
     let mut cluster = Cluster::new();
-    cluster.set_contact_points(vec!["127.0.0.1"]).unwrap();
+    cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
     let mut session = Session::new().connect(&mut cluster).wait().unwrap();
 
     let pairs = vec!(

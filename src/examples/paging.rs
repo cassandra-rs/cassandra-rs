@@ -1,8 +1,8 @@
 extern crate cassandra;
 
+use std::str::FromStr;
 use cassandra::*;
 
-static CONTACT_POINTS: &'static str = "127.0.0.1";
 static NUM_CONCURRENT_REQUESTS: isize = 100;
 static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
                                         \'SimpleStrategy\', \'replication_factor\': \'1\' };";
@@ -66,10 +66,8 @@ fn main() {
     // let uuid_gen = &mut UuidGen::new();
 
     let mut cluster = Cluster::new();
-    cluster.set_contact_points(vec![CONTACT_POINTS])
-           .unwrap();
-    cluster.set_load_balance_round_robin()
-           .unwrap();
+    cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
+    cluster.set_load_balance_round_robin().unwrap();
 
     let mut session = Session::new().connect(&cluster).wait().unwrap();
 

@@ -1,7 +1,13 @@
+use std::str::FromStr;
 use cassandra::ssl::Ssl;
 use cassandra_sys::CassCluster as _Cluster;
 use std::ffi::CString;
-
+use std::net::AddrParseError;
+use std::net::Ipv4Addr;
+// use ip::IpAddr;
+use chrono::duration::Duration;
+use std::ffi::NulError;
+use std::fmt;
 use cassandra_sys::cass_cluster_new;
 use cassandra_sys::cass_cluster_free;
 use cassandra_sys::cass_cluster_set_contact_points;
@@ -47,6 +53,37 @@ use cassandra::policy::retry::RetryPolicy;
 
 use cassandra::session::Session;
 
+pub enum CqlProtocol {
+    ONE = 1,
+    TWO = 2,
+    THREE = 3,
+    FOUR = 4,
+}
+
+pub struct ContactPoints(Vec<Ipv4Addr>);
+
+impl fmt::Display for ContactPoints {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let contact_points: Vec<String> = self.0.iter().map(|ip| format!("{}", ip)).collect();
+        write!(f, "{} ", contact_points.join(","))
+    }
+}
+
+impl FromStr for ContactPoints {
+    type Err = AddrParseError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let contact_points: Vec<&str> = s.split(",").collect();
+
+        let contact_points: Result<Vec<_>, _> = contact_points.iter()
+                                                              .map(|addr| {
+                                                                  println!("{}", addr);
+                                                                  Ipv4Addr::from_str(addr)
+                                                              })
+                                                              .collect();
+        Ok(ContactPoints(try!(contact_points)))
+    }
+}
+
 ///
 /// The main class to use when interacting with a Cassandra cluster.
 /// Typically, one instance of this class will be created for each separate
@@ -83,11 +120,10 @@ impl Cluster {
     /// Example contact points: "127.0.0.1" "127.0.0.1,127.0.0.2", "server1.domain.com"
     /// ```
     ///
-    pub fn set_contact_points(&mut self, contact_points: Vec<&str>) -> Result<&mut Self, CassError> {
+    pub fn set_contact_points(&mut self, contact_points: ContactPoints) -> Result<&mut Self, CassError> {
         unsafe {
-            let points = contact_points.join(",");
-            println!("p:{}:", points);
-            let s = CString::new(points).unwrap();
+            println!("p:{}:", contact_points);
+            let s = CString::new(contact_points.to_string()).unwrap();
             let err = CassError::build(cass_cluster_set_contact_points(self.0, s.as_ptr()), None);
             err.wrap(self)
         }
@@ -98,8 +134,8 @@ impl Cluster {
     /// ```
     /// Default: 9042
     /// ```
-    pub fn set_port(&mut self, port: i32) -> Result<&mut Self, CassError> {
-        unsafe { CassError::build(cass_cluster_set_port(self.0, port), None).wrap(self) }
+    pub fn set_port(&mut self, port: u16) -> Result<&mut Self, CassError> {
+        unsafe { CassError::build(cass_cluster_set_port(self.0, port as i32), None).wrap(self) }
     }
 
 
@@ -122,9 +158,9 @@ impl Cluster {
     /// ```
     ///Default: version 4
     /// ```
-    pub fn set_protocol_version(&mut self, protocol_version: i32) -> Result<&mut Self, CassError> {
+    pub fn set_protocol_version(&mut self, protocol_version: CqlProtocol) -> Result<&mut Self, CassError> {
         unsafe {
-            CassError::build(cass_cluster_set_protocol_version(self.0, protocol_version),
+            CassError::build(cass_cluster_set_protocol_version(self.0, protocol_version as i32),
                              None)
                 .wrap(self)
         }
@@ -310,9 +346,9 @@ impl Cluster {
     ///
     /// ```
     /// Default: 5000ms
-    pub fn set_connect_timeout(&mut self, timeout_ms: u32) -> &Self {
+    pub fn set_connect_timeout(&mut self, timeout: Duration) -> &Self {
         unsafe {
-            cass_cluster_set_connect_timeout(self.0, timeout_ms);
+            cass_cluster_set_connect_timeout(self.0, timeout.num_milliseconds() as u32);
         }
         self
     }
@@ -321,19 +357,21 @@ impl Cluster {
     ///
     /// ```
     /// Default: 12000ms
-    pub fn set_request_timeout(&mut self, timeout_ms: u32) -> &Self {
+    pub fn set_request_timeout(&mut self, timeout: Duration) -> &Self {
         unsafe {
-            cass_cluster_set_request_timeout(self.0, timeout_ms);
+            cass_cluster_set_request_timeout(self.0, timeout.num_milliseconds() as u32);
         }
         self
     }
 
     ///Sets credentials for plain text authentication.
-    pub fn set_credentials(&mut self, username: *const i8, password: *const i8) -> &Self {
+    pub fn set_credentials(&mut self, username: &str, password: &str) -> Result<&Self, NulError> {
         unsafe {
-            cass_cluster_set_credentials(self.0, username, password);
+            cass_cluster_set_credentials(self.0,
+                                         try!(CString::new(username)).as_ptr(),
+                                         try!(CString::new(password)).as_ptr());
         }
-        self
+        Ok(self)
     }
 
     ///Configures the cluster to use round-robin load balancing.
@@ -357,13 +395,12 @@ impl Cluster {
     ///first connected contact point, and no remote hosts are considered in
     ///query plans. If relying on this mechanism, be sure to use only contact
     ///points from the local DC.
-    pub fn set_load_balance_dc_aware<S>(&mut self, local_dc: S, used_hosts_per_remote_dc: u32,
+    pub fn set_load_balance_dc_aware<S>(&mut self, local_dc: &str, used_hosts_per_remote_dc: u32,
         allow_remote_dcs_for_local_cl: bool)
-                                        -> Result<&Self, CassError>
-        where S: Into<String> {
+                                        -> Result<&Self, CassError> {
         unsafe {
             CassError::build({
-                                 let local_dc = CString::new(local_dc.into()).unwrap();
+                                 let local_dc = CString::new(local_dc).unwrap();
                                  cass_cluster_set_load_balance_dc_aware(self.0,
                                                                         local_dc.as_ptr(),
                                                                         used_hosts_per_remote_dc,
@@ -423,15 +460,15 @@ impl Cluster {
     ///  <li>update_rate_ms: 100 milliseconds</li>
     ///  <li>min_measured: 50</li>
     ///</ul>
-    pub fn set_latency_aware_routing_settings(&mut self, exclusion_threshold: f64, scale_ms: u64, retry_period_ms: u64,
-        update_rate_ms: u64, min_measured: u64)
+    pub fn set_latency_aware_routing_settings(&mut self, exclusion_threshold: f64, scale: Duration,
+        retry_period: Duration, update_rate: Duration, min_measured: u64)
                                               -> &Self {
         unsafe {
             cass_cluster_set_latency_aware_routing_settings(self.0,
                                                             exclusion_threshold,
-                                                            scale_ms,
-                                                            retry_period_ms,
-                                                            update_rate_ms,
+                                                            scale.num_milliseconds() as u64,
+                                                            retry_period.num_milliseconds() as u64,
+                                                            update_rate.num_milliseconds() as u64,
                                                             min_measured);
         }
         self
@@ -471,9 +508,9 @@ impl Cluster {
     ///
     /// ```
     ///Default: false (disabled).
-    pub fn set_tcp_keepalive(&mut self, enable: bool, delay_secs: u32) -> &Self {
+    pub fn set_tcp_keepalive(&mut self, enable: bool, delay: Duration) -> &Self {
         unsafe {
-            cass_cluster_set_tcp_keepalive(self.0, enable as u32, delay_secs);
+            cass_cluster_set_tcp_keepalive(self.0, enable as u32, delay.num_seconds() as u32);
         }
         self
     }
@@ -497,21 +534,21 @@ impl Cluster {
     ///
     /// ````
     // Default: 30 seconds
-    pub fn set_connection_heartbeat_interval(&mut self, hearbeat: u32) -> &mut Self {
+    pub fn set_connection_heartbeat_interval(&mut self, hearbeat: Duration) -> &mut Self {
         unsafe {
-            cass_cluster_set_connection_heartbeat_interval(self.0, hearbeat);
+            cass_cluster_set_connection_heartbeat_interval(self.0, hearbeat.num_seconds() as u32);
             self
         }
     }
 
-    ///ets the amount of time a connection is allowed to be without a successful
+    ///Sets the amount of time a connection is allowed to be without a successful
     ///heartbeat response before being terminated and scheduled for reconnection.
     ///
     /// ```
     ///Default: 60 seconds
-    pub fn set_connection_idle_timeout(&mut self, timeout: u32) -> &mut Self {
+    pub fn set_connection_idle_timeout(&mut self, timeout: Duration) -> &mut Self {
         unsafe {
-            cass_cluster_set_connection_idle_timeout(self.0, timeout);
+            cass_cluster_set_connection_idle_timeout(self.0, timeout.num_seconds() as u32);
             self
         }
     }

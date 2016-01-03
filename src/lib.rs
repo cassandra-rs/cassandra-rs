@@ -3,6 +3,7 @@ extern crate libc;
 extern crate log;
 extern crate decimal;
 extern crate chrono;
+extern crate ip;
 
 pub use cassandra::consistency::*;
 pub use cassandra::inet::*;

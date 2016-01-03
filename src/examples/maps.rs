@@ -1,13 +1,11 @@
 extern crate cassandra;
-
+use std::str::FromStr;
 use cassandra::*;
 
 struct Pair<'a> {
     key: &'a str,
     value: i32,
 }
-const CONTACT_POINTS: &'static str = "127.0.0.1";
-
 static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
                                         \'SimpleStrategy\', \'replication_factor\': \'3\' };";
 static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.maps (key text, items map<text, int>, \
@@ -53,10 +51,8 @@ fn main() {
 
 fn foo() -> Result<(), CassError> {
     let mut cluster = Cluster::new();
-    cluster.set_contact_points(vec![CONTACT_POINTS])
-           .unwrap()
-           .set_load_balance_round_robin()
-           .unwrap();
+    cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
+    cluster.set_load_balance_round_robin().unwrap();
 
     let items: Vec<Pair> = vec![Pair {
                                     key: "apple",

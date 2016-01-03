@@ -2,6 +2,7 @@ use std::fmt::{Debug, Display, Formatter};
 use std::{fmt, mem, slice, str};
 use std::ffi::{CStr, CString, NulError};
 use std::error::Error;
+use std::net::AddrParseError;
 
 use cassandra_sys::cass_error_desc;
 use cassandra_sys::CASS_ERROR_LIB_BAD_PARAMS;
@@ -81,6 +82,7 @@ pub enum CassErrorSource {
 
 pub enum CassRustError {
     NulInString(NulError),
+    BadAddress(AddrParseError),
 }
 
 pub enum CassError {
@@ -104,6 +106,12 @@ impl Error for CassError {
         // let c_buf: *const i8 = self.desc();
         // let buf: &[u8] = unsafe { CStr::from_ptr(c_buf).to_bytes() };
         // from_utf8(buf).unwrap()
+    }
+}
+
+impl From<AddrParseError> for CassError {
+    fn from(err: AddrParseError) -> CassError {
+        CassError::Rust(CassRustError::BadAddress(err))
     }
 }
 
@@ -627,15 +635,16 @@ impl CassError {
         str::from_utf8(buf).unwrap()
     }
 
-    pub fn desc(&self) -> &str {
+    pub fn desc<'a>(&'a self) -> &'a str {
         unsafe {
             match *self {
                 CassError::Lib{ref err} => CassError::pointer_to_string(cass_error_desc(err.err)),
                 CassError::Ssl(ref err) => CassError::pointer_to_string(cass_error_desc(err.0)),
                 CassError::Server(ref err) => CassError::pointer_to_string(cass_error_desc(err.0)),
                 CassError::Rust(ref err) => {
-                    match *err {
-                        CassRustError::NulInString(_) => "Tried to create a CString with a nul in the middle",
+                    match err {
+                        &CassRustError::NulInString(_) => "Tried to create a CString with a nul in the middle",
+                        &CassRustError::BadAddress(_) => "Tried to parse an invalid ip address", //FIXME how do i return a slice created from self?
                     }
                 }
             }

@@ -1,4 +1,5 @@
 extern crate cassandra;
+use std::str::FromStr;
 
 use cassandra::*;
 
@@ -64,8 +65,8 @@ fn select_from_basic(session: &mut Session, prepared: &PreparedStatement, key: &
 
 fn main() {
     let mut cluster = Cluster::new();
-    cluster.set_contact_points(vec!["127.0.0.1"]).unwrap();
-    cluster.set_protocol_version(3).unwrap();
+    cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
+    cluster.set_protocol_version(CqlProtocol::THREE).unwrap();
     println!("Proto set");
     let mut session = cluster.connect().unwrap();
 

@@ -1,12 +1,8 @@
 extern crate cassandra;
 
-use cassandra::Session;
-use cassandra::Uuid;
-use cassandra::Statement;
-use cassandra::CassResult;
-use cassandra::CassError;
-use cassandra::UuidGen;
-use cassandra::Cluster;
+use cassandra::*;
+
+use std::str::FromStr;
 
 static INSERT_QUERY: &'static str = "INSERT INTO examples.log (key, time, entry) VALUES (?, ?, ?);";
 static SELECT_QUERY: &'static str = "SELECT * FROM examples.log WHERE key = ?";
@@ -35,7 +31,7 @@ fn select_from_log(session: &mut Session, key: &str) -> Result<CassResult, CassE
 fn main() {
     let uuid_gen = UuidGen::new();
     let mut cluster = Cluster::new();
-    cluster.set_contact_points(vec!["127.0.0.1"]).unwrap();
+    cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
     let session = &mut Session::new().connect(&cluster).wait().unwrap();
 
     session.execute(CREATE_KEYSPACE, 0).wait().unwrap();

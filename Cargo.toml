@@ -5,7 +5,7 @@ license = "Apache-2.0"
 homepage = "https://github.com/tupshin/cassandra-rust"
 repository = "https://github.com/tupshin/cassandra-rust"
 name = "cassandra"
-version = "0.5.0"
+version = "0.5.1"
 authors = ["Tupshin Harper <tupshin@tupshin.com>"]
 build = "build.rs"
 
@@ -19,6 +19,7 @@ log = "0.3"
 cassandra-sys = "0.2"
 decimal = "0.2"
 chrono = "0.2"
+ip = "1.0"
 
 [[bin]]
 name="async"

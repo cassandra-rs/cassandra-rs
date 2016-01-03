@@ -1,12 +1,9 @@
 extern crate num;
 extern crate cassandra;
+use std::str::FromStr;
 
 
-use cassandra::Session;
-use cassandra::Statement;
-use cassandra::Cluster;
-use cassandra::ResultFuture;
-use cassandra::CassError;
+use cassandra::*;
 
 static NUM_CONCURRENT_REQUESTS: usize = 100;
 static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
@@ -49,7 +46,7 @@ pub fn block_async(mut futures: Vec<ResultFuture>) -> Result<(), CassError> {
 
 pub fn main() {
     let mut cluster = Cluster::new();
-    cluster.set_contact_points(vec!["127.0.0.1"]).unwrap();
+    cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
     match Session::new().connect(&cluster).wait() {
         Ok(mut session) => {
             session.execute(CREATE_KEYSPACE, 0).wait().unwrap();

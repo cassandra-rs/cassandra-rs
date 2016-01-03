@@ -1,5 +1,6 @@
 extern crate cassandra;
-extern crate cassandra_sys;
+
+use std::str::FromStr;
 
 use cassandra::*;
 
@@ -8,8 +9,6 @@ static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples W
                                         \'SimpleStrategy\', \'replication_factor\': \'1\' };";
 static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.schema_meta (key text, value bigint, PRIMARY \
                                      KEY (key));";
-
-const CONTACT_POINTS: &'static str = "127.0.0.1";
 
 const CREATE_FUNC1: &'static str = "CREATE FUNCTION IF NOT EXISTS examples.avg_state(state tuple<int, bigint>, val \
                                     int) CALLED ON NULL INPUT RETURNS tuple<int, bigint> LANGUAGE java AS 'if (val != \
@@ -134,8 +133,7 @@ fn main() {
 
 fn cass() -> Result<(), CassError> {
     let mut cluster = Cluster::new();
-    let contact_points: Vec<&str> = vec![CONTACT_POINTS];
-    try!(cluster.set_contact_points(contact_points));
+    cluster.set_contact_points(try!(ContactPoints::from_str("127.0.0.1"))).unwrap();
     try!(cluster.set_load_balance_round_robin());
 
     let session_future = Session::new().connect(&cluster).wait();
