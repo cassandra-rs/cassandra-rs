@@ -42,12 +42,6 @@ fn main() {
     insert_into_log(session, "test", uuid_gen.get_time(), "Log entry #3").unwrap();
     insert_into_log(session, "test", uuid_gen.get_time(), "Log entry #4").unwrap();
     let results = select_from_log(session, "test").unwrap();
-    // 		for row in results.iter() {
-    // 		let time = row.get_column(1).unwrap();
-    // 		let entry = try!(row.get_column(2).unwrap();
-    // 		let time_str = time.get_string();
-    // 		println!("{:?}.{:?}", time_str, entry.get_string());
-    // 	}
 
-    println!("{:?}", results);
+    println!("{}", results);
 }
