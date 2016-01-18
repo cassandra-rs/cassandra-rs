@@ -59,7 +59,8 @@ fn main() {
         let mut cluster = Cluster::new();
         cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
 
-        match Session::new().connect(&cluster).wait() {
+        match cluster.connect()
+ {
             Ok(mut session) => {
                 let input = Basic {
                     bln: true,

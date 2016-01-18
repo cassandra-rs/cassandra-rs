@@ -32,15 +32,15 @@ fn main() {
     let uuid_gen = UuidGen::new();
     let mut cluster = Cluster::new();
     cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
-    let session = &mut Session::new().connect(&cluster).wait().unwrap();
+    let session = &mut cluster.connect().unwrap();
 
     session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
     session.execute(CREATE_TABLE, 0).wait().unwrap();
-    println!("uuid_gen = {:?}", uuid_gen.get_time());
-    insert_into_log(session, "test", uuid_gen.get_time(), "Log entry #1").unwrap();
-    insert_into_log(session, "test", uuid_gen.get_time(), "Log entry #2").unwrap();
-    insert_into_log(session, "test", uuid_gen.get_time(), "Log entry #3").unwrap();
-    insert_into_log(session, "test", uuid_gen.get_time(), "Log entry #4").unwrap();
+    println!("uuid_gen = {:?}", uuid_gen.gen_time());
+    insert_into_log(session, "test", uuid_gen.gen_time(), "Log entry #1").unwrap();
+    insert_into_log(session, "test", uuid_gen.gen_time(), "Log entry #2").unwrap();
+    insert_into_log(session, "test", uuid_gen.gen_time(), "Log entry #3").unwrap();
+    insert_into_log(session, "test", uuid_gen.gen_time(), "Log entry #4").unwrap();
     let results = select_from_log(session, "test").unwrap();
 
     println!("{}", results);

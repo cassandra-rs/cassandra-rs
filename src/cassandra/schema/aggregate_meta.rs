@@ -16,15 +16,27 @@ use cassandra_sys::cass_aggregate_meta_init_cond;
 use cassandra_sys::cass_aggregate_meta_field_by_name;
 
 use cassandra::schema::function_meta::FunctionMeta;
+use cassandra::schema::function_meta;
 use cassandra::data_type::ConstDataType;
 use cassandra::value::Value;
 use cassandra::iterator::FieldIterator;
+use cassandra::iterator;
+use cassandra::value;
 
-pub struct AggregateMeta(pub *const _CassAggregateMeta);
+///Metadata about a cassandra aggregate
+pub struct AggregateMeta(*const _CassAggregateMeta);
 
+pub mod protected {
+    use cassandra::schema::aggregate_meta::AggregateMeta;
+    use cassandra_sys::CassAggregateMeta as _CassAggregateMeta;
+    pub fn build(aggregate: *const _CassAggregateMeta) -> AggregateMeta {
+        AggregateMeta(aggregate)
+    }
+}
 impl AggregateMeta {
+    ///An iterator over the fields of an aggregate
     pub fn fields_iter(&self) -> FieldIterator {
-        unsafe { FieldIterator(cass_iterator_fields_from_aggregate_meta(self.0)) }
+        unsafe { iterator::protected::CassIterator::build(cass_iterator_fields_from_aggregate_meta(self.0)) }
     }
 
 
@@ -70,17 +82,17 @@ impl AggregateMeta {
 
     /// Gets the function metadata for the aggregate's state function.
     pub fn state_func(&self) -> FunctionMeta {
-        unsafe { FunctionMeta(cass_aggregate_meta_state_func(self.0)) }
+        unsafe { function_meta::protected::build(cass_aggregate_meta_state_func(self.0)) }
     }
 
     /// Gets the function metadata for the aggregates's final function.
     pub fn final_func(&self) -> FunctionMeta {
-        unsafe { FunctionMeta(cass_aggregate_meta_final_func(self.0)) }
+        unsafe { function_meta::protected::build(cass_aggregate_meta_final_func(self.0)) }
     }
 
     ///  Gets the initial condition value for the aggregate.
     pub fn init_cond(&self) -> Value {
-        unsafe { Value(cass_aggregate_meta_init_cond(self.0)) }
+        unsafe { value::protected::build(cass_aggregate_meta_init_cond(self.0)) }
     }
 
     ///  Gets a metadata field for the provided name. Metadata fields allow direct
@@ -88,7 +100,7 @@ impl AggregateMeta {
     pub fn field_by_name(&self, name: &str) -> Option<Value> {
         unsafe {
             let agg = cass_aggregate_meta_field_by_name(self.0, CString::new(name).unwrap().as_ptr());
-            if agg.is_null() { None } else { Some(Value(agg)) }
+            if agg.is_null() { None } else { Some(value::protected::build(agg)) }
         }
     }
 }

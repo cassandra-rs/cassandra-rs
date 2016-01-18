@@ -4,9 +4,18 @@ use cassandra_sys::cass_retry_policy_fallthrough_new;
 use cassandra_sys::cass_retry_policy_logging_new;
 use cassandra_sys::cass_retry_policy_free;
 
-use cassandra_sys::CassRetryPolicy as _CassRetryPolicy;
+use cassandra_sys::CassRetryPolicy as _RetryPolicy;
 
-pub struct RetryPolicy(pub *mut _CassRetryPolicy);
+///The selected retry policy
+pub struct RetryPolicy(*mut _RetryPolicy);
+
+pub mod protected {
+    use cassandra::policy::retry::RetryPolicy;
+    use cassandra_sys::CassRetryPolicy as _RetryPolicy;
+    pub fn inner(policy: RetryPolicy) -> *mut _RetryPolicy {
+        policy.0
+    }
+}
 
 impl RetryPolicy {
     pub fn default_new() -> Self {

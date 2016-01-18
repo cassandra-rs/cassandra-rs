@@ -5,7 +5,7 @@ use std::ffi::CString;
 use std::net::AddrParseError;
 use std::net::Ipv4Addr;
 // use ip::IpAddr;
-use chrono::duration::Duration;
+use time::Duration;
 use std::ffi::NulError;
 use std::fmt;
 use cassandra_sys::cass_cluster_new;
@@ -35,6 +35,7 @@ use cassandra_sys::cass_cluster_set_load_balance_dc_aware;
 use cassandra_sys::cass_cluster_set_load_balance_round_robin;
 use cassandra_sys::cass_cluster_set_credentials;
 use cassandra_sys::cass_cluster_set_request_timeout;
+use cassandra_sys::cass_future_error_code;
 use cassandra_sys::cass_cluster_set_connect_timeout;
 use cassandra_sys::cass_cluster_set_latency_aware_routing;
 use cassandra_sys::cass_cluster_set_latency_aware_routing_settings;
@@ -45,14 +46,20 @@ use cassandra_sys::cass_cluster_set_retry_policy;
 use cassandra_sys::cass_cluster_set_timestamp_gen;
 use cassandra_sys::cass_cluster_set_use_schema;
 use cassandra_sys::cass_cluster_set_whitelist_filtering;
-
-
+use cassandra_sys::cass_session_new;
+use cassandra_sys::cass_session_connect;
+use cassandra::time;
+use cassandra::policy;
+use cassandra::ssl;
 use cassandra::error::CassError;
 use cassandra::time::TimestampGen;
 use cassandra::policy::retry::RetryPolicy;
+use cassandra_sys::CASS_OK;
 
 use cassandra::session::Session;
 
+///Possible Cql Protocol versions
+#[allow(missing_docs)]
 pub enum CqlProtocol {
     ONE = 1,
     TWO = 2,
@@ -60,6 +67,7 @@ pub enum CqlProtocol {
     FOUR = 4,
 }
 
+///A set of cassandra contact points
 pub struct ContactPoints(Vec<Ipv4Addr>);
 
 impl fmt::Display for ContactPoints {
@@ -95,12 +103,21 @@ impl FromStr for ContactPoints {
 /// cluster.set_contact_points("127.0.0.1").unwrap();
 /// let mut session = cluster.connect().unwrap();
 /// ```
+
 pub struct Cluster(pub *mut _Cluster);
 
 impl Drop for Cluster {
     ///Frees a cluster instance.
     fn drop(&mut self) {
         unsafe { cass_cluster_free(self.0) }
+    }
+}
+
+pub mod protected {
+    use cassandra::cluster::Cluster;
+    use cassandra_sys::CassCluster as _Cluster;
+    pub fn inner(cluster: &Cluster) -> *mut _Cluster {
+        cluster.0
     }
 }
 
@@ -142,14 +159,19 @@ impl Cluster {
     /// Sets the SSL context and enables SSL
     pub fn set_ssl(&mut self, ssl: &mut Ssl) -> &Self {
         unsafe {
-            cass_cluster_set_ssl(self.0, ssl.0);
+            cass_cluster_set_ssl(self.0, ssl::protected::inner(ssl));
             self
         }
     }
 
-    /// Connect to Cassandra cluster
-    pub fn connect(&mut self) -> Result<Session, CassError> {
-        Session::new().connect(&self).wait()
+    /// Performs a blocking call to connect to Cassandra cluster
+    pub fn connect(&mut self) -> Result<Session, CassError> {unsafe{
+    	let session = cass_session_new();
+    	let connect_future = cass_session_connect(session, self.0);
+    	match cass_future_error_code(connect_future) {
+	    	CASS_OK => Ok(Session(session)),
+	    	err => Err(CassError::build(err, Some("")))    	
+	 }}
     }
 
     ///Sets the protocol version. This will automatically downgrade to the lowest
@@ -520,9 +542,9 @@ impl Cluster {
     ///
     /// ```
     /// Default: server-side timestamp generator.
-    pub fn set_timestamp_gen(&mut self, timestamp_gen: TimestampGen) -> &mut Self {
+    pub fn set_timestamp_gen(&mut self, tsg: &TimestampGen) -> &mut Self {
         unsafe {
-            cass_cluster_set_timestamp_gen(self.0, timestamp_gen.0);
+            cass_cluster_set_timestamp_gen(self.0, time::protected::inner(tsg));
             self
         }
     }
@@ -565,7 +587,7 @@ impl Cluster {
     ///will return an error.
     pub fn set_retry_policy(&mut self, retry_policy: RetryPolicy) -> &mut Self {
         unsafe {
-            cass_cluster_set_retry_policy(self.0, retry_policy.0);
+            cass_cluster_set_retry_policy(self.0, policy::retry::protected::inner(retry_policy));
             self
         }
     }

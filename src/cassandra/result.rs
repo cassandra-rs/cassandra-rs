@@ -15,6 +15,7 @@ use cassandra::value::ValueType;
 use cassandra::data_type::ConstDataType;
 use cassandra::row::Row;
 use cassandra::error::CassError;
+use cassandra::row;
 
 use cassandra_sys::CassResult as _CassResult;
 use cassandra_sys::CassIterator as _CassIterator;
@@ -33,7 +34,24 @@ use cassandra_sys::cass_iterator_from_result;
 use cassandra_sys::cass_result_column_data_type;
 use cassandra_sys::cass_result_paging_state_token;
 
-pub struct CassResult(pub *const _CassResult);
+///The result of a query.
+///A result object is read-only and is thread-safe to read or iterate over
+///concurrently.
+pub struct CassResult(*const _CassResult);
+unsafe impl Sync for CassResult {}
+unsafe impl Send for CassResult {}
+
+pub mod protected {
+    use cassandra::result::CassResult;
+    use cassandra_sys::CassResult as _CassResult;
+    pub fn build(result: *const _CassResult) -> CassResult {
+        CassResult(result)
+    }
+
+    pub fn inner(result: CassResult) -> *const _CassResult {
+        result.0
+    }
+}
 
 impl Debug for CassResult {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
@@ -89,7 +107,7 @@ impl CassResult {
 
     ///Gets the column type at index for the specified result.
     pub fn column_type(&self, index: u64) -> ValueType {
-        unsafe { ValueType::build(cass_result_column_type(self.0, index)) }
+        unsafe { ValueType::build(cass_result_column_type(self.0, index)).unwrap() }
     }
 
     ///Gets the column datatype at index for the specified result.
@@ -102,7 +120,7 @@ impl CassResult {
         unsafe {
             match self.row_count() {
                 0 => None,
-                _ => Some(Row(cass_result_first_row(self.0))),
+                _ => Some(row::protected::build(cass_result_first_row(self.0))),
             }
         }
     }
@@ -112,6 +130,12 @@ impl CassResult {
         unsafe { cass_result_has_more_pages(self.0) > 0 }
     }
 
+    ///Sets the statement's paging state. This can be used to get the next page of
+    ///data in a multi-page query.
+    ///
+    ///<b>Warning:</b> The paging state should not be exposed to or come from
+    ///untrusted environments. The paging state could be spoofed and potentially
+    // used to gain access to other data.
     pub fn set_paging_state_token(&mut self, paging_state: &str) -> Result<&Self, CassError> {
         unsafe {
             let paging_state = CString::new(paging_state).unwrap();
@@ -126,12 +150,13 @@ impl CassResult {
 
 
     ///Creates a new iterator for the specified result. This can be
-    // used to iterate over rows in the result.
+    ///used to iterate over rows in the result.
     pub fn iter(&self) -> ResultIterator {
         unsafe { ResultIterator(cass_iterator_from_result(self.0)) }
     }
 }
 
+///An iterator over the results of a query
 pub struct ResultIterator(pub *mut _CassIterator);
 
 impl Drop for ResultIterator {
@@ -153,8 +178,9 @@ impl Iterator for ResultIterator {
 }
 
 impl ResultIterator {
+    ///Gets the next row in the result set
     pub fn get_row(&mut self) -> Row {
-        unsafe { Row(cass_iterator_get_row(self.0)) }
+        unsafe { row::protected::build(cass_iterator_get_row(self.0)) }
     }
 }
 

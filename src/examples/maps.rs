@@ -70,8 +70,8 @@ fn foo() -> Result<(), CassError> {
                                     key: "mango",
                                     value: 4,
                                 }];
-    let session_future = Session::new().connect(&cluster).wait();
-    match session_future {
+    match cluster.connect()
+ {
         Ok(mut session) => {
             try!(session.execute(CREATE_KEYSPACE, 0).wait());
             try!(session.execute(CREATE_TABLE, 0).wait());

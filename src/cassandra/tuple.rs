@@ -23,7 +23,11 @@ use cassandra_sys::cass_tuple_set_decimal;
 use cassandra_sys::cass_iterator_free;
 use cassandra_sys::cass_iterator_next;
 use cassandra_sys::cass_iterator_get_value;
-
+use cassandra::value;
+use cassandra::collection;
+use cassandra::uuid;
+use cassandra::data_type;
+use cassandra::user_type;
 use std::ffi::CString;
 
 use cassandra::inet::AsInet;
@@ -37,35 +41,19 @@ use cassandra_sys::CassIterator as _CassIterator;
 use cassandra::value::Value;
 use cassandra::user_type::UserType;
 use cassandra::collection::Set;
+use cassandra::inet;
 
-pub struct Tuple(pub *mut _Tuple);
-pub struct TupleIterator(pub *mut _CassIterator);
 
-impl Drop for TupleIterator {
-    fn drop(&mut self) {
-        unsafe { cass_iterator_free(self.0) }
-    }
+///A tuple of values.
+pub struct Tuple(*mut _Tuple);
+
+pub mod protected {
+	use cassandra::tuple::Tuple;
+	use cassandra_sys::CassTuple as _Tuple;
+	pub fn inner(tuple:Tuple) -> *mut _Tuple {
+		tuple.0
+	}
 }
-
-impl Iterator for TupleIterator {
-    type Item = Value;
-    fn next(&mut self) -> Option<<Self as Iterator>::Item> {
-        unsafe {
-            match cass_iterator_next(self.0) {
-                0 => None,
-                _ => Some(self.get_value()),
-            }
-        }
-    }
-}
-
-impl TupleIterator {
-    pub fn get_value(&mut self) -> Value {
-        unsafe { Value::new(cass_iterator_get_value(self.0)) }
-    }
-}
-
-
 impl Tuple {
     ///Creates a new tuple.
     pub fn new(item_count: u64) -> Self {
@@ -74,7 +62,7 @@ impl Tuple {
 
     ///Creates a new tuple from an existing data type.
     pub fn new_from_data_type(data_type: DataType) -> Tuple {
-        unsafe { Tuple(cass_tuple_new_from_data_type(data_type.0)) }
+        unsafe { Tuple(cass_tuple_new_from_data_type(data_type::protected::inner(data_type))) }
     }
 
     ///Gets the data type of a tuple.
@@ -153,20 +141,26 @@ impl Tuple {
     ///Sets a "uuid" or "timeuuid" in a tuple at the specified index.
     pub fn set_uuid<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
         where S: Into<Uuid> {
-        unsafe { CassError::build(cass_tuple_set_uuid(self.0, index, value.into().0), None).wrap(()) }
+        unsafe { CassError::build(cass_tuple_set_uuid(self.0, index, uuid::protected::inner(value.into())), None).wrap(()) }
     }
 
     ///Sets an "inet" in a tuple at the specified index.
     pub fn set_inet(&mut self, index: u64, value: SocketAddr) -> Result<(), CassError> {
         let inet = AsInet::as_cass_inet(&value);
-        unsafe { CassError::build(cass_tuple_set_inet(self.0, index, inet.0), None).wrap(()) }
+        unsafe {
+            CassError::build(cass_tuple_set_inet(self.0, index, inet::protected::inner(&inet)),
+                             None)
+                .wrap(())
+        }
     }
 
     ///Sets a "list", "map" or "set" in a tuple at the specified index.
     pub fn set_collection<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
         where S: Into<Set> {
         unsafe {
-            CassError::build(cass_tuple_set_collection(self.0, index, value.into().0),
+            CassError::build(cass_tuple_set_collection(self.0,
+                                                       index,
+                                                       collection::protected::inner_set(value.into())),
                              None)
                 .wrap(())
         }
@@ -178,8 +172,8 @@ impl Tuple {
     }
 
     ///Sets a "udt" in a tuple at the specified index.
-    pub fn set_user_type(&mut self, index: u64, value: UserType) -> Result<(), CassError> {
-        unsafe { CassError::build(cass_tuple_set_user_type(self.0, index, value.0), None).wrap(()) }
+    pub fn set_user_type(&mut self, index: u64, value: &UserType) -> Result<(), CassError> {
+        unsafe { CassError::build(cass_tuple_set_user_type(self.0, index, user_type::protected::inner(value)), None).wrap(()) }
     }
 }
 

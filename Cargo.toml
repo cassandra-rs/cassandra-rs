@@ -20,6 +20,11 @@ cassandra-sys = "0.2"
 decimal = "0.2"
 chrono = "0.2"
 ip = "1.0"
+time = "0.1"
+clap = "1"
+
+[build-dependencies]
+rusty-cheddar = "0.3"
 
 [[bin]]
 name="async"

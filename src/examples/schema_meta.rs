@@ -80,7 +80,7 @@ fn print_meta_fields(iterator: FieldIterator, indent: i32) {
     for item in iterator {
         print_indent(indent);
         println!("{}: ", item.name);
-        print_schema_value(Value(item.value));
+        print_schema_value(item.value);
         println!("");
 
     }
@@ -136,9 +136,7 @@ fn cass() -> Result<(), CassError> {
     cluster.set_contact_points(try!(ContactPoints::from_str("127.0.0.1"))).unwrap();
     try!(cluster.set_load_balance_round_robin());
 
-    let session_future = Session::new().connect(&cluster).wait();
-
-    match session_future {
+    match cluster.connect() {
         Ok(session) => {
             try!(session.execute(CREATE_KEYSPACE, 0).wait());
             print_keyspace(&session, "examples");

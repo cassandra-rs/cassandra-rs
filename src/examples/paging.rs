@@ -69,7 +69,7 @@ fn main() {
     cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
     cluster.set_load_balance_round_robin().unwrap();
 
-    let mut session = Session::new().connect(&cluster).wait().unwrap();
+    let mut session = cluster.connect().unwrap();
 
     session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
     session.execute(CREATE_TABLE, 0).wait().unwrap();

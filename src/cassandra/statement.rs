@@ -1,6 +1,6 @@
 use std::ffi::CString;
 // use decimal::d128;
-
+use cassandra::batch;
 use cassandra::collection::Set;
 use cassandra::collection::Map;
 use cassandra::collection::List;
@@ -13,7 +13,14 @@ use cassandra::user_type::UserType;
 use cassandra::batch::CustomPayload;
 use cassandra::policy::retry::RetryPolicy;
 use cassandra::tuple::Tuple;
-
+use cassandra::tuple;
+use cassandra::inet;
+use cassandra::user_type;
+use cassandra::policy;
+use cassandra::result;
+use cassandra::collection;
+use cassandra::uuid;
+use cassandra::consistency;
 use cassandra_sys::CassStatement as _Statement;
 use cassandra_sys::cass_statement_new;
 use cassandra_sys::cass_statement_free;
@@ -64,8 +71,25 @@ use cassandra_sys::cass_statement_set_paging_state_token;
 use cassandra_sys::cass_statement_set_retry_policy;
 use cassandra_sys::cass_statement_set_timestamp;
 
-pub struct Statement(pub *mut _Statement);
+///A statement object is an executable query. It represents either a regular
+///(adhoc) statement or a prepared statement. It maintains the queries' parameter
+///values along with query options (consistency level, paging state, etc.)
+///
+///<b>Note:</b> Parameters for regular queries are not supported by the binary protocol
+///version 1.
+pub struct Statement(*mut _Statement);
 
+pub mod protected {
+	use cassandra::statement::Statement;
+	use cassandra_sys::CassStatement as _Statement;
+	pub fn build(statement:*mut _Statement) -> Statement {
+		Statement(statement)
+	}
+	
+	pub fn inner(statement:&Statement) -> *mut _Statement {
+		statement.0
+	}
+}
 impl Drop for Statement {
     ///Frees a statement instance. Statements can be immediately freed after
     ///being prepared, executed or added to a batch.
@@ -74,6 +98,8 @@ impl Drop for Statement {
     }
 }
 
+///All Rust types that can be bound to a cassandra statement
+///FIXME not yet implemented
 pub enum CassBindable {
 
 }
@@ -91,6 +117,8 @@ impl Statement {
         cass_statement_free(self.0)
     }
 
+    ///Binds an arbitrary CassBindable type to a cassandra statement
+    ///FIXME not yet implemented
     pub fn bind(&mut self, params: Vec<CassBindable>) {
         let _ = params;
         unimplemented!();
@@ -126,7 +154,11 @@ impl Statement {
     ///
     ///<b>Default:</b> CASS_CONSISTENCY_LOCAL_ONE
     pub fn set_consistency(&mut self, consistency: Consistency) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_statement_set_consistency(self.0, consistency.0), None).wrap(self) }
+        unsafe {
+            CassError::build(cass_statement_set_consistency(self.0, consistency::protected::inner(consistency)),
+                             None)
+                .wrap(self)
+        }
     }
 
     /// Sets the statement's serial consistency level.
@@ -134,7 +166,8 @@ impl Statement {
     ///<b>Default:</b> Not set
     pub fn set_serial_consistency(&mut self, serial_consistency: Consistency) -> Result<&mut Self, CassError> {
         unsafe {
-            CassError::build(cass_statement_set_serial_consistency(self.0, serial_consistency.0),
+            CassError::build(cass_statement_set_serial_consistency(self.0,
+                                                                   consistency::protected::inner(serial_consistency)),
                              None)
                 .wrap(self)
         }
@@ -151,7 +184,9 @@ impl Statement {
     ///data in a multi-page query.
     pub fn set_paging_state(&mut self, result: CassResult) -> Result<&mut Self, CassError> {
         unsafe {
-            try!(CassError::build(cass_statement_set_paging_state(self.0, result.0), None).wrap(()));
+            try!(CassError::build(cass_statement_set_paging_state(self.0, result::protected::inner(result)),
+                                  None)
+                     .wrap(()));
             Ok(self)
         }
     }
@@ -183,7 +218,7 @@ impl Statement {
     /// Sets the statement's retry policy.
     pub fn set_retry_policy(&mut self, retry_policy: RetryPolicy) -> Result<&Self, CassError> {
         unsafe {
-            CassError::build(cass_statement_set_retry_policy(self.0, retry_policy.0),
+            CassError::build(cass_statement_set_retry_policy(self.0, policy::retry::protected::inner(retry_policy)),
                              None)
                 .wrap(self)
         }
@@ -191,7 +226,11 @@ impl Statement {
 
     ///Sets the statement's custom payload.
     pub fn set_custom_payload(&mut self, payload: CustomPayload) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_statement_set_custom_payload(self.0, payload.0), None).wrap(self) }
+        unsafe {
+            CassError::build(cass_statement_set_custom_payload(self.0, batch::protected::inner_payload(&payload)),
+                             None)
+                .wrap(self)
+        }
     }
 
     ///Binds null to a query or bound statement at the specified index.
@@ -403,7 +442,7 @@ impl Statement {
 
     ///Binds a "uuid" or "timeuuid" to a query or bound statement at the specified index.
     pub fn bind_uuid(&mut self, index: u64, value: Uuid) -> Result<&mut Self, CassError> {
-        unsafe { CassError::build(cass_statement_bind_uuid(self.0, index, value.0), None).wrap(self) }
+        unsafe { CassError::build(cass_statement_bind_uuid(self.0, index, uuid::protected::inner(value.into())), None).wrap(self) }
     }
 
     ///Binds a "uuid" or "timeuuid" to all the values
@@ -414,7 +453,7 @@ impl Statement {
     pub fn bind_uuid_by_name(&mut self, name: &str, value: Uuid) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_uuid_by_name(self.0, name.as_ptr(), value.0),
+            CassError::build(cass_statement_bind_uuid_by_name(self.0, name.as_ptr(), uuid::protected::inner(value)),
                              None)
                 .wrap(self)
         }
@@ -422,14 +461,18 @@ impl Statement {
 
     ///Binds an "inet" to a query or bound statement at the specified index.
     pub fn bind_inet(&mut self, index: u64, value: Inet) -> Result<&mut Self, CassError> {
-        unsafe { CassError::build(cass_statement_bind_inet(self.0, index, value.0), None).wrap(self) }
+        unsafe {
+            CassError::build(cass_statement_bind_inet(self.0, index, inet::protected::inner(&value)),
+                             None)
+                .wrap(self)
+        }
     }
 
     ///Binds an "inet" to all the values with the specified name.
     pub fn bind_inet_by_name(&mut self, name: &str, value: Inet) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_inet_by_name(self.0, name.as_ptr(), value.0),
+            CassError::build(cass_statement_bind_inet_by_name(self.0, name.as_ptr(), inet::protected::inner(&value)),
                              None)
                 .wrap(self)
         }
@@ -473,9 +516,9 @@ impl Statement {
     //    }
 
     ///Bind a "map" to a query or bound statement at the specified index.
-    pub fn bind_map(&mut self, index: u64, collection: Map) -> Result<&mut Self, CassError> {
+    pub fn bind_map(&mut self, index: u64, map: Map) -> Result<&mut Self, CassError> {
         unsafe {
-            CassError::build(cass_statement_bind_collection(self.0, index, collection.0),
+            CassError::build(cass_statement_bind_collection(self.0, index, collection::protected::inner_map(map)),
                              None)
                 .wrap(self)
         }
@@ -486,10 +529,12 @@ impl Statement {
     ///
     ///This can only be used with statements created by
     ///cass_prepared_bind().
-    pub fn bind_map_by_name(&mut self, name: &str, collection: Map) -> Result<&mut Self, CassError> {
+    pub fn bind_map_by_name(&mut self, name: &str, map: Map) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_collection_by_name(self.0, name.as_ptr(), collection.0),
+            CassError::build(cass_statement_bind_collection_by_name(self.0,
+                                                                    name.as_ptr(),
+                                                                    collection::protected::inner_map(map)),
                              None)
                 .wrap(self)
         }
@@ -497,7 +542,9 @@ impl Statement {
     ///Bind a "set" to a query or bound statement at the specified index.
     pub fn bind_set(&mut self, index: u64, collection: Set) -> Result<&mut Self, CassError> {
         unsafe {
-            CassError::build(cass_statement_bind_collection(self.0, index, collection.0),
+            CassError::build(cass_statement_bind_collection(self.0,
+                                                            index,
+                                                            collection::protected::inner_set(collection)),
                              None)
                 .wrap(self)
         }
@@ -511,7 +558,9 @@ impl Statement {
     pub fn bind_set_by_name(&mut self, name: &str, collection: Set) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_collection_by_name(self.0, name.as_ptr(), collection.0),
+            CassError::build(cass_statement_bind_collection_by_name(self.0,
+                                                                    name.as_ptr(),
+                                                                    collection::protected::inner_set(collection)),
                              None)
                 .wrap(self)
         }
@@ -520,7 +569,9 @@ impl Statement {
     ///Bind a "list" to a query or bound statement at the specified index.
     pub fn bind_list(&mut self, index: u64, collection: List) -> Result<&mut Self, CassError> {
         unsafe {
-            CassError::build(cass_statement_bind_collection(self.0, index, collection.0),
+            CassError::build(cass_statement_bind_collection(self.0,
+                                                            index,
+                                                            collection::protected::inner_list(collection)),
                              None)
                 .wrap(self)
         }
@@ -534,7 +585,9 @@ impl Statement {
     pub fn bind_list_by_name(&mut self, name: &str, collection: List) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_collection_by_name(self.0, name.as_ptr(), collection.0),
+            CassError::build(cass_statement_bind_collection_by_name(self.0,
+                                                                    name.as_ptr(),
+                                                                    collection::protected::inner_list(collection)),
                              None)
                 .wrap(self)
         }
@@ -542,7 +595,7 @@ impl Statement {
 
     ///Bind a "tuple" to a query or bound statement at the specified index.
     pub fn bind_tuple(&mut self, index: u64, value: Tuple) -> Result<&mut Self, CassError> {
-        unsafe { CassError::build(cass_statement_bind_tuple(self.0, index, value.0), None).wrap(self) }
+        unsafe { CassError::build(cass_statement_bind_tuple(self.0, index, tuple::protected::inner(value)), None).wrap(self) }
     }
 
     ///Bind a "tuple" to all the values with the specified name.
@@ -552,7 +605,7 @@ impl Statement {
     pub fn bind_tuple_by_name(&mut self, name: &str, value: Tuple) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_tuple_by_name(self.0, name.as_ptr(), value.0),
+            CassError::build(cass_statement_bind_tuple_by_name(self.0, name.as_ptr(), tuple::protected::inner(value)),
                              None)
                 .wrap(self)
         }
@@ -560,16 +613,16 @@ impl Statement {
 
     ///Bind a user defined type to a query or bound statement at the
     ///specified index.
-    pub fn bind_user_type(&mut self, index: u64, value: UserType) -> Result<&mut Self, CassError> {
-        unsafe { CassError::build(cass_statement_bind_user_type(self.0, index, value.0), None).wrap(self) }
+    pub fn bind_user_type(&mut self, index: u64, value: &UserType) -> Result<&mut Self, CassError> {
+        unsafe { CassError::build(cass_statement_bind_user_type(self.0, index, user_type::protected::inner(value)), None).wrap(self) }
     }
 
     ///Bind a user defined type to a query or bound statement with the
     ///specified name.
-    pub fn bind_user_type_by_name(&mut self, name: &str, value: UserType) -> Result<&mut Self, CassError> {
+    pub fn bind_user_type_by_name(&mut self, name: &str, value: &UserType) -> Result<&mut Self, CassError> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_user_type_by_name(self.0, name.as_ptr(), value.0),
+            CassError::build(cass_statement_bind_user_type_by_name(self.0, name.as_ptr(), user_type::protected::inner(value)),
                              None)
                 .wrap(self)
         }

@@ -6,14 +6,24 @@ use cassandra_sys::cass_iterator_keyspaces_from_schema_meta;
 
 use cassandra::schema::keyspace_meta::KeyspaceMeta;
 use cassandra::iterator::KeyspaceIterator;
-
-pub struct SchemaMeta(pub *const _CassSchemaMeta);
+use cassandra::iterator;
+use cassandra::schema::keyspace_meta;
+///A snapshot of the schema's metadata
+pub struct SchemaMeta(*const _CassSchemaMeta);
 
 impl Drop for SchemaMeta {
     fn drop(&mut self) {
         unsafe {
             cass_schema_meta_free(self.0);
         }
+    }
+}
+
+pub mod protected {
+    use cassandra_sys::CassSchemaMeta as _CassSchemaMeta;
+    use cassandra::schema::schema_meta::SchemaMeta;
+    pub fn build(schema: *const _CassSchemaMeta) -> SchemaMeta {
+        SchemaMeta(schema)
     }
 }
 
@@ -25,10 +35,12 @@ impl SchemaMeta {
 
     ///Gets the keyspace metadata for the provided keyspace name.
     pub fn get_keyspace_by_name(&self, keyspace: &str) -> KeyspaceMeta {
-        unsafe { KeyspaceMeta(cass_schema_meta_keyspace_by_name(self.0, keyspace.as_ptr() as *const i8)) }
+        unsafe {
+            keyspace_meta::protected::build(cass_schema_meta_keyspace_by_name(self.0, keyspace.as_ptr() as *const i8))
+        }
     }
 
     pub fn keyspace_iter(&mut self) -> KeyspaceIterator {
-        unsafe { KeyspaceIterator(cass_iterator_keyspaces_from_schema_meta(self.0)) }
+        unsafe { iterator::protected::CassIterator::build(cass_iterator_keyspaces_from_schema_meta(self.0)) }
     }
 }

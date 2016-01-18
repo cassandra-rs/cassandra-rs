@@ -9,18 +9,30 @@ use cassandra::column::ColumnType;
 use cassandra::iterator::FieldIterator;
 use cassandra::data_type::ConstDataType;
 use cassandra::value::Value;
+use cassandra::iterator;
+use cassandra::value;
 
-pub struct ColumnMeta(pub *const _CassColumnMeta);
+///Column metadata
+pub struct ColumnMeta(*const _CassColumnMeta);
 
 use std::mem;
 use std::str;
 use std::slice;
 use std::ffi::CString;
 
+pub mod protected {
+    use cassandra_sys::CassColumnMeta as _CassColumnMeta;
+    use cassandra::schema::column_meta::ColumnMeta;
+    pub fn build(column: *const _CassColumnMeta) -> ColumnMeta {
+        ColumnMeta(column)
+    }
+}
+
+
 impl ColumnMeta {
     ///returns an iterator over the fields of this column
     pub fn field_iter(&mut self) -> FieldIterator {
-        unsafe { FieldIterator(cass_iterator_fields_from_column_meta(self.0)) }
+        unsafe { iterator::protected::CassIterator::build(cass_iterator_fields_from_column_meta(self.0)) }
     }
 
     ///Gets the name of the column.
@@ -49,7 +61,7 @@ impl ColumnMeta {
     pub fn field_by_name(&self, name: &str) -> Option<Value> {
         unsafe {
             let field = cass_column_meta_field_by_name(self.0, CString::new(name).unwrap().as_ptr());
-            if field.is_null() { None } else { Some(Value(field)) }
+            if field.is_null() { None } else { Some(value::protected::build(field)) }
         }
     }
 }

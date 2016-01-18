@@ -22,14 +22,19 @@ use cassandra_sys::cass_collection_data_type;
 use cassandra_sys::cass_collection_new;
 use cassandra_sys::cass_collection_free;
 use cassandra_sys::cass_collection_new_from_data_type;
+use cassandra::inet;
+use cassandra::user_type;
+use cassandra::data_type;
+use cassandra::tuple;
 
-use cassandra::iterator::CassIterator;
+use cassandra::iterator::protected::CassIterator;
 use cassandra::error::CassError;
 use cassandra::tuple::Tuple;
 use cassandra::user_type::UserType;
 use cassandra::data_type::DataType;
 use cassandra::data_type::ConstDataType;
 use cassandra::uuid::Uuid;
+use cassandra::uuid;
 use cassandra::inet::Inet;
 
 #[repr(C)]
@@ -40,9 +45,12 @@ pub enum CassCollectionType {
     SET = 34,
 }
 
+///A generic Cassandra collection that needs to go away
 pub trait CassCollection {
+    ///The type of value held by this collection
     type Value;
 
+    ///Access to the private ffi field
     fn inner(&self) -> *mut _CassCollection;
     ///Creates a new collection.
     fn new(item_count: u64) -> Self;
@@ -119,12 +127,16 @@ pub trait CassCollection {
 
     ///Appends a "uuid" or "timeuuid"  to the collection.
     fn append_uuid(&mut self, value: Uuid) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_collection_append_uuid(self.inner(), value.0), None).wrap(self) }
+        unsafe { CassError::build(cass_collection_append_uuid(self.inner(), uuid::protected::inner(value)), None).wrap(self) }
     }
 
     ///Appends an "inet" to the collection.
     fn append_inet(&mut self, value: Inet) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_collection_append_inet(self.inner(), value.0), None).wrap(self) }
+        unsafe {
+            CassError::build(cass_collection_append_inet(self.inner(), inet::protected::inner(&value)),
+                             None)
+                .wrap(self)
+        }
     }
 
     ///Appends a "list" to the collection.
@@ -156,13 +168,13 @@ pub trait CassCollection {
 
     ///Appends a "tuple" to the collection.
     fn append_tuple(&mut self, value: Tuple) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_collection_append_tuple(self.inner(), value.0), None).wrap(self) }
+        unsafe { CassError::build(cass_collection_append_tuple(self.inner(), tuple::protected::inner(value)), None).wrap(self) }
     }
 
     ///Appends a "udt" to the collection.
-    fn append_user_type(&mut self, value: UserType) -> Result<&Self, CassError> {
+    fn append_user_type(&mut self, value: &UserType) -> Result<&Self, CassError> {
         unsafe {
-            CassError::build(cass_collection_append_user_type(self.inner(), value.0),
+            CassError::build(cass_collection_append_user_type(self.inner(), user_type::protected::inner(value)),
                              None)
                 .wrap(self)
         }
@@ -170,7 +182,26 @@ pub trait CassCollection {
 }
 
 
-pub struct List(pub *mut _CassCollection);
+///A cassandra list collection
+pub struct List(*mut _CassCollection);
+
+pub mod protected {
+    use cassandra_sys::CassCollection as _CassCollection;
+    use cassandra::collection::{List, Map, Set};
+
+
+    pub fn inner_set(collection: Set) -> *mut _CassCollection {
+        collection.0
+    }
+
+    pub fn inner_list(collection: List) -> *mut _CassCollection {
+        collection.0
+    }
+
+    pub fn inner_map(collection: Map) -> *mut _CassCollection {
+        collection.0
+    }
+}
 
 
 impl Drop for List {
@@ -188,7 +219,7 @@ impl CassCollection for List {
     }
 
     fn new_from_data_type(value: DataType, item_count: u64) -> Self {
-        unsafe { List(cass_collection_new_from_data_type(value.0, item_count)) }
+        unsafe { List(cass_collection_new_from_data_type(data_type::protected::inner(value), item_count)) }
     }
 
     fn inner(&self) -> *mut _CassCollection {
@@ -196,7 +227,7 @@ impl CassCollection for List {
     }
 }
 
-pub struct Set(pub *mut _CassCollection);
+pub struct Set(*mut _CassCollection);
 
 impl Drop for Set {
     fn drop(&mut self) {
@@ -217,7 +248,7 @@ impl CassCollection for Set {
     }
 
     fn new_from_data_type(value: DataType, item_count: u64) -> Self {
-        unsafe { Set(cass_collection_new_from_data_type(value.0, item_count)) }
+        unsafe { Set(cass_collection_new_from_data_type(data_type::protected::inner(value), item_count)) }
     }
 
     ///Helper method only
@@ -227,7 +258,7 @@ impl CassCollection for Set {
 }
 
 
-pub struct Map(pub *mut _CassCollection);
+pub struct Map(*mut _CassCollection);
 
 impl Drop for Map {
     fn drop(&mut self) {
@@ -243,7 +274,7 @@ impl CassCollection for Map {
     }
 
     fn new_from_data_type(value: DataType, item_count: u64) -> Self {
-        unsafe { Map(cass_collection_new_from_data_type(value.0, item_count)) }
+        unsafe { Map(cass_collection_new_from_data_type(data_type::protected::inner(value), item_count)) }
     }
 
     fn inner(&self) -> *mut _CassCollection {

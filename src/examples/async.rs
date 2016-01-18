@@ -45,6 +45,6 @@ pub fn main() {
             }
             session.close().wait().unwrap();
         }
-        Err(err) => panic!("couldn't connect: {:?}", err)
+        Err(err) => panic!("couldn't connect: {:?}", err),
     }
 }

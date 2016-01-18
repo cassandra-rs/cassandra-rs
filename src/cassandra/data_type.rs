@@ -19,7 +19,7 @@ use cassandra_sys::cass_data_type_add_sub_value_type_by_name;
 use cassandra_sys::cass_data_type_free;
 use cassandra_sys::cass_user_type_new_from_data_type;
 use cassandra_sys::cass_data_type_new;
-
+use cassandra::user_type;
 use cassandra::value::ValueType;
 
 use cassandra::error::CassError;
@@ -31,8 +31,19 @@ use cassandra_sys::CassDataType as _CassDataType;
 use std::ffi::CString;
 
 
-pub struct DataType(pub *mut _CassDataType);
+pub struct DataType(*mut _CassDataType);
 pub struct ConstDataType(pub *const _CassDataType);
+
+pub mod protected {
+    use cassandra::data_type::DataType;
+    use cassandra_sys::CassDataType as _CassDataType;
+    pub fn inner(data_type: DataType) -> *mut _CassDataType {
+        data_type.0
+    }
+    pub fn inner_const(data_type: DataType) -> *const _CassDataType {
+        data_type.0
+    }
+}
 
 impl Drop for DataType {
     ///Frees a data type instance.
@@ -51,7 +62,7 @@ impl DataType {
 
     ///Creates a new data type from an existing data type.
     pub fn new_user_type(&self) -> UserType {
-        unsafe { UserType(cass_user_type_new_from_data_type(self.0)) }
+        unsafe { user_type::protected::build(cass_user_type_new_from_data_type(self.0)) }
     }
 
 
@@ -72,7 +83,7 @@ impl DataType {
 
     ///Gets the value type of the specified data type.
     pub fn get_type(data_type: DataType) -> ValueType {
-        unsafe { ValueType::build(cass_data_type_type(data_type.0)) }
+        unsafe { ValueType::build(cass_data_type_type(data_type.0)).unwrap() }
     }
 
     ///Gets the type name of a UDT data type.

@@ -1,34 +1,42 @@
 use cassandra::statement::Statement;
 
 use cassandra_sys::CassPrepared as _PreparedStatement;
-use cassandra_sys::cass_prepared_free;
+// use cassandra_sys::cass_prepared_free;
 use cassandra_sys::cass_prepared_bind;
 use cassandra_sys::cass_prepared_parameter_name;
 use cassandra_sys::cass_prepared_parameter_data_type;
 use cassandra_sys::cass_prepared_parameter_data_type_by_name;
 use cassandra::data_type::ConstDataType;
-
+use cassandra::statement;
 use std::{mem, slice, str};
 use std::ffi::CString;
 
 /// A statement that has been prepared against at least one Cassandra node.
 /// Instances of this class should not be created directly, but through Session.prepare().
-pub struct PreparedStatement(pub *const _PreparedStatement);
+pub struct PreparedStatement(*const _PreparedStatement);
 
 unsafe impl Sync for PreparedStatement {}
 unsafe impl Send for PreparedStatement {}
 
-impl Drop for PreparedStatement {
-    ///Frees a prepared instance.
-    fn drop(&mut self) {
-        unsafe { cass_prepared_free(self.0) }
+pub mod protected {
+    use cassandra::prepared::PreparedStatement;
+    use cassandra_sys::CassPrepared as _PreparedStatement;
+    pub fn build(prepared: *const _PreparedStatement) -> PreparedStatement {
+        PreparedStatement(prepared)
     }
 }
+
+// impl Drop for PreparedStatement {
+//    ///Frees a prepared instance.
+//    fn drop(&mut self) {
+//        unsafe { cass_prepared_free(self.0) }
+//    }
+// }
 
 impl PreparedStatement {
     ///Creates a bound statement from a pre-prepared statement.
     pub fn bind(&self) -> Statement {
-        unsafe { Statement(cass_prepared_bind(self.0)) }
+        unsafe { statement::protected::build(cass_prepared_bind(self.0)) }
     }
 
     ///Gets the name of a parameter at the specified index.

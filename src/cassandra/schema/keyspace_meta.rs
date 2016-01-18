@@ -14,6 +14,7 @@ use cassandra_sys::cass_iterator_fields_from_keyspace_meta;
 use cassandra_sys::cass_iterator_functions_from_keyspace_meta;
 use cassandra_sys::cass_iterator_user_types_from_keyspace_meta;
 
+use cassandra::schema::function_meta;
 use cassandra::schema::function_meta::FunctionMeta;
 use cassandra::schema::table_meta::TableMeta;
 use cassandra::data_type::ConstDataType;
@@ -22,29 +23,43 @@ use cassandra::iterator::FieldIterator;
 use cassandra::iterator::AggregateIterator;
 use cassandra::iterator::FunctionIterator;
 use cassandra::iterator::UserTypeIterator;
+use cassandra::iterator;
 use std::mem;
+use cassandra::schema::table_meta;
 use std::ffi::CString;
+use cassandra::schema::aggregate_meta;
 
 use cassandra_sys::CassKeyspaceMeta as _CassKeyspaceMeta;
 
-pub struct KeyspaceMeta(pub *const _CassKeyspaceMeta);
+///A snapshot of the schema's metadata.
+pub struct KeyspaceMeta(*const _CassKeyspaceMeta);
+
+pub mod protected {
+    use cassandra::schema::keyspace_meta::KeyspaceMeta;
+    use cassandra_sys::CassKeyspaceMeta as _CassKeyspaceMeta;
+    pub fn build(keyspace_meta: *const _CassKeyspaceMeta) -> KeyspaceMeta {
+        KeyspaceMeta(keyspace_meta)
+    }
+}
 
 pub struct MetadataFieldValue(*const _CassValue);
 
 impl KeyspaceMeta {
-    pub fn aggregrates_iterator(&self) -> AggregateIterator {
-        unsafe { AggregateIterator(cass_iterator_aggregates_from_keyspace_meta(self.0)) }
+    ///Iterator over the aggregates in this keyspace
+    pub fn aggregrates_iter(&self) -> AggregateIterator {
+        unsafe { iterator::protected::CassIterator::build(cass_iterator_aggregates_from_keyspace_meta(self.0)) }
     }
 
+    ///Iterator over the field in this keyspace
     pub fn fields_iter(&self) -> FieldIterator {
-        unsafe { FieldIterator(cass_iterator_fields_from_keyspace_meta(self.0)) }
+        unsafe { iterator::protected::CassIterator::build(cass_iterator_fields_from_keyspace_meta(self.0)) }
     }
 
     ///Gets the table metadata for the provided table name.
     pub fn table_by_name(&self, name: &str) -> Option<TableMeta> {
         unsafe {
             let value = cass_keyspace_meta_table_by_name(self.0, CString::new(name).unwrap().as_ptr());
-            if value.is_null() { None } else { Some(TableMeta(value)) }
+            if value.is_null() { None } else { Some(table_meta::protected::build(value)) }
         }
     }
 
@@ -64,7 +79,7 @@ impl KeyspaceMeta {
                                                             CString::new(arguments.join(","))
                                                                 .unwrap()
                                                                 .as_ptr());
-            if value.is_null() { None } else { Some(FunctionMeta(value)) }
+            if value.is_null() { None } else { Some(function_meta::protected::build(value)) }
         }
     }
 
@@ -76,20 +91,23 @@ impl KeyspaceMeta {
                                                            CString::new(arguments.join(","))
                                                                .unwrap()
                                                                .as_ptr());
-            if agg.is_null() { None } else { Some(AggregateMeta(agg)) }
+            if agg.is_null() { None } else { Some(aggregate_meta::protected::build((agg))) }
         }
     }
 
+    ///Iterator over the tables in this keyspaces
     pub fn table_iter(&mut self) -> TableIterator {
-        unsafe { TableIterator(cass_iterator_tables_from_keyspace_meta(self.0)) }
+        unsafe { iterator::protected::build_table_iterator(cass_iterator_tables_from_keyspace_meta(self.0)) }
     }
 
+    ///Iterator over the functions in this keyspaces
     pub fn function_iter(&mut self) -> FunctionIterator {
-        unsafe { FunctionIterator(cass_iterator_functions_from_keyspace_meta(self.0)) }
+        unsafe { iterator::protected::CassIterator::build(cass_iterator_functions_from_keyspace_meta(self.0)) }
     }
 
+    ///Iterator over the UDTs in this keyspaces
     pub fn user_type_iter(&mut self) -> UserTypeIterator {
-        unsafe { UserTypeIterator(cass_iterator_user_types_from_keyspace_meta(self.0)) }
+        unsafe { iterator::protected::CassIterator::build(cass_iterator_user_types_from_keyspace_meta(self.0)) }
     }
 
     /// Gets the name of the keyspace.

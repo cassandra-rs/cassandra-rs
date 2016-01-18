@@ -1,45 +1,50 @@
+//! This is a wrapper around the DataStax C++ driver for Cassandra. It aims to be 100% safe with minimal overhead added
+
+#![warn(missing_docs)]
+
 extern crate libc;
 #[macro_use]
 extern crate log;
 extern crate decimal;
 extern crate chrono;
+extern crate time;
 extern crate ip;
 
-pub use cassandra::consistency::*;
-pub use cassandra::inet::*;
-pub use cassandra::uuid::*;
-pub use cassandra::cluster::*;
-pub use cassandra::session::*;
-pub use cassandra::statement::*;
-pub use cassandra::batch::*;
-pub use cassandra::future::*;
-pub use cassandra::prepared::*;
-pub use cassandra::result::*;
-pub use cassandra::row::*;
-pub use cassandra::value::*;
-pub use cassandra::collection::*;
-pub use cassandra::ssl::*;
-pub use cassandra::schema::keyspace_meta::*;
-pub use cassandra::schema::column_meta::*;
-pub use cassandra::schema::schema_meta::*;
-pub use cassandra::schema::table_meta::*;
-pub use cassandra::schema::function_meta::*;
-pub use cassandra::schema::aggregate_meta::*;
-pub use cassandra::error::*;
-pub use cassandra::helpers::*;
-pub use cassandra::log::*;
-pub use cassandra::column::*;
-pub use cassandra::tuple::*;
-pub use cassandra::user_type::*;
-pub use cassandra::data_type::*;
-pub use cassandra::policy::retry::*;
-pub use cassandra::custom_payload::*;
-pub use cassandra::time::*;
-pub use cassandra::util::*;
-pub use cassandra::metrics::*;
-pub use cassandra::iterator::*;
-pub use cassandra::write_type::*;
-pub use cassandra::field::*;
+pub use cassandra::consistency::Consistency;
+// pub use cassandra::inet::{Inet};
+pub use cassandra::uuid::{Uuid, UuidGen};
+pub use cassandra::cluster::{Cluster, ContactPoints, CqlProtocol};
+pub use cassandra::session::Session;
+pub use cassandra::statement::Statement;
+pub use cassandra::batch::{Batch, BatchType, CustomPayload};
+pub use cassandra::future::{CloseFuture, Future, FutureCallback, PreparedFuture, ResultFuture, SessionFuture};
+pub use cassandra::prepared::PreparedStatement;
+pub use cassandra::result::CassResult;
+pub use cassandra::row::Row;
+pub use cassandra::value::{Value, ValueType}; //FIXME this should not be exported
+pub use cassandra::collection::{CassCollection, List, Map, Set};
+pub use cassandra::ssl::Ssl;
+pub use cassandra::schema::keyspace_meta::KeyspaceMeta;
+pub use cassandra::schema::column_meta::ColumnMeta;
+pub use cassandra::schema::schema_meta::SchemaMeta;
+pub use cassandra::schema::table_meta::TableMeta;
+pub use cassandra::schema::function_meta::FunctionMeta;
+pub use cassandra::schema::aggregate_meta::AggregateMeta;
+pub use cassandra::error::{CassError, CassErrorResult};
+pub use cassandra::log::LogLevel;
+pub use cassandra::column::Column;
+pub use cassandra::tuple::Tuple;
+pub use cassandra::user_type::UserType;
+pub use cassandra::data_type::DataType;
+pub use cassandra::policy::retry::RetryPolicy;
+// pub use cassandra::custom_payload::CustomPayload;
+pub use cassandra::time::TimestampGen;
+// pub use cassandra::util::*;
+// pub use cassandra::metrics::*;
+pub use cassandra::iterator::{AggregateIterator, ColumnIterator, FieldIterator, FunctionIterator, KeyspaceIterator,
+                              MapIterator, SetIterator, TableIterator, UserTypeIterator};
+// pub use cassandra::write_type::*;
+pub use cassandra::field::Field;
 
 extern crate cassandra_sys;
 

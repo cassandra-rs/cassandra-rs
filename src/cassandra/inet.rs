@@ -2,9 +2,9 @@ use std::str::FromStr;
 use std::string::ToString;
 use std::mem;
 use std::ffi::CString;
-use std::ffi::NulError;
+// use std::ffi::NulError;
 use std::ffi::CStr;
-
+use std::net::{Ipv4Addr, Ipv6Addr};
 use cassandra_sys::CassInet as _Inet;
 use cassandra_sys::cass_inet_init_v4;
 use cassandra_sys::cass_inet_init_v6;
@@ -12,15 +12,22 @@ use cassandra_sys::cass_inet_string;
 use cassandra_sys::cass_inet_from_string;
 use cassandra_sys::CASS_OK;
 use std::net::SocketAddr;
-use std::net::Ipv4Addr;
-use std::net::Ipv6Addr;
 use std::default::Default;
 
 use cassandra::error::CassError;
-use cassandra::error::CassLibError;
+// use cassandra::error::CassLibError;
 
 #[repr(C)]
-pub struct Inet(pub _Inet);
+///Cassandra's version of an IP address
+pub struct Inet(_Inet);
+
+pub mod protected {
+    use cassandra::inet::Inet;
+    use cassandra_sys::CassInet as _Inet;
+    pub fn inner(inet: &Inet) -> _Inet {
+        inet.0
+    }
+}
 
 impl Default for Inet {
     fn default() -> Inet {
@@ -28,7 +35,9 @@ impl Default for Inet {
     }
 }
 
+///Lets various things get converted to a Inet
 pub trait AsInet {
+    ///Converts to a Cassandra Inet
     fn as_cass_inet(&self) -> Inet;
 }
 
@@ -49,10 +58,13 @@ impl AsInet for SocketAddr {
     }
 }
 
-pub enum InetParseError {
-    NulInString(NulError),
-    LibBadParams(CassLibError),
-}
+///The types of errors that can occur when trying to parse an Inet String
+// pub enum InetParseError {
+//    ///Don't put a null in a string, silly!
+//    NulInString(NulError),
+//    ///Not a valiid address
+//    LibBadParams(CassLibError),
+// }
 
 impl FromStr for Inet {
     type Err = CassError;
@@ -80,7 +92,9 @@ impl ToString for Inet {
     }
 }
 
+///Converts from an Cassandra Inet address
 pub trait FromInet {
+    ///Converts from an Cassandra Inet address
     fn from_cass_inet(inet: Inet) -> Self;
 }
 
@@ -116,11 +130,13 @@ impl FromInet for Ipv6Addr {
 }
 
 impl Inet {
-    pub fn cass_inet_init_v4(address: *const u8) -> Inet {
-        unsafe { Inet(cass_inet_init_v4(address)) }
+    ///Constructs an inet v4 object.
+    pub fn cass_inet_init_v4(address: Ipv4Addr) -> Inet {
+        unsafe { Inet(cass_inet_init_v4(address.octets().as_ptr())) }
     }
 
-    pub fn cass_inet_init_v6(address: *const u8) -> Inet {
-        unsafe { Inet(cass_inet_init_v6(address)) }
+    ///Constructs an inet v6 object.
+    pub fn cass_inet_init_v6(address: Ipv6Addr) -> Inet {
+        unsafe { Inet(cass_inet_init_v6(address.segments().as_ptr() as *const u8)) }
     }
 }

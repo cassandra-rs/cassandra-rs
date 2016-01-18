@@ -40,7 +40,7 @@ fn main() {
 
     let mut cluster = Cluster::new();
     cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
-    let session = &mut Session::new().connect(&cluster).wait().unwrap();
+    let session = &mut cluster.connect().unwrap();
 
     let items = vec!["apple".to_string(), "orange".to_string(), "banana".to_string(), "mango".to_string()];
     session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
