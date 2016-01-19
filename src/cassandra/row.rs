@@ -7,7 +7,8 @@ use cassandra_sys::cass_row_get_column;
 use cassandra_sys::cass_row_get_column_by_name;
 use cassandra_sys::cass_iterator_from_row;
 use cassandra_sys::CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS;
-
+use cassandra::util::Protected;
+use cassandra::value::Value;
 use std::fmt::Debug;
 use std::fmt::Display;
 use std::fmt::Formatter;
@@ -23,11 +24,12 @@ use cassandra::column;
 ///A collection of column values.
 pub struct Row(*const _Row);
 
-pub mod protected {
-    use cassandra::row::Row;
-    use cassandra_sys::CassRow as _Row;
-    pub fn build(row: *const _Row) -> Row {
-        Row(row)
+impl Protected<*const _Row> for Row {
+    fn inner(&self) -> *const _Row {
+        self.0
+    }
+    fn build(inner: *const _Row) -> Self {
+        Row(inner)
     }
 }
 
@@ -37,7 +39,7 @@ impl Debug for Row {
         for column in self {
             try!(write!(f,
                         "{:?}\t",
-                        value::protected::build(column::protected::inner(&column))));
+                        Value::build(column.inner())));
         }
         Ok(())
     }
@@ -48,7 +50,7 @@ impl Display for Row {
         for column in self {
             try!(write!(f,
                         "{}\t",
-                        value::protected::build(column::protected::inner(&column))));
+                        Value::build(column.inner())));
         }
         Ok(())
     }
@@ -62,7 +64,7 @@ impl Row {
             if col.is_null() {
                 Err(CassError::build(CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS, None))
             } else {
-                Ok(column::protected::build(col))
+                Ok(Column::build(col))
             }
         }
     }
@@ -75,7 +77,7 @@ impl Row {
             println!("name: {:?}", name);
             println!("self: {:?}", self);
             // unimplemented!();
-            column::protected::build(cass_row_get_column_by_name(self.0, name.as_ptr()))
+            Column::build(cass_row_get_column_by_name(self.0, name.as_ptr()))
         }
     }
 }
@@ -97,7 +99,7 @@ impl iter::Iterator for RowIterator {
         unsafe {
             match cass_iterator_next(self.0) {
                 0 => None,
-                _ => Some(column::protected::build(cass_iterator_get_column(self.0))),
+                _ => Some(Column::build(cass_iterator_get_column(self.0))),
             }
         }
     }
@@ -110,7 +112,7 @@ impl<'a> Iterator for &'a RowIterator {
         unsafe {
             match cass_iterator_next(self.0) {
                 0 => None,
-                _ => Some(column::protected::build(cass_iterator_get_column(self.0))),
+                _ => Some(Column::build(cass_iterator_get_column(self.0))),
             }
         }
     }
@@ -121,7 +123,7 @@ impl Display for RowIterator {
         for item in self {
             try!(write!(f,
                         "{}\t",
-                        value::protected::build(column::protected::inner(&item))));
+                        Value::build(item.inner())));
         }
         Ok(())
     }

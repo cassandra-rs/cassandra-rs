@@ -69,6 +69,7 @@ use cassandra::consistency::Consistency;
 use cassandra::write_type::WriteType;
 use cassandra_sys::CassError as _CassError;
 use cassandra::consistency;
+use cassandra::util::Protected;
 
 use cassandra_sys::CassErrorResult as _CassErrorResult;
 
@@ -448,11 +449,12 @@ impl CassError {
 ///An error result of a request
 pub struct CassErrorResult(*const _CassErrorResult);
 
-pub mod protected {
-    use cassandra::error::CassErrorResult;
-    use cassandra_sys::CassErrorResult as _CassErrorResult;
-    pub fn build(error_result: *const _CassErrorResult) -> CassErrorResult {
-        CassErrorResult(error_result)
+impl Protected<*const _CassErrorResult> for CassErrorResult {
+    fn inner(&self) -> *const _CassErrorResult {
+        self.0
+    }
+    fn build(inner: *const _CassErrorResult) -> Self {
+        CassErrorResult(inner)
     }
 }
 
@@ -474,7 +476,7 @@ impl CassErrorResult {
     ///  <li>CASS_ERROR_SERVER_UNAVAILABLE</li>
     /// </ul>
     pub fn result_consistency(&self) -> Consistency {
-        unsafe { consistency::protected::build(cass_error_result_consistency(self.0)) }
+        unsafe { Consistency::build(cass_error_result_consistency(self.0)) }
     }
 
     /// Gets the actual number of received responses, received acknowledgments

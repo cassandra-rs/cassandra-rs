@@ -13,6 +13,7 @@ use cassandra_sys::cass_inet_from_string;
 use cassandra_sys::CASS_OK;
 use std::net::SocketAddr;
 use std::default::Default;
+use cassandra::util::Protected;
 
 use cassandra::error::CassError;
 // use cassandra::error::CassLibError;
@@ -21,11 +22,12 @@ use cassandra::error::CassError;
 ///Cassandra's version of an IP address
 pub struct Inet(_Inet);
 
-pub mod protected {
-    use cassandra::inet::Inet;
-    use cassandra_sys::CassInet as _Inet;
-    pub fn inner(inet: &Inet) -> _Inet {
-        inet.0
+impl Protected<_Inet> for Inet {
+    fn inner(&self) -> _Inet {
+        self.0
+    }
+    fn build(inner: _Inet) -> Self {
+        Inet(inner)
     }
 }
 

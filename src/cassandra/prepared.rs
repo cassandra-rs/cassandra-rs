@@ -10,6 +10,7 @@ use cassandra::data_type::ConstDataType;
 use cassandra::statement;
 use std::{mem, slice, str};
 use std::ffi::CString;
+use cassandra::util::Protected;
 
 /// A statement that has been prepared against at least one Cassandra node.
 /// Instances of this class should not be created directly, but through Session.prepare().
@@ -18,25 +19,19 @@ pub struct PreparedStatement(*const _PreparedStatement);
 unsafe impl Sync for PreparedStatement {}
 unsafe impl Send for PreparedStatement {}
 
-pub mod protected {
-    use cassandra::prepared::PreparedStatement;
-    use cassandra_sys::CassPrepared as _PreparedStatement;
-    pub fn build(prepared: *const _PreparedStatement) -> PreparedStatement {
-        PreparedStatement(prepared)
+impl Protected<*const _PreparedStatement> for PreparedStatement {
+    fn inner(&self) -> *const _PreparedStatement {
+        self.0
+    }
+    fn build(inner: *const _PreparedStatement) -> Self {
+        PreparedStatement(inner)
     }
 }
-
-// impl Drop for PreparedStatement {
-//    ///Frees a prepared instance.
-//    fn drop(&mut self) {
-//        unsafe { cass_prepared_free(self.0) }
-//    }
-// }
 
 impl PreparedStatement {
     ///Creates a bound statement from a pre-prepared statement.
     pub fn bind(&self) -> Statement {
-        unsafe { statement::protected::build(cass_prepared_bind(self.0)) }
+        unsafe { Statement::build(cass_prepared_bind(self.0)) }
     }
 
     ///Gets the name of a parameter at the specified index.

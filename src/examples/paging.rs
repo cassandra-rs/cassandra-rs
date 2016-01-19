@@ -69,15 +69,17 @@ fn main() {
     cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
     cluster.set_load_balance_round_robin().unwrap();
 
-    let mut session = cluster.connect().unwrap();
-
-    session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
-    session.execute(CREATE_TABLE, 0).wait().unwrap();
-    session.execute("USE examples", 0).wait().unwrap();
-    let results = insert_into_paging(&mut session /* , uuid_gen */).unwrap();
-    for result in results {
-        print!("{:?}", result.unwrap().wait().unwrap());
+    match cluster.connect() {
+        Ok(ref mut session) => {
+            session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
+            session.execute(CREATE_TABLE, 0).wait().unwrap();
+            session.execute("USE examples", 0).wait().unwrap();
+            let results = insert_into_paging(session /* , uuid_gen */).unwrap();
+            for result in results {
+                print!("{:?}", result.unwrap().wait().unwrap());
+            }
+            select_from_paging(session).unwrap();
+        }
+        err => println!("{:?}", err),
     }
-    select_from_paging(&mut session).unwrap();
-    session.close().wait().unwrap();
 }

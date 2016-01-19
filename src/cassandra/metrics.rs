@@ -1,12 +1,16 @@
 use cassandra_sys::CassMetrics as _CassMetrics;
+use cassandra::util::Protected;
 
 ///A view into server metrics FIXME not meaingfully implemented
 pub struct SessionMetrics(*const _CassMetrics);
 
-pub mod protected {
-    use cassandra::metrics::SessionMetrics;
-    use cassandra_sys::CassMetrics as _CassMetrics;
-    pub fn build_session_metrics(metrics: *const _CassMetrics) -> SessionMetrics {
-        SessionMetrics(metrics)
+
+impl Protected<*const _CassMetrics> for SessionMetrics {
+    fn inner(&self) -> *const _CassMetrics {
+        self.0
+    }
+    fn build(inner: *const _CassMetrics) -> Self {
+        SessionMetrics(inner)
     }
 }
+

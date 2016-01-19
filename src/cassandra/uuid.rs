@@ -3,7 +3,7 @@ use std::fmt;
 use std::fmt::Display;
 use std::fmt::Debug;
 use std::mem;
-use std::ffi::CString;
+use std::ffi::{CStr, CString};
 use std::str;
 
 
@@ -20,7 +20,9 @@ use cassandra_sys::cass_uuid_min_from_time;
 use cassandra_sys::cass_uuid_max_from_time;
 use cassandra_sys::cass_uuid_timestamp;
 use cassandra_sys::cass_uuid_version;
-// use cassandra_sys::cass_uuid_string;
+use cassandra::util::Protected;
+
+use cassandra_sys::cass_uuid_string;
 // use cassandra_sys::raw2utf8;
 use cassandra_sys::cass_uuid_from_string;
 
@@ -33,7 +35,16 @@ use cassandra::error::CassError;
 ///Version 1 (time-based) or version 4 (random) UUID.
 pub struct Uuid(_Uuid);
 
-impl ::std::default::Default for Uuid {
+impl Protected<_Uuid> for Uuid {
+    fn inner(&self) -> _Uuid {
+        self.0
+    }
+    fn build(inner: _Uuid) -> Self {
+        Uuid(inner)
+    }
+}
+
+impl Default for Uuid {
     fn default() -> Uuid {
         unsafe { ::std::mem::zeroed() }
     }
@@ -46,28 +57,27 @@ pub struct UuidGen(*mut _UuidGen);
 unsafe impl Sync for UuidGen {}
 unsafe impl Send for UuidGen {}
 
-pub mod protected {
-	use cassandra::uuid::Uuid;
-	use cassandra_sys::CassUuid as _Uuid;
-	pub fn inner(uuid:Uuid) -> _Uuid {
-		uuid.0
-	}
-}
 impl Drop for UuidGen {
     fn drop(&mut self) {
         unsafe { cass_uuid_gen_free(self.0) }
     }
 }
 
-impl Debug for Uuid {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "{:?}", self.to_string())
-    }
-}
+// impl Debug for Uuid {
+//    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+//        write!(f, "{:?}", self.to_string())
+//    }
+// }
 
+// FIXME!!!!!!!
 impl Display for Uuid {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "{}", self.to_string())
+        unsafe {
+            let mut string = mem::zeroed();
+            cass_uuid_string(self.0, &mut string);
+            let slice = CStr::from_ptr(&string);
+            write!(f, "{}", str::from_utf8(slice.to_bytes()).unwrap())
+        }
     }
 }
 
@@ -106,19 +116,6 @@ impl str::FromStr for Uuid {
     }
 }
 
-// 	impl string::ToString for Uuid {
-//    pub fn to_string(&self) -> String {
-//        unsafe {
-//            let mut time_str: [i8; CASS_UUID_STRING_LENGTH] = [0; CASS_UUID_STRING_LENGTH];
-//
-//            cass_uuid_string(self.0, time_str[..].as_mut_ptr());
-//            let mut output: i8 = mem::zeroed();
-//            cass_uuid_string(self.0, &mut output);
-//            let slice = CStr::from_ptr(&output);
-//            str::from_utf8(slice.to_bytes()).unwrap().to_owned()
-//        }
-//    }
-// 	}
 
 impl UuidGen {
     ///Creates a new thread-safe UUID generator

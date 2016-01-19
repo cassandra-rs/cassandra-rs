@@ -32,6 +32,8 @@ use cassandra::schema::{column_meta, table_meta};
 use cassandra_sys::cass_iterator_get_aggregate_meta;
 use cassandra::schema::function_meta;
 use cassandra::schema::aggregate_meta;
+use cassandra::util::Protected;
+
 ///Iterates over the  aggregate metadata entries(??)
 pub struct AggregateIterator(*mut _CassIterator);
 
@@ -49,7 +51,7 @@ impl Iterator for AggregateIterator {
                 0 => None,
                 _ => {
                     let field_value = cass_iterator_get_aggregate_meta(self.0);
-                    Some(aggregate_meta::protected::build(field_value))
+                    Some(AggregateMeta::build(field_value))
                 }
             }
         }
@@ -94,7 +96,7 @@ impl Iterator for FunctionIterator {
         unsafe {
             match cass_iterator_next(self.0) {
                 0 => None,
-                _ => Some(function_meta::protected::build(cass_iterator_get_function_meta(self.0))),
+                _ => Some(FunctionMeta::build(cass_iterator_get_function_meta(self.0))),
             }
         }
     }
@@ -110,7 +112,7 @@ impl Iterator for TableIterator {
         unsafe {
             match cass_iterator_next(self.0) {
                 0 => None,
-                _ => Some(table_meta::protected::build(cass_iterator_get_table_meta(self.0))),
+                _ => Some(TableMeta::build(cass_iterator_get_table_meta(self.0))),
             }
         }
     }
@@ -125,7 +127,7 @@ impl Iterator for KeyspaceIterator {
         unsafe {
             match cass_iterator_next(self.0) {
                 0 => None,
-                _ => Some(keyspace_meta::protected::build(cass_iterator_get_keyspace_meta(self.0))),
+                _ => Some(KeyspaceMeta::build(cass_iterator_get_keyspace_meta(self.0))),
             }
         }
     }
@@ -140,7 +142,7 @@ impl Iterator for ColumnIterator {
         unsafe {
             match cass_iterator_next(self.0) {
                 0 => None,
-                _ => Some(column_meta::protected::build(cass_iterator_get_column_meta(self.0))),
+                _ => Some(ColumnMeta::build(cass_iterator_get_column_meta(self.0))),
             }
         }
     }
@@ -165,7 +167,7 @@ impl Iterator for FieldIterator {
                             let value = cass_iterator_get_meta_field_value(self.0);
                             Some(Field {
                                 name: name.to_owned(),
-                                value: value::protected::build(value),
+                                value: Value::build(value),
                             })
                         }
                         err => panic!("FIXME: no error handling. Err {}", err),
@@ -183,100 +185,96 @@ impl Iterator for FieldIterator {
 //    pub fn new(_type: _CassIteratorType) -> Self { CassIteratorType(_type) }
 // }
 
-/// Module used to grant access to private fields
-pub mod protected {
-    use cassandra::value;
-    ///A generic cassandra iterator
-    use cassandra_sys::CassIterator as _CassIterator;
-    use cassandra::value::Value;
-    use cassandra::iterator::KeyspaceIterator;
-    use cassandra::iterator::TableIterator;
-    use cassandra::iterator::FieldIterator;
-    use cassandra::iterator::UserTypeIterator;
-    use cassandra::iterator::ColumnIterator;
-    use cassandra_sys::cass_iterator_get_value;
-    use cassandra::iterator::FunctionIterator;
+//impl Protected<*mut _Batch> for CassIterator {
+//    fn inner(&self) -> *mut _CassIterator {
+//        self.0
+//    }
+//    fn build(inner: *mut _CassIterator) -> Self {
+//        CassIterator(inner)
+//    }
+//}
 
-    ///A Generic Cassandra Iterator that shouldn't be exposed to users
-    pub trait CassIterator {
-        fn build(iterator: *mut _CassIterator) -> Self;
-
-
-        ///Get the ffi iterator
-        fn inner(&self) -> *mut _CassIterator;
-
-        ///Gets the value at the current position
-        fn get_value(&mut self) -> Value {
-            unsafe { value::protected::build(cass_iterator_get_value(self.inner())) }
-        }
+impl Protected<*mut _CassIterator> for UserTypeIterator {
+    fn inner(&self) -> *mut _CassIterator {
+        self.0
     }
-
-    impl CassIterator for UserTypeIterator {
-        fn build(iterator: *mut _CassIterator) -> Self {
-            UserTypeIterator(iterator)
-        }
-
-        fn inner(&self) -> *mut _CassIterator {
-            self.0
-        }
-    }
-
-    impl CassIterator for FunctionIterator {
-        fn build(iterator: *mut _CassIterator) -> Self {
-            FunctionIterator(iterator)
-        }
-
-        fn inner(&self) -> *mut _CassIterator {
-            self.0
-        }
-    }
-
-    impl CassIterator for KeyspaceIterator {
-        fn build(iterator: *mut _CassIterator) -> Self {
-            KeyspaceIterator(iterator)
-        }
-
-        fn inner(&self) -> *mut _CassIterator {
-            self.0
-        }
-    }
-
-    impl CassIterator for FieldIterator {
-        fn build(iterator: *mut _CassIterator) -> Self {
-            FieldIterator(iterator)
-        }
-
-        fn inner(&self) -> *mut _CassIterator {
-            self.0
-        }
-    }
-
-    impl CassIterator for ColumnIterator {
-        fn build(iterator: *mut _CassIterator) -> Self {
-            ColumnIterator(iterator)
-        }
-
-        fn inner(&self) -> *mut _CassIterator {
-            self.0
-        }
-    }
-
-    pub fn build_table_iterator(iterator: *mut _CassIterator) -> TableIterator {
-        TableIterator(iterator)
+    fn build(inner: *mut _CassIterator) -> Self {
+        UserTypeIterator(inner)
     }
 }
-// impl Iterator for CassIterator {
-//    type Item = Value;
-//
-//    fn next(&mut self) -> Option<<Self as Iterator>::Item> {
-//        unsafe {
-//            match cass_iterator_next(self.inner()) {
-//                0 => None,
-//                _ => Some(self.get_value()),
-//            }
-//        }
-//    }
-// }
+
+impl Protected<*mut _CassIterator> for AggregateIterator {
+    fn inner(&self) -> *mut _CassIterator {
+        self.0
+    }
+    fn build(inner: *mut _CassIterator) -> Self {
+        AggregateIterator(inner)
+    }
+}
+
+impl Protected<*mut _CassIterator> for FunctionIterator {
+    fn inner(&self) -> *mut _CassIterator {
+        self.0
+    }
+    fn build(inner: *mut _CassIterator) -> Self {
+        FunctionIterator(inner)
+    }
+}
+
+impl Protected<*mut _CassIterator> for KeyspaceIterator {
+    fn inner(&self) -> *mut _CassIterator {
+        self.0
+    }
+    fn build(inner: *mut _CassIterator) -> Self {
+        KeyspaceIterator(inner)
+    }
+}
+
+impl Protected<*mut _CassIterator> for FieldIterator {
+    fn inner(&self) -> *mut _CassIterator {
+        self.0
+    }
+    fn build(inner: *mut _CassIterator) -> Self {
+        FieldIterator(inner)
+    }
+}
+
+impl Protected<*mut _CassIterator> for ColumnIterator {
+    fn inner(&self) -> *mut _CassIterator {
+        self.0
+    }
+    fn build(inner: *mut _CassIterator) -> Self {
+        ColumnIterator(inner)
+    }
+}
+
+impl Protected<*mut _CassIterator> for TableIterator {
+    fn inner(&self) -> *mut _CassIterator {
+        self.0
+    }
+    fn build(inner: *mut _CassIterator) -> Self {
+        TableIterator(inner)
+    }
+}
+
+impl Protected<*mut _CassIterator> for MapIterator {
+    fn inner(&self) -> *mut _CassIterator {
+        self.0
+    }
+    fn build(inner: *mut _CassIterator) -> Self {
+        MapIterator(inner)
+    }
+}
+
+impl Protected<*mut _CassIterator> for SetIterator {
+    fn inner(&self) -> *mut _CassIterator {
+        self.0
+    }
+    fn build(inner: *mut _CassIterator) -> Self {
+        SetIterator(inner)
+    }
+}
+
 
 ///Iterater over the set's metadata entries(??)
 pub struct SetIterator(*mut _CassIterator);
@@ -296,36 +294,6 @@ impl Drop for SetIterator {
     }
 }
 
-impl protected::CassIterator for SetIterator {
-    fn inner(&self) -> *mut _CassIterator {
-        self.0
-    }
-
-    fn build(iterator: *mut _CassIterator) -> Self {
-        SetIterator(iterator)
-    }
-}
-
-impl protected::CassIterator for AggregateIterator {
-    fn inner(&self) -> *mut _CassIterator {
-        self.0
-    }
-
-    fn build(iterator: *mut _CassIterator) -> Self {
-        AggregateIterator(iterator)
-    }
-}
-
-
-impl protected::CassIterator for MapIterator {
-    fn inner(&self) -> *mut _CassIterator {
-        self.0
-    }
-
-    fn build(iterator: *mut _CassIterator) -> Self {
-        MapIterator(iterator)
-    }
-}
 
 impl Iterator for SetIterator {
     type Item = Value;
@@ -343,7 +311,7 @@ impl Iterator for SetIterator {
 use cassandra::value;
 impl SetIterator {
     fn get_value(&mut self) -> Value {
-        unsafe { value::protected::build(cass_iterator_get_value(self.0)) }
+        unsafe { Value::build(cass_iterator_get_value(self.0)) }
     }
 }
 
@@ -352,10 +320,10 @@ pub struct MapIterator(*mut _CassIterator);
 
 impl MapIterator {
     fn get_key(&mut self) -> Value {
-        unsafe { value::protected::build(cass_iterator_get_map_key(self.0)) }
+        unsafe { Value::build(cass_iterator_get_map_key(self.0)) }
     }
     fn get_value(&mut self) -> Value {
-        unsafe { value::protected::build(cass_iterator_get_map_value(self.0)) }
+        unsafe { Value::build(cass_iterator_get_map_value(self.0)) }
     }
 
     ///Gets the next k/v pair in the map
@@ -387,7 +355,7 @@ impl Iterator for TupleIterator {
 
 impl TupleIterator {
     fn get_value(&mut self) -> Value {
-        unsafe { value::protected::build(cass_iterator_get_value(self.0)) }
+        unsafe { Value::build(cass_iterator_get_value(self.0)) }
     }
 }
 

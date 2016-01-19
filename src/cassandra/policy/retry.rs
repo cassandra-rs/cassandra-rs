@@ -3,17 +3,18 @@ use cassandra_sys::cass_retry_policy_downgrading_consistency_new;
 use cassandra_sys::cass_retry_policy_fallthrough_new;
 use cassandra_sys::cass_retry_policy_logging_new;
 use cassandra_sys::cass_retry_policy_free;
-
+use cassandra::util::Protected;
 use cassandra_sys::CassRetryPolicy as _RetryPolicy;
 
 ///The selected retry policy
 pub struct RetryPolicy(*mut _RetryPolicy);
 
-pub mod protected {
-    use cassandra::policy::retry::RetryPolicy;
-    use cassandra_sys::CassRetryPolicy as _RetryPolicy;
-    pub fn inner(policy: RetryPolicy) -> *mut _RetryPolicy {
-        policy.0
+impl Protected<*mut _RetryPolicy> for RetryPolicy {
+    fn inner(&self) -> *mut _RetryPolicy {
+        self.0
+    }
+    fn build(inner: *mut _RetryPolicy) -> Self {
+        RetryPolicy(inner)
     }
 }
 

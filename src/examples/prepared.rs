@@ -67,40 +67,41 @@ fn main() {
     let mut cluster = Cluster::new();
     cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
     cluster.set_protocol_version(CqlProtocol::THREE).unwrap();
-    println!("Proto set");
-    let mut session = cluster.connect().unwrap();
 
-    println!("Connected");
-    let mut input = Basic {
-        bln: true,
-        flt: 0.001f32,
-        dbl: 0.0002f64,
-        i32: 1,
-        i64: 2,
-    };
-    let mut output = Basic {
-        bln: false,
-        flt: 0f32,
-        dbl: 0f64,
-        i32: 0,
-        i64: 0,
-    };
-    println!("Executing create keyspace");
-    session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
-    println!("Creating table");
-    session.execute(CREATE_TABLE, 0).wait().unwrap();
+    match cluster.connect() {
+        Ok(ref mut session) => {
 
-    println!("Basic insertions");
-    insert_into_basic(&mut session, "prepared_test", &mut input).unwrap();
-    println!("Preparing");
-    match session.prepare(SELECT_QUERY).unwrap().wait() {
-        Ok(prepared) => {
-            select_from_basic(&mut session, &prepared, "prepared_test", &mut output).unwrap();
-            println!("input: {:?}\nouput: {:?}", input, output);
-            assert_eq!(input, output);
+            let mut input = Basic {
+                bln: true,
+                flt: 0.001f32,
+                dbl: 0.0002f64,
+                i32: 1,
+                i64: 2,
+            };
+            let mut output = Basic {
+                bln: false,
+                flt: 0f32,
+                dbl: 0f64,
+                i32: 0,
+                i64: 0,
+            };
+            println!("Executing create keyspace");
+            session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
+            println!("Creating table");
+            session.execute(CREATE_TABLE, 0).wait().unwrap();
+
+            println!("Basic insertions");
+            insert_into_basic(session, "prepared_test", &mut input).unwrap();
+            println!("Preparing");
+            match session.prepare(SELECT_QUERY).unwrap().wait() {
+                Ok(prepared) => {
+                    select_from_basic(session, &prepared, "prepared_test", &mut output).unwrap();
+                    println!("input: {:?}\nouput: {:?}", input, output);
+                    assert_eq!(input, output);
+                }
+                Err(err) => panic!(err),
+            }
         }
-        Err(err) => panic!(err),
+        err => println!("{:?}", err),
     }
-    let close_future = session.close();
-    close_future.wait().unwrap();
 }

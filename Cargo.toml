@@ -22,7 +22,7 @@ chrono = "0.2"
 ip = "1.0"
 time = "0.1"
 clap = "1"
-
+uuid = "0.1"
 [build-dependencies]
 rusty-cheddar = "0.3"
 

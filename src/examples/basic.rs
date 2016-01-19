@@ -59,25 +59,25 @@ fn main() {
         i64: 2,
     };
 
+    let contact_points = ContactPoints::from_str("127.0.0.1").unwrap();
+
     let mut cluster = Cluster::new();
-    cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
+    cluster.set_contact_points(contact_points).unwrap();
     cluster.set_load_balance_round_robin().unwrap();
 
     match cluster.connect() {
-        Ok(mut session) => {
+        Ok(ref mut session) => {
             session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
             session.execute(CREATE_TABLE, 0).wait().unwrap();
 
-            insert_into_basic(&mut session, "test", &input).unwrap();
-            let output = select_from_basic(&mut session, "test").unwrap();
+            insert_into_basic(session, "test", &input).unwrap();
+            let output = select_from_basic(session, "test").unwrap();
 
             println!("{:?}", input);
             println!("{:?}", output);
 
             assert!(input == output);
-
-            session.close().wait().unwrap();
         }
-        _ => {}
+        err => println!("{:?}", err),
     }
 }

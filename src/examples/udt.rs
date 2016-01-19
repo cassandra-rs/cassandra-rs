@@ -7,8 +7,9 @@ fn main() {
     let mut cluster = Cluster::new();
     cluster.set_contact_points("127.0.0.1").unwrap();
 
-    let session = Session::new().connect(&cluster).wait().unwrap();
-    let schema = session.get_schema();
+    match cluster.connect() {
+        Ok(ref mut session) => {
+		    let schema = session.get_schema();
     session.execute(
         "CREATE KEYSPACE examples WITH replication = \
         { 'class': 'SimpleStrategy', 'replication_factor': '3' }",
@@ -34,6 +35,9 @@ fn main() {
     insert_into_udt(&session, schema).unwrap();
     select_from_udt(&session).unwrap();
     session.close().wait().unwrap();
+}
+        err => println!("{:?}", err),
+    }
 }
 
 fn select_from_udt(session: &Session) -> Result<(), CassandraError> {

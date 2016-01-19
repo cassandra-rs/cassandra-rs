@@ -27,6 +27,8 @@ use cassandra::error::CassErrorResult;
 use cassandra::error;
 use cassandra::result;
 use cassandra::prepared;
+use cassandra::util::Protected;
+
 use cassandra::session;
 use libc::c_void;
 
@@ -75,13 +77,13 @@ impl Future {
     /// Gets the result of a successful future. If the future is not ready this method will
     ///wait for the future to be set.
     pub fn get_result(&self) -> CassResult {
-        unsafe { result::protected::build((cass_future_get_result(self.0))) }
+        unsafe { CassResult::build((cass_future_get_result(self.0))) }
     }
 
     /// Gets the error result from a future that failed as a result of a server error. If the
     ///future is not ready this method will wait for the future to be set.
     pub fn get_error_result(&self) -> CassErrorResult {
-        unsafe { error::protected::build(cass_future_get_error_result(self.0)) }
+        unsafe { CassErrorResult::build(cass_future_get_error_result(self.0)) }
     }
 
     ///Gets the error code from future. If the future is not ready this method will
@@ -186,7 +188,7 @@ impl ResultFuture {
     pub fn get(&mut self) -> Option<CassResult> {
         unsafe {
             let result = cass_future_get_result(self.0);
-            if result.is_null() { None } else { Some((result::protected::build(result))) }
+            if result.is_null() { None } else { Some((CassResult::build(result))) }
         }
     }
 }
@@ -225,21 +227,19 @@ impl PreparedFuture {
     ///Gets the error message from future. If the future is not ready this method will
     ///wait for the future to be set.
     pub fn get(&mut self) -> PreparedStatement {
-        unsafe { prepared::protected::build(cass_future_get_prepared(self.0)) }
+        unsafe { PreparedStatement::build(cass_future_get_prepared(self.0)) }
     }
 }
 
 ///The future result of an attempt to create a new Cassandra session
 ///It can be waited on, polled or a callback
 ///can be attached.
-pub struct SessionFuture(*mut _Future, *mut _Session);
+pub struct SessionFuture(*mut _Future);
 
 impl SessionFuture {
     ///blocks until the session connects or errors out
-    pub fn wait(&mut self) -> Result<Session, CassError> {
+    pub fn wait(&mut self) -> Result<(),CassError> {
         unsafe {
-        	let result = self.get();
-        	//println!("myresult = {:?}", result);
             cass_future_wait(self.0);
             self.error_code()
         }
@@ -247,10 +247,10 @@ impl SessionFuture {
 
     ///Gets the error code from future. If the future is not ready this method will
     ///wait for the future to be set.
-    pub fn error_code(&self) -> Result<Session, CassError> {
+    pub fn error_code(&self) -> Result<(), CassError> {
         unsafe {
             match self.get() {
-                Some(result) => CassError::build(cass_future_error_code(self.0), None).wrap(result),
+                Some(result) => CassError::build(cass_future_error_code(self.0), None).wrap(()),
                 None => panic!("FIXME"),
             }
         }
@@ -259,11 +259,11 @@ impl SessionFuture {
     ///Gets the result of a successful future. If the future is not ready this method will
     ///wait for the future to be set.
     ///a None response indicates that there was an error
-    pub fn get(&self) -> Option<Session> {
+    pub fn get(&self) -> Option<CassResult> {
         unsafe {
             let result = cass_future_get_result(self.0);
-            println!("result is null: {}",result.is_null());
-            if result.is_null() { None } else { Some((session::protected::build(&mut*self.1))) }
+            println!("result is null: {}", result.is_null());
+            if result.is_null() { None } else { Some(CassResult::build(result)) }
         }
     }
 }
@@ -275,34 +275,51 @@ impl SessionFuture {
 ///can be attached.
 pub struct CloseFuture(*mut _Future);
 
-pub mod protected {
-    use cassandra::future::SessionFuture;
-    use cassandra::future::ResultFuture;
-    use cassandra::future::CloseFuture;
-    use cassandra::future::Future;
-    use cassandra::future::PreparedFuture;
-    use cassandra_sys::CassFuture as _Future;
-    use cassandra_sys::CassSession as _Session;
-    pub fn build_close(future: *mut _Future) -> CloseFuture {
-        CloseFuture(future)
+impl Protected<*mut _Future> for Future {
+    fn inner(&self) -> *mut _Future {
+        self.0
     }
-
-    pub fn build_future(future: *mut _Future) -> Future {
-        Future(future)
-    }
-
-    pub fn build_prepared_future(future: *mut _Future) -> PreparedFuture {
-        PreparedFuture(future)
-    }
-
-    pub fn build_result_future(future: *mut _Future) -> ResultFuture {
-        ResultFuture(future)
-    }
-
-    pub fn build_session_future(future: *mut _Future, session: *mut _Session) -> SessionFuture {
-        SessionFuture(future, session)
+    fn build(inner: *mut _Future) -> Self {
+        Future(inner)
     }
 }
+
+impl Protected<*mut _Future> for PreparedFuture {
+    fn inner(&self) -> *mut _Future {
+        self.0
+    }
+    fn build(inner: *mut _Future) -> Self {
+        PreparedFuture(inner)
+    }
+}
+
+impl Protected<*mut _Future> for ResultFuture {
+    fn inner(&self) -> *mut _Future {
+        self.0
+    }
+    fn build(inner: *mut _Future) -> Self {
+        ResultFuture(inner)
+    }
+}
+
+impl Protected<*mut _Future> for SessionFuture {
+    fn inner(&self) -> *mut _Future {
+        self.0
+    }
+    fn build(inner: *mut _Future) -> Self {
+        SessionFuture(inner)
+    }
+}
+
+impl Protected<*mut _Future> for CloseFuture {
+    fn inner(&self) -> *mut _Future {
+        self.0
+    }
+    fn build(inner: *mut _Future) -> Self {
+        CloseFuture(inner)
+    }
+}
+
 
 impl Drop for CloseFuture {
     fn drop(&mut self) {
@@ -331,6 +348,6 @@ impl CloseFuture {
     ///Gets the error message from future. If the future is not ready this method will
     ///wait for the future to be set.
     pub fn get(&self) -> PreparedStatement {
-        unsafe { prepared::protected::build(cass_future_get_prepared(self.0)) }
+        unsafe { PreparedStatement::build(cass_future_get_prepared(self.0)) }
     }
 }

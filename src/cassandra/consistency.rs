@@ -3,6 +3,9 @@ use cassandra_sys::CassConsistency as _CassConsistency;
 use std::ffi::CStr;
 
 use cassandra_sys::cass_consistency_string;
+use cassandra::util::Protected;
+
+
 
 ///A Cassandra consistency level
 pub struct Consistency(_CassConsistency);
@@ -16,13 +19,11 @@ impl ToString for Consistency {
     }
 }
 
-pub mod protected {
-    use cassandra::consistency::Consistency;
-    use cassandra_sys::CassConsistency as _CassConsistency;
-    pub fn build(consistency: _CassConsistency) -> Consistency {
-        Consistency(consistency)
+impl Protected<_CassConsistency> for Consistency {
+    fn inner(&self) -> _CassConsistency {
+        self.0
     }
-    pub fn inner(consistency: Consistency) -> _CassConsistency {
-        consistency.0
+    fn build(inner: _CassConsistency) -> Self {
+        Consistency(inner)
     }
 }

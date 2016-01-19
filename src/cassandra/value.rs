@@ -35,7 +35,7 @@ use cassandra_sys::cass_value_get_int32;
 use cassandra_sys::cass_iterator_from_collection;
 use cassandra_sys::cass_iterator_from_map;
 use cassandra_sys::cass_value_data_type;
-
+use cassandra::util::Protected;
 
 use cassandra_sys::CASS_VALUE_TYPE_UNKNOWN;
 use cassandra_sys::CASS_VALUE_TYPE_CUSTOM;
@@ -62,7 +62,6 @@ use cassandra_sys::CASS_VALUE_TYPE_UDT;
 use cassandra_sys::CASS_VALUE_TYPE_TUPLE;
 use cassandra_sys::CASS_VALUE_TYPE_LAST_ENTRY;
 
-use cassandra::inet::protected::inner as inet_protected;
 use cassandra::data_type::ConstDataType;
 use cassandra::iterator;
 
@@ -71,16 +70,13 @@ use std::mem;
 ///A single primitive value or a collection of values.
 pub struct Value(*const _CassValue);
 
-pub mod protected {
-	use cassandra::value::Value;
-	use cassandra_sys::CassValue as _Value;
-	pub fn build(value:*const _Value) -> Value {
-		Value(value)
-	}
-	
-	pub fn inner(value:&Value) -> *const _Value {
-		value.0
-	}
+impl Protected<*const _CassValue> for Value {
+    fn inner(&self) -> *const _CassValue {
+        self.0
+    }
+    fn build(inner: *const _CassValue) -> Self {
+        Value(inner)
+    }
 }
 
 #[derive(Debug)]
@@ -160,7 +156,7 @@ impl Debug for Value {
                 ValueType::DOUBLE => write!(f, "{:?}", self.get_dbl().unwrap()),
                 ValueType::FLOAT => write!(f, "{:?}", self.get_flt().unwrap()),
                 ValueType::INT => write!(f, "{:?}", self.get_i32().unwrap()),
-                ValueType::TIMEUUID => write!(f, "TIMEUUID: {:?}", self.get_uuid().unwrap()),
+                ValueType::TIMEUUID => write!(f, "TIMEUUID: {}", self.get_uuid().unwrap()),
                 ValueType::SET => {
                     try!(write!(f, "["));
                     for item in self.get_set().unwrap() {
@@ -316,7 +312,7 @@ impl Value {
     pub fn get_set(&self) -> Result<SetIterator, CassError> {
         unsafe {
             match self.get_type() {
-                ValueType::SET => Ok(iterator::protected::CassIterator::build(cass_iterator_from_collection(self.0))),
+                ValueType::SET => Ok(SetIterator::build(cass_iterator_from_collection(self.0))),
                 _ => Err(CassError::build(CassErrorTypes::LIB_INVALID_VALUE_TYPE as u32, None)),
             }
         }
@@ -326,7 +322,7 @@ impl Value {
     pub fn get_map(&self) -> Result<MapIterator, CassError> {
         unsafe {
             match self.get_type() {
-                ValueType::MAP => Ok(iterator::protected::CassIterator::build(cass_iterator_from_map(self.0))),
+                ValueType::MAP => Ok(MapIterator::build(cass_iterator_from_map(self.0))),
                 _ => Err(CassError::build(CassErrorTypes::LIB_INVALID_VALUE_TYPE as u32, None)),
             }
         }
@@ -389,7 +385,7 @@ impl Value {
     pub fn get_inet(&self) -> Result<Inet, CassError> {
         unsafe {
             let output: Inet = mem::zeroed();
-            CassError::build(cass_value_get_inet(self.0, &mut inet_protected(&output)),
+            CassError::build(cass_value_get_inet(self.0, &mut Inet::inner(&output)),
                              None)
                 .wrap(output)
         }
@@ -439,7 +435,9 @@ impl Value {
     pub fn get_uuid(&self) -> Result<Uuid, CassError> {
         unsafe {
             let mut output: Uuid = mem::zeroed();
-            CassError::build(cass_value_get_uuid(self.0, &mut uuid::protected::inner(output)), None).wrap(output)
+            CassError::build(cass_value_get_uuid(self.0, &mut output.inner()),
+                             None)
+                .wrap(output)
         }
     }
 }

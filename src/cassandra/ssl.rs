@@ -8,23 +8,26 @@ use cassandra_sys::cass_ssl_add_trusted_cert;
 use cassandra_sys::cass_ssl_set_verify_flags;
 use cassandra_sys::cass_ssl_set_cert;
 use cassandra_sys::cass_ssl_set_private_key;
+use cassandra::util::Protected;
 
 ///Describes the SSL configuration of a cluster.
 pub struct Ssl(*mut _Ssl);
+
+impl Protected<*mut _Ssl> for Ssl {
+    fn inner(&self) -> *mut _Ssl {
+        self.0
+    }
+    fn build(inner: *mut _Ssl) -> Self {
+        Ssl(inner)
+    }
+}
+
 
 impl Drop for Ssl {
     ///Frees a SSL context instance.
     fn drop(&mut self) {
         unsafe { cass_ssl_free(self.0) }
     }
-}
-
-pub mod protected {
-	use cassandra::ssl::Ssl;
-	use cassandra_sys::CassSsl as _Ssl;
-	pub fn inner(ssl:&mut Ssl) -> *mut _Ssl {
-		ssl.0
-	}
 }
 
 impl Ssl {

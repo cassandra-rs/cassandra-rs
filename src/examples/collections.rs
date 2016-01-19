@@ -10,7 +10,7 @@ static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples W
 static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.collections (key text, items set<text>, \
                                      PRIMARY KEY (key))";
 
-fn insert_into_collections(session: &mut Session, key: &str, items: Vec<String>) -> Result<CassResult, CassError> {
+fn insert_into_collections(session: &mut Session, key: &str, items: Vec<&str>) -> Result<CassResult, CassError> {
     let mut statement = Statement::new(INSERT_QUERY, 2);
     try!(statement.bind_string(0, key));
     let mut set = Set::new(2);
@@ -37,14 +37,18 @@ fn select_from_collections(session: &mut Session, key: &str) -> Result<(), CassE
 }
 
 fn main() {
-
+    let items = vec!["apple", "orange", "banana", "mango"];
+    let contact_points = ContactPoints::from_str("127.0.0.1").unwrap();
     let mut cluster = Cluster::new();
-    cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
-    let session = &mut cluster.connect().unwrap();
+    cluster.set_contact_points(contact_points).unwrap();
 
-    let items = vec!["apple".to_string(), "orange".to_string(), "banana".to_string(), "mango".to_string()];
-    session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
-    session.execute(CREATE_TABLE, 0).wait().unwrap();
-    insert_into_collections(session, "test", items).unwrap();
-    select_from_collections(session, "test").unwrap();
+    match cluster.connect() {
+        Ok(ref mut session) => {
+            session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
+            session.execute(CREATE_TABLE, 0).wait().unwrap();
+            insert_into_collections(session, "test", items).unwrap();
+            select_from_collections(session, "test").unwrap();
+        }
+        err => println!("{:?}", err),
+    }
 }

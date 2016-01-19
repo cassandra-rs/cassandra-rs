@@ -26,28 +26,32 @@ use cassandra_sys::cass_custom_payload_set;
 use cassandra::consistency;
 pub use cassandra_sys::CassBatch as _Batch;
 use cassandra::statement;
+use cassandra::util::Protected;
 
 ///A group of statements that are executed as a single batch.
 ///<b>Note:</b> Batches are not supported by the binary protocol version 1.
 pub struct Batch(*mut _Batch);
 
-pub mod protected {
-    use cassandra::batch::Batch;
-    use cassandra_sys::CassBatch as _Batch;
-    use cassandra::batch::CustomPayload;
-    use cassandra_sys::CassCustomPayload as _CassCustomPayload;
-    pub fn inner(batch: &Batch) -> *mut _Batch {
-        batch.0
+impl Protected<*mut _Batch> for Batch {
+    fn inner(&self) -> *mut _Batch {
+        self.0
     }
-
-    pub fn inner_payload(payload: &CustomPayload) -> *mut _CassCustomPayload {
-        payload.0
+    fn build(inner: *mut _Batch) -> Self {
+        Batch(inner)
     }
 }
 
 ///Custom payloads not fully supported yet
 pub struct CustomPayload(*mut _CassCustomPayload);
 
+impl Protected<*mut _CassCustomPayload> for CustomPayload {
+    fn inner(&self) -> *mut _CassCustomPayload {
+        self.0
+    }
+    fn build(inner: *mut _CassCustomPayload) -> Self {
+        CustomPayload(inner)
+    }
+}
 impl CustomPayload {
     ///creates a new custom payload
     pub fn new() -> Self {
@@ -110,7 +114,7 @@ impl Batch {
     ///<b>Default:</b> Not set
     pub fn set_serial_consistency(&mut self, consistency: Consistency) -> Result<&Self, CassError> {
         unsafe {
-            match cass_batch_set_serial_consistency(self.0, consistency::protected::inner(consistency)) {
+            match cass_batch_set_serial_consistency(self.0, consistency.inner()) {
                 0 => Ok(self),
                 err => Err(err),
             }
@@ -130,7 +134,7 @@ impl Batch {
     ///Sets the batch's retry policy.
     pub fn set_retry_policy(&mut self, retry_policy: RetryPolicy) -> Result<&Self, CassError> {
         unsafe {
-            match cass_batch_set_retry_policy(self.0, policy::retry::protected::inner(retry_policy)) {
+            match cass_batch_set_retry_policy(self.0, retry_policy.inner()) {
                 0 => Ok(self),
                 err => Err(err),
             }
@@ -150,7 +154,7 @@ impl Batch {
     ///Adds a statement to a batch.
     pub fn add_statement(&mut self, statement: &Statement) -> Result<&Self, CassError> {
         unsafe {
-            match cass_batch_add_statement(self.0, statement::protected::inner(statement)) {
+            match cass_batch_add_statement(self.0, statement.inner()) {
                 0 => Ok(self),
                 err => Err(err),
             }

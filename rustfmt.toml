@@ -27,3 +27,4 @@ single_line_if_else = true
 format_strings = true
 density = "Compressed"
 rewrite_if_else = false
+fn_empty_single_line = true

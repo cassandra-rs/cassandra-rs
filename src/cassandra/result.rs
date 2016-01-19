@@ -33,6 +33,7 @@ use cassandra_sys::cass_result_has_more_pages;
 use cassandra_sys::cass_iterator_from_result;
 use cassandra_sys::cass_result_column_data_type;
 use cassandra_sys::cass_result_paging_state_token;
+use cassandra::util::Protected;
 
 ///The result of a query.
 ///A result object is read-only and is thread-safe to read or iterate over
@@ -41,15 +42,12 @@ pub struct CassResult(*const _CassResult);
 unsafe impl Sync for CassResult {}
 unsafe impl Send for CassResult {}
 
-pub mod protected {
-    use cassandra::result::CassResult;
-    use cassandra_sys::CassResult as _CassResult;
-    pub fn build(result: *const _CassResult) -> CassResult {
-        CassResult(result)
+impl Protected<*const _CassResult> for CassResult {
+    fn inner(&self) -> *const _CassResult {
+        self.0
     }
-
-    pub fn inner(result: CassResult) -> *const _CassResult {
-        result.0
+    fn build(inner: *const _CassResult) -> Self {
+        CassResult(inner)
     }
 }
 
@@ -120,7 +118,7 @@ impl CassResult {
         unsafe {
             match self.row_count() {
                 0 => None,
-                _ => Some(row::protected::build(cass_result_first_row(self.0))),
+                _ => Some(Row::build(cass_result_first_row(self.0))),
             }
         }
     }
@@ -180,7 +178,7 @@ impl Iterator for ResultIterator {
 impl ResultIterator {
     ///Gets the next row in the result set
     pub fn get_row(&mut self) -> Row {
-        unsafe { row::protected::build(cass_iterator_get_row(self.0)) }
+        unsafe { Row::build(cass_iterator_get_row(self.0)) }
     }
 }
 

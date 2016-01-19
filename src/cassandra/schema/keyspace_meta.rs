@@ -1,6 +1,7 @@
 use cassandra::schema::aggregate_meta::AggregateMeta;
 use cassandra_sys::raw2utf8;
 use cassandra_sys::CassValue as _CassValue;
+use cassandra::util::Protected;
 
 use cassandra_sys::cass_iterator_tables_from_keyspace_meta;
 use cassandra_sys::cass_keyspace_meta_aggregate_by_name;
@@ -34,11 +35,12 @@ use cassandra_sys::CassKeyspaceMeta as _CassKeyspaceMeta;
 ///A snapshot of the schema's metadata.
 pub struct KeyspaceMeta(*const _CassKeyspaceMeta);
 
-pub mod protected {
-    use cassandra::schema::keyspace_meta::KeyspaceMeta;
-    use cassandra_sys::CassKeyspaceMeta as _CassKeyspaceMeta;
-    pub fn build(keyspace_meta: *const _CassKeyspaceMeta) -> KeyspaceMeta {
-        KeyspaceMeta(keyspace_meta)
+impl Protected<*const _CassKeyspaceMeta> for KeyspaceMeta {
+    fn inner(&self) -> *const _CassKeyspaceMeta {
+        self.0
+    }
+    fn build(inner: *const _CassKeyspaceMeta) -> Self {
+        KeyspaceMeta(inner)
     }
 }
 
@@ -47,19 +49,19 @@ pub struct MetadataFieldValue(*const _CassValue);
 impl KeyspaceMeta {
     ///Iterator over the aggregates in this keyspace
     pub fn aggregrates_iter(&self) -> AggregateIterator {
-        unsafe { iterator::protected::CassIterator::build(cass_iterator_aggregates_from_keyspace_meta(self.0)) }
+        unsafe { AggregateIterator::build(cass_iterator_aggregates_from_keyspace_meta(self.0)) }
     }
 
     ///Iterator over the field in this keyspace
     pub fn fields_iter(&self) -> FieldIterator {
-        unsafe { iterator::protected::CassIterator::build(cass_iterator_fields_from_keyspace_meta(self.0)) }
+        unsafe { FieldIterator::build(cass_iterator_fields_from_keyspace_meta(self.0)) }
     }
 
     ///Gets the table metadata for the provided table name.
     pub fn table_by_name(&self, name: &str) -> Option<TableMeta> {
         unsafe {
             let value = cass_keyspace_meta_table_by_name(self.0, CString::new(name).unwrap().as_ptr());
-            if value.is_null() { None } else { Some(table_meta::protected::build(value)) }
+            if value.is_null() { None } else { Some(TableMeta::build(value)) }
         }
     }
 
@@ -79,7 +81,7 @@ impl KeyspaceMeta {
                                                             CString::new(arguments.join(","))
                                                                 .unwrap()
                                                                 .as_ptr());
-            if value.is_null() { None } else { Some(function_meta::protected::build(value)) }
+            if value.is_null() { None } else { Some(FunctionMeta::build(value)) }
         }
     }
 
@@ -91,23 +93,23 @@ impl KeyspaceMeta {
                                                            CString::new(arguments.join(","))
                                                                .unwrap()
                                                                .as_ptr());
-            if agg.is_null() { None } else { Some(aggregate_meta::protected::build((agg))) }
+            if agg.is_null() { None } else { Some(AggregateMeta::build((agg))) }
         }
     }
 
     ///Iterator over the tables in this keyspaces
     pub fn table_iter(&mut self) -> TableIterator {
-        unsafe { iterator::protected::build_table_iterator(cass_iterator_tables_from_keyspace_meta(self.0)) }
+        unsafe { TableIterator::build(cass_iterator_tables_from_keyspace_meta(self.0)) }
     }
 
     ///Iterator over the functions in this keyspaces
     pub fn function_iter(&mut self) -> FunctionIterator {
-        unsafe { iterator::protected::CassIterator::build(cass_iterator_functions_from_keyspace_meta(self.0)) }
+        unsafe { FunctionIterator::build(cass_iterator_functions_from_keyspace_meta(self.0)) }
     }
 
     ///Iterator over the UDTs in this keyspaces
     pub fn user_type_iter(&mut self) -> UserTypeIterator {
-        unsafe { iterator::protected::CassIterator::build(cass_iterator_user_types_from_keyspace_meta(self.0)) }
+        unsafe { UserTypeIterator::build(cass_iterator_user_types_from_keyspace_meta(self.0)) }
     }
 
     /// Gets the name of the keyspace.

@@ -50,12 +50,11 @@ use cassandra_sys::cass_session_new;
 use cassandra_sys::cass_session_connect;
 use cassandra::time;
 use cassandra::policy;
-use cassandra::ssl;
 use cassandra::error::CassError;
 use cassandra::time::TimestampGen;
 use cassandra::policy::retry::RetryPolicy;
 use cassandra_sys::CASS_OK;
-
+use cassandra::util::Protected;
 use cassandra::session::Session;
 
 ///Possible Cql Protocol versions
@@ -113,11 +112,12 @@ impl Drop for Cluster {
     }
 }
 
-pub mod protected {
-    use cassandra::cluster::Cluster;
-    use cassandra_sys::CassCluster as _Cluster;
-    pub fn inner(cluster: &Cluster) -> *mut _Cluster {
-        cluster.0
+impl Protected<*mut _Cluster> for Cluster {
+    fn inner(&self) -> *mut _Cluster {
+        self.0
+    }
+    fn build(inner: *mut _Cluster) -> Self {
+        Cluster(inner)
     }
 }
 
@@ -137,7 +137,8 @@ impl Cluster {
     /// Example contact points: "127.0.0.1" "127.0.0.1,127.0.0.2", "server1.domain.com"
     /// ```
     ///
-    pub fn set_contact_points(&mut self, contact_points: ContactPoints) -> Result<&mut Self, CassError> {
+    pub fn set_contact_points<T: Into<ContactPoints>>(&mut self, contact_points: T) -> Result<&mut Self, CassError> {
+        let contact_points = contact_points.into();
         unsafe {
             println!("p:{}:", contact_points);
             let s = CString::new(contact_points.to_string()).unwrap();
@@ -159,19 +160,21 @@ impl Cluster {
     /// Sets the SSL context and enables SSL
     pub fn set_ssl(&mut self, ssl: &mut Ssl) -> &Self {
         unsafe {
-            cass_cluster_set_ssl(self.0, ssl::protected::inner(ssl));
+            cass_cluster_set_ssl(self.0, ssl.inner());
             self
         }
     }
 
     /// Performs a blocking call to connect to Cassandra cluster
-    pub fn connect(&mut self) -> Result<Session, CassError> {unsafe{
-    	let session = cass_session_new();
-    	let connect_future = cass_session_connect(session, self.0);
-    	match cass_future_error_code(connect_future) {
-	    	CASS_OK => Ok(Session(session)),
-	    	err => Err(CassError::build(err, Some("")))    	
-	 }}
+    pub fn connect(&mut self) -> Result<Session, CassError> {
+        unsafe {
+            let session = cass_session_new();
+            let connect_future = cass_session_connect(session, self.0);
+            match cass_future_error_code(connect_future) {
+                CASS_OK => Ok(Session(session)),
+                err => Err(CassError::build(err, Some(""))),    	
+            }
+        }
     }
 
     ///Sets the protocol version. This will automatically downgrade to the lowest
@@ -544,7 +547,7 @@ impl Cluster {
     /// Default: server-side timestamp generator.
     pub fn set_timestamp_gen(&mut self, tsg: &TimestampGen) -> &mut Self {
         unsafe {
-            cass_cluster_set_timestamp_gen(self.0, time::protected::inner(tsg));
+            cass_cluster_set_timestamp_gen(self.0, TimestampGen::inner(tsg));
             self
         }
     }
@@ -587,7 +590,7 @@ impl Cluster {
     ///will return an error.
     pub fn set_retry_policy(&mut self, retry_policy: RetryPolicy) -> &mut Self {
         unsafe {
-            cass_cluster_set_retry_policy(self.0, policy::retry::protected::inner(retry_policy));
+            cass_cluster_set_retry_policy(self.0, retry_policy.inner());
             self
         }
     }

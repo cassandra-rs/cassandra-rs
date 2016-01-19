@@ -29,19 +29,18 @@ use cassandra::user_type::UserType;
 use cassandra_sys::CassDataType as _CassDataType;
 
 use std::ffi::CString;
+use cassandra::util::Protected;
 
 
 pub struct DataType(*mut _CassDataType);
 pub struct ConstDataType(pub *const _CassDataType);
 
-pub mod protected {
-    use cassandra::data_type::DataType;
-    use cassandra_sys::CassDataType as _CassDataType;
-    pub fn inner(data_type: DataType) -> *mut _CassDataType {
-        data_type.0
+impl Protected<*mut _CassDataType> for DataType {
+    fn inner(&self) -> *mut _CassDataType {
+        self.0
     }
-    pub fn inner_const(data_type: DataType) -> *const _CassDataType {
-        data_type.0
+    fn build(inner: *mut _CassDataType) -> Self {
+        DataType(inner)
     }
 }
 
@@ -62,7 +61,7 @@ impl DataType {
 
     ///Creates a new data type from an existing data type.
     pub fn new_user_type(&self) -> UserType {
-        unsafe { user_type::protected::build(cass_user_type_new_from_data_type(self.0)) }
+        unsafe { UserType::build(cass_user_type_new_from_data_type(self.0)) }
     }
 
 

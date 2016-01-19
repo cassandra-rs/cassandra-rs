@@ -35,11 +35,13 @@ use cassandra::uuid;
 use cassandra::value::ValueType;
 use cassandra::iterator::SetIterator;
 use cassandra::iterator::UserTypeIterator;
+use cassandra::iterator::ColumnIterator;
 use cassandra::inet::Inet;
 use cassandra::iterator::MapIterator;
 use cassandra::error::CassErrorTypes;
 use cassandra::error::CassError;
 use cassandra::inet;
+use cassandra::util::Protected;
 // use decimal::d128;
 
 #[repr(C)]
@@ -80,15 +82,12 @@ impl ColumnType {
 ///Representation of a Cassandra column
 pub struct Column(*const _Value);
 
-pub mod protected {
-    use cassandra::column::Column;
-    use cassandra_sys::CassValue as _Value;
-    pub fn inner(column: &Column) -> *const _Value {
-        column.0
+impl Protected<*const _Value> for Column {
+    fn inner(&self) -> *const _Value {
+        self.0
     }
-
-    pub fn build(column: *const _Value) -> Column {
-        Column(column)
+    fn build(inner: *const _Value) -> Self {
+        Column(inner)
     }
 }
 
@@ -205,7 +204,7 @@ impl Column {
     ///Gets the inet from this column or errors if you ask for the wrong type
     pub fn get_inet(&self, mut output: Inet) -> Result<Inet, CassError> {
         unsafe {
-            CassError::build(cass_value_get_inet(self.0, &mut inet::protected::inner(&output)),
+            CassError::build(cass_value_get_inet(self.0, &mut output.inner()),
                              None)
                 .wrap(output)
         }
@@ -298,7 +297,9 @@ impl Column {
     pub fn get_uuid(&self) -> Result<Uuid, CassError> {
         unsafe {
             let mut output: Uuid = mem::zeroed();
-            CassError::build(cass_value_get_uuid(self.0, &mut uuid::protected::inner(output)), None).wrap(output)
+            CassError::build(cass_value_get_uuid(self.0, &mut output.inner()),
+                             None)
+                .wrap(output)
         }
     }
 
@@ -306,7 +307,7 @@ impl Column {
     pub fn map_iter(&self) -> Result<MapIterator, CassError> {
         unsafe {
             match self.get_type() {
-                ValueType::MAP => Ok(iterator::protected::CassIterator::build(cass_iterator_from_map(self.0))),
+                ValueType::MAP => Ok(MapIterator::build(cass_iterator_from_map(self.0))),
                 _ => Err(CassError::build(CassErrorTypes::LIB_INVALID_VALUE_TYPE as u32, None)),
             }
         }
@@ -316,7 +317,7 @@ impl Column {
     pub fn set_iter(&self) -> Result<SetIterator, CassError> {
         unsafe {
             match self.get_type() {
-                ValueType::SET => Ok(iterator::protected::CassIterator::build(cass_iterator_from_collection(self.0))),
+                ValueType::SET => Ok(SetIterator::build(cass_iterator_from_collection(self.0))),
                 _ => Err(CassError::build(1, None)),
             }
         }
@@ -327,7 +328,7 @@ impl Column {
         unsafe {
             match self.get_type() {
                 ValueType::UDT => {
-                    Ok(iterator::protected::CassIterator::build(cass_iterator_fields_from_user_type(self.0)))
+                    Ok(UserTypeIterator::build(cass_iterator_fields_from_user_type(self.0)))
                 }
                 _ => Err(CassError::build(1, None)),
             }

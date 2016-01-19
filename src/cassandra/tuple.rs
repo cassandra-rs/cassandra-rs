@@ -20,15 +20,11 @@ use cassandra_sys::cass_tuple_set_int8;
 use cassandra_sys::cass_tuple_set_int16;
 #[allow(unused_imports)]
 use cassandra_sys::cass_tuple_set_decimal;
-use cassandra_sys::cass_iterator_free;
-use cassandra_sys::cass_iterator_next;
-use cassandra_sys::cass_iterator_get_value;
-use cassandra::value;
 use cassandra::collection;
 use cassandra::uuid;
-use cassandra::data_type;
 use cassandra::user_type;
 use std::ffi::CString;
+use cassandra::util::Protected;
 
 use cassandra::inet::AsInet;
 use std::net::SocketAddr;
@@ -47,13 +43,15 @@ use cassandra::inet;
 ///A tuple of values.
 pub struct Tuple(*mut _Tuple);
 
-pub mod protected {
-	use cassandra::tuple::Tuple;
-	use cassandra_sys::CassTuple as _Tuple;
-	pub fn inner(tuple:Tuple) -> *mut _Tuple {
-		tuple.0
-	}
+impl Protected<*mut _Tuple> for Tuple {
+    fn inner(&self) -> *mut _Tuple {
+        self.0
+    }
+    fn build(inner: *mut _Tuple) -> Self {
+        Tuple(inner)
+    }
 }
+
 impl Tuple {
     ///Creates a new tuple.
     pub fn new(item_count: u64) -> Self {
@@ -62,7 +60,7 @@ impl Tuple {
 
     ///Creates a new tuple from an existing data type.
     pub fn new_from_data_type(data_type: DataType) -> Tuple {
-        unsafe { Tuple(cass_tuple_new_from_data_type(data_type::protected::inner(data_type))) }
+        unsafe { Tuple(cass_tuple_new_from_data_type(data_type.inner())) }
     }
 
     ///Gets the data type of a tuple.
@@ -141,14 +139,18 @@ impl Tuple {
     ///Sets a "uuid" or "timeuuid" in a tuple at the specified index.
     pub fn set_uuid<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
         where S: Into<Uuid> {
-        unsafe { CassError::build(cass_tuple_set_uuid(self.0, index, uuid::protected::inner(value.into())), None).wrap(()) }
+        unsafe {
+            CassError::build(cass_tuple_set_uuid(self.0, index, value.into().inner()),
+                             None)
+                .wrap(())
+        }
     }
 
     ///Sets an "inet" in a tuple at the specified index.
     pub fn set_inet(&mut self, index: u64, value: SocketAddr) -> Result<(), CassError> {
         let inet = AsInet::as_cass_inet(&value);
         unsafe {
-            CassError::build(cass_tuple_set_inet(self.0, index, inet::protected::inner(&inet)),
+            CassError::build(cass_tuple_set_inet(self.0, index, inet.inner()),
                              None)
                 .wrap(())
         }
@@ -160,7 +162,7 @@ impl Tuple {
         unsafe {
             CassError::build(cass_tuple_set_collection(self.0,
                                                        index,
-                                                       collection::protected::inner_set(value.into())),
+                                                       value.into().inner()),
                              None)
                 .wrap(())
         }
@@ -173,7 +175,11 @@ impl Tuple {
 
     ///Sets a "udt" in a tuple at the specified index.
     pub fn set_user_type(&mut self, index: u64, value: &UserType) -> Result<(), CassError> {
-        unsafe { CassError::build(cass_tuple_set_user_type(self.0, index, user_type::protected::inner(value)), None).wrap(()) }
+        unsafe {
+            CassError::build(cass_tuple_set_user_type(self.0, index,value.inner()),
+                             None)
+                .wrap(())
+        }
     }
 }
 

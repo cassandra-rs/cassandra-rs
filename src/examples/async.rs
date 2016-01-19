@@ -35,15 +35,14 @@ pub fn main() {
     let mut cluster = Cluster::new();
     cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
     match cluster.connect() {
-        Ok(mut session) => {
+        Ok(ref mut session) => {
             session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
             session.execute(CREATE_TABLE, 0).wait().unwrap();
             session.execute("USE examples", 0).wait().unwrap();
-            let futures = insert_into_async(&mut session, "test".to_owned()).unwrap();
+            let futures = insert_into_async(session, "test".to_owned()).unwrap();
             for mut future in futures {
                 println!("insert result={:?}", future.wait());
             }
-            session.close().wait().unwrap();
         }
         Err(err) => panic!("couldn't connect: {:?}", err),
     }

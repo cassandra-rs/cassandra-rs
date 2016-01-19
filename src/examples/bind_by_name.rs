@@ -59,9 +59,8 @@ fn main() {
         let mut cluster = Cluster::new();
         cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
 
-        match cluster.connect()
- {
-            Ok(mut session) => {
+        match cluster.connect() {
+            Ok(ref mut session) => {
                 let input = Basic {
                     bln: true,
                     flt: 0.001f32,
@@ -80,19 +79,18 @@ fn main() {
                 session.execute(CREATE_TABLE, 0).wait().unwrap();
                 match session.prepare(INSERT_QUERY).unwrap().wait() {
                     Ok(insert_prepared) => {
-                        insert_into_basic(&mut session, insert_prepared, "prepared_test", input).unwrap();
+                        insert_into_basic(session, insert_prepared, "prepared_test", input).unwrap();
                     }
                     Err(err) => println!("error: {:?}", err),
                 }
                 match session.prepare(SELECT_QUERY).unwrap().wait() {
                     Ok(ref mut select_prepared) => {
-                        select_from_basic(&mut session, &select_prepared, "prepared_test", &mut output).unwrap();
+                        select_from_basic(session, &select_prepared, "prepared_test", &mut output).unwrap();
                         assert_eq!(input, output);
                         println!("results matched: {:?}", output);
                     }
                     Err(err) => println!("err: {:?}", err),
                 }
-                session.close().wait().unwrap();
             }
             Err(err) => println!("couldn't connect: {:?}", err),
         }

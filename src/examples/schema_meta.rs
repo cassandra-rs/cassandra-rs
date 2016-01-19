@@ -137,7 +137,7 @@ fn cass() -> Result<(), CassError> {
     try!(cluster.set_load_balance_round_robin());
 
     match cluster.connect() {
-        Ok(session) => {
+        Ok(ref mut session) => {
             try!(session.execute(CREATE_KEYSPACE, 0).wait());
             print_keyspace(&session, "examples");
             try!(session.execute(CREATE_TABLE, 0).wait());
@@ -148,13 +148,12 @@ fn cass() -> Result<(), CassError> {
             let keyspace = schema.get_keyspace_by_name("examples");
             let mut table = keyspace.table_by_name("schema_meta").unwrap();
             print_table_meta(&mut table, 0);
-            try!(print_function(&session,
+            try!(print_function(session,
                                 "examples",
                                 "avg_state",
                                 vec!["tuple<int,bigint>", "int"]));
             try!(print_function(&session, "examples", "avg_final", vec!["tuple<int,bigint>"]));
             try!(print_aggregate(&session, "examples", "average", vec!["int"]));
-            try!(session.close().wait());
             Ok(())
         }
         _ => panic!(),

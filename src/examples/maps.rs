@@ -70,14 +70,12 @@ fn foo() -> Result<(), CassError> {
                                     key: "mango",
                                     value: 4,
                                 }];
-    match cluster.connect()
- {
-        Ok(mut session) => {
+    match cluster.connect() {
+        Ok(ref mut session) => {
             try!(session.execute(CREATE_KEYSPACE, 0).wait());
             try!(session.execute(CREATE_TABLE, 0).wait());
-            try!(insert_into_maps(&mut session, "test", items));
-            try!(select_from_maps(&mut session, "test"));
-            session.close();
+            try!(insert_into_maps(session, "test", items));
+            try!(select_from_maps(session, "test"));
             Ok(())
         }
         Err(err) => Err(err),

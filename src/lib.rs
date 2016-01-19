@@ -9,6 +9,7 @@ extern crate decimal;
 extern crate chrono;
 extern crate time;
 extern crate ip;
+extern crate uuid;
 
 pub use cassandra::consistency::Consistency;
 // pub use cassandra::inet::{Inet};

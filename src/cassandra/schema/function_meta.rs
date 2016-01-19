@@ -11,13 +11,13 @@ use cassandra_sys::cass_function_meta_return_type;
 use cassandra_sys::cass_iterator_fields_from_function_meta;
 use cassandra_sys::CassFunctionMeta as _CassFunctionMeta;
 use cassandra_sys::CASS_OK;
+use cassandra::util::Protected;
 
 use cassandra::iterator::FieldIterator;
 
 use std::{mem, slice, str};
 use std::ffi::CString;
 use cassandra::error::CassError;
-
 use cassandra::data_type::ConstDataType;
 use cassandra::value::Value;
 use cassandra::value;
@@ -25,19 +25,19 @@ use cassandra::iterator;
 ///The metadata for a function
 pub struct FunctionMeta(*const _CassFunctionMeta);
 
-pub mod protected {
-    use cassandra_sys::CassFunctionMeta as _CassFunctionMeta;
-    use cassandra::schema::function_meta::FunctionMeta;
-    pub fn build(column: *const _CassFunctionMeta) -> FunctionMeta {
-        FunctionMeta(column)
+impl Protected<*const _CassFunctionMeta> for FunctionMeta {
+    fn inner(&self) -> *const _CassFunctionMeta {
+        self.0
+    }
+    fn build(inner: *const _CassFunctionMeta) -> Self {
+        FunctionMeta(inner)
     }
 }
-
 
 impl FunctionMeta {
     ///Iterator over the fields in this function
     pub fn fields_iter(&self) -> FieldIterator {
-        unsafe { iterator::protected::CassIterator::build(cass_iterator_fields_from_function_meta(self.0)) }
+        unsafe { FieldIterator::build(cass_iterator_fields_from_function_meta(self.0)) }
     }
 
     ///Gets the name of the function.
@@ -132,6 +132,8 @@ impl FunctionMeta {
     ///Gets a metadata field for the provided name. Metadata fields allow direct
     ///access to the column data found in the underlying "functions" metadata table.
     pub fn field_by_name(&self, name: &str) -> Value {
-        unsafe { value::protected::build(cass_function_meta_field_by_name(self.0, CString::new(name).unwrap().as_ptr())) }
+        unsafe {
+            Value::build(cass_function_meta_field_by_name(self.0, CString::new(name).unwrap().as_ptr()))
+        }
     }
 }

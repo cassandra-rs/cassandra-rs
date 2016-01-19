@@ -36,10 +36,6 @@ pub fn verify_batch(session: &mut Session) {
 }
 
 fn main() {
-    let mut cluster = Cluster::new();
-    cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
-    let session = &mut cluster.connect().unwrap();
-
     let pairs = vec!(
         Pair{key:"a", value:"1"},
         Pair{key:"b", value:"2"},
@@ -47,9 +43,16 @@ fn main() {
         Pair{key:"d", value:"4"},
     );
 
-    session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
-    session.execute_statement(&Statement::new(CREATE_TABLE, 0)).wait().unwrap();
-    insert_into_batch_with_prepared(session, pairs).unwrap();
-    verify_batch(session);
-    //session.close();
+    let mut cluster = Cluster::new();
+    cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
+
+    match cluster.connect() {
+        Ok(ref mut session) => {
+            session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
+            session.execute_statement(&Statement::new(CREATE_TABLE, 0)).wait().unwrap();
+            insert_into_batch_with_prepared(session, pairs).unwrap();
+            verify_batch(session);
+        }
+        err => println!("{:?}", err),
+    }
 }

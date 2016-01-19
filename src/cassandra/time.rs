@@ -5,7 +5,7 @@ use cassandra_sys::cass_timestamp_gen_server_side_new;
 use cassandra_sys::cass_date_from_epoch;
 use cassandra_sys::cass_date_time_to_epoch;
 use time::Duration;
-
+use cassandra::util::Protected;
 
 use cassandra_sys::CassTimestampGen as _TimestampGen;
 
@@ -15,13 +15,15 @@ pub struct TimestampGen(*mut _TimestampGen);
 unsafe impl Send for TimestampGen {}
 unsafe impl Sync for TimestampGen {}
 
-pub mod protected {
-	use cassandra::time::TimestampGen;
-	use cassandra_sys::CassTimestampGen as _TimestampGen;
-	pub fn inner(tsg:&TimestampGen) -> *mut _TimestampGen {
-		tsg.0
-	}
+impl Protected<*mut _TimestampGen> for TimestampGen {
+    fn inner(&self) -> *mut _TimestampGen {
+        self.0
+    }
+    fn build(inner: *mut _TimestampGen) -> Self {
+        TimestampGen(inner)
+    }
 }
+
 
 ///Cassandra representation of the number of days since epoch
 pub struct Date(u32);
