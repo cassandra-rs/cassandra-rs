@@ -1,6 +1,9 @@
 use std::{mem, slice, str};
 
 use cassandra_sys::CASS_OK;
+use cassandra_sys::cass_true;
+use cassandra_sys::cass_false;
+
 // use cassandra_sys::CassIteratorType as _CassIteratorType;
 use cassandra_sys::CassIterator as _CassIterator;
 // use cassandra_sys::cass_iterator_type;
@@ -48,8 +51,8 @@ impl Iterator for AggregateIterator {
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
-                0 => None,
-                _ => {
+                cass_false => None,
+                cass_true => {
                     let field_value = cass_iterator_get_aggregate_meta(self.0);
                     Some(AggregateMeta::build(field_value))
                 }
@@ -72,8 +75,8 @@ impl Iterator for UserTypeIterator {
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
-                0 => None,
-                _ => Some(ConstDataType(cass_iterator_get_user_type(self.0))),
+                cass_false => None,
+                cass_true => Some(ConstDataType(cass_iterator_get_user_type(self.0))),
             }
         }
     }
@@ -95,8 +98,8 @@ impl Iterator for FunctionIterator {
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
-                0 => None,
-                _ => Some(FunctionMeta::build(cass_iterator_get_function_meta(self.0))),
+                cass_false => None,
+                cass_true => Some(FunctionMeta::build(cass_iterator_get_function_meta(self.0))),
             }
         }
     }
@@ -111,8 +114,8 @@ impl Iterator for TableIterator {
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
-                0 => None,
-                _ => Some(TableMeta::build(cass_iterator_get_table_meta(self.0))),
+                cass_false => None,
+                cass_true => Some(TableMeta::build(cass_iterator_get_table_meta(self.0))),
             }
         }
     }
@@ -126,8 +129,8 @@ impl Iterator for KeyspaceIterator {
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
-                0 => None,
-                _ => Some(KeyspaceMeta::build(cass_iterator_get_keyspace_meta(self.0))),
+                cass_false => None,
+                cass_true => Some(KeyspaceMeta::build(cass_iterator_get_keyspace_meta(self.0))),
             }
         }
     }
@@ -141,8 +144,8 @@ impl Iterator for ColumnIterator {
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
-                0 => None,
-                _ => Some(ColumnMeta::build(cass_iterator_get_column_meta(self.0))),
+                cass_false => None,
+                cass_true => Some(ColumnMeta::build(cass_iterator_get_column_meta(self.0))),
             }
         }
     }
@@ -156,8 +159,8 @@ impl Iterator for FieldIterator {
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
-                0 => None,
-                _ => {
+                cass_false => None,
+                cass_true => {
                     let mut name = mem::zeroed();
                     let mut name_length = mem::zeroed();
                     match cass_iterator_get_meta_field_name(self.0, &mut name, &mut name_length) {
@@ -170,7 +173,7 @@ impl Iterator for FieldIterator {
                                 value: Value::build(value),
                             })
                         }
-                        err => panic!("FIXME: no error handling. Err {}", err),
+                        err => panic!("FIXME: no error handling. Err {:?}", err),
                     }
                 }
             }
@@ -301,8 +304,8 @@ impl Iterator for SetIterator {
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
-                0 => None,
-                _ => Some(self.get_value()),
+                cass_false => None,
+                cass_true => Some(self.get_value()),
             }
         }
     }
@@ -346,8 +349,8 @@ impl Iterator for TupleIterator {
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
-                0 => None,
-                _ => Some(self.get_value()),
+                cass_false => None,
+                cass_true => Some(self.get_value()),
             }
         }
     }
@@ -372,8 +375,8 @@ impl Iterator for MapIterator {
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
-                0 => None,
-                _ => Some(self.get_pair().unwrap()),
+                cass_false => None,
+                cass_true => Some(self.get_pair().unwrap()),
             }
         }
     }

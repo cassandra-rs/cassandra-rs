@@ -94,29 +94,30 @@ fn print_schema_value(value: Value) {
     //  size_t s_length;
     //  CassUuid u;
     //  char us[CASS_UUID_STRING_LENGTH];
-
-    let value = match value.get_type() {
-        ValueType::INT => value.get_i32().unwrap().to_string(),
-        ValueType::BOOLEAN => if value.get_bool().unwrap() { "true".to_owned() } else { "false".to_owned() },
-        ValueType::DOUBLE => value.get_dbl().unwrap().to_string(),
-
-        ValueType::TEXT | ValueType::ASCII | ValueType::VARCHAR => value.get_string().unwrap().to_string(),
-        ValueType::UUID => value.get_uuid().unwrap().to_string(),
-        ValueType::LIST => {
-            print_schema_set(value.get_set().unwrap());
-            "".to_owned()
-        }
-        ValueType::MAP => {
-            print_schema_map(value.get_map().unwrap());
-            "".to_owned()
-        }
-        ValueType::BLOB => {
-            print_schema_bytes(value.get_bytes().unwrap());
-            "".to_owned()
-        }
-        _ => "<unhandled type>".to_owned(),
-    };
-    print!("{}", value);
+//FIXME
+//    let value = match value.get_type().0 {
+//        ValueType::INT => value.get_i32().unwrap().to_string(),
+//        ValueType::BOOLEAN => if value.get_bool().unwrap() { "true".to_owned() } else { "false".to_owned() },
+//        ValueType::DOUBLE => value.get_dbl().unwrap().to_string(),
+//
+//        ValueType::TEXT | ValueType::ASCII | ValueType::VARCHAR => value.get_string().unwrap().to_string(),
+//        ValueType::UUID => value.get_uuid().unwrap().to_string(),
+//        ValueType::LIST => {
+//            print_schema_set(value.get_set().unwrap());
+//            "".to_owned()
+//        }
+//        ValueType::MAP => {
+//            print_schema_map(value.get_map().unwrap());
+//            "".to_owned()
+//        }
+//        ValueType::BLOB => {
+//            print_schema_bytes(value.get_bytes().unwrap());
+//            "".to_owned()
+//        }
+//        _ => "<unhandled type>".to_owned(),
+//    };
+//    print!("{}", value);
+//
 }
 
 fn print_schema_bytes(bytes: &[u8]) {
@@ -133,8 +134,8 @@ fn main() {
 
 fn cass() -> Result<(), CassError> {
     let mut cluster = Cluster::new();
-    cluster.set_contact_points(try!(ContactPoints::from_str("127.0.0.1"))).unwrap();
-    try!(cluster.set_load_balance_round_robin());
+    cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
+    cluster.set_load_balance_round_robin();
 
     match cluster.connect() {
         Ok(ref mut session) => {

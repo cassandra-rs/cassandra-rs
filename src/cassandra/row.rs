@@ -16,6 +16,8 @@ use std::fmt;
 use std::ffi::CString;
 use std::iter::IntoIterator;
 use std::iter;
+use cassandra_sys::cass_true;
+use cassandra_sys::cass_false;
 
 use cassandra::error::CassError;
 use cassandra::column::Column;
@@ -62,7 +64,7 @@ impl Row {
         unsafe {
             let col = cass_row_get_column(self.0, index);
             if col.is_null() {
-                Err(CassError::build(CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS, None))
+                Err(CassError::build(CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS))
             } else {
                 Ok(Column::build(col))
             }
@@ -98,8 +100,8 @@ impl iter::Iterator for RowIterator {
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
-                0 => None,
-                _ => Some(Column::build(cass_iterator_get_column(self.0))),
+                cass_false => None,
+                cass_true => Some(Column::build(cass_iterator_get_column(self.0))),
             }
         }
     }
@@ -111,8 +113,8 @@ impl<'a> Iterator for &'a RowIterator {
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
-                0 => None,
-                _ => Some(Column::build(cass_iterator_get_column(self.0))),
+                cass_false => None,
+                cass_true => Some(Column::build(cass_iterator_get_column(self.0))),
             }
         }
     }

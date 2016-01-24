@@ -30,21 +30,21 @@ fn insert_into_basic(session: &mut Session, key: &str, basic: &Basic) -> Result<
     Ok(try!(session.execute_statement(&statement).wait()))
 }
 
-fn select_from_basic(session: &mut Session, key: &str) -> Result<Basic, CassError> {
+fn select_from_basic(session: &mut Session, key: &str) -> Result<Option<Basic>, CassError> {
     let mut statement = Statement::new(SELECT_QUERY, 1);
     try!(statement.bind_string(0, key));
     let result = try!(session.execute_statement(&statement).wait());
     println!("Result: \n{:?}\n", result);
     match result.first_row() {
-        None => Err(CassError::build(1, None)),
+        None => Ok(None),
         Some(row) => {
-            Ok(Basic {
+            Ok(Some(Basic {
                 bln: try!(try!(row.get_column(1)).get_bool()),
                 dbl: try!(try!(row.get_column(2)).get_double()),
                 flt: try!(try!(row.get_column(3)).get_float()),
                 i32: try!(try!(row.get_column(4)).get_i32()),
                 i64: try!(try!(row.get_column(5)).get_i64()),
-            })
+            }))
         }
     }
 }
@@ -63,7 +63,7 @@ fn main() {
 
     let mut cluster = Cluster::new();
     cluster.set_contact_points(contact_points).unwrap();
-    cluster.set_load_balance_round_robin().unwrap();
+    cluster.set_load_balance_round_robin();
 
     match cluster.connect() {
         Ok(ref mut session) => {
@@ -71,7 +71,7 @@ fn main() {
             session.execute(CREATE_TABLE, 0).wait().unwrap();
 
             insert_into_basic(session, "test", &input).unwrap();
-            let output = select_from_basic(session, "test").unwrap();
+            let output = select_from_basic(session, "test").unwrap().expect("no output from select");
 
             println!("{:?}", input);
             println!("{:?}", output);

@@ -11,6 +11,8 @@ use cassandra_sys::cass_function_meta_return_type;
 use cassandra_sys::cass_iterator_fields_from_function_meta;
 use cassandra_sys::CassFunctionMeta as _CassFunctionMeta;
 use cassandra_sys::CASS_OK;
+use cassandra_sys::cass_true;
+use cassandra_sys::cass_false;
 use cassandra::util::Protected;
 
 use cassandra::iterator::FieldIterator;
@@ -92,7 +94,7 @@ impl FunctionMeta {
 
     ///Gets whether a function is called on "null".
     pub fn called_on_null_input(&self) -> bool {
-        unsafe { cass_function_meta_called_on_null_input(self.0) != 0 }
+        unsafe { cass_function_meta_called_on_null_input(self.0) == cass_true }
     }
 
     ///Gets the number of arguments this function takes.
@@ -109,7 +111,7 @@ impl FunctionMeta {
 
             match cass_function_meta_argument(self.0, index, &mut name, &mut name_length, &mut data_type) {
                 CASS_OK => Ok(()),
-                err => Err(CassError::build(err, None)),
+                err => Err(CassError::build(err)),
             }
         }
     }

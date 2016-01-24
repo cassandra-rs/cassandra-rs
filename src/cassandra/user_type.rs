@@ -1,5 +1,8 @@
 use std::ffi::CString;
 
+use cassandra_sys::cass_true;
+use cassandra_sys::cass_false;
+
 use cassandra_sys::cass_user_type_set_uuid_by_name;
 use cassandra_sys::cass_user_type_set_user_type_by_name;
 use cassandra_sys::cass_user_type_set_uint32;
@@ -85,7 +88,7 @@ impl UserType {
 
     ///Sets a null in a user defined type at the specified index.
     pub fn set_null(&mut self, index: u64) -> Result<(), CassError> {
-        unsafe { CassError::build(cass_user_type_set_null(self.0, index), None).wrap(()) }
+        unsafe { CassError::build(cass_user_type_set_null(self.0, index)).wrap(()) }
     }
 
     /// Sets a null in a user defined type at the specified name.
@@ -93,13 +96,13 @@ impl UserType {
         where S: Into<String> {
         unsafe {
             let name = CString::new(name.into()).unwrap();
-            CassError::build(cass_user_type_set_null_by_name(self.0, name.as_ptr()), None).wrap(())
+            CassError::build(cass_user_type_set_null_by_name(self.0, name.as_ptr())).wrap(())
         }
     }
 
     ///Sets a "tinyint" in a user defined type at the specified index.
     pub fn set_int8(&mut self, index: u64, value: i8) -> Result<(), CassError> {
-        unsafe { CassError::build(cass_user_type_set_int8(self.0, index, value), None).wrap(()) }
+        unsafe { CassError::build(cass_user_type_set_int8(self.0, index, value)).wrap(()) }
     }
 
     ///Sets a "tinyint" in a user defined type at the specified name.
@@ -109,7 +112,7 @@ impl UserType {
             match CString::new(name.into()) {
                 Ok(name) => {
                     let rc = cass_user_type_set_int8_by_name(self.0, name.as_ptr(), value);
-                    CassError::build(rc, None).wrap(())
+                    CassError::build(rc).wrap(())
                 }
                 Err(err) => panic!("error: {}", err),
             }
@@ -119,7 +122,7 @@ impl UserType {
 
     ///Sets an "smallint" in a user defined type at the specified index.
     pub fn set_int16(&mut self, index: u64, value: i16) -> Result<(), CassError> {
-        unsafe { CassError::build(cass_user_type_set_int16(self.0, index, value), None).wrap(()) }
+        unsafe { CassError::build(cass_user_type_set_int16(self.0, index, value)).wrap(()) }
     }
 
     ///Sets an "smallint" in a user defined type at the specified name.
@@ -129,7 +132,7 @@ impl UserType {
             match CString::new(name.into()) {
                 Ok(name) => {
                     let rc = cass_user_type_set_int16_by_name(self.0, name.as_ptr(), value);
-                    CassError::build(rc, None).wrap(())
+                    CassError::build(rc).wrap(())
                 }
                 Err(err) => panic!("error: {}", err),
             }
@@ -139,7 +142,7 @@ impl UserType {
 
     ///Sets an "int" in a user defined type at the specified index.
     pub fn set_int32(&mut self, index: u64, value: i32) -> Result<(), CassError> {
-        unsafe { CassError::build(cass_user_type_set_int32(self.0, index, value), None).wrap(()) }
+        unsafe { CassError::build(cass_user_type_set_int32(self.0, index, value)).wrap(()) }
     }
 
     ///Sets an "int" in a user defined type at the specified name.
@@ -149,7 +152,7 @@ impl UserType {
             match CString::new(name.into()) {
                 Ok(name) => {
                     let rc = cass_user_type_set_int32_by_name(self.0, name.as_ptr(), value);
-                    CassError::build(rc, None).wrap(())
+                    CassError::build(rc).wrap(())
                 }
                 Err(err) => panic!("error: {}", err),
             }
@@ -159,7 +162,7 @@ impl UserType {
 
     ///Sets a "date" in a user defined type at the specified index.
     pub fn set_uint32(&mut self, index: u64, value: u32) -> Result<(), CassError> {
-        unsafe { CassError::build(cass_user_type_set_uint32(self.0, index, value), None).wrap(()) }
+        unsafe { CassError::build(cass_user_type_set_uint32(self.0, index, value)).wrap(()) }
     }
 
     ///Sets a "date" in a user defined type at the specified name.
@@ -169,7 +172,7 @@ impl UserType {
             match CString::new(name.into()) {
                 Ok(name) => {
                     let rc = cass_user_type_set_uint32_by_name(self.0, name.as_ptr(), value);
-                    CassError::build(rc, None).wrap(())
+                    CassError::build(rc).wrap(())
                 }
                 Err(err) => panic!("error: {}", err),
             }
@@ -181,7 +184,7 @@ impl UserType {
     ///Sets an "bigint", "counter", "timestamp" or "time" in a
     ///user defined type at the specified index.
     pub fn set_int64(&mut self, index: u64, value: i64) -> Result<(), CassError> {
-        unsafe { CassError::build(cass_user_type_set_int64(self.0, index, value), None).wrap(()) }
+        unsafe { CassError::build(cass_user_type_set_int64(self.0, index, value)).wrap(()) }
     }
 
     ///Sets an "bigint", "counter", "timestamp" or "time" in a
@@ -190,15 +193,14 @@ impl UserType {
         where S: Into<String> {
         unsafe {
             let name = CString::new(name.into()).unwrap();
-            CassError::build(cass_user_type_set_int64_by_name(self.0, name.as_ptr(), value),
-                             None)
+            CassError::build(cass_user_type_set_int64_by_name(self.0, name.as_ptr(), value))
                 .wrap(())
         }
     }
 
     ///Sets a "float" in a user defined type at the specified index.
     pub fn set_float(&mut self, index: u64, value: f32) -> Result<(), CassError> {
-        unsafe { CassError::build(cass_user_type_set_float(self.0, index, value), None).wrap(()) }
+        unsafe { CassError::build(cass_user_type_set_float(self.0, index, value)).wrap(()) }
     }
 
     /// Sets a "float" in a user defined type at the specified name.
@@ -206,15 +208,14 @@ impl UserType {
         where S: Into<String> {
         unsafe {
             let name = CString::new(name.into()).unwrap();
-            CassError::build(cass_user_type_set_float_by_name(self.0, name.as_ptr(), value),
-                             None)
+            CassError::build(cass_user_type_set_float_by_name(self.0, name.as_ptr(), value))
                 .wrap(())
         }
     }
 
     ///Sets an "double" in a user defined type at the specified index.
     pub fn set_double(&mut self, index: u64, value: f64) -> Result<(), CassError> {
-        unsafe { CassError::build(cass_user_type_set_double(self.0, index, value), None).wrap(()) }
+        unsafe { CassError::build(cass_user_type_set_double(self.0, index, value)).wrap(()) }
     }
 
     ///Sets an "double" in a user defined type at the specified name.
@@ -223,8 +224,7 @@ impl UserType {
         where S: Into<String> {
         unsafe {
             let name = CString::new(name.into()).unwrap();
-            CassError::build(cass_user_type_set_double_by_name(self.0, name.as_ptr(), value),
-                             None)
+            CassError::build(cass_user_type_set_double_by_name(self.0, name.as_ptr(), value))
                 .wrap(())
         }
     }
@@ -232,8 +232,7 @@ impl UserType {
     ///Sets a "boolean" in a user defined type at the specified index.
     pub fn set_bool(&mut self, index: u64, value: bool) -> Result<(), CassError> {
         unsafe {
-            CassError::build(cass_user_type_set_bool(self.0, index, if value { 1u32 } else { 0u32 }),
-                             None)
+            CassError::build(cass_user_type_set_bool(self.0, index, if value { cass_true } else { cass_false }))
                 .wrap(())
         }
     }
@@ -243,8 +242,7 @@ impl UserType {
         where S: Into<String> {
         unsafe {
             let name = CString::new(name.into()).unwrap();
-            CassError::build(cass_user_type_set_bool_by_name(self.0, name.as_ptr(), if value { 1u32 } else { 0u32 }),
-                             None)
+            CassError::build(cass_user_type_set_bool_by_name(self.0, name.as_ptr(), if value { cass_true } else { cass_false }))
                 .wrap(())
         }
     }
@@ -255,8 +253,7 @@ impl UserType {
         where S: Into<String> {
         unsafe {
             let value = CString::new(value.into()).unwrap();
-            CassError::build(cass_user_type_set_string(self.0, index, value.as_ptr()),
-                             None)
+            CassError::build(cass_user_type_set_string(self.0, index, value.as_ptr()))
                 .wrap(())
         }
     }
@@ -268,8 +265,7 @@ impl UserType {
         unsafe {
             let name = CString::new(name.into()).unwrap();
             let value = CString::new(value.into()).unwrap();
-            CassError::build(cass_user_type_set_string_by_name(self.0, name.as_ptr(), value.as_ptr()),
-                             None)
+            CassError::build(cass_user_type_set_string_by_name(self.0, name.as_ptr(), value.as_ptr()))
                 .wrap(())
         }
     }
@@ -278,8 +274,7 @@ impl UserType {
     ///Sets a "blob" "varint" or "custom" in a user defined type at the specified index.
     pub fn set_bytes(&mut self, index: u64, value: Vec<u8>) -> Result<(), CassError> {
         unsafe {
-            CassError::build(cass_user_type_set_bytes(self.0, index, value.as_ptr(), value.len() as u64),
-                             None)
+            CassError::build(cass_user_type_set_bytes(self.0, index, value.as_ptr(), value.len() as u64))
                 .wrap(())
         }
     }
@@ -292,8 +287,7 @@ impl UserType {
             CassError::build(cass_user_type_set_bytes_by_name(self.0,
                                                               name.as_ptr(),
                                                               value.as_ptr(),
-                                                              value.len() as u64),
-                             None)
+                                                              value.len() as u64))
                 .wrap(())
         }
     }
@@ -302,8 +296,7 @@ impl UserType {
     pub fn set_uuid<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
         where S: Into<Uuid> {
         unsafe {
-            CassError::build(cass_user_type_set_uuid(self.0, index, value.into().inner()),
-                             None)
+            CassError::build(cass_user_type_set_uuid(self.0, index, value.into().inner()))
                 .wrap(())
         }
     }
@@ -315,8 +308,7 @@ impl UserType {
             let name = CString::new(name.into()).unwrap();
             CassError::build(cass_user_type_set_uuid_by_name(self.0,
                                                              name.as_ptr(),
-                                                             value.into().inner()),
-                             None)
+                                                             value.into().inner()))
                 .wrap(())
         }
     }
@@ -325,8 +317,7 @@ impl UserType {
     pub fn set_inet<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
         where S: Into<Inet> {
         unsafe {
-            CassError::build(cass_user_type_set_inet(self.0, index, value.into().inner()),
-                             None)
+            CassError::build(cass_user_type_set_inet(self.0, index, value.into().inner()))
                 .wrap(())
         }
     }
@@ -338,8 +329,7 @@ impl UserType {
         unsafe {
             CassError::build(cass_user_type_set_inet_by_name(self.0,
                                                              name.as_ptr(),
-                                                             value.into().inner()),
-                             None)
+                                                             value.into().inner()))
                 .wrap(())
         }
     }
@@ -350,8 +340,7 @@ impl UserType {
         unsafe {
             CassError::build(cass_user_type_set_collection(self.0,
                                                            index,
-                                                           value.into().inner()),
-                             None)
+                                                           value.into().inner()))
                 .wrap(())
         }
     }
@@ -364,8 +353,7 @@ impl UserType {
             let name = CString::new(name.into()).unwrap();
             CassError::build(cass_user_type_set_collection_by_name(self.0,
                                                                    name.as_ptr(),
-                                                                   value.inner()),
-                             None)
+                                                                   value.inner()))
                 .wrap(())
         }
     }
@@ -373,8 +361,7 @@ impl UserType {
     ///Sets a "tuple" in a user defined type at the specified index.
     pub fn set_tuple(&mut self, index: u64, value: Tuple) -> Result<(), CassError> {
         unsafe {
-            CassError::build(cass_user_type_set_tuple(self.0, index, value.inner()),
-                             None)
+            CassError::build(cass_user_type_set_tuple(self.0, index, value.inner()))
                 .wrap(())
         }
     }
@@ -384,15 +371,14 @@ impl UserType {
         where S: Into<String> {
         unsafe {
             let name = CString::new(name.into()).unwrap();
-            CassError::build(cass_user_type_set_tuple_by_name(self.0, name.as_ptr(), value.inner()),
-                             None)
+            CassError::build(cass_user_type_set_tuple_by_name(self.0, name.as_ptr(), value.inner()))
                 .wrap(())
         }
     }
 
     ///Sets a user defined type in a user defined type at the specified index.
     pub fn set_user_type(&mut self, index: u64, value: UserType) -> Result<(), CassError> {
-        unsafe { CassError::build(cass_user_type_set_user_type(self.0, index, value.0), None).wrap(()) }
+        unsafe { CassError::build(cass_user_type_set_user_type(self.0, index, value.0)).wrap(()) }
     }
 
     ///Sets a user defined type in a user defined type at the specified name.
@@ -400,8 +386,7 @@ impl UserType {
         where S: Into<String> {
         unsafe {
             let name = CString::new(name.into()).unwrap();
-            CassError::build(cass_user_type_set_user_type_by_name(self.0, name.as_ptr(), value.0),
-                             None)
+            CassError::build(cass_user_type_set_user_type_by_name(self.0, name.as_ptr(), value.0))
                 .wrap(())
         }
     }

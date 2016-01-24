@@ -52,7 +52,7 @@ fn main() {
 fn foo() -> Result<(), CassError> {
     let mut cluster = Cluster::new();
     cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
-    cluster.set_load_balance_round_robin().unwrap();
+    cluster.set_load_balance_round_robin();
 
     let items: Vec<Pair> = vec![Pair {
                                     key: "apple",

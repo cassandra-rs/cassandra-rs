@@ -13,11 +13,13 @@ extern crate uuid;
 
 pub use cassandra::consistency::Consistency;
 // pub use cassandra::inet::{Inet};
+pub use cassandra_sys::CASS_BATCH_TYPE_LOGGED;
+pub use cassandra::batch::{Batch,BatchType};
 pub use cassandra::uuid::{Uuid, UuidGen};
 pub use cassandra::cluster::{Cluster, ContactPoints, CqlProtocol};
 pub use cassandra::session::Session;
 pub use cassandra::statement::Statement;
-pub use cassandra::batch::{Batch, BatchType, CustomPayload};
+pub use cassandra_sys::CassBatchType;
 pub use cassandra::future::{CloseFuture, Future, FutureCallback, PreparedFuture, ResultFuture, SessionFuture};
 pub use cassandra::prepared::PreparedStatement;
 pub use cassandra::result::CassResult;

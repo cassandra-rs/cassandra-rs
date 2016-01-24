@@ -1,4 +1,5 @@
 use cassandra_sys::CassColumnMeta as _CassColumnMeta;
+use cassandra_sys::CassColumnType as _CassColumnType;
 use cassandra_sys::cass_column_meta_name;
 use cassandra_sys::cass_column_meta_data_type;
 use cassandra_sys::cass_column_meta_field_by_name;
@@ -49,8 +50,8 @@ impl ColumnMeta {
     }
 
     ///Gets the type of the column.
-    pub fn get_type(&self) -> ColumnType {
-        unsafe { ColumnType::build(cass_column_meta_type(self.0)).unwrap() }
+    pub fn get_type(&self) -> _CassColumnType {
+        unsafe { cass_column_meta_type(self.0) }
     }
 
     ///Gets the data type of the column.

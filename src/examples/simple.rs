@@ -11,7 +11,7 @@ fn main() {
 
     let mut cluster = Cluster::new();
     cluster.set_contact_points(contact_points).unwrap();
-    cluster.set_load_balance_round_robin().unwrap();
+    cluster.set_load_balance_round_robin();
 
     match cluster.connect() {
         Ok(ref mut session) => {

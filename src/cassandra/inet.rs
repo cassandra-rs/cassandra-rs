@@ -75,10 +75,10 @@ impl FromStr for Inet {
         unsafe {
             let mut inet = mem::zeroed();
 
-            let s = try!(CString::new(s));
+            let s = CString::new(s).unwrap();
             match cass_inet_from_string(s.as_ptr(), &mut inet) {
                 CASS_OK => Ok(Inet(inet)),
-                err => Err(CassError::build(err, None)),
+                err => Err(CassError::build(err)),
             }
         }
     }

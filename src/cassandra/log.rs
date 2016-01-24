@@ -2,6 +2,7 @@ use std::ffi::CStr;
 use libc::c_void;
 
 use cassandra_sys::CassLogMessage;
+use cassandra_sys::CassLogLevel;
 
 // use cassandra_sys::cass_log_cleanup; @deprecated
 use cassandra_sys::cass_log_level_string;
@@ -12,34 +13,18 @@ use cassandra_sys::cass_log_set_level;
 
 #[repr(C)]
 ///The possible logging levels that can be set
-pub enum LogLevel {
-    ///No Logging
-    DISABLED = 0,
-    ///Only log critical errors
-    CRITICAL = 1,
-    ///Log all errors
-    ERROR = 2,
-    ///Log errors and warnings
-    WARN = 3,
-    ///Log everything at INFO or above
-    INFO = 4,
-    ///Debug logging. Very Verbose
-    DEBUG = 5,
-    ///Log at TRACE level. Don't use in production
-    TRACE = 6,
-    ///?
-    LAST_ENTRY = 7,
-}
+pub struct LogLevel(CassLogLevel);
+
 
 impl LogLevel {
     ///Gets the string for a log level.
     pub fn as_string(self) -> String {
-        unsafe { CStr::from_ptr(cass_log_level_string(self as u32)).to_str().unwrap().to_owned() }
+        unsafe { CStr::from_ptr(cass_log_level_string(self.0)).to_str().unwrap().to_owned() }
     }
 }
 
 /// A callback that's used to handle logging.
-pub type CassLogCallback = Option<extern "C" fn(message: *const CassLogMessage, data: *mut c_void)>;
+pub type CassLogCallback = Option<unsafe extern "C" fn(message: *const CassLogMessage, data: *mut c_void)>;
 
 ///Sets the log level.
 ///
@@ -47,7 +32,7 @@ pub type CassLogCallback = Option<extern "C" fn(message: *const CassLogMessage, 
 ///any of the cass_cluster_*() or cass_ssl_*() functions.
 ///<b>Default:</b> CASS_LOG_WARN
 pub fn set_level(level: LogLevel) {
-    unsafe { cass_log_set_level(level as u32) }
+    unsafe { cass_log_set_level(level.0) }
 }
 
 ///Sets a callback for handling logging events.

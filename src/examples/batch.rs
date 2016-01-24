@@ -16,14 +16,14 @@ static SELECT_QUERY: &'static str = "SELECT * from examples.pairs";
 
 fn insert_into_batch_with_prepared(session: &mut Session, pairs: Vec<Pair>) -> Result<PreparedStatement, CassError> {
     let prepared = session.prepare(INSERT_QUERY).unwrap().wait().unwrap();
-    let mut batch = Batch::new(BatchType::LOGGED);
+    let mut batch = Batch::new(CASS_BATCH_TYPE_LOGGED);
     for pair in pairs {
         let mut statement = prepared.bind();
         try!(statement.bind_string(0, pair.key));
         try!(statement.bind_string(1, pair.value));
         match batch.add_statement(&statement) {
             Ok(_) => {}
-            Err(err) => return Err(CassError::build(err, None)),
+            Err(err) => panic!("{:?}",err),
         }
     }
     try!(session.execute_batch(batch).wait());

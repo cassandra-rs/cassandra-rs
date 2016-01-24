@@ -1,9 +1,10 @@
 use std::ffi::NulError;
 use std::ffi::CString;
-
+pub use cassandra_sys::CassBatchType as BatchType;
 use cassandra::statement::Statement;
 use cassandra::policy;
 
+use cassandra_sys::CASS_OK;
 use cassandra_sys::CassError;
 use cassandra_sys::CassConsistency;
 use cassandra_sys::cass_batch_set_consistency;
@@ -14,9 +15,7 @@ use cassandra_sys::cass_batch_set_serial_consistency;
 use cassandra_sys::cass_batch_set_timestamp;
 use cassandra_sys::cass_batch_free;
 use cassandra_sys::cass_batch_new;
-use cassandra_sys::CASS_BATCH_TYPE_LOGGED;
-use cassandra_sys::CASS_BATCH_TYPE_UNLOGGED;
-use cassandra_sys::CASS_BATCH_TYPE_COUNTER;
+use cassandra_sys::CassBatchType::*;
 use cassandra_sys::CassCustomPayload as _CassCustomPayload;
 use cassandra::policy::retry::RetryPolicy;
 use cassandra::consistency::Consistency;
@@ -27,6 +26,7 @@ use cassandra::consistency;
 pub use cassandra_sys::CassBatch as _Batch;
 use cassandra::statement;
 use cassandra::util::Protected;
+
 
 ///A group of statements that are executed as a single batch.
 ///<b>Note:</b> Batches are not supported by the binary protocol version 1.
@@ -75,15 +75,15 @@ impl Drop for CustomPayload {
     }
 }
 
-///Type of Cassandra Batch operation to perform
-pub enum BatchType {
-    ///Logged batches have Atomicity guarantees
-    LOGGED = CASS_BATCH_TYPE_LOGGED as isize,
-    ///Unlogged batches do not provide any atomicity guarantees
-    UNLOGGED = CASS_BATCH_TYPE_UNLOGGED as isize,
-    ///Counter batches can only be used when writing counter types
-    COUNTER = CASS_BATCH_TYPE_COUNTER as isize,
-}
+// ///Type of Cassandra Batch operation to perform
+//pub enum BatchType {
+//    ///Logged batches have Atomicity guarantees
+//    LOGGED,
+//    ///Unlogged batches do not provide any atomicity guarantees
+//    UNLOGGED,
+//    ///Counter batches can only be used when writing counter types
+//    COUNTER,
+//}
 
 impl Drop for Batch {
     ///Frees a batch instance. Batches can be immediately freed after being
@@ -96,14 +96,14 @@ impl Drop for Batch {
 impl Batch {
     ///Creates a new batch statement with batch type.
     pub fn new(batch_type: BatchType) -> Batch {
-        unsafe { Batch(cass_batch_new(batch_type as u32)) }
+        unsafe { Batch(cass_batch_new(batch_type)) }
     }
 
     ///Sets the batch's consistency level
     pub fn set_consistency(&mut self, consistency: CassConsistency) -> Result<&Self, CassError> {
         unsafe {
             match cass_batch_set_consistency(self.0, consistency) {
-                0 => Ok(self),
+                CASS_OK => Ok(self),
                 err => Err(err),
             }
         }
@@ -115,7 +115,7 @@ impl Batch {
     pub fn set_serial_consistency(&mut self, consistency: Consistency) -> Result<&Self, CassError> {
         unsafe {
             match cass_batch_set_serial_consistency(self.0, consistency.inner()) {
-                0 => Ok(self),
+                CASS_OK => Ok(self),
                 err => Err(err),
             }
         }
@@ -125,7 +125,7 @@ impl Batch {
     pub fn set_timestamp(&mut self, timestamp: i64) -> Result<&Self, CassError> {
         unsafe {
             match cass_batch_set_timestamp(self.0, timestamp) {
-                0 => Ok(self),
+                CASS_OK => Ok(self),
                 err => Err(err),
             }
         }
@@ -135,7 +135,7 @@ impl Batch {
     pub fn set_retry_policy(&mut self, retry_policy: RetryPolicy) -> Result<&Self, CassError> {
         unsafe {
             match cass_batch_set_retry_policy(self.0, retry_policy.inner()) {
-                0 => Ok(self),
+                CASS_OK => Ok(self),
                 err => Err(err),
             }
         }
@@ -145,7 +145,7 @@ impl Batch {
     pub fn set_custom_payload(&mut self, custom_payload: CustomPayload) -> Result<&Self, CassError> {
         unsafe {
             match cass_batch_set_custom_payload(self.0, custom_payload.0) {
-                0 => Ok(self),
+                CASS_OK => Ok(self),
                 err => Err(err),
             }
         }
@@ -155,7 +155,7 @@ impl Batch {
     pub fn add_statement(&mut self, statement: &Statement) -> Result<&Self, CassError> {
         unsafe {
             match cass_batch_add_statement(self.0, statement.inner()) {
-                0 => Ok(self),
+                CASS_OK => Ok(self),
                 err => Err(err),
             }
         }

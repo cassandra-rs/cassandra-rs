@@ -7,6 +7,9 @@ use cassandra::error::CassError;
 use cassandra::result::CassResult;
 use cassandra::prepared::PreparedStatement;
 
+use cassandra_sys::cass_true;
+use cassandra_sys::cass_false;
+
 use cassandra_sys::CassFuture as _Future;
 // use cassandra_sys::CassResult as _CassResult;
 use cassandra_sys::cass_future_free;
@@ -50,12 +53,12 @@ impl Drop for Future {
 impl Future {
     ///Sets a callback that is called when a future is set
     pub fn set_callback(&mut self, callback: FutureCallback, data: *mut c_void) -> Result<&Self, CassError> {
-        unsafe { CassError::build(cass_future_set_callback(self.0, callback.0, data), None).wrap(self) }
+        unsafe { CassError::build(cass_future_set_callback(self.0, callback.0, data)).wrap(self) }
     }
 
     ///Gets the set status of the future.
     pub fn ready(&mut self) -> bool {
-        unsafe { cass_future_ready(self.0) > 0 }
+        unsafe { cass_future_ready(self.0) == cass_true }
     }
 
     /// Wait for the future to be set with either a result or error.
@@ -71,7 +74,7 @@ impl Future {
 
     ///Wait for the future to be set or timeout.
     pub fn wait_timed(&mut self, timeout_us: u64) -> bool {
-        unsafe { cass_future_wait_timed(self.0, timeout_us) > 0 }
+        unsafe { cass_future_wait_timed(self.0, timeout_us) == cass_true }
     }
 
     /// Gets the result of a successful future. If the future is not ready this method will
@@ -89,7 +92,7 @@ impl Future {
     ///Gets the error code from future. If the future is not ready this method will
     // wait for the future to be set.
     fn error_code(self) -> Result<(), CassError> {
-        unsafe { CassError::build(cass_future_error_code(self.0), None).wrap(()) }
+        unsafe { CassError::build(cass_future_error_code(self.0)).wrap(()) }
     }
 
     ///Gets the error message from future. If the future is not ready this method will
@@ -114,7 +117,7 @@ impl Future {
 
     ///Gets a custom payload item from a response future at the specified index. If the future is not
     ///ready this method will wait for the future to be set.
-    pub fn payload_item(&self, index: u64) -> Result<(String, String), u32> {
+    pub fn payload_item(&self, index: u64) -> Result<(String, String), CassError> {
         unsafe {
             let name = mem::zeroed();
             let name_length = mem::zeroed();
@@ -127,7 +130,7 @@ impl Future {
                     Ok((str::from_utf8(name).unwrap().to_owned(),
                         str::from_utf8(value).unwrap().to_owned()))
                 }
-                err => Err(err),
+                err => Err(CassError::build(err)),
             }
 
         }
@@ -161,7 +164,7 @@ impl ResultFuture {
     pub fn error_code(&mut self) -> Result<CassResult, CassError> {
         unsafe {
             match self.get() {
-                Some(result) => CassError::build(cass_future_error_code(self.0), None).wrap(result),
+                Some(result) => CassError::build(cass_future_error_code(self.0)).wrap(result),
                 None => panic!("FIXME"),
             }
         }
@@ -221,7 +224,7 @@ impl PreparedFuture {
     ///Gets the error code from future. If the future is not ready this method will
     ///wait for the future to be set.
     pub fn error_code(&mut self) -> Result<PreparedStatement, CassError> {
-        unsafe { CassError::build(cass_future_error_code(self.0), None).wrap(self.get()) }
+        unsafe { CassError::build(cass_future_error_code(self.0)).wrap(self.get()) }
     }
 
     ///Gets the error message from future. If the future is not ready this method will
@@ -250,7 +253,7 @@ impl SessionFuture {
     pub fn error_code(&self) -> Result<(), CassError> {
         unsafe {
             match self.get() {
-                Some(result) => CassError::build(cass_future_error_code(self.0), None).wrap(()),
+                Some(result) => CassError::build(cass_future_error_code(self.0)).wrap(()),
                 None => panic!("FIXME"),
             }
         }
@@ -342,7 +345,7 @@ impl CloseFuture {
     ///Gets the error code from future. If the future is not ready this method will
     ///wait for the future to be set.
     pub fn error_code(&self) -> Result<PreparedStatement, CassError> {
-        unsafe { CassError::build(cass_future_error_code(self.0), None).wrap(self.get()) }
+        unsafe { CassError::build(cass_future_error_code(self.0)).wrap(self.get()) }
     }
 
     ///Gets the error message from future. If the future is not ready this method will

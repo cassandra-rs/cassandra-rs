@@ -56,7 +56,7 @@ impl Drop for DataType {
 impl DataType {
     /// Creates a new data type with value type.
     pub fn new(value_type: ValueType) -> Self {
-        unsafe { DataType(cass_data_type_new(value_type as u32)) }
+        unsafe { DataType(cass_data_type_new(value_type.inner())) }
     }
 
     ///Creates a new data type from an existing data type.
@@ -82,7 +82,7 @@ impl DataType {
 
     ///Gets the value type of the specified data type.
     pub fn get_type(data_type: DataType) -> ValueType {
-        unsafe { ValueType::build(cass_data_type_type(data_type.0)).unwrap() }
+        unsafe { ValueType::build(cass_data_type_type(data_type.0)) }
     }
 
     ///Gets the type name of a UDT data type.
@@ -92,8 +92,7 @@ impl DataType {
             let type_name = CString::new(type_name.into()).unwrap();
             CassError::build(cass_data_type_type_name(data_type.0,
                                                       &mut type_name.as_ptr(),
-                                                      &mut (type_name.as_bytes().len() as u64)),
-                             None)
+                                                      &mut (type_name.as_bytes().len() as u64)))
                 .wrap(())
         }
     }
@@ -105,8 +104,7 @@ impl DataType {
         where S: Into<String> {
         unsafe {
             let type_name = CString::new(type_name.into()).unwrap();
-            CassError::build(cass_data_type_set_type_name(data_type.0, type_name.as_ptr()),
-                             None)
+            CassError::build(cass_data_type_set_type_name(data_type.0, type_name.as_ptr()))
                 .wrap(())
         }
     }
@@ -120,8 +118,7 @@ impl DataType {
             let keyspace = CString::new(keyspace.into()).unwrap();
             CassError::build(cass_data_type_keyspace(data_type.0,
                                                      &mut (keyspace.as_ptr()),
-                                                     &mut (keyspace.as_bytes().len() as u64)),
-                             None)
+                                                     &mut (keyspace.as_bytes().len() as u64)))
                 .wrap(())
         }
     }
@@ -133,8 +130,7 @@ impl DataType {
         where S: Into<String> {
         unsafe {
             let keyspace = CString::new(keyspace.into()).unwrap();
-            CassError::build(cass_data_type_set_keyspace(data_type.0, keyspace.as_ptr()),
-                             None)
+            CassError::build(cass_data_type_set_keyspace(data_type.0, keyspace.as_ptr()))
                 .wrap(())
         }
     }
@@ -148,8 +144,7 @@ impl DataType {
             let class_name = CString::new(class_name.into()).unwrap();
             CassError::build(cass_data_type_class_name(data_type.0,
                                                        &mut class_name.as_ptr(),
-                                                       &mut (class_name.as_bytes().len() as u64)),
-                             None)
+                                                       &mut (class_name.as_bytes().len() as u64)))
                 .wrap(())
         }
     }
@@ -161,8 +156,7 @@ impl DataType {
         where S: Into<String> {
         unsafe {
             let class_name = CString::new(class_name.into()).unwrap();
-            CassError::build(cass_data_type_set_class_name(self.0, class_name.as_ptr()),
-                             None)
+            CassError::build(cass_data_type_set_class_name(self.0, class_name.as_ptr()))
                 .wrap(())
         }
     }
@@ -204,8 +198,7 @@ impl DataType {
             CassError::build(cass_data_type_sub_type_name(data_type.0,
                                                           index,
                                                           &mut name.as_ptr(),
-                                                          &mut (name.as_bytes().len() as u64)),
-                             None)
+                                                          &mut (name.as_bytes().len() as u64)))
                 .wrap(())
         }
     }
@@ -214,7 +207,7 @@ impl DataType {
     ///
     ///<b>Note:</b> Only valid for tuple and collection data types.
     pub fn add_sub_type(&self, sub_data_type: DataType) -> Result<(), CassError> {
-        unsafe { CassError::build(cass_data_type_add_sub_type(self.0, sub_data_type.0), None).wrap(()) }
+        unsafe { CassError::build(cass_data_type_add_sub_type(self.0, sub_data_type.0)).wrap(()) }
     }
 
     ///Gets the sub-data type of a UDT (user defined type) at the specified index.
@@ -224,8 +217,7 @@ impl DataType {
         where S: Into<String> {
         unsafe {
             let name = CString::new(name.into()).unwrap();
-            CassError::build(cass_data_type_add_sub_type_by_name(self.0, name.as_ptr(), sub_data_type.0),
-                             None)
+            CassError::build(cass_data_type_add_sub_type_by_name(self.0, name.as_ptr(), sub_data_type.0))
                 .wrap(())
         }
     }
@@ -236,8 +228,7 @@ impl DataType {
     pub fn add_sub_value_type<S>(&self, sub_value_type: ValueType) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            CassError::build(cass_data_type_add_sub_value_type(self.0, sub_value_type as u32),
-                             None)
+            CassError::build(cass_data_type_add_sub_value_type(self.0, sub_value_type.inner()))
                 .wrap(())
         }
     }
@@ -245,14 +236,13 @@ impl DataType {
     ///Adds a sub-data type to a tuple or collection using a value type.
     ///
     ///<b>Note:</b> Only valid for tuple and collection data types.
-    pub fn add_sub_value_type_by_name<S>(&self, name: &str) -> Result<(), CassError>
+    pub fn add_sub_value_type_by_name<S>(&self, name: &str, typ: ValueType) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
             let name = CString::new(name).unwrap();
             CassError::build(cass_data_type_add_sub_value_type_by_name(self.0,
                                                                        name.as_ptr(),
-                                                                       name.to_bytes().len() as u32),
-                             None)
+                                                                       typ.inner()))
                 .wrap(())
         }
 

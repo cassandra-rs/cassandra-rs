@@ -11,6 +11,9 @@ use std::slice;
 use std::str;
 use std::ffi::CString;
 
+use cassandra_sys::cass_true;
+use cassandra_sys::cass_false;
+
 use cassandra::value::ValueType;
 use cassandra::data_type::ConstDataType;
 use cassandra::row::Row;
@@ -105,7 +108,7 @@ impl CassResult {
 
     ///Gets the column type at index for the specified result.
     pub fn column_type(&self, index: u64) -> ValueType {
-        unsafe { ValueType::build(cass_result_column_type(self.0, index)).unwrap() }
+        unsafe { ValueType::build(cass_result_column_type(self.0, index)) }
     }
 
     ///Gets the column datatype at index for the specified result.
@@ -125,7 +128,7 @@ impl CassResult {
 
     ///Returns true if there are more pages.
     pub fn has_more_pages(&self) -> bool {
-        unsafe { cass_result_has_more_pages(self.0) > 0 }
+        unsafe { cass_result_has_more_pages(self.0) == cass_true }
     }
 
     ///Sets the statement's paging state. This can be used to get the next page of
@@ -140,8 +143,7 @@ impl CassResult {
 
             CassError::build(cass_result_paging_state_token(self.0,
                                                             &mut paging_state.as_ptr(),
-                                                            &mut (paging_state.to_bytes().len() as u64)),
-                             None)
+                                                            &mut (paging_state.to_bytes().len() as u64)))
                 .wrap(self)
         }
     }
@@ -168,8 +170,8 @@ impl Iterator for ResultIterator {
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
-                0 => None,
-                _ => Some(self.get_row()),
+                cass_false => None,
+                cass_true => Some(self.get_row()),
             }
         }
     }
