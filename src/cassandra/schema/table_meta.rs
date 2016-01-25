@@ -10,8 +10,6 @@ use cassandra_sys::cass_table_meta_partition_key_count;
 use cassandra_sys::CassTableMeta as _CassTableMeta;
 use cassandra_sys::cass_iterator_columns_from_table_meta;
 use cassandra_sys::cass_iterator_fields_from_table_meta;
-use cassandra::iterator;
-use cassandra::value;
 use cassandra::iterator::FieldIterator;
 use cassandra::iterator::ColumnIterator;
 use cassandra::util::Protected;
@@ -20,7 +18,6 @@ use std::str;
 use std::slice;
 use std::mem;
 
-use cassandra::schema::column_meta;
 use cassandra::schema::column_meta::ColumnMeta;
 use cassandra::value::Value;
 

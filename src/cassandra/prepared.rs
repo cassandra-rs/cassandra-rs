@@ -7,7 +7,6 @@ use cassandra_sys::cass_prepared_parameter_name;
 use cassandra_sys::cass_prepared_parameter_data_type;
 use cassandra_sys::cass_prepared_parameter_data_type_by_name;
 use cassandra::data_type::ConstDataType;
-use cassandra::statement;
 use std::{mem, slice, str};
 use std::ffi::CString;
 use cassandra::util::Protected;

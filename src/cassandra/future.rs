@@ -2,13 +2,11 @@ use std::mem;
 use std::str;
 use std::slice;
 
-use cassandra::session::Session;
 use cassandra::error::CassError;
 use cassandra::result::CassResult;
 use cassandra::prepared::PreparedStatement;
 
 use cassandra_sys::cass_true;
-use cassandra_sys::cass_false;
 
 use cassandra_sys::CassFuture as _Future;
 // use cassandra_sys::CassResult as _CassResult;
@@ -25,14 +23,9 @@ use cassandra_sys::cass_future_custom_payload_item_count;
 use cassandra_sys::cass_future_get_error_result;
 use cassandra_sys::cass_future_set_callback;
 use cassandra_sys::CassFutureCallback as _CassFutureCallback;
-use cassandra_sys::CassSession as _Session;
 use cassandra::error::CassErrorResult;
-use cassandra::error;
-use cassandra::result;
-use cassandra::prepared;
 use cassandra::util::Protected;
 
-use cassandra::session;
 use libc::c_void;
 
 use cassandra_sys::CASS_OK;
@@ -253,7 +246,7 @@ impl SessionFuture {
     pub fn error_code(&self) -> Result<(), CassError> {
         unsafe {
             match self.get() {
-                Some(result) => CassError::build(cass_future_error_code(self.0)).wrap(()),
+                Some(_) => CassError::build(cass_future_error_code(self.0)).wrap(()),
                 None => panic!("FIXME"),
             }
         }

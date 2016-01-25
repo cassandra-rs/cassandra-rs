@@ -6,8 +6,6 @@ use std::slice;
 
 use cassandra::error::CassError;
 use cassandra::inet::Inet;
-use cassandra::uuid;
-use cassandra_sys::CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS;
 use cassandra_sys::CASS_ERROR_LIB_INVALID_VALUE_TYPE;
 use cassandra_sys::CASS_VALUE_TYPE_ASCII;
 use cassandra_sys::CASS_VALUE_TYPE_TEXT;
@@ -16,6 +14,8 @@ use cassandra_sys::CASS_VALUE_TYPE_UNKNOWN;
 use cassandra_sys::CASS_VALUE_TYPE_BIGINT;
 use cassandra_sys::CASS_VALUE_TYPE_BLOB;
 use cassandra_sys::CASS_VALUE_TYPE_CUSTOM;
+use cassandra_sys::CASS_VALUE_TYPE_DATE;
+use cassandra_sys::CASS_VALUE_TYPE_TIME;
 use cassandra_sys::CASS_VALUE_TYPE_BOOLEAN;
 use cassandra_sys::CASS_VALUE_TYPE_COUNTER;
 use cassandra_sys::CASS_VALUE_TYPE_DECIMAL;
@@ -23,7 +23,10 @@ use cassandra_sys::CASS_VALUE_TYPE_DOUBLE;
 use cassandra_sys::CASS_VALUE_TYPE_FLOAT;
 use cassandra_sys::CASS_VALUE_TYPE_TIMESTAMP;
 use cassandra_sys::CASS_VALUE_TYPE_INT;
+use cassandra_sys::CASS_VALUE_TYPE_SMALL_INT;
+use cassandra_sys::CASS_VALUE_TYPE_TINY_INT;
 use cassandra_sys::CASS_VALUE_TYPE_UUID;
+use cassandra_sys::CASS_VALUE_TYPE_LAST_ENTRY;
 use cassandra_sys::CASS_VALUE_TYPE_VARINT;
 use cassandra_sys::CASS_VALUE_TYPE_INET;
 use cassandra_sys::CASS_VALUE_TYPE_TIMEUUID;
@@ -33,7 +36,6 @@ use cassandra_sys::CASS_VALUE_TYPE_SET;
 use cassandra_sys::CASS_VALUE_TYPE_UDT;
 use cassandra_sys::CASS_VALUE_TYPE_TUPLE;
 use cassandra_sys::cass_true;
-use cassandra_sys::cass_false;
 use cassandra_sys::CassValueType as _CassValueType;
 use cassandra::uuid::Uuid;
 use cassandra::iterator::MapIterator;
@@ -59,13 +61,14 @@ use cassandra_sys::cass_value_get_double;
 use cassandra_sys::cass_value_get_float;
 use cassandra_sys::cass_value_get_int64;
 use cassandra_sys::cass_value_get_int32;
+use cassandra_sys::cass_value_get_int16;
+use cassandra_sys::cass_value_get_int8;
 use cassandra_sys::cass_iterator_from_collection;
 use cassandra_sys::cass_iterator_from_map;
 use cassandra_sys::cass_value_data_type;
 use cassandra::util::Protected;
 
 use cassandra::data_type::ConstDataType;
-use cassandra::iterator;
 
 use std::mem;
 
@@ -110,15 +113,26 @@ impl Debug for Value {
             match self.get_type().0 {
                 CASS_VALUE_TYPE_UNKNOWN => write!(f, "{:?}", "unknown"),
                 CASS_VALUE_TYPE_CUSTOM => write!(f, "{:?}", "custom"),
-                CASS_VALUE_TYPE_ASCII => write!(f, "{:?}", self.get_string().unwrap()),
+                CASS_VALUE_TYPE_ASCII | CASS_VALUE_TYPE_TEXT | CASS_VALUE_TYPE_VARCHAR=> write!(f, "{:?}", self.get_string().unwrap()),
+                CASS_VALUE_TYPE_DECIMAL => write!(f, "{:?}", self.get_bytes().unwrap()),
+                CASS_VALUE_TYPE_COUNTER => write!(f, "{:?}", self.get_i64().unwrap()),
                 CASS_VALUE_TYPE_BIGINT => write!(f, "{:?}", self.get_i64().unwrap()),
-                CASS_VALUE_TYPE_VARCHAR => write!(f, "{:?}", self.get_string().unwrap()),
+                CASS_VALUE_TYPE_DATE => write!(f, "{:?}", self.get_string().unwrap()),
+                CASS_VALUE_TYPE_TIME => write!(f, "{:?}", self.get_string().unwrap()),
+                CASS_VALUE_TYPE_VARINT => write!(f, "{:?}", self.get_bytes().unwrap()),
                 CASS_VALUE_TYPE_BOOLEAN => write!(f, "{:?}", self.get_bool().unwrap()),
                 CASS_VALUE_TYPE_DOUBLE => write!(f, "{:?}", self.get_dbl().unwrap()),
                 CASS_VALUE_TYPE_FLOAT => write!(f, "{:?}", self.get_flt().unwrap()),
+                CASS_VALUE_TYPE_BLOB => write!(f, "{:?}", self.get_bytes().unwrap()),
                 CASS_VALUE_TYPE_INT => write!(f, "{:?}", self.get_i32().unwrap()),
+                CASS_VALUE_TYPE_SMALL_INT => write!(f, "{:?}", self.get_i16().unwrap()),
+                CASS_VALUE_TYPE_TINY_INT => write!(f, "{:?}", self.get_i8().unwrap()),
+                CASS_VALUE_TYPE_INET => write!(f, "{:?}", self.get_inet().unwrap()),
+                CASS_VALUE_TYPE_TIMESTAMP => write!(f, "{:?}", self.get_i64().unwrap()),
                 CASS_VALUE_TYPE_TIMEUUID => write!(f, "TIMEUUID: {}", self.get_uuid().unwrap()),
-                CASS_VALUE_TYPE_SET => {
+                CASS_VALUE_TYPE_LAST_ENTRY => unimplemented!(),
+                CASS_VALUE_TYPE_UUID => write!(f, "UUID: {}", self.get_uuid().unwrap()),
+                CASS_VALUE_TYPE_SET | CASS_VALUE_TYPE_LIST => {
                     try!(write!(f, "["));
                     for item in self.get_set().unwrap() {
                         try!(write!(f, "SET {:?} ", item))
@@ -138,8 +152,14 @@ impl Debug for Value {
                     //                    }
                     Ok(())
                 }
+                CASS_VALUE_TYPE_TUPLE => {
+                    //                    for item in self.as_map_iterator().unwrap() {
+                    //                        try!(write!(f, "MAP {:?}:{:?}", item.0,item.1))
+                    //                    }
+                    Ok(())
+                }
                 // FIXME
-                err => write!(f, "{:?}", err),
+                //err => write!(f, "{:?}", err),
             }
         }
     }
@@ -358,6 +378,22 @@ impl Value {
         }
     }
 
+    ///Get this value as an i16
+    pub fn get_i16(&self) -> Result<i16, CassError> {
+        unsafe {
+            let mut output = mem::zeroed();
+            CassError::build(cass_value_get_int16(self.0, &mut output)).wrap(output)
+        }
+    }
+
+    ///Get this value as an i8
+    pub fn get_i8(&self) -> Result<i8, CassError> {
+        unsafe {
+            let mut output = mem::zeroed();
+            CassError::build(cass_value_get_int8(self.0, &mut output)).wrap(output)
+        }
+    }
+
     ///Get this value as an i64
     pub fn get_i64(&self) -> Result<i64, CassError> {
         unsafe {
@@ -393,9 +429,9 @@ impl Value {
     ///Get this value as a UUID
     pub fn get_uuid(&self) -> Result<Uuid, CassError> {
         unsafe {
-            let mut output: Uuid = mem::zeroed();
-            CassError::build(cass_value_get_uuid(self.0, &mut output.inner()))
-                .wrap(output)
+            let mut uuid = mem::zeroed();
+            CassError::build(cass_value_get_uuid(self.0, &mut uuid))
+                .wrap(Uuid::build(uuid))
         }
     }
 }

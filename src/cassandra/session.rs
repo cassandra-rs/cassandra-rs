@@ -13,14 +13,9 @@ use cassandra::statement::Statement;
 use cassandra::schema::schema_meta::SchemaMeta;
 use cassandra::metrics::SessionMetrics;
 use cassandra::cluster::Cluster;
-use cassandra::metrics;
-use cassandra::schema;
-use cassandra::future;
-use cassandra::statement;
 use cassandra::util::Protected;
 
 use cassandra_sys::CassSession as _Session;
-use cassandra_sys::cass_session_new;
 use cassandra_sys::cass_session_free;
 use cassandra_sys::cass_session_close;
 use cassandra_sys::cass_session_connect;

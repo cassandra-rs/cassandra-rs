@@ -6,12 +6,9 @@ use cassandra_sys::cass_column_meta_field_by_name;
 use cassandra_sys::cass_column_meta_type;
 use cassandra_sys::cass_iterator_fields_from_column_meta;
 
-use cassandra::column::ColumnType;
 use cassandra::iterator::FieldIterator;
 use cassandra::data_type::ConstDataType;
 use cassandra::value::Value;
-use cassandra::iterator;
-use cassandra::value;
 use cassandra::util::Protected;
 
 ///Column metadata

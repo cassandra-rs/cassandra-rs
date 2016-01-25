@@ -4,7 +4,6 @@ use std::str::FromStr;
 
 use cassandra::*;
 
-
 static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
                                         \'SimpleStrategy\', \'replication_factor\': \'1\' };";
 static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.schema_meta (key text, value bigint, PRIMARY \
@@ -40,34 +39,34 @@ fn print_function_meta(meta: FunctionMeta, indent: i32) {
     println!("");
 }
 
-fn print_schema_map(map: MapIterator) {
-    let mut is_first = true;
+//fn print_schema_map(map: MapIterator) {
+//    let mut is_first = true;
+//
+//    print!("{{ ");
+//    for pair in map {
+//        if !is_first {
+//            print!(", ")
+//        }
+//        print_schema_value(pair.0);
+//        print!(" : ");
+//        print_schema_value(pair.1);
+//        is_first = false;
+//    }
+//    print!(" }}");
+//}
 
-    print!("{{ ");
-    for pair in map {
-        if !is_first {
-            print!(", ")
-        }
-        print_schema_value(pair.0);
-        print!(" : ");
-        print_schema_value(pair.1);
-        is_first = false;
-    }
-    print!(" }}");
-}
-
-fn print_schema_set(set: SetIterator) {
-    let mut is_first = true;
-    print!("{{ ");
-    for item in set {
-        if !is_first {
-            print!(", ")
-        }
-        print_schema_value(item);
-        is_first = false;
-    }
-    print!(" }}");
-}
+//fn print_schema_set(set: SetIterator) {
+//    let mut is_first = true;
+//    print!("{{ ");
+//    for item in set {
+//        if !is_first {
+//            print!(", ")
+//        }
+//        print_schema_value(item);
+//        is_first = false;
+//    }
+//    print!(" }}");
+//}
 
 fn print_aggregate_meta(meta: AggregateMeta, indent: i32) {
     print_indent(indent);
@@ -87,45 +86,38 @@ fn print_meta_fields(iterator: FieldIterator, indent: i32) {
 }
 
 fn print_schema_value(value: Value) {
-    //  cass_int32_t i;
-    //  cass_bool_t b;
-    //  cass_double_t d;
-    //  const char* s;
-    //  size_t s_length;
-    //  CassUuid u;
-    //  char us[CASS_UUID_STRING_LENGTH];
 //FIXME
-//    let value = match value.get_type().0 {
-//        ValueType::INT => value.get_i32().unwrap().to_string(),
-//        ValueType::BOOLEAN => if value.get_bool().unwrap() { "true".to_owned() } else { "false".to_owned() },
-//        ValueType::DOUBLE => value.get_dbl().unwrap().to_string(),
+    let value = match value.get_type() {
+//        CASS_VALUE_TYPE_INT => value.get_i32().unwrap().to_string(),
+//        CASS_VALUE_TYPE_BOOL => if value.get_bool().unwrap() { "true".to_owned() } else { "false".to_owned() },
+//        CASS_VALUE_TYPE_DOUBLE => value.get_dbl().unwrap().to_string(),
 //
-//        ValueType::TEXT | ValueType::ASCII | ValueType::VARCHAR => value.get_string().unwrap().to_string(),
-//        ValueType::UUID => value.get_uuid().unwrap().to_string(),
-//        ValueType::LIST => {
+//        CASS_VALUE_TYPE_TEXT | CASS_VALUE_TYPE_ASCII | CASS_VALUE_TYPE_VARCHAR => value.get_string().unwrap().to_string(),
+//        CASS_VALUE_TYPE_UUID => value.get_uuid().unwrap().to_string(),
+//        CASS_VALUE_TYPE_LIST => {
 //            print_schema_set(value.get_set().unwrap());
 //            "".to_owned()
 //        }
-//        ValueType::MAP => {
+//        CASS_VALUE_TYPE_MAP => {
 //            print_schema_map(value.get_map().unwrap());
 //            "".to_owned()
 //        }
-//        ValueType::BLOB => {
+//        CASS_VALUE_TYPE_BLOB => {
 //            print_schema_bytes(value.get_bytes().unwrap());
 //            "".to_owned()
 //        }
-//        _ => "<unhandled type>".to_owned(),
-//    };
-//    print!("{}", value);
-//
+        _ => "<unhandled type>".to_owned(),
+    };
+    print!("{}", value);
+
 }
 
-fn print_schema_bytes(bytes: &[u8]) {
-    print!("0x");
-    for byte in bytes {
-        print!("{}", byte);
-    }
-}
+//fn print_schema_bytes(bytes: &[u8]) {
+//    print!("0x");
+//    for byte in bytes {
+//        print!("{}", byte);
+//    }
+//}
 
 fn main() {
     let foo = cass();

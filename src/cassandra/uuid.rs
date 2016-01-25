@@ -1,7 +1,6 @@
 use std::fmt::Formatter;
 use std::fmt;
 use std::fmt::Display;
-use std::fmt::Debug;
 use std::mem;
 use std::ffi::{CStr, CString};
 use std::str;

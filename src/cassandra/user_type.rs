@@ -49,9 +49,6 @@ use cassandra::collection::Set;
 use cassandra::tuple::Tuple;
 use cassandra::error::CassError;
 use cassandra::data_type::ConstDataType;
-use cassandra::collection;
-use cassandra::uuid;
-use cassandra::tuple;
 use cassandra::util::Protected;
 // use cassandra::iterator::FieldIterator;
 

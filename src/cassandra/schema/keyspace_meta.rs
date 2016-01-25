@@ -15,7 +15,6 @@ use cassandra_sys::cass_iterator_fields_from_keyspace_meta;
 use cassandra_sys::cass_iterator_functions_from_keyspace_meta;
 use cassandra_sys::cass_iterator_user_types_from_keyspace_meta;
 
-use cassandra::schema::function_meta;
 use cassandra::schema::function_meta::FunctionMeta;
 use cassandra::schema::table_meta::TableMeta;
 use cassandra::data_type::ConstDataType;
@@ -24,11 +23,8 @@ use cassandra::iterator::FieldIterator;
 use cassandra::iterator::AggregateIterator;
 use cassandra::iterator::FunctionIterator;
 use cassandra::iterator::UserTypeIterator;
-use cassandra::iterator;
 use std::mem;
-use cassandra::schema::table_meta;
 use std::ffi::CString;
-use cassandra::schema::aggregate_meta;
 
 use cassandra_sys::CassKeyspaceMeta as _CassKeyspaceMeta;
 

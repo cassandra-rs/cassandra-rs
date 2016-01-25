@@ -19,7 +19,6 @@ use cassandra_sys::cass_data_type_add_sub_value_type_by_name;
 use cassandra_sys::cass_data_type_free;
 use cassandra_sys::cass_user_type_new_from_data_type;
 use cassandra_sys::cass_data_type_new;
-use cassandra::user_type;
 use cassandra::value::ValueType;
 
 use cassandra::error::CassError;
@@ -32,6 +31,7 @@ use std::ffi::CString;
 use cassandra::util::Protected;
 
 
+///Any cassandra datatype
 pub struct DataType(*mut _CassDataType);
 pub struct ConstDataType(pub *const _CassDataType);
 

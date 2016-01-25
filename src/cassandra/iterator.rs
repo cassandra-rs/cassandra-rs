@@ -22,7 +22,6 @@ use cassandra_sys::cass_iterator_next;
 // use cassandra_sys::cass_iterator_get_user_type_field_name;
 // use cassandra_sys::cass_iterator_get_user_type_field_value;
 use cassandra::error::CassError;
-use cassandra::schema::keyspace_meta;
 use cassandra::value::Value;
 use cassandra::field::Field;
 use cassandra::data_type::ConstDataType;
@@ -31,10 +30,7 @@ use cassandra::schema::table_meta::TableMeta;
 use cassandra::schema::function_meta::FunctionMeta;
 use cassandra::schema::column_meta::ColumnMeta;
 use cassandra::schema::aggregate_meta::AggregateMeta;
-use cassandra::schema::{column_meta, table_meta};
 use cassandra_sys::cass_iterator_get_aggregate_meta;
-use cassandra::schema::function_meta;
-use cassandra::schema::aggregate_meta;
 use cassandra::util::Protected;
 
 ///Iterates over the  aggregate metadata entries(??)
@@ -311,7 +307,6 @@ impl Iterator for SetIterator {
     }
 }
 
-use cassandra::value;
 impl SetIterator {
     fn get_value(&mut self) -> Value {
         unsafe { Value::build(cass_iterator_get_value(self.0)) }

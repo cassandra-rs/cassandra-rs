@@ -1,11 +1,10 @@
 use std::fmt::{Debug, Display, Formatter};
 use std::{fmt, mem, slice, str};
-use std::ffi::{CStr, CString, NulError};
+use std::ffi::{CString, NulError};
 use std::error::Error;
 use std::net::AddrParseError;
 
 use cassandra_sys::CASS_OK;
-use cassandra_sys::cass_error_desc;
 use cassandra_sys::cass_error_num_arg_types;
 use cassandra_sys::cass_error_result_arg_type;
 use cassandra_sys::cass_error_result_code;
@@ -23,7 +22,6 @@ use cassandra_sys::cass_error_result_write_type;
 use cassandra::consistency::Consistency;
 use cassandra::write_type::WriteType;
 use cassandra_sys::CassError as _CassError;
-use cassandra::consistency;
 use cassandra::util::Protected;
 
 use cassandra_sys::CassErrorResult as _CassErrorResult;
@@ -320,14 +318,14 @@ impl Drop for CassErrorResult {
 }
 
 impl CassError {
-    fn pointer_to_string<'a>(c_buf: *const i8) -> &'a str {
-        let buf: &[u8] = unsafe { CStr::from_ptr(c_buf).to_bytes() };
-        str::from_utf8(buf).unwrap()
-    }
+//    fn pointer_to_string<'a>(c_buf: *const i8) -> &'a str {
+//        let buf: &[u8] = unsafe { CStr::from_ptr(c_buf).to_bytes() };
+//        str::from_utf8(buf).unwrap()
+//    }
 
     ///Gets the textual description for this error
     pub fn desc<'a>(&'a self) -> &'a str {
-        unsafe {
+         {
         	panic!("");
 //            match *self {
 //                CassError::Lib(ref err) => CassError::pointer_to_string(cass_error_desc(err.err)),

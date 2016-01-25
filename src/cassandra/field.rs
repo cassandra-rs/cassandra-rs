@@ -8,7 +8,6 @@ use std::slice;
 
 use cassandra_sys::CASS_OK;
 use cassandra_sys::cass_true;
-use cassandra_sys::cass_false;
 use cassandra_sys::CASS_ERROR_LIB_INVALID_VALUE_TYPE;
 use cassandra_sys::CASS_VALUE_TYPE_ASCII;
 use cassandra_sys::CASS_VALUE_TYPE_TEXT;
@@ -16,14 +15,19 @@ use cassandra_sys::CASS_VALUE_TYPE_VARCHAR;
 use cassandra_sys::CASS_VALUE_TYPE_UNKNOWN;
 use cassandra_sys::CASS_VALUE_TYPE_BIGINT;
 use cassandra_sys::CASS_VALUE_TYPE_BLOB;
+use cassandra_sys::CASS_VALUE_TYPE_TIME;
 use cassandra_sys::CASS_VALUE_TYPE_CUSTOM;
+use cassandra_sys::CASS_VALUE_TYPE_LAST_ENTRY;
 use cassandra_sys::CASS_VALUE_TYPE_BOOLEAN;
+use cassandra_sys::CASS_VALUE_TYPE_DATE;
 use cassandra_sys::CASS_VALUE_TYPE_COUNTER;
 use cassandra_sys::CASS_VALUE_TYPE_DECIMAL;
 use cassandra_sys::CASS_VALUE_TYPE_DOUBLE;
 use cassandra_sys::CASS_VALUE_TYPE_FLOAT;
 use cassandra_sys::CASS_VALUE_TYPE_TIMESTAMP;
 use cassandra_sys::CASS_VALUE_TYPE_INT;
+use cassandra_sys::CASS_VALUE_TYPE_SMALL_INT;
+use cassandra_sys::CASS_VALUE_TYPE_TINY_INT;
 use cassandra_sys::CASS_VALUE_TYPE_UUID;
 use cassandra_sys::CASS_VALUE_TYPE_VARINT;
 use cassandra_sys::CASS_VALUE_TYPE_INET;
@@ -52,9 +56,6 @@ use cassandra_sys::cass_iterator_from_map;
 use cassandra_sys::cass_iterator_from_collection;
 use cassandra_sys::cass_value_type;
 
-use cassandra::uuid;
-use cassandra::iterator;
-// use cassandra_sys::cass_iterator_get_meta_field_name;
 use cassandra::uuid::Uuid;
 use cassandra::value::{Value, ValueType};
 use cassandra::iterator::SetIterator;
@@ -65,35 +66,37 @@ use cassandra::error::CassError;
 use cassandra::util::Protected;
 
 
-#[repr(C)]
-#[derive(Copy,Debug,Clone)]
-#[allow(missing_docs)]
-pub enum FieldType {
-    PARTITION_KEY = 0,
-    CLUSTERING_KEY = 1,
-    REGULAR = 2,
-    COMPACT_VALUE = 3,
-    STATIC = 4,
-    UNKNOWN = 5,
-}
+//#[repr(C)]
+//#[derive(Copy,Debug,Clone)]
+//#[allow(missing_docs)]
+//pub enum FieldType {
+//    PARTITION_KEY = 0,
+//    CLUSTERING_KEY = 1,
+//    REGULAR = 2,
+//    COMPACT_VALUE = 3,
+//    STATIC = 4,
+//    UNKNOWN = 5,
+//}
 
-impl FieldType {
-    //    pub fn build(type_num: u32) -> Result<FieldType, u32> {
-    //        match type_num {
-    //            //            0 => Ok(PARTITION_KEY),
-    //            //            1 => Ok(CLUSTERING_KEY),
-    //            //            2 => Ok(REGULAR),
-    //            //            3 => Ok(COMPACT_VALUE),
-    //            //            4 => Ok(STATIC),
-    //            //            5 => Ok(UNKNOWN),
-    //            err => Err(err),
-    //        }
-    //    }
-}
+//impl FieldType {
+//    //    pub fn build(type_num: u32) -> Result<FieldType, u32> {
+//    //        match type_num {
+//    //            //            0 => Ok(PARTITION_KEY),
+//    //            //            1 => Ok(CLUSTERING_KEY),
+//    //            //            2 => Ok(REGULAR),
+//    //            //            3 => Ok(COMPACT_VALUE),
+//    //            //            4 => Ok(STATIC),
+//    //            //            5 => Ok(UNKNOWN),
+//    //            err => Err(err),
+//    //        }
+//    //    }
+//}
 
 ///A field's metadata
 pub struct Field {
+	///The field's name
     pub name: String,
+	///The field's value
     pub value: Value,
 }
 
@@ -111,8 +114,12 @@ impl Debug for Field {
             CASS_VALUE_TYPE_DOUBLE => write!(f, "DOUBLE Cassandra type"),
             CASS_VALUE_TYPE_FLOAT => write!(f, "FLOAT Cassandra type"),
             CASS_VALUE_TYPE_INT => write!(f, "INT Cassandra type"),
+            CASS_VALUE_TYPE_SMALL_INT => write!(f, "SMALL INT Cassandra type"),
+            CASS_VALUE_TYPE_TINY_INT => write!(f, "TINY INT Cassandra type"),
             CASS_VALUE_TYPE_TEXT => write!(f, "TEXT Cassandra type"),
             CASS_VALUE_TYPE_TIMESTAMP => write!(f, "TIMESTAMP Cassandra type"),
+            CASS_VALUE_TYPE_TIME => write!(f, "TIME Cassandra type"),
+            CASS_VALUE_TYPE_DATE => write!(f, "DATE Cassandra type"),
             CASS_VALUE_TYPE_UUID => write!(f, "UUID Cassandra type"),
             CASS_VALUE_TYPE_VARCHAR => write!(f, "VARCHAR: {:?}", self.get_string()),
             CASS_VALUE_TYPE_VARINT => Ok(()),
@@ -138,7 +145,7 @@ impl Debug for Field {
             }
             CASS_VALUE_TYPE_UDT => write!(f, "UDT Cassandra type"),
             CASS_VALUE_TYPE_TUPLE => write!(f, "Tuple Cassandra type"),
-            CASS_VALUE_TYPE_LASTENTRY => write!(f, "LAST_ENTRY Cassandra type"),
+            CASS_VALUE_TYPE_LAST_ENTRY => write!(f, "LAST_ENTRY Cassandra type"),
         }
     }
 }
@@ -152,11 +159,15 @@ impl Display for Field {
             CASS_VALUE_TYPE_BIGINT => write!(f, "BIGINT Cassandra type"),
             CASS_VALUE_TYPE_BLOB => write!(f, "BLOB Cassandra type"),
             CASS_VALUE_TYPE_BOOLEAN => write!(f, "BOOLEAN Cassandra type"),
+            CASS_VALUE_TYPE_DATE => write!(f, "DATE Cassandra type"),
+            CASS_VALUE_TYPE_TIME => write!(f, "TIME Cassandra type"),
             CASS_VALUE_TYPE_COUNTER => write!(f, "COUNTER Cassandra type"),
             CASS_VALUE_TYPE_DECIMAL => write!(f, "DECIMAL Cassandra type"),
             CASS_VALUE_TYPE_DOUBLE => write!(f, "DOUBLE Cassandra type"),
             CASS_VALUE_TYPE_FLOAT => write!(f, "FLOAT Cassandra type"),
             CASS_VALUE_TYPE_INT => write!(f, "INT Cassandra type"),
+            CASS_VALUE_TYPE_SMALL_INT => write!(f, "SMALL_INT Cassandra type"),
+            CASS_VALUE_TYPE_TINY_INT => write!(f, "TINY_INT Cassandra type"),
             CASS_VALUE_TYPE_TEXT => write!(f, "TEXT Cassandra type"),
             CASS_VALUE_TYPE_TIMESTAMP => write!(f, "TIMESTAMP Cassandra type"),
             CASS_VALUE_TYPE_UUID => write!(f, "UUID Cassandra type"),
@@ -184,7 +195,7 @@ impl Display for Field {
             }
             CASS_VALUE_TYPE_UDT => write!(f, "UDT Cassandra type"),
             CASS_VALUE_TYPE_TUPLE => write!(f, "Tuple Cassandra type"),
-            CASS_VALUE_TYPE_LASTENTRY => write!(f, "LAST_ENTRY Cassandra type"),
+            CASS_VALUE_TYPE_LAST_ENTRY => write!(f, "LAST_ENTRY Cassandra type"),
         }
     }
 }
@@ -323,10 +334,10 @@ impl Field {
     ///Gets the value of a uuid field
     pub fn get_uuid(&self) -> Result<Uuid, CassError> {
         unsafe {
-            let mut output: Uuid = mem::zeroed();
+            let mut uuid = mem::zeroed();
             CassError::build(cass_value_get_uuid(self.value.inner(),
-                                                 &mut output.inner()))
-                .wrap(output)
+                                                 &mut uuid))
+                .wrap(Uuid::build(uuid))
         }
     }
 

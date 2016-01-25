@@ -12,7 +12,6 @@ use cassandra_sys::cass_iterator_fields_from_function_meta;
 use cassandra_sys::CassFunctionMeta as _CassFunctionMeta;
 use cassandra_sys::CASS_OK;
 use cassandra_sys::cass_true;
-use cassandra_sys::cass_false;
 use cassandra::util::Protected;
 
 use cassandra::iterator::FieldIterator;
@@ -22,8 +21,6 @@ use std::ffi::CString;
 use cassandra::error::CassError;
 use cassandra::data_type::ConstDataType;
 use cassandra::value::Value;
-use cassandra::value;
-use cassandra::iterator;
 ///The metadata for a function
 pub struct FunctionMeta(*const _CassFunctionMeta);
 

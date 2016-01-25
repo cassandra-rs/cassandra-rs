@@ -4,7 +4,7 @@ use cassandra_sys::cass_write_type_string;
 use cassandra_sys::CassWriteType;
 
 
-///The write type of a reques
+///The write type of a request
 pub struct WriteType(pub CassWriteType);
 
 impl WriteType {

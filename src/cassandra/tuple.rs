@@ -22,9 +22,6 @@ use cassandra_sys::cass_tuple_set_int8;
 use cassandra_sys::cass_tuple_set_int16;
 #[allow(unused_imports)]
 use cassandra_sys::cass_tuple_set_decimal;
-use cassandra::collection;
-use cassandra::uuid;
-use cassandra::user_type;
 use std::ffi::CString;
 use cassandra::util::Protected;
 
@@ -35,11 +32,8 @@ use cassandra::uuid::Uuid;
 use cassandra::data_type::DataType;
 use cassandra::data_type::ConstDataType;
 use cassandra::error::CassError;
-use cassandra_sys::CassIterator as _CassIterator;
-use cassandra::value::Value;
 use cassandra::user_type::UserType;
 use cassandra::collection::Set;
-use cassandra::inet;
 
 
 ///A tuple of values.

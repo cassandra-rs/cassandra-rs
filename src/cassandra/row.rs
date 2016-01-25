@@ -21,7 +21,6 @@ use cassandra_sys::cass_false;
 
 use cassandra::error::CassError;
 use cassandra::column::Column;
-use cassandra::column;
 
 ///A collection of column values.
 pub struct Row(*const _Row);
@@ -35,7 +34,6 @@ impl Protected<*const _Row> for Row {
     }
 }
 
-use cassandra::value;
 impl Debug for Row {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         for column in self {

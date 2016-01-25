@@ -51,8 +51,6 @@ use cassandra_sys::cass_cluster_set_use_schema;
 use cassandra_sys::cass_cluster_set_whitelist_filtering;
 use cassandra_sys::cass_session_new;
 use cassandra_sys::cass_session_connect;
-use cassandra::time;
-use cassandra::policy;
 use cassandra::error::CassError;
 use cassandra::time::TimestampGen;
 use cassandra::policy::retry::RetryPolicy;

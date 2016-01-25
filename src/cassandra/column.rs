@@ -9,7 +9,6 @@ use std::slice;
 //use cassandra_sys::Enum_CassValueType_::*;
 use cassandra_sys::CASS_OK;
 use cassandra_sys::cass_true;
-use cassandra_sys::cass_false;
 use cassandra_sys::CASS_VALUE_TYPE_ASCII;
 use cassandra_sys::CASS_VALUE_TYPE_VARCHAR;
 use cassandra_sys::CASS_VALUE_TYPE_TEXT;
@@ -60,17 +59,13 @@ use cassandra_sys::cass_iterator_from_collection;
 use cassandra_sys::cass_value_type;
 use cassandra_sys::CassValue as _Value;
 use cassandra_sys::cass_iterator_fields_from_user_type;
-use cassandra::iterator;
 use cassandra::uuid::Uuid;
-use cassandra::uuid;
 use cassandra::value::ValueType;
 use cassandra::iterator::SetIterator;
 use cassandra::iterator::UserTypeIterator;
-use cassandra::iterator::ColumnIterator;
 use cassandra::inet::Inet;
 use cassandra::iterator::MapIterator;
 use cassandra::error::CassError;
-use cassandra::inet;
 use cassandra::util::Protected;
 // use decimal::d128;
 
@@ -90,23 +85,6 @@ pub enum ColumnType {
     STATIC = 4,
     ///An unknown column type. FIXME not sure if ever used
     UNKNOWN = 5,
-}
-
-impl ColumnType {
-    ///Creates a new ColumnType object
-    pub fn build(type_num: u32) -> Result<ColumnType, u32> {
-
-        // use ColumnType::*;
-        match type_num {
-            0 => Ok(ColumnType::PARTITION_KEY),
-            1 => Ok(ColumnType::CLUSTERING_KEY),
-            2 => Ok(ColumnType::REGULAR),
-            3 => Ok(ColumnType::COMPACT_VALUE),
-            4 => Ok(ColumnType::STATIC),
-            5 => Ok(ColumnType::UNKNOWN),
-            err => Err(err),
-        }
-    }
 }
 
 ///Representation of a Cassandra column
@@ -131,10 +109,14 @@ impl Debug for Column {
             CASS_VALUE_TYPE_BLOB => write!(f, "BLOB Cassandra type"),
             CASS_VALUE_TYPE_BOOLEAN => write!(f, "BOOLEAN Cassandra type"),
             CASS_VALUE_TYPE_COUNTER => write!(f, "COUNTER Cassandra type"),
+            CASS_VALUE_TYPE_DATE => write!(f, "DATE Cassandra type"),
+            CASS_VALUE_TYPE_TIME => write!(f, "TIME Cassandra type"),
             CASS_VALUE_TYPE_DECIMAL => write!(f, "DECIMAL Cassandra type"),
             CASS_VALUE_TYPE_DOUBLE => write!(f, "DOUBLE Cassandra type"),
             CASS_VALUE_TYPE_FLOAT => write!(f, "FLOAT Cassandra type"),
             CASS_VALUE_TYPE_INT => write!(f, "INT Cassandra type"),
+            CASS_VALUE_TYPE_SMALL_INT => write!(f, "SMALL_INT Cassandra type"),
+            CASS_VALUE_TYPE_TINY_INT => write!(f, "TINY_INT Cassandra type"),
             CASS_VALUE_TYPE_TEXT => write!(f, "TEXT Cassandra type"),
             CASS_VALUE_TYPE_TIMESTAMP => write!(f, "TIMESTAMP Cassandra type"),
             CASS_VALUE_TYPE_UUID => write!(f, "UUID Cassandra type"),
@@ -162,7 +144,7 @@ impl Debug for Column {
             }
             CASS_VALUE_TYPE_UDT => write!(f, "UDT Cassandra type"),
             CASS_VALUE_TYPE_TUPLE => write!(f, "Tuple Cassandra type"),
-            CASS_VALUE_TYPE_LASTENTRY => write!(f, "LAST_ENTRY Cassandra type"),
+            CASS_VALUE_TYPE_LAST_ENTRY => write!(f, "LAST_ENTRY Cassandra type"),
         }
     }
 }
@@ -180,7 +162,11 @@ impl Display for Column {
             CASS_VALUE_TYPE_DECIMAL => write!(f, "DECIMAL Cassandra type"),
             CASS_VALUE_TYPE_DOUBLE => write!(f, "DOUBLE Cassandra type"),
             CASS_VALUE_TYPE_FLOAT => write!(f, "FLOAT Cassandra type"),
+            CASS_VALUE_TYPE_DATE => write!(f, "DATE Cassandra type"),
+            CASS_VALUE_TYPE_TIME => write!(f, "TIME Cassandra type"),
             CASS_VALUE_TYPE_INT => write!(f, "INT Cassandra type"),
+            CASS_VALUE_TYPE_SMALL_INT => write!(f, "SMALL INT Cassandra type"),
+            CASS_VALUE_TYPE_TINY_INT => write!(f, "TINY INT Cassandra type"),
             CASS_VALUE_TYPE_TEXT => write!(f, "TEXT Cassandra type"),
             CASS_VALUE_TYPE_TIMESTAMP => write!(f, "TIMESTAMP Cassandra type"),
             CASS_VALUE_TYPE_UUID => write!(f, "UUID Cassandra type"),
@@ -208,7 +194,7 @@ impl Display for Column {
             }
             CASS_VALUE_TYPE_UDT => write!(f, "UDT Cassandra type"),
             CASS_VALUE_TYPE_TUPLE => write!(f, "Tuple Cassandra type"),
-            CASS_VALUE_TYPE_LASTENTRY => write!(f, "LAST_ENTRY Cassandra type"),
+            CASS_VALUE_TYPE_LAST_ENTRY => write!(f, "LAST_ENTRY Cassandra type"),
         }
     }
 }
@@ -232,10 +218,11 @@ impl Column {
     }
 
     ///Gets the inet from this column or errors if you ask for the wrong type
-    pub fn get_inet(&self, mut output: Inet) -> Result<Inet, CassError> {
+    pub fn get_inet(&self) -> Result<Inet, CassError> {
         unsafe {
-            CassError::build(cass_value_get_inet(self.0, &mut output.inner()))
-                .wrap(output)
+        	let mut inet = mem::zeroed();
+            CassError::build(cass_value_get_inet(self.0, &mut inet))
+                .wrap(Inet::build(inet))
         }
     }
 
@@ -277,7 +264,7 @@ impl Column {
 
 
                 }
-                other => panic!("Unsupported type: {:?}"), //FIXME
+                other => panic!("Unsupported type: {:?}",other), //FIXME
             }
         }
     }
@@ -325,9 +312,9 @@ impl Column {
     ///Gets the uuid from this column or errors if you ask for the wrong type
     pub fn get_uuid(&self) -> Result<Uuid, CassError> {
         unsafe {
-            let mut output: Uuid = mem::zeroed();
-            CassError::build(cass_value_get_uuid(self.0, &mut output.inner()))
-                .wrap(output)
+            let mut output = mem::zeroed();
+            CassError::build(cass_value_get_uuid(self.0, &mut output))
+                .wrap(Uuid::build(output))
         }
     }
 

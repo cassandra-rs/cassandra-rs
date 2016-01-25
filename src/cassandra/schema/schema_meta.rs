@@ -8,7 +8,6 @@ use cassandra::schema::keyspace_meta::KeyspaceMeta;
 use cassandra::iterator::KeyspaceIterator;
 use cassandra::util::Protected;
 
-use cassandra::schema::keyspace_meta;
 ///A snapshot of the schema's metadata
 pub struct SchemaMeta(*const _CassSchemaMeta);
 
@@ -29,7 +28,6 @@ impl Protected<*const _CassSchemaMeta> for SchemaMeta {
     }
 }
 
-
 impl SchemaMeta {
     ///Gets the version of the schema metadata snapshot.
     pub fn snapshot_version(&self) -> u32 {
@@ -43,6 +41,7 @@ impl SchemaMeta {
         }
     }
 
+	///Returns an iterator over the keyspaces in this schema
     pub fn keyspace_iter(&mut self) -> KeyspaceIterator {
         unsafe { KeyspaceIterator::build(cass_iterator_keyspaces_from_schema_meta(self.0)) }
     }

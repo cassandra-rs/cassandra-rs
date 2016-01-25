@@ -16,12 +16,9 @@ use cassandra_sys::cass_aggregate_meta_init_cond;
 use cassandra_sys::cass_aggregate_meta_field_by_name;
 
 use cassandra::schema::function_meta::FunctionMeta;
-use cassandra::schema::function_meta;
 use cassandra::data_type::ConstDataType;
 use cassandra::value::Value;
 use cassandra::iterator::FieldIterator;
-use cassandra::iterator;
-use cassandra::value;
 use cassandra::util::Protected;
 
 

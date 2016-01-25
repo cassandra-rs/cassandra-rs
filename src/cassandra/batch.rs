@@ -2,7 +2,6 @@ use std::ffi::NulError;
 use std::ffi::CString;
 pub use cassandra_sys::CassBatchType as BatchType;
 use cassandra::statement::Statement;
-use cassandra::policy;
 
 use cassandra_sys::CASS_OK;
 use cassandra_sys::CassError;
@@ -15,16 +14,13 @@ use cassandra_sys::cass_batch_set_serial_consistency;
 use cassandra_sys::cass_batch_set_timestamp;
 use cassandra_sys::cass_batch_free;
 use cassandra_sys::cass_batch_new;
-use cassandra_sys::CassBatchType::*;
 use cassandra_sys::CassCustomPayload as _CassCustomPayload;
 use cassandra::policy::retry::RetryPolicy;
 use cassandra::consistency::Consistency;
 use cassandra_sys::cass_custom_payload_free;
 use cassandra_sys::cass_custom_payload_new;
 use cassandra_sys::cass_custom_payload_set;
-use cassandra::consistency;
 pub use cassandra_sys::CassBatch as _Batch;
-use cassandra::statement;
 use cassandra::util::Protected;
 
 

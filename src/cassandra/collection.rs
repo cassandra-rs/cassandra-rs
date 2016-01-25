@@ -36,13 +36,13 @@ use cassandra::data_type::ConstDataType;
 use cassandra::uuid::Uuid;
 use cassandra::util::Protected;
 
-#[repr(C)]
-#[derive(Debug,Copy,Clone)]
-pub enum CassCollectionType {
-    CASS_COLLECTION_TYPE_LIST,
-    CASS_COLLECTION_TYPE_MAP,
-    CASS_COLLECTION_TYPE_SET,
-}
+//#[repr(C)]
+//#[derive(Debug,Copy,Clone)]
+//pub enum CassCollectionType {
+//    CASS_COLLECTION_TYPE_LIST,
+//    CASS_COLLECTION_TYPE_MAP,
+//    CASS_COLLECTION_TYPE_SET,
+//}
 
 ///A generic Cassandra collection that needs to go away
 pub trait CassCollection {
