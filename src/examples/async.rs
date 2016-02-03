@@ -15,15 +15,15 @@ static INSERT_QUERY: &'static str = "INSERT INTO examples.async (key, bln, flt, 
 fn insert_into_async(session: &mut Session, key: String) -> Result<Vec<ResultFuture>, CassError> {
     let mut futures = Vec::<ResultFuture>::new();
     for i in 0..NUM_CONCURRENT_REQUESTS {
-        let key: String = key.clone() + &i.to_string();
+        let key:&str = &(key.clone() + &i.to_string());
         let mut statement = Statement::new(INSERT_QUERY, 6);
 
-        try!(statement.bind_string(0, &key));
-        try!(statement.bind_bool(1, i % 2 == 0));
-        try!(statement.bind_float(2, i as f32 / 2.0f32));
-        try!(statement.bind_double(3, i as f64 / 200.0));
-        try!(statement.bind_int32(4, i as i32 * 10));
-        try!(statement.bind_int64(5, i as i64 * 100));
+        try!(statement.bind(0, key));
+        try!(statement.bind(1, i % 2 == 0));
+        try!(statement.bind(2, i as f32 / 2.0f32));
+        try!(statement.bind(3, i as f64 / 200.0));
+        try!(statement.bind(4, i as i32 * 10));
+        try!(statement.bind(5, i as i64 * 100));
 
         let future = session.execute_statement(&statement);
         futures.push(future);

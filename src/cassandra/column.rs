@@ -60,6 +60,7 @@ use cassandra_sys::cass_value_type;
 use cassandra_sys::CassValue as _Value;
 use cassandra_sys::cass_iterator_fields_from_user_type;
 use cassandra::uuid::Uuid;
+use cassandra::value::Value;
 use cassandra::value::ValueType;
 use cassandra::iterator::SetIterator;
 use cassandra::iterator::UserTypeIterator;
@@ -69,23 +70,23 @@ use cassandra::error::CassError;
 use cassandra::util::Protected;
 // use decimal::d128;
 
-#[repr(C)]
-#[derive(Copy,Debug,Clone)]
-///The type of Cassandra column being referenced
-pub enum ColumnType {
-    ///A Cassandra partition key column
-    PARTITION_KEY = 0,
-    ///A Cassandra clustering key column
-    CLUSTERING_KEY = 1,
-    ///A "normal" column
-    REGULAR = 2,
-    ///For compact tables?
-    COMPACT_VALUE = 3,
-    ///A Cassandra static column
-    STATIC = 4,
-    ///An unknown column type. FIXME not sure if ever used
-    UNKNOWN = 5,
-}
+//#[repr(C)]
+//#[derive(Copy,Debug,Clone)]
+//  ///The type of Cassandra column being referenced
+//pub enum ColumnType {
+//    ///A Cassandra partition key column
+//    PARTITION_KEY = 0,
+//    ///A Cassandra clustering key column
+//    CLUSTERING_KEY = 1,
+//    ///A "normal" column
+//    REGULAR = 2,
+//    ///For compact tables?
+//    COMPACT_VALUE = 3,
+//    ///A Cassandra static column
+//    STATIC = 4,
+//    ///An unknown column type. FIXME not sure if ever used
+//    UNKNOWN = 5,
+//}
 
 ///Representation of a Cassandra column
 pub struct Column(*const _Value);
@@ -199,17 +200,29 @@ impl Display for Column {
     }
 }
 
-trait AsTypedColumn {
-    type T;
-    fn get(col: Column) -> Result<Self::T, CassError>;
-}
+//pub trait AsTypedColumn {
+//    type T;
+//    fn get(T) -> Result<Self::T, CassError>;
+//}
 
-impl AsTypedColumn for bool {
-    type T = Self;
-    fn get(col: Column) -> Result<Self, CassError> {
+impl From<Column> for Result<bool,CassError> {
+    fn from(col:Column) -> Result<bool,CassError> {
         col.get_bool()
     }
 }
+
+//impl Into<Result<bool,CassError>> for Column {
+//    fn into(self) -> Result<bool,CassError> {
+//        self.get_bool()
+//    }
+//}
+
+//impl From<Column> for bool {
+//    fn from(col:Column) -> bool {
+//        col.get_bool().unwrap()
+//    }
+//}
+
 
 impl Column {
     ///Gets the type of this column.

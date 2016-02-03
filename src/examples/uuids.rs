@@ -13,16 +13,16 @@ static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.log (ke
 
 fn insert_into_log(session: &mut Session, key: &str, time: Uuid, entry: &str) -> Result<CassResult, CassError> {
     let mut statement = Statement::new(INSERT_QUERY, 3);
-    statement.bind_string(0, key).unwrap();
-    statement.bind_uuid(1, time).unwrap();
-    statement.bind_string(2, &entry).unwrap();
+    try!(statement.bind(0, key));
+    try!(statement.bind(1, time));
+    try!(statement.bind(2, entry));
     let mut future = session.execute_statement(&statement);
     future.wait()
 }
 
 fn select_from_log(session: &mut Session, key: &str) -> Result<CassResult, CassError> {
     let mut statement = Statement::new(SELECT_QUERY, 1);
-    statement.bind_string(0, &key).unwrap();
+    try!(statement.bind(0, key));
     let mut future = session.execute_statement(&statement);
     let results = try!(future.wait());
     Ok(results)

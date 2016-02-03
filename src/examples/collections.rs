@@ -12,7 +12,7 @@ static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.collect
 
 fn insert_into_collections(session: &mut Session, key: &str, items: Vec<&str>) -> Result<CassResult, CassError> {
     let mut statement = Statement::new(INSERT_QUERY, 2);
-    try!(statement.bind_string(0, key));
+    try!(statement.bind(0, key));
     let mut set = Set::new(2);
     for item in items {
         try!(set.append_string(&item));
@@ -23,7 +23,7 @@ fn insert_into_collections(session: &mut Session, key: &str, items: Vec<&str>) -
 
 fn select_from_collections(session: &mut Session, key: &str) -> Result<(), CassError> {
     let mut statement = Statement::new(SELECT_QUERY, 1);
-    try!(statement.bind_string(0, key));
+    try!(statement.bind(0, key));
     let result = try!(session.execute_statement(&statement).wait());
     println!("{:?}", result);
     for row in result.iter() {

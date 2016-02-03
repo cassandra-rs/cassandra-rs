@@ -18,11 +18,11 @@ fn insert_into_paging(session: &mut Session /* , uuid_gen:&mut UuidGen */)
     let mut results = Vec::with_capacity(NUM_CONCURRENT_REQUESTS as usize);
 
     for i in 0..NUM_CONCURRENT_REQUESTS {
-        let key = i.to_string();
+        let key:&str = &(i.to_string());
         println!("key ={:?}", key);
         let mut statement = Statement::new(INSERT_QUERY, 2);
-        try!(statement.bind_string(0, &key));
-        try!(statement.bind_string(1, &key));
+        try!(statement.bind(0, key));
+        try!(statement.bind(1, key));
         let future = session.execute_statement(&statement);
         futures.push(future);
     }
@@ -38,7 +38,7 @@ fn select_from_paging(session: &mut Session) -> Result<(), CassError> {
     let mut statement = Statement::new(SELECT_QUERY, 0);
     statement.set_paging_size(100).unwrap();
 
-    // FIXME must understaned statement lifetime better for paging
+    // FIXME must understand statement lifetime better for paging
     while has_more_pages {
         let result = try!(session.execute_statement(&statement).wait());
         // println!("{:?}", result);

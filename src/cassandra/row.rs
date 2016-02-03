@@ -56,6 +56,45 @@ impl Display for Row {
     }
 }
 
+pub trait AsRustType<T> {
+	fn get_col(&self, index: u64) -> Result<T, CassError>;
+}
+
+impl AsRustType<bool> for Row {
+	fn get_col(&self, index:u64) -> Result<bool,CassError> {
+		let col = try!(self.get_column(index));
+		col.get_bool()
+	}
+}
+
+impl AsRustType<f64> for Row {
+	fn get_col(&self, index:u64) -> Result<f64,CassError> {
+		let col = try!(self.get_column(index));
+		col.get_double()
+	}
+}
+
+impl AsRustType<f32> for Row {
+	fn get_col(&self, index:u64) -> Result<f32,CassError> {
+		let col = try!(self.get_column(index));
+		col.get_float()
+	}
+}
+
+impl AsRustType<i64> for Row {
+	fn get_col(&self, index:u64) -> Result<i64,CassError> {
+		let col = try!(self.get_column(index));
+		col.get_i64()
+	}
+}
+
+impl AsRustType<i32> for Row {
+	fn get_col(&self, index:u64) -> Result<i32,CassError> {
+		let col = try!(self.get_column(index));
+		col.get_i32()
+	}
+}
+
 impl Row {
     ///Get a particular column by index
     pub fn get_column(&self, index: u64) -> Result<Column, CassError> {

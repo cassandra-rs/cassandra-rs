@@ -91,10 +91,109 @@ impl Drop for Statement {
 }
 
 ///All Rust types that can be bound to a cassandra statement
-///FIXME not yet implemented
-pub enum CassBindable {
+/////FIXME not yet implemented
+//pub enum CassBindable {
+//
+//}
 
+///Any rust type that can have a default bind implementation
+pub trait BindRustType<T> {
+	///binds a rust type to C* by index
+	fn bind(&mut self, index: u64, value: T) -> Result<&mut Statement, CassError>;
+	///binds a rust type to C* by name
+	fn bind_by_name(&mut self, col:&str, value: T) -> Result<&mut Statement, CassError>;
 }
+
+impl BindRustType<bool> for Statement {
+	fn bind(&mut self, index:u64, value: bool) -> Result<&mut Self,CassError> {
+		self.bind_bool(index, value)
+	}
+
+	fn bind_by_name(&mut self, col:&str, value: bool) -> Result<&mut Self,CassError> {
+		self.bind_bool_by_name(col, value)
+	}
+}
+
+impl BindRustType<f32> for Statement {
+	fn bind(&mut self, index:u64, value: f32) -> Result<&mut Self,CassError> {
+		self.bind_float(index, value)
+	}
+
+	fn bind_by_name(&mut self, col:&str, value: f32) -> Result<&mut Self,CassError> {
+		self.bind_float_by_name(col, value)
+	}
+}
+
+impl BindRustType<f64> for Statement {
+	fn bind(&mut self, index:u64, value: f64) -> Result<&mut Self,CassError> {
+		self.bind_double(index, value)
+	}
+
+	fn bind_by_name(&mut self, col:&str, value: f64) -> Result<&mut Self,CassError> {
+		self.bind_double_by_name(col, value)
+	}
+}
+
+impl BindRustType<i32> for Statement {
+	fn bind(&mut self, index:u64, value: i32) -> Result<&mut Self,CassError> {
+		self.bind_int32(index, value)
+	}
+
+	fn bind_by_name(&mut self, col:&str, value: i32) -> Result<&mut Self,CassError> {
+		self.bind_int32_by_name(col, value)
+	}
+}
+
+impl BindRustType<i64> for Statement {
+	fn bind(&mut self, index:u64, value: i64) -> Result<&mut Self,CassError> {
+		self.bind_int64(index, value)
+	}
+
+	fn bind_by_name(&mut self, col:&str, value: i64) -> Result<&mut Self,CassError> {
+		self.bind_int64_by_name(col, value)
+	}
+}
+
+impl<'a> BindRustType<&'a str> for Statement {
+	fn bind(&mut self, index:u64, value: &str) -> Result<&mut Self,CassError> {
+		self.bind_string(index, &value)
+	}
+
+	fn bind_by_name(&mut self, col:&str, value: &str) -> Result<&mut Self,CassError> {
+		self.bind_string_by_name(col, &value)
+	}
+}
+
+impl BindRustType<Set> for Statement {
+	fn bind(&mut self, index:u64, value: Set) -> Result<&mut Self,CassError> {
+		self.bind_set(index, value)
+	}
+
+	fn bind_by_name(&mut self, col:&str, value: Set) -> Result<&mut Self,CassError> {
+		self.bind_set_by_name(col, value)
+	}
+}
+
+impl BindRustType<Uuid> for Statement {
+	fn bind(&mut self, index:u64, value: Uuid) -> Result<&mut Self,CassError> {
+		self.bind_uuid(index, value)
+	}
+
+	fn bind_by_name(&mut self, col:&str, value: Uuid) -> Result<&mut Self,CassError> {
+		self.bind_uuid_by_name(col, value)
+	}
+}
+
+impl BindRustType<Map> for Statement {
+	fn bind(&mut self, index:u64, value: Map) -> Result<&mut Self,CassError> {
+		self.bind_map(index, value)
+	}
+
+	fn bind_by_name(&mut self, col:&str, value: Map) -> Result<&mut Self,CassError> {
+		self.bind_map_by_name(col, value)
+	}
+}
+
 
 impl Statement {
     ///Creates a new query statement.
@@ -109,12 +208,12 @@ impl Statement {
         cass_statement_free(self.0)
     }
 
-    ///Binds an arbitrary CassBindable type to a cassandra statement
-    ///FIXME not yet implemented
-    pub fn bind(&mut self, params: Vec<CassBindable>) {
-        let _ = params;
-        unimplemented!();
-    }
+//    ///Binds an arbitrary CassBindable type to a cassandra statement
+//    ///FIXME not yet implemented
+//    pub fn bind(&mut self, params: Vec<CassBindable>) {
+//        let _ = params;
+//        unimplemented!();
+//    }
 
     ///Adds a key index specifier to this a statement.
     ///When using token-aware routing, this can be used to tell the driver which

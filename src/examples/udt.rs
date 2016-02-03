@@ -93,7 +93,7 @@ fn insert_into_udt(session: &Session) -> Result<(), CassandraError> {
     address.set_int32_by_name("zip", id.0.time_and_version as i32).unwrap();
     address.set_collection_by_name("phone", phone).unwrap();
 
-    statement.bind_uuid(0, id).unwrap();
+    statement.bind(0, id).unwrap();
     statement.bind_user_type(1, address).unwrap();
     let mut future = session.execute_statement(&statement);
     match future.wait() {

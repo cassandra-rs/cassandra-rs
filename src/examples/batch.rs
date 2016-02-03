@@ -19,8 +19,8 @@ fn insert_into_batch_with_prepared(session: &mut Session, pairs: Vec<Pair>) -> R
     let mut batch = Batch::new(CASS_BATCH_TYPE_LOGGED);
     for pair in pairs {
         let mut statement = prepared.bind();
-        try!(statement.bind_string(0, pair.key));
-        try!(statement.bind_string(1, pair.value));
+        try!(statement.bind(0, pair.key));
+        try!(statement.bind(1, pair.value));
         match batch.add_statement(&statement) {
             Ok(_) => {}
             Err(err) => panic!("{:?}",err),

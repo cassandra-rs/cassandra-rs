@@ -21,12 +21,12 @@ struct Basic {
 
 fn insert_into_basic(session: &mut Session, key: &str, basic: &Basic) -> Result<CassResult, CassError> {
     let mut statement = Statement::new(INSERT_QUERY, 6);
-    try!(statement.bind_string(0, key));
-    try!(statement.bind_bool(1, basic.bln));
-    try!(statement.bind_float(2, basic.flt));
-    try!(statement.bind_double(3, basic.dbl));
-    try!(statement.bind_int32(4, basic.i32));
-    try!(statement.bind_int64(5, basic.i64));
+    try!(statement.bind(0, key));
+    try!(statement.bind(1, basic.bln));
+    try!(statement.bind(2, basic.flt));
+    try!(statement.bind(3, basic.dbl));
+    try!(statement.bind(4, basic.i32));
+    try!(statement.bind(5, basic.i64));
     Ok(try!(session.execute_statement(&statement).wait()))
 }
 
@@ -39,11 +39,11 @@ fn select_from_basic(session: &mut Session, key: &str) -> Result<Option<Basic>, 
         None => Ok(None),
         Some(row) => {
             Ok(Some(Basic {
-                bln: try!(try!(row.get_column(1)).get_bool()),
-                dbl: try!(try!(row.get_column(2)).get_double()),
-                flt: try!(try!(row.get_column(3)).get_float()),
-                i32: try!(try!(row.get_column(4)).get_i32()),
-                i64: try!(try!(row.get_column(5)).get_i64()),
+                bln: try!(row.get_col(1)),
+                dbl: try!(row.get_col(2)),
+                flt: try!(row.get_col(3)),
+                i32: try!(row.get_col(4)),
+                i64: try!(row.get_col(5)),
             }))
         }
     }

@@ -15,21 +15,21 @@ static INSERT_QUERY: &'static str = "INSERT INTO examples.maps (key, items) VALU
 
 fn insert_into_maps(session: &mut Session, key: &str, items: Vec<Pair>) -> Result<(), CassError> {
     let mut statement = Statement::new(INSERT_QUERY, 2);
-    statement.bind_string(0, key).unwrap();
+    statement.bind(0, key).unwrap();
 
     let mut map = Map::new(5);
     for item in items {
         map.append_string(item.key).unwrap();
         map.append_int32(item.value).unwrap();
     }
-    try!(statement.bind_map(1, map));
+    try!(statement.bind(1, map));
     try!(session.execute_statement(&statement).wait());
     Ok(())
 }
 
 fn select_from_maps(session: &mut Session, key: &str) -> Result<(), CassError> {
     let mut statement = Statement::new(SELECT_QUERY, 1);
-    try!(statement.bind_string(0, key));
+    try!(statement.bind(0, key));
     let result = try!(session.execute_statement(&statement).wait());
     // println!("{:?}", result);
     for row in result.iter() {

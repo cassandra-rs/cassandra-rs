@@ -23,18 +23,13 @@ struct Basic {
 fn insert_into_basic(session: &mut Session, key: &str, basic: &mut Basic) -> Result<(), CassError> {
     println!("Creating statement");
     let mut statement = Statement::new(INSERT_QUERY, 6);
-    statement.bind_string(0, key)
-             .unwrap()
-             .bind_bool(1, basic.bln)
-             .unwrap()
-             .bind_float(2, basic.flt)
-             .unwrap()
-             .bind_double(3, basic.dbl)
-             .unwrap()
-             .bind_int32(4, basic.i32)
-             .unwrap()
-             .bind_int64(5, basic.i64)
-             .unwrap();
+    try!(statement.bind(0, key));
+	try!(statement.bind(1, basic.bln));
+	try!(statement.bind(2, basic.flt));
+	try!(statement.bind(3, basic.dbl));
+	try!(statement.bind(4, basic.i32));
+	try!(statement.bind(5, basic.i64));
+	
     println!("Executing insert statement");
     try!(session.execute_statement(&statement).wait());
     println!("Insert execute OK");
@@ -51,11 +46,11 @@ fn select_from_basic(session: &mut Session, prepared: &PreparedStatement, key: &
         Ok(result) => {
             println!("{:?}", result);
             for row in result.iter() {
-                basic.bln = try!(try!(row.get_column(1)).get_bool());
-                basic.dbl = try!(try!(row.get_column(2)).get_double());
-                basic.flt = try!(try!(row.get_column(3)).get_float());
-                basic.i32 = try!(try!(row.get_column(4)).get_i32());
-                basic.i64 = try!(try!(row.get_column(5)).get_i64());
+                basic.bln = try!(row.get_col(1));
+                basic.dbl = try!(row.get_col(2));
+                basic.flt = try!(row.get_col(3));
+                basic.i32 = try!(row.get_col(4));
+                basic.i64 = try!(row.get_col(5));
             }
             Ok(())
         }
