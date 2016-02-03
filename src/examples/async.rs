@@ -1,22 +1,19 @@
 extern crate num;
+#[macro_use(stmt)]
 extern crate cassandra;
 use std::str::FromStr;
 
 use cassandra::*;
 
 static NUM_CONCURRENT_REQUESTS: usize = 100;
-static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
-                                        \'SimpleStrategy\', \'replication_factor\': \'1\' };";
-static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.async (key text, bln boolean, flt float, dbl \
-                                     double, i32 int, i64 bigint, PRIMARY KEY (key));";
-static INSERT_QUERY: &'static str = "INSERT INTO examples.async (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, \
-                                     ?);";
 
 fn insert_into_async(session: &mut Session, key: String) -> Result<Vec<ResultFuture>, CassError> {
     let mut futures = Vec::<ResultFuture>::new();
     for i in 0..NUM_CONCURRENT_REQUESTS {
-        let key:&str = &(key.clone() + &i.to_string());
-        let mut statement = Statement::new(INSERT_QUERY, 6);
+        let key: &str = &(key.clone() + &i.to_string());
+        let mut statement = stmt!("INSERT INTO examples.async (key, bln, flt, dbl, i32, i64)
+        	VALUES (?, ?, \
+                                   ?, ?, ?, ?);");
 
         try!(statement.bind(0, key));
         try!(statement.bind(1, i % 2 == 0));
@@ -25,7 +22,7 @@ fn insert_into_async(session: &mut Session, key: String) -> Result<Vec<ResultFut
         try!(statement.bind(4, i as i32 * 10));
         try!(statement.bind(5, i as i64 * 100));
 
-        let future = session.execute_statement(&statement);
+        let future = session.execute(&statement);
         futures.push(future);
     }
     Ok(futures)
@@ -36,9 +33,13 @@ pub fn main() {
     cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
     match cluster.connect() {
         Ok(ref mut session) => {
-            session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
-            session.execute(CREATE_TABLE, 0).wait().unwrap();
-            session.execute("USE examples", 0).wait().unwrap();
+            session.execute(&stmt!("CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
+                                        \'SimpleStrategy\', \'replication_factor\': \'1\' };")).wait().unwrap();
+            session.execute(&stmt!("CREATE TABLE IF NOT EXISTS examples.async(key text, bln boolean, flt float, dbl \
+                                    double, i32 int, i64 bigint, PRIMARY KEY (key));"))
+                   .wait()
+                   .unwrap();
+            session.execute(&stmt!("USE examples")).wait().unwrap();
             let futures = insert_into_async(session, "test".to_owned()).unwrap();
             for mut future in futures {
                 println!("insert result={:?}", future.wait());

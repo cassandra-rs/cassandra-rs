@@ -234,7 +234,7 @@ pub struct SessionFuture(*mut _Future);
 
 impl SessionFuture {
     ///blocks until the session connects or errors out
-    pub fn wait(&mut self) -> Result<(),CassError> {
+    pub fn wait(&mut self) -> Result<(), CassError> {
         unsafe {
             cass_future_wait(self.0);
             self.error_code()

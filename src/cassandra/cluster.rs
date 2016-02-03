@@ -173,7 +173,7 @@ impl Cluster {
             let connect_future = cass_session_connect(session, self.0);
             match cass_future_error_code(connect_future) {
                 CASS_OK => Ok(Session(session)),
-                err => Err(CassError::build(err)),    	
+                err => Err(CassError::build(err)),
             }
         }
     }
@@ -185,10 +185,7 @@ impl Cluster {
     ///Default: version 4
     /// ```
     pub fn set_protocol_version(&mut self, protocol_version: CqlProtocol) -> Result<&mut Self, CassError> {
-        unsafe {
-            CassError::build(cass_cluster_set_protocol_version(self.0, protocol_version as i32))
-                .wrap(self)
-        }
+        unsafe { CassError::build(cass_cluster_set_protocol_version(self.0, protocol_version as i32)).wrap(self) }
     }
 
     /// Sets the number of IO threads. This is the number of threads
@@ -235,10 +232,7 @@ impl Cluster {
     /// Default: 1
     /// ```
     pub fn set_core_connections_per_host(&mut self, num_connections: u32) -> Result<&mut Self, CassError> {
-        unsafe {
-            CassError::build(cass_cluster_set_core_connections_per_host(self.0, num_connections))
-                .wrap(self)
-        }
+        unsafe { CassError::build(cass_cluster_set_core_connections_per_host(self.0, num_connections)).wrap(self) }
     }
 
     /// Sets the maximum number of connections made to each server in each
@@ -248,10 +242,7 @@ impl Cluster {
     /// Default: 2
     /// ```
     pub fn set_max_connections_per_host(&mut self, num_connections: u32) -> Result<&mut Self, CassError> {
-        unsafe {
-            CassError::build(cass_cluster_set_max_connections_per_host(self.0, num_connections))
-                .wrap(self)
-        }
+        unsafe { CassError::build(cass_cluster_set_max_connections_per_host(self.0, num_connections)).wrap(self) }
     }
 
     ///Sets the amount of time to wait before attempting to reconnect.
@@ -273,10 +264,7 @@ impl Cluster {
     /// ```
     ///Default: 1
     pub fn set_max_concurrent_creation(&mut self, num_connections: u32) -> Result<&mut Self, CassError> {
-        unsafe {
-            CassError::build(cass_cluster_set_max_concurrent_creation(self.0, num_connections))
-                .wrap(self)
-        }
+        unsafe { CassError::build(cass_cluster_set_max_concurrent_creation(self.0, num_connections)).wrap(self) }
     }
 
     ///Sets the threshold for the maximum number of concurrent requests in-flight
@@ -286,10 +274,7 @@ impl Cluster {
     /// ```
     /// Default: 100
     pub fn set_max_concurrent_requests_threshold(&mut self, num_requests: u32) -> Result<&mut Self, CassError> {
-        unsafe {
-            CassError::build(cass_cluster_set_max_concurrent_requests_threshold(self.0, num_requests))
-                .wrap(self)
-        }
+        unsafe { CassError::build(cass_cluster_set_max_concurrent_requests_threshold(self.0, num_requests)).wrap(self) }
     }
 
     ///Sets the maximum number of requests processed by an IO worker
@@ -298,10 +283,7 @@ impl Cluster {
     /// ```
     ///Default: 128
     pub fn set_max_requests_per_flush(&mut self, num_requests: u32) -> Result<&mut Self, CassError> {
-        unsafe {
-            CassError::build(cass_cluster_set_max_requests_per_flush(self.0, num_requests))
-                .wrap(self)
-        }
+        unsafe { CassError::build(cass_cluster_set_max_requests_per_flush(self.0, num_requests)).wrap(self) }
     }
 
     /// Sets the high water mark for the number of bytes outstanding
@@ -311,10 +293,7 @@ impl Cluster {
     /// ```
     /// Default: 64KB
     pub fn set_write_bytes_high_water_mark(&mut self, num_bytes: u32) -> Result<&mut Self, CassError> {
-        unsafe {
-            CassError::build(cass_cluster_set_write_bytes_high_water_mark(self.0, num_bytes))
-                .wrap(self)
-        }
+        unsafe { CassError::build(cass_cluster_set_write_bytes_high_water_mark(self.0, num_bytes)).wrap(self) }
     }
 
     /// Sets the low water mark for the number of bytes outstanding
@@ -324,10 +303,7 @@ impl Cluster {
     /// ```
     /// Default: 32KB
     pub fn set_write_bytes_low_water_mark(&mut self, num_bytes: u32) -> Result<&mut Self, CassError> {
-        unsafe {
-            CassError::build(cass_cluster_set_write_bytes_low_water_mark(self.0, num_bytes))
-                .wrap(self)
-        }
+        unsafe { CassError::build(cass_cluster_set_write_bytes_low_water_mark(self.0, num_bytes)).wrap(self) }
     }
 
     ///Sets the high water mark for the number of requests queued waiting
@@ -338,10 +314,7 @@ impl Cluster {
     /// ```
     /// Default: 256
     pub fn set_pending_requests_high_water_mark(&mut self, num_requests: u32) -> Result<&mut Self, CassError> {
-        unsafe {
-            CassError::build(cass_cluster_set_pending_requests_high_water_mark(self.0, num_requests))
-                .wrap(self)
-        }
+        unsafe { CassError::build(cass_cluster_set_pending_requests_high_water_mark(self.0, num_requests)).wrap(self) }
     }
 
     ///Sets the low water mark for the number of requests queued waiting
@@ -352,10 +325,7 @@ impl Cluster {
     ///```
     /// Default: 128
     pub fn set_pending_requests_low_water_mark(&mut self, num_requests: u32) -> Result<&mut Self, CassError> {
-        unsafe {
-            CassError::build(cass_cluster_set_pending_requests_low_water_mark(self.0, num_requests))
-                .wrap(self)
-        }
+        unsafe { CassError::build(cass_cluster_set_pending_requests_low_water_mark(self.0, num_requests)).wrap(self) }
     }
 
     /// Sets the timeout for connecting to a node.
@@ -398,7 +368,7 @@ impl Cluster {
         unsafe {
             cass_cluster_set_load_balance_round_robin(self.0);
             self
-            
+
         }
     }
 
@@ -417,12 +387,12 @@ impl Cluster {
                                         -> Result<&Self, CassError> {
         unsafe {
             CassError::build({
-                                 let local_dc = CString::new(local_dc).unwrap();
-                                 cass_cluster_set_load_balance_dc_aware(self.0,
-                                                                        local_dc.as_ptr(),
-                                                                        used_hosts_per_remote_dc,
-                                                                        allow_remote_dcs_for_local_cl)
-                             })
+                let local_dc = CString::new(local_dc).unwrap();
+                cass_cluster_set_load_balance_dc_aware(self.0,
+                                                       local_dc.as_ptr(),
+                                                       used_hosts_per_remote_dc,
+                                                       allow_remote_dcs_for_local_cl)
+            })
                 .wrap(self)
         }
     }
@@ -442,7 +412,7 @@ impl Cluster {
     ///the base load balancing policy.
     pub fn set_token_aware_routing(&mut self, enabled: bool) -> &Self {
         unsafe {
-            cass_cluster_set_token_aware_routing(self.0, if enabled {cass_true} else {cass_false});
+            cass_cluster_set_token_aware_routing(self.0, if enabled { cass_true } else { cass_false });
         }
         self
     }
@@ -458,7 +428,7 @@ impl Cluster {
     /// placement (token-aware) before considering the latency.
     pub fn set_latency_aware_routing(&mut self, enabled: bool) -> &Self {
         unsafe {
-            cass_cluster_set_latency_aware_routing(self.0, if enabled {cass_true} else {cass_false});
+            cass_cluster_set_latency_aware_routing(self.0, if enabled { cass_true } else { cass_false });
         }
         self
     }
@@ -515,7 +485,7 @@ impl Cluster {
     ///<b>Default:</b> true (disables Nagel's algorithm).
     pub fn set_tcp_nodelay(&mut self, enable: bool) -> &Self {
         unsafe {
-            cass_cluster_set_tcp_nodelay(self.0, if enable {cass_true} else {cass_false});
+            cass_cluster_set_tcp_nodelay(self.0, if enable { cass_true } else { cass_false });
         }
         self
     }
@@ -526,7 +496,9 @@ impl Cluster {
     ///Default: false (disabled).
     pub fn set_tcp_keepalive(&mut self, enable: bool, delay: Duration) -> &Self {
         unsafe {
-            cass_cluster_set_tcp_keepalive(self.0, if enable {cass_true} else {cass_false}, delay.num_seconds() as u32);
+            cass_cluster_set_tcp_keepalive(self.0,
+                                           if enable { cass_true } else { cass_false },
+                                           delay.num_seconds() as u32);
         }
         self
     }
@@ -596,7 +568,7 @@ impl Cluster {
     ///Default: true (enabled).
     pub fn set_use_schema(&mut self, enabled: bool) -> &Self {
         unsafe {
-            cass_cluster_set_use_schema(self.0, if enabled {cass_true} else {cass_false});
+            cass_cluster_set_use_schema(self.0, if enabled { cass_true } else { cass_false });
         }
         self
     }

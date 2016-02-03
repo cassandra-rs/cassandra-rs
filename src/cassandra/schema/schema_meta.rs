@@ -36,12 +36,10 @@ impl SchemaMeta {
 
     ///Gets the keyspace metadata for the provided keyspace name.
     pub fn get_keyspace_by_name(&self, keyspace: &str) -> KeyspaceMeta {
-        unsafe {
-            KeyspaceMeta::build(cass_schema_meta_keyspace_by_name(self.0, keyspace.as_ptr() as *const i8))
-        }
+        unsafe { KeyspaceMeta::build(cass_schema_meta_keyspace_by_name(self.0, keyspace.as_ptr() as *const i8)) }
     }
 
-	///Returns an iterator over the keyspaces in this schema
+    ///Returns an iterator over the keyspaces in this schema
     pub fn keyspace_iter(&mut self) -> KeyspaceIterator {
         unsafe { KeyspaceIterator::build(cass_iterator_keyspaces_from_schema_meta(self.0)) }
     }

@@ -13,4 +13,3 @@ impl Protected<*const _CassMetrics> for SessionMetrics {
         SessionMetrics(inner)
     }
 }
-

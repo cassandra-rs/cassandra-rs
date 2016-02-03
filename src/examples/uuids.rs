@@ -1,3 +1,4 @@
+#[macro_use(stmt)]
 extern crate cassandra;
 
 use cassandra::*;
@@ -12,18 +13,18 @@ static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.log (ke
                                      PRIMARY KEY (key, time));";
 
 fn insert_into_log(session: &mut Session, key: &str, time: Uuid, entry: &str) -> Result<CassResult, CassError> {
-    let mut statement = Statement::new(INSERT_QUERY, 3);
+    let mut statement = stmt!(INSERT_QUERY);
     try!(statement.bind(0, key));
     try!(statement.bind(1, time));
     try!(statement.bind(2, entry));
-    let mut future = session.execute_statement(&statement);
+    let mut future = session.execute(&statement);
     future.wait()
 }
 
 fn select_from_log(session: &mut Session, key: &str) -> Result<CassResult, CassError> {
-    let mut statement = Statement::new(SELECT_QUERY, 1);
+    let mut statement = stmt!(SELECT_QUERY);
     try!(statement.bind(0, key));
-    let mut future = session.execute_statement(&statement);
+    let mut future = session.execute(&statement);
     let results = try!(future.wait());
     Ok(results)
 }
@@ -34,8 +35,8 @@ fn main() {
     cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
     match cluster.connect() {
         Ok(ref mut session) => {
-            session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
-            session.execute(CREATE_TABLE, 0).wait().unwrap();
+            session.execute(&stmt!(CREATE_KEYSPACE)).wait().unwrap();
+            session.execute(&stmt!(CREATE_TABLE)).wait().unwrap();
             println!("uuid_gen = {}", uuid_gen.gen_time());
             insert_into_log(session, "test", uuid_gen.gen_time(), "Log entry #1").unwrap();
             insert_into_log(session, "test", uuid_gen.gen_time(), "Log entry #2").unwrap();

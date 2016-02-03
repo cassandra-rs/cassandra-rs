@@ -1,25 +1,10 @@
+#[macro_use(stmt)]
 extern crate cassandra;
 
 use std::str::FromStr;
 
 use cassandra::*;
 
-static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
-                                        \'SimpleStrategy\', \'replication_factor\': \'1\' };";
-static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.schema_meta (key text, value bigint, PRIMARY \
-                                     KEY (key));";
-
-const CREATE_FUNC1: &'static str = "CREATE FUNCTION IF NOT EXISTS examples.avg_state(state tuple<int, bigint>, val \
-                                    int) CALLED ON NULL INPUT RETURNS tuple<int, bigint> LANGUAGE java AS 'if (val != \
-                                    null) { state.setInt(0, state.getInt(0) + 1); state.setLong(1, state.getLong(1) + \
-                                    val.intValue()); } return state;';";
-const CREATE_FUNC2: &'static str = "CREATE FUNCTION IF NOT EXISTS examples.avg_final (state tuple<int, bigint>) \
-                                    CALLED ON NULL INPUT RETURNS double LANGUAGE java AS 'double r = 0; if \
-                                    (state.getInt(0) == 0) return null; r = state.getLong(1); r /= state.getInt(0); \
-                                    return Double.valueOf(r);';";
-
-const CREATE_AGGREGATE: &'static str = "CREATE AGGREGATE examples.average(int) SFUNC avg_state STYPE tuple<int, \
-                                        bigint> FINALFUNC avg_final INITCOND(0, 0);";
 
 fn print_function(session: &Session, keyspace: &str, function: &str, arguments: Vec<&str>) -> Result<(), CassError> {
     let schema_meta = session.get_schema_meta();
@@ -39,7 +24,7 @@ fn print_function_meta(meta: FunctionMeta, indent: i32) {
     println!("");
 }
 
-//fn print_schema_map(map: MapIterator) {
+// fn print_schema_map(map: MapIterator) {
 //    let mut is_first = true;
 //
 //    print!("{{ ");
@@ -53,9 +38,9 @@ fn print_function_meta(meta: FunctionMeta, indent: i32) {
 //        is_first = false;
 //    }
 //    print!(" }}");
-//}
+// }
 
-//fn print_schema_set(set: SetIterator) {
+// fn print_schema_set(set: SetIterator) {
 //    let mut is_first = true;
 //    print!("{{ ");
 //    for item in set {
@@ -66,7 +51,7 @@ fn print_function_meta(meta: FunctionMeta, indent: i32) {
 //        is_first = false;
 //    }
 //    print!(" }}");
-//}
+// }
 
 fn print_aggregate_meta(meta: AggregateMeta, indent: i32) {
     print_indent(indent);
@@ -86,38 +71,39 @@ fn print_meta_fields(iterator: FieldIterator, indent: i32) {
 }
 
 fn print_schema_value(value: Value) {
-//FIXME
+    // FIXME
     let value = match value.get_type() {
-//        CASS_VALUE_TYPE_INT => value.get_i32().unwrap().to_string(),
-//        CASS_VALUE_TYPE_BOOL => if value.get_bool().unwrap() { "true".to_owned() } else { "false".to_owned() },
-//        CASS_VALUE_TYPE_DOUBLE => value.get_dbl().unwrap().to_string(),
-//
-//        CASS_VALUE_TYPE_TEXT | CASS_VALUE_TYPE_ASCII | CASS_VALUE_TYPE_VARCHAR => value.get_string().unwrap().to_string(),
-//        CASS_VALUE_TYPE_UUID => value.get_uuid().unwrap().to_string(),
-//        CASS_VALUE_TYPE_LIST => {
-//            print_schema_set(value.get_set().unwrap());
-//            "".to_owned()
-//        }
-//        CASS_VALUE_TYPE_MAP => {
-//            print_schema_map(value.get_map().unwrap());
-//            "".to_owned()
-//        }
-//        CASS_VALUE_TYPE_BLOB => {
-//            print_schema_bytes(value.get_bytes().unwrap());
-//            "".to_owned()
-//        }
+        //        CASS_VALUE_TYPE_INT => value.get_i32().unwrap().to_string(),
+        //    CASS_VALUE_TYPE_BOOL => if value.get_bool().unwrap() { "true".to_owned() } else { "false".to_owned() },
+        //        CASS_VALUE_TYPE_DOUBLE => value.get_dbl().unwrap().to_string(),
+        //
+        // CASS_VALUE_TYPE_TEXT | CASS_VALUE_TYPE_ASCII | CASS_VALUE_TYPE_VARCHAR =>
+        // value.get_string().unwrap().to_string(),
+        //        CASS_VALUE_TYPE_UUID => value.get_uuid().unwrap().to_string(),
+        //        CASS_VALUE_TYPE_LIST => {
+        //            print_schema_set(value.get_set().unwrap());
+        //            "".to_owned()
+        //        }
+        //        CASS_VALUE_TYPE_MAP => {
+        //            print_schema_map(value.get_map().unwrap());
+        //            "".to_owned()
+        //        }
+        //        CASS_VALUE_TYPE_BLOB => {
+        //            print_schema_bytes(value.get_bytes().unwrap());
+        //            "".to_owned()
+        //        }
         _ => "<unhandled type>".to_owned(),
     };
     print!("{}", value);
 
 }
 
-//fn print_schema_bytes(bytes: &[u8]) {
+// fn print_schema_bytes(bytes: &[u8]) {
 //    print!("0x");
 //    for byte in bytes {
 //        print!("{}", byte);
 //    }
-//}
+// }
 
 fn main() {
     let foo = cass();
@@ -129,14 +115,31 @@ fn cass() -> Result<(), CassError> {
     cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
     cluster.set_load_balance_round_robin();
 
+    let create_ks = stmt!("CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
+                           \'SimpleStrategy\', \'replication_factor\': \'1\' };");
+    let create_table = stmt!("CREATE TABLE IF NOT EXISTS examples.schema_meta (key text, value bigint, PRIMARY KEY \
+                              (key));");
+
+    let create_func1 = stmt!("CREATE FUNCTION IF NOT EXISTS examples.avg_state(state tuple<int, bigint>, val int) \
+                              CALLED ON NULL INPUT RETURNS tuple<int, bigint> LANGUAGE java AS 'if (val != null) { \
+                              state.setInt(0, state.getInt(0) + 1); state.setLong(1, state.getLong(1) + \
+                              val.intValue()); } return state;';");
+    let create_func2 = stmt!("CREATE FUNCTION IF NOT EXISTS examples.avg_final (state tuple<int, bigint>) CALLED ON \
+                              NULL INPUT RETURNS double LANGUAGE java AS 'double r = 0; if (state.getInt(0) == 0) \
+                              return null; r = state.getLong(1); r /= state.getInt(0); return Double.valueOf(r);';");
+
+    let create_aggregate = stmt!("CREATE AGGREGATE examples.average(int) SFUNC avg_state STYPE tuple<int, bigint> \
+                                  FINALFUNC avg_final INITCOND(0, 0);");
+
+
     match cluster.connect() {
         Ok(ref mut session) => {
-            try!(session.execute(CREATE_KEYSPACE, 0).wait());
+            try!(session.execute(&create_ks).wait());
             print_keyspace(&session, "examples");
-            try!(session.execute(CREATE_TABLE, 0).wait());
-            try!(session.execute(CREATE_FUNC1, 0).wait());
-            try!(session.execute(CREATE_FUNC2, 0).wait());
-            try!(session.execute(CREATE_AGGREGATE, 0).wait());
+            try!(session.execute(&create_table).wait());
+            try!(session.execute(&create_func1).wait());
+            try!(session.execute(&create_func2).wait());
+            try!(session.execute(&create_aggregate).wait());
             let schema = &session.get_schema_meta();
             let keyspace = schema.get_keyspace_by_name("examples");
             let mut table = keyspace.table_by_name("schema_meta").unwrap();

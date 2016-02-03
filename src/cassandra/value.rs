@@ -92,7 +92,7 @@ pub struct ValueType(_CassValueType);
 impl ValueType {
     #[allow(missing_docs)]
     pub fn build(typ: _CassValueType) -> Self {
-		ValueType(typ)
+        ValueType(typ)
     }
 }
 
@@ -113,7 +113,9 @@ impl Debug for Value {
             match self.get_type().0 {
                 CASS_VALUE_TYPE_UNKNOWN => write!(f, "{:?}", "unknown"),
                 CASS_VALUE_TYPE_CUSTOM => write!(f, "{:?}", "custom"),
-                CASS_VALUE_TYPE_ASCII | CASS_VALUE_TYPE_TEXT | CASS_VALUE_TYPE_VARCHAR=> write!(f, "{:?}", self.get_string().unwrap()),
+                CASS_VALUE_TYPE_ASCII | CASS_VALUE_TYPE_TEXT | CASS_VALUE_TYPE_VARCHAR => {
+                    write!(f, "{:?}", self.get_string().unwrap())
+                }
                 CASS_VALUE_TYPE_DECIMAL => write!(f, "{:?}", self.get_bytes().unwrap()),
                 CASS_VALUE_TYPE_COUNTER => write!(f, "{:?}", self.get_i64().unwrap()),
                 CASS_VALUE_TYPE_BIGINT => write!(f, "{:?}", self.get_i64().unwrap()),
@@ -159,7 +161,7 @@ impl Debug for Value {
                     Ok(())
                 }
                 // FIXME
-                //err => write!(f, "{:?}", err),
+                // err => write!(f, "{:?}", err),
             }
         }
     }
@@ -231,7 +233,7 @@ impl Value {
     //            let slice = Vec::from_raw_parts(output, output_size as usize, output_size as usize);
     //            let r = CassError::build(result);
     //            r.wrap(slice)
-    //       
+    //
     //    }
 
     /// Gets the name of the keyspace.
@@ -264,7 +266,7 @@ impl Value {
 
     ///Returns true if a specified value is null.
     pub fn is_null(&self) -> bool {
-        unsafe { cass_value_is_null(self.0) == cass_true}
+        unsafe { cass_value_is_null(self.0) == cass_true }
     }
 
     ///Returns true if a specified value is a collection.
@@ -365,8 +367,7 @@ impl Value {
     pub fn get_inet(&self) -> Result<Inet, CassError> {
         unsafe {
             let output: Inet = mem::zeroed();
-            CassError::build(cass_value_get_inet(self.0, &mut Inet::inner(&output)))
-                .wrap(output)
+            CassError::build(cass_value_get_inet(self.0, &mut Inet::inner(&output))).wrap(output)
         }
     }
 
@@ -430,8 +431,7 @@ impl Value {
     pub fn get_uuid(&self) -> Result<Uuid, CassError> {
         unsafe {
             let mut uuid = mem::zeroed();
-            CassError::build(cass_value_get_uuid(self.0, &mut uuid))
-                .wrap(Uuid::build(uuid))
+            CassError::build(cass_value_get_uuid(self.0, &mut uuid)).wrap(Uuid::build(uuid))
         }
     }
 }

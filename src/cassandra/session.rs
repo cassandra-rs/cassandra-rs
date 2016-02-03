@@ -68,19 +68,13 @@ impl Session {
 
     /// Connects a session.
     pub fn connect(self, cluster: &Cluster) -> SessionFuture {
-        unsafe {
-            SessionFuture::build(cass_session_connect(self.0, cluster.inner()))
-        }
+        unsafe { SessionFuture::build(cass_session_connect(self.0, cluster.inner())) }
     }
 
     ///Connects a session and sets the keyspace.
     pub fn connect_keyspace(&self, cluster: &Cluster, keyspace: &str) -> Result<Future, NulError> {
         let keyspace = try!(CString::new(keyspace));
-        unsafe {
-            Ok(Future::build(cass_session_connect_keyspace(self.0,
-                                                                             cluster.inner(),
-                                                                             keyspace.as_ptr())))
-        }
+        unsafe { Ok(Future::build(cass_session_connect_keyspace(self.0, cluster.inner(), keyspace.as_ptr()))) }
     }
 
     ///Closes the session instance, outputs a close future which can
@@ -98,13 +92,13 @@ impl Session {
         }
     }
 
-    ///Execute a query or bound statement.
-    pub fn execute(&self, statement: &str, parameter_count: u64) -> ResultFuture {
-        unsafe {
-            ResultFuture::build(cass_session_execute(self.0,
-                                                                        Statement::new(statement, parameter_count).inner()))
-        }
-    }
+    //    ///Execute a query or bound statement.
+    //    pub fn execute(&self, statement: &str, parameter_count: u64) -> ResultFuture {
+    //        unsafe {
+    //            ResultFuture::build(cass_session_execute(self.0,
+    //            Statement::new(statement, parameter_count).inner()))
+    //        }
+    //    }
 
     /// Execute a batch statement.
     pub fn execute_batch(&self, batch: Batch) -> ResultFuture {
@@ -112,10 +106,8 @@ impl Session {
     }
 
     /// Execute a statement.
-    pub fn execute_statement(&self, statement: &Statement) -> ResultFuture {
-        unsafe {
-            ResultFuture::build(cass_session_execute(self.0, statement.inner()))
-        }
+    pub fn execute(&self, statement: &Statement) -> ResultFuture {
+        unsafe { ResultFuture::build(cass_session_execute(self.0, statement.inner())) }
     }
 
     ///Gets a snapshot of this session's schema metadata. The returned

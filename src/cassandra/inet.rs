@@ -13,7 +13,7 @@ use cassandra_sys::cass_inet_from_string;
 use cassandra_sys::CASS_OK;
 use std::net::SocketAddr;
 use std::default::Default;
-use std::fmt::{Debug,Formatter};
+use std::fmt::{Debug, Formatter};
 use std::fmt;
 use cassandra::util::Protected;
 
@@ -26,10 +26,9 @@ use cassandra::error::CassError;
 pub struct Inet(_Inet);
 
 impl Debug for Inet {
-	    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         unimplemented!();
     }
-
 }
 
 impl Protected<_Inet> for Inet {

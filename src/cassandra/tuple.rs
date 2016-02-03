@@ -108,8 +108,7 @@ impl Tuple {
     ///Sets a "boolean" in a tuple at the specified index.
     pub fn set_bool(&mut self, index: u64, value: bool) -> Result<(), CassError> {
         unsafe {
-            CassError::build(cass_tuple_set_bool(self.0, index, if value { cass_true } else { cass_false }))
-                .wrap(())
+            CassError::build(cass_tuple_set_bool(self.0, index, if value { cass_true } else { cass_false })).wrap(())
         }
     }
 
@@ -124,39 +123,25 @@ impl Tuple {
 
     ///Sets a "blob", "varint" or "custom" in a tuple at the specified index.
     pub fn set_bytes(&mut self, index: u64, value: Vec<u8>) -> Result<(), CassError> {
-        unsafe {
-            CassError::build(cass_tuple_set_bytes(self.0, index, value.as_ptr(), value.len() as u64))
-                .wrap(())
-        }
+        unsafe { CassError::build(cass_tuple_set_bytes(self.0, index, value.as_ptr(), value.len() as u64)).wrap(()) }
     }
 
     ///Sets a "uuid" or "timeuuid" in a tuple at the specified index.
     pub fn set_uuid<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
         where S: Into<Uuid> {
-        unsafe {
-            CassError::build(cass_tuple_set_uuid(self.0, index, value.into().inner()))
-                .wrap(())
-        }
+        unsafe { CassError::build(cass_tuple_set_uuid(self.0, index, value.into().inner())).wrap(()) }
     }
 
     ///Sets an "inet" in a tuple at the specified index.
     pub fn set_inet(&mut self, index: u64, value: SocketAddr) -> Result<(), CassError> {
         let inet = AsInet::as_cass_inet(&value);
-        unsafe {
-            CassError::build(cass_tuple_set_inet(self.0, index, inet.inner()))
-                .wrap(())
-        }
+        unsafe { CassError::build(cass_tuple_set_inet(self.0, index, inet.inner())).wrap(()) }
     }
 
     ///Sets a "list", "map" or "set" in a tuple at the specified index.
     pub fn set_collection<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
         where S: Into<Set> {
-        unsafe {
-            CassError::build(cass_tuple_set_collection(self.0,
-                                                       index,
-                                                       value.into().inner()))
-                .wrap(())
-        }
+        unsafe { CassError::build(cass_tuple_set_collection(self.0, index, value.into().inner())).wrap(()) }
     }
 
     ///Sets a "tuple" in a tuple at the specified index.
@@ -166,10 +151,7 @@ impl Tuple {
 
     ///Sets a "udt" in a tuple at the specified index.
     pub fn set_user_type(&mut self, index: u64, value: &UserType) -> Result<(), CassError> {
-        unsafe {
-            CassError::build(cass_tuple_set_user_type(self.0, index,value.inner()))
-                .wrap(())
-        }
+        unsafe { CassError::build(cass_tuple_set_user_type(self.0, index, value.inner())).wrap(()) }
     }
 }
 

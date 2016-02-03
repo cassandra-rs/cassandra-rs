@@ -1,3 +1,4 @@
+#[macro_use(stmt)]
 extern crate cassandra;
 
 use std::str::FromStr;
@@ -18,12 +19,12 @@ fn insert_into_paging(session: &mut Session /* , uuid_gen:&mut UuidGen */)
     let mut results = Vec::with_capacity(NUM_CONCURRENT_REQUESTS as usize);
 
     for i in 0..NUM_CONCURRENT_REQUESTS {
-        let key:&str = &(i.to_string());
+        let key: &str = &(i.to_string());
         println!("key ={:?}", key);
         let mut statement = Statement::new(INSERT_QUERY, 2);
         try!(statement.bind(0, key));
         try!(statement.bind(1, key));
-        let future = session.execute_statement(&statement);
+        let future = session.execute(&statement);
         futures.push(future);
     }
 
@@ -40,7 +41,7 @@ fn select_from_paging(session: &mut Session) -> Result<(), CassError> {
 
     // FIXME must understand statement lifetime better for paging
     while has_more_pages {
-        let result = try!(session.execute_statement(&statement).wait());
+        let result = try!(session.execute(&statement).wait());
         // println!("{:?}", result);
         for row in result.iter() {
             match try!(row.get_column(0)).get_string() {
@@ -71,9 +72,9 @@ fn main() {
 
     match cluster.connect() {
         Ok(ref mut session) => {
-            session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
-            session.execute(CREATE_TABLE, 0).wait().unwrap();
-            session.execute("USE examples", 0).wait().unwrap();
+            session.execute(&stmt!(CREATE_KEYSPACE)).wait().unwrap();
+            session.execute(&stmt!(CREATE_TABLE)).wait().unwrap();
+            session.execute(&stmt!("USE examples")).wait().unwrap();
             let results = insert_into_paging(session /* , uuid_gen */).unwrap();
             for result in results {
                 print!("{:?}", result.unwrap().wait().unwrap());

@@ -37,9 +37,7 @@ impl Protected<*const _Row> for Row {
 impl Debug for Row {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         for column in self {
-            try!(write!(f,
-                        "{:?}\t",
-                        Value::build(column.inner())));
+            try!(write!(f, "{:?}\t", Value::build(column.inner())));
         }
         Ok(())
     }
@@ -48,51 +46,51 @@ impl Debug for Row {
 impl Display for Row {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         for column in self {
-            try!(write!(f,
-                        "{}\t",
-                        Value::build(column.inner())));
+            try!(write!(f, "{}\t", Value::build(column.inner())));
         }
         Ok(())
     }
 }
 
+///Auto inferencing conversion from c* to rust
 pub trait AsRustType<T> {
-	fn get_col(&self, index: u64) -> Result<T, CassError>;
+    ///convert while reading cassandra columns
+    fn get_col(&self, index: u64) -> Result<T, CassError>;
 }
 
 impl AsRustType<bool> for Row {
-	fn get_col(&self, index:u64) -> Result<bool,CassError> {
-		let col = try!(self.get_column(index));
-		col.get_bool()
-	}
+    fn get_col(&self, index: u64) -> Result<bool, CassError> {
+        let col = try!(self.get_column(index));
+        col.get_bool()
+    }
 }
 
 impl AsRustType<f64> for Row {
-	fn get_col(&self, index:u64) -> Result<f64,CassError> {
-		let col = try!(self.get_column(index));
-		col.get_double()
-	}
+    fn get_col(&self, index: u64) -> Result<f64, CassError> {
+        let col = try!(self.get_column(index));
+        col.get_double()
+    }
 }
 
 impl AsRustType<f32> for Row {
-	fn get_col(&self, index:u64) -> Result<f32,CassError> {
-		let col = try!(self.get_column(index));
-		col.get_float()
-	}
+    fn get_col(&self, index: u64) -> Result<f32, CassError> {
+        let col = try!(self.get_column(index));
+        col.get_float()
+    }
 }
 
 impl AsRustType<i64> for Row {
-	fn get_col(&self, index:u64) -> Result<i64,CassError> {
-		let col = try!(self.get_column(index));
-		col.get_i64()
-	}
+    fn get_col(&self, index: u64) -> Result<i64, CassError> {
+        let col = try!(self.get_column(index));
+        col.get_i64()
+    }
 }
 
 impl AsRustType<i32> for Row {
-	fn get_col(&self, index:u64) -> Result<i32,CassError> {
-		let col = try!(self.get_column(index));
-		col.get_i32()
-	}
+    fn get_col(&self, index: u64) -> Result<i32, CassError> {
+        let col = try!(self.get_column(index));
+        col.get_i32()
+    }
 }
 
 impl Row {
@@ -160,9 +158,7 @@ impl<'a> Iterator for &'a RowIterator {
 impl Display for RowIterator {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         for item in self {
-            try!(write!(f,
-                        "{}\t",
-                        Value::build(item.inner())));
+            try!(write!(f, "{}\t", Value::build(item.inner())));
         }
         Ok(())
     }

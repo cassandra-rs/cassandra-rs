@@ -104,8 +104,7 @@ impl DataType {
         where S: Into<String> {
         unsafe {
             let type_name = CString::new(type_name.into()).unwrap();
-            CassError::build(cass_data_type_set_type_name(data_type.0, type_name.as_ptr()))
-                .wrap(())
+            CassError::build(cass_data_type_set_type_name(data_type.0, type_name.as_ptr())).wrap(())
         }
     }
 
@@ -130,8 +129,7 @@ impl DataType {
         where S: Into<String> {
         unsafe {
             let keyspace = CString::new(keyspace.into()).unwrap();
-            CassError::build(cass_data_type_set_keyspace(data_type.0, keyspace.as_ptr()))
-                .wrap(())
+            CassError::build(cass_data_type_set_keyspace(data_type.0, keyspace.as_ptr())).wrap(())
         }
     }
 
@@ -156,8 +154,7 @@ impl DataType {
         where S: Into<String> {
         unsafe {
             let class_name = CString::new(class_name.into()).unwrap();
-            CassError::build(cass_data_type_set_class_name(self.0, class_name.as_ptr()))
-                .wrap(())
+            CassError::build(cass_data_type_set_class_name(self.0, class_name.as_ptr())).wrap(())
         }
     }
 
@@ -217,8 +214,7 @@ impl DataType {
         where S: Into<String> {
         unsafe {
             let name = CString::new(name.into()).unwrap();
-            CassError::build(cass_data_type_add_sub_type_by_name(self.0, name.as_ptr(), sub_data_type.0))
-                .wrap(())
+            CassError::build(cass_data_type_add_sub_type_by_name(self.0, name.as_ptr(), sub_data_type.0)).wrap(())
         }
     }
 
@@ -227,10 +223,7 @@ impl DataType {
     ///<b>Note:</b> Only valid for tuple and collection data types.
     pub fn add_sub_value_type<S>(&self, sub_value_type: ValueType) -> Result<(), CassError>
         where S: Into<String> {
-        unsafe {
-            CassError::build(cass_data_type_add_sub_value_type(self.0, sub_value_type.inner()))
-                .wrap(())
-        }
+        unsafe { CassError::build(cass_data_type_add_sub_value_type(self.0, sub_value_type.inner())).wrap(()) }
     }
 
     ///Adds a sub-data type to a tuple or collection using a value type.
@@ -240,10 +233,7 @@ impl DataType {
         where S: Into<String> {
         unsafe {
             let name = CString::new(name).unwrap();
-            CassError::build(cass_data_type_add_sub_value_type_by_name(self.0,
-                                                                       name.as_ptr(),
-                                                                       typ.inner()))
-                .wrap(())
+            CassError::build(cass_data_type_add_sub_value_type_by_name(self.0, name.as_ptr(), typ.inner())).wrap(())
         }
 
     }

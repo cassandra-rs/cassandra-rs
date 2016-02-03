@@ -6,7 +6,7 @@ use std::fmt;
 use std::str;
 use std::slice;
 
-//use cassandra_sys::Enum_CassValueType_::*;
+// use cassandra_sys::Enum_CassValueType_::*;
 use cassandra_sys::CASS_OK;
 use cassandra_sys::cass_true;
 use cassandra_sys::CASS_VALUE_TYPE_ASCII;
@@ -60,7 +60,6 @@ use cassandra_sys::cass_value_type;
 use cassandra_sys::CassValue as _Value;
 use cassandra_sys::cass_iterator_fields_from_user_type;
 use cassandra::uuid::Uuid;
-use cassandra::value::Value;
 use cassandra::value::ValueType;
 use cassandra::iterator::SetIterator;
 use cassandra::iterator::UserTypeIterator;
@@ -70,10 +69,10 @@ use cassandra::error::CassError;
 use cassandra::util::Protected;
 // use decimal::d128;
 
-//#[repr(C)]
-//#[derive(Copy,Debug,Clone)]
+// #[repr(C)]
+// #[derive(Copy,Debug,Clone)]
 //  ///The type of Cassandra column being referenced
-//pub enum ColumnType {
+// pub enum ColumnType {
 //    ///A Cassandra partition key column
 //    PARTITION_KEY = 0,
 //    ///A Cassandra clustering key column
@@ -86,7 +85,7 @@ use cassandra::util::Protected;
 //    STATIC = 4,
 //    ///An unknown column type. FIXME not sure if ever used
 //    UNKNOWN = 5,
-//}
+// }
 
 ///Representation of a Cassandra column
 pub struct Column(*const _Value);
@@ -200,28 +199,28 @@ impl Display for Column {
     }
 }
 
-//pub trait AsTypedColumn {
+// pub trait AsTypedColumn {
 //    type T;
 //    fn get(T) -> Result<Self::T, CassError>;
-//}
+// }
 
-impl From<Column> for Result<bool,CassError> {
-    fn from(col:Column) -> Result<bool,CassError> {
+impl From<Column> for Result<bool, CassError> {
+    fn from(col: Column) -> Result<bool, CassError> {
         col.get_bool()
     }
 }
 
-//impl Into<Result<bool,CassError>> for Column {
+// impl Into<Result<bool,CassError>> for Column {
 //    fn into(self) -> Result<bool,CassError> {
 //        self.get_bool()
 //    }
-//}
+// }
 
-//impl From<Column> for bool {
+// impl From<Column> for bool {
 //    fn from(col:Column) -> bool {
 //        col.get_bool().unwrap()
 //    }
-//}
+// }
 
 
 impl Column {
@@ -233,9 +232,8 @@ impl Column {
     ///Gets the inet from this column or errors if you ask for the wrong type
     pub fn get_inet(&self) -> Result<Inet, CassError> {
         unsafe {
-        	let mut inet = mem::zeroed();
-            CassError::build(cass_value_get_inet(self.0, &mut inet))
-                .wrap(Inet::build(inet))
+            let mut inet = mem::zeroed();
+            CassError::build(cass_value_get_inet(self.0, &mut inet)).wrap(Inet::build(inet))
         }
     }
 
@@ -277,7 +275,7 @@ impl Column {
 
 
                 }
-                other => panic!("Unsupported type: {:?}",other), //FIXME
+                other => panic!("Unsupported type: {:?}", other), //FIXME
             }
         }
     }
@@ -326,8 +324,7 @@ impl Column {
     pub fn get_uuid(&self) -> Result<Uuid, CassError> {
         unsafe {
             let mut output = mem::zeroed();
-            CassError::build(cass_value_get_uuid(self.0, &mut output))
-                .wrap(Uuid::build(output))
+            CassError::build(cass_value_get_uuid(self.0, &mut output)).wrap(Uuid::build(output))
         }
     }
 
@@ -355,9 +352,7 @@ impl Column {
     pub fn use_type_iter(&self) -> Result<UserTypeIterator, CassError> {
         unsafe {
             match self.get_type().inner() {
-                CASS_VALUE_TYPE_UDT => {
-                    Ok(UserTypeIterator::build(cass_iterator_fields_from_user_type(self.0)))
-                }
+                CASS_VALUE_TYPE_UDT => Ok(UserTypeIterator::build(cass_iterator_fields_from_user_type(self.0))),
                 _ => Err(CassError::build(CASS_ERROR_LIB_INVALID_VALUE_TYPE)),
             }
         }

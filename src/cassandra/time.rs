@@ -2,8 +2,8 @@ use cassandra_sys::cass_time_from_epoch;
 use cassandra_sys::cass_timestamp_gen_free;
 use cassandra_sys::cass_timestamp_gen_monotonic_new;
 use cassandra_sys::cass_timestamp_gen_server_side_new;
-use cassandra_sys::cass_date_from_epoch;
-use cassandra_sys::cass_date_time_to_epoch;
+// use cassandra_sys::cass_date_from_epoch;
+// use cassandra_sys::cass_date_time_to_epoch;
 use time::Duration;
 use cassandra::util::Protected;
 
@@ -25,8 +25,8 @@ impl Protected<*mut _TimestampGen> for TimestampGen {
 }
 
 
-///Cassandra representation of the number of days since epoch
-pub struct Date(u32);
+// ///Cassandra representation of the number of days since epoch
+// pub struct Date(u32);
 
 ///Converts a unix timestamp (in seconds) to the Cassandra "time" type. The "time" type
 ///represents the number of nanoseconds since midnight (range 0 to 86399999999999).
@@ -63,17 +63,17 @@ impl TimestampGen {
     //    }
 }
 
-///Converts a unix timestamp (in seconds) to the Cassandra "date" type. The "date" type
-///represents the number of days since the Epoch (1970-01-01) with the Epoch centered at
-///the value 2^31.
-fn date_from_epoch(epoch_secs: Duration) -> Date {
-    unsafe { Date(cass_date_from_epoch(epoch_secs.num_days())) }
-}
+// Converts a unix timestamp (in seconds) to the Cassandra "date" type. The "date" type
+// represents the number of days since the Epoch (1970-01-01) with the Epoch centered at
+// the value 2^31.
+// fn date_from_epoch(epoch_secs: Duration) -> Date {
+//    unsafe { Date(cass_date_from_epoch(epoch_secs.num_days())) }
+// }
 
-///Combines the Cassandra "date" and "time" types to Epoch time in seconds.
-fn date_time_to_epoch(date: Date, time: Time) -> Duration {
-    unsafe { Duration::seconds(cass_date_time_to_epoch(date.0, time.0)) }
-}
+// Combines the Cassandra "date" and "time" types to Epoch time in seconds.
+// fn date_time_to_epoch(date: Date, time: Time) -> Duration {
+//   unsafe { Duration::seconds(cass_date_time_to_epoch(date.0, time.0)) }
+// }
 
 impl Drop for TimestampGen {
     fn drop(&mut self) {

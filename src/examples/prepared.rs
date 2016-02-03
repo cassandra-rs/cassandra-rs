@@ -1,3 +1,4 @@
+#[macro_use(stmt)]
 extern crate cassandra;
 use std::str::FromStr;
 
@@ -22,16 +23,16 @@ struct Basic {
 
 fn insert_into_basic(session: &mut Session, key: &str, basic: &mut Basic) -> Result<(), CassError> {
     println!("Creating statement");
-    let mut statement = Statement::new(INSERT_QUERY, 6);
+    let mut statement = stmt!(INSERT_QUERY);
     try!(statement.bind(0, key));
-	try!(statement.bind(1, basic.bln));
-	try!(statement.bind(2, basic.flt));
-	try!(statement.bind(3, basic.dbl));
-	try!(statement.bind(4, basic.i32));
-	try!(statement.bind(5, basic.i64));
-	
+    try!(statement.bind(1, basic.bln));
+    try!(statement.bind(2, basic.flt));
+    try!(statement.bind(3, basic.dbl));
+    try!(statement.bind(4, basic.i32));
+    try!(statement.bind(5, basic.i64));
+
     println!("Executing insert statement");
-    try!(session.execute_statement(&statement).wait());
+    try!(session.execute(&statement).wait());
     println!("Insert execute OK");
     Ok(())
 }
@@ -41,7 +42,7 @@ fn select_from_basic(session: &mut Session, prepared: &PreparedStatement, key: &
                      -> Result<(), CassError> {
     let mut statement = prepared.bind();
     try!(statement.bind_string(0, key));
-    let mut future = session.execute_statement(&statement);
+    let mut future = session.execute(&statement);
     match future.wait() {
         Ok(result) => {
             println!("{:?}", result);
@@ -81,9 +82,9 @@ fn main() {
                 i64: 0,
             };
             println!("Executing create keyspace");
-            session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
+            session.execute(&stmt!(CREATE_KEYSPACE)).wait().unwrap();
             println!("Creating table");
-            session.execute(CREATE_TABLE, 0).wait().unwrap();
+            session.execute(&stmt!(CREATE_TABLE)).wait().unwrap();
 
             println!("Basic insertions");
             insert_into_basic(session, "prepared_test", &mut input).unwrap();

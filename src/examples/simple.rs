@@ -1,10 +1,11 @@
+#[macro_use(stmt)]
 extern crate cassandra;
 use cassandra::*;
 use std::str::FromStr;
 
 
 fn main() {
-    let query = "SELECT keyspace_name FROM system_schema.keyspaces;";
+    let query = stmt!("SELECT keyspace_name FROM system_schema.keyspaces;");
     let col_name = "keyspace_name";
 
     let contact_points = ContactPoints::from_str("127.0.0.1").unwrap();
@@ -15,7 +16,7 @@ fn main() {
 
     match cluster.connect() {
         Ok(ref mut session) => {
-            let result = session.execute(query, 0).wait().unwrap();
+            let result = session.execute(&query).wait().unwrap();
             println!("{}", result);
             for row in result.iter() {
                 println!("ks name = {}", row.get_column_by_name(col_name));

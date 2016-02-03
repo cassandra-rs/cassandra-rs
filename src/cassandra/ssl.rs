@@ -75,8 +75,7 @@ impl Ssl {
     pub fn set_private_key(&mut self, key: &str, password: *const i8) -> Result<&Self, CassError> {
         unsafe {
             let key = CString::new(key).unwrap();
-            CassError::build(cass_ssl_set_private_key(self.0, key.as_ptr(), password))
-                .wrap(self)
+            CassError::build(cass_ssl_set_private_key(self.0, key.as_ptr(), password)).wrap(self)
         }
     }
 }

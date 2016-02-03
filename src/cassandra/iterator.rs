@@ -184,14 +184,14 @@ impl Iterator for FieldIterator {
 //    pub fn new(_type: _CassIteratorType) -> Self { CassIteratorType(_type) }
 // }
 
-//impl Protected<*mut _Batch> for CassIterator {
+// impl Protected<*mut _Batch> for CassIterator {
 //    fn inner(&self) -> *mut _CassIterator {
 //        self.0
 //    }
 //    fn build(inner: *mut _CassIterator) -> Self {
 //        CassIterator(inner)
 //    }
-//}
+// }
 
 impl Protected<*mut _CassIterator> for UserTypeIterator {
     fn inner(&self) -> *mut _CassIterator {

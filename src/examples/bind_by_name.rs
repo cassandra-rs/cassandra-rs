@@ -1,3 +1,4 @@
+#[macro_use(stmt)]
 extern crate cassandra;
 use cassandra::*;
 use std::str::FromStr;
@@ -31,14 +32,14 @@ fn insert_into_basic(session: &mut Session, prepared: PreparedStatement, key: &s
     try!(statement.bind_by_name("i32", basic.i32));
     try!(statement.bind_by_name("i64", basic.i64));
 
-    session.execute_statement(&statement).wait()
+    session.execute(&statement).wait()
 }
 
 unsafe fn select_from_basic(session: &mut Session, prepared: &PreparedStatement, key: &str, basic: &mut Basic)
                             -> Result<CassResult, CassError> {
     let mut statement = prepared.bind();
     statement.bind_string_by_name("key", key).unwrap();
-    match session.execute_statement(&statement).wait() {
+    match session.execute(&statement).wait() {
         Ok(result) => {
             println!("{:?}", result);
             for row in result.iter() {
@@ -75,8 +76,8 @@ fn main() {
                     i32: 0,
                     i64: 0,
                 };
-                session.execute(CREATE_KEYSPACE, 0).wait().unwrap();
-                session.execute(CREATE_TABLE, 0).wait().unwrap();
+                session.execute(&stmt!(CREATE_KEYSPACE)).wait().unwrap();
+                session.execute(&stmt!(CREATE_TABLE)).wait().unwrap();
                 match session.prepare(INSERT_QUERY).unwrap().wait() {
                     Ok(insert_prepared) => {
                         insert_into_basic(session, insert_prepared, "prepared_test", input).unwrap();

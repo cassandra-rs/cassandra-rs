@@ -18,7 +18,6 @@ use cassandra::value::ValueType;
 use cassandra::data_type::ConstDataType;
 use cassandra::row::Row;
 use cassandra::error::CassError;
-use cassandra::row;
 
 use cassandra_sys::CassResult as _CassResult;
 use cassandra_sys::CassIterator as _CassIterator;

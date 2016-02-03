@@ -72,14 +72,14 @@ impl Drop for CustomPayload {
 }
 
 // ///Type of Cassandra Batch operation to perform
-//pub enum BatchType {
+// pub enum BatchType {
 //    ///Logged batches have Atomicity guarantees
 //    LOGGED,
 //    ///Unlogged batches do not provide any atomicity guarantees
 //    UNLOGGED,
 //    ///Counter batches can only be used when writing counter types
 //    COUNTER,
-//}
+// }
 
 impl Drop for Batch {
     ///Frees a batch instance. Batches can be immediately freed after being

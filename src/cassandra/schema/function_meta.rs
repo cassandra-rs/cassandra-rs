@@ -131,8 +131,6 @@ impl FunctionMeta {
     ///Gets a metadata field for the provided name. Metadata fields allow direct
     ///access to the column data found in the underlying "functions" metadata table.
     pub fn field_by_name(&self, name: &str) -> Value {
-        unsafe {
-            Value::build(cass_function_meta_field_by_name(self.0, CString::new(name).unwrap().as_ptr()))
-        }
+        unsafe { Value::build(cass_function_meta_field_by_name(self.0, CString::new(name).unwrap().as_ptr())) }
     }
 }
