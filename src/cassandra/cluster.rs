@@ -52,6 +52,7 @@ use cassandra_sys::cass_cluster_set_whitelist_filtering;
 use cassandra_sys::cass_session_new;
 use cassandra_sys::cass_session_connect;
 use cassandra::error::CassError;
+use cassandra::future::ConnectFuture;
 use cassandra::time::TimestampGen;
 use cassandra::policy::retry::RetryPolicy;
 use cassandra_sys::CASS_OK;
@@ -82,12 +83,12 @@ impl FromStr for ContactPoints {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let contact_points: Vec<&str> = s.split(",").collect();
 
-        let contact_points: Result<Vec<_>, _> = contact_points.iter()
-                                                              .map(|addr| {
-                                                                  println!("{}", addr);
-                                                                  Ipv4Addr::from_str(addr)
-                                                              })
-                                                              .collect();
+        let contact_points = contact_points.iter()
+                                           .map(|addr| {
+                                               println!("{}", addr);
+                                               Ipv4Addr::from_str(addr)
+                                           })
+                                           .collect();
         Ok(ContactPoints(try!(contact_points)))
     }
 }
@@ -109,6 +110,7 @@ pub struct Cluster(pub *mut _Cluster);
 impl Drop for Cluster {
     ///Frees a cluster instance.
     fn drop(&mut self) {
+    	println!("dropping cluster");
         unsafe { cass_cluster_free(self.0) }
     }
 }
@@ -169,10 +171,10 @@ impl Cluster {
     /// Performs a blocking call to connect to Cassandra cluster
     pub fn connect(&mut self) -> Result<Session, CassError> {
         unsafe {
-            let session = cass_session_new();
-            let connect_future = cass_session_connect(session, self.0);
-            match cass_future_error_code(connect_future) {
-                CASS_OK => Ok(Session(session)),
+            let session = Session(cass_session_new());
+            let connect_future = ConnectFuture::build(cass_session_connect(session.0, self.0));
+            match cass_future_error_code(connect_future.inner()) {
+                CASS_OK => Ok(session),
                 err => Err(CassError::build(err)),
             }
         }

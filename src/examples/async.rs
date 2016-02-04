@@ -1,11 +1,14 @@
-extern crate num;
 #[macro_use(stmt)]
 extern crate cassandra;
-use std::str::FromStr;
-
 use cassandra::*;
 
-static NUM_CONCURRENT_REQUESTS: usize = 100;
+extern crate num;
+
+use std::str::FromStr;
+
+
+
+static NUM_CONCURRENT_REQUESTS: usize = 1000;
 
 fn insert_into_async(session: &mut Session, key: String) -> Result<Vec<ResultFuture>, CassError> {
     let mut futures = Vec::<ResultFuture>::new();
@@ -34,7 +37,9 @@ pub fn main() {
     match cluster.connect() {
         Ok(ref mut session) => {
             session.execute(&stmt!("CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
-                                        \'SimpleStrategy\', \'replication_factor\': \'1\' };")).wait().unwrap();
+                                    \'SimpleStrategy\', \'replication_factor\': \'1\' };"))
+                   .wait()
+                   .unwrap();
             session.execute(&stmt!("CREATE TABLE IF NOT EXISTS examples.async(key text, bln boolean, flt float, dbl \
                                     double, i32 int, i64 bigint, PRIMARY KEY (key));"))
                    .wait()

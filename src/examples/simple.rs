@@ -19,7 +19,8 @@ fn main() {
             let result = session.execute(&query).wait().unwrap();
             println!("{}", result);
             for row in result.iter() {
-                println!("ks name = {}", row.get_column_by_name(col_name));
+                let col: String = row.get_col_by_name(col_name).unwrap();
+                println!("ks name = {}", col);
             }
         }
         err => println!("{:?}", err),

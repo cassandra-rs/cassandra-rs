@@ -95,6 +95,14 @@ macro_rules! stmt {
     };
 }
 
+// statement,
+// 	key,
+// 	i % 2 == 0,
+// 	i as f32 / 2.0f32,
+// 	i as f64 / 200.0,
+// 	i as i32 * 10,
+// 	i as i64 * 100);
+
 
 impl Drop for Statement {
     ///Frees a statement instance. Statements can be immediately freed after

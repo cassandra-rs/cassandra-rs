@@ -12,14 +12,6 @@ struct Basic {
     i64: i64,
 }
 
-static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
-                                        \'SimpleStrategy\', \'replication_factor\': \'3\' };";
-static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.basic (key text, bln boolean, flt float, dbl \
-                                     double,i32 int, i64 bigint, PRIMARY KEY (key));";
-static INSERT_QUERY: &'static str = "INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, \
-                                     ?);";
-static SELECT_QUERY: &'static str = "SELECT * FROM examples.basic WHERE key = ?";
-
 fn insert_into_basic(session: &mut Session, prepared: PreparedStatement, key: &str, basic: Basic)
                      -> Result<CassResult, CassError> {
     println!("key={:?}", key);
@@ -35,23 +27,26 @@ fn insert_into_basic(session: &mut Session, prepared: PreparedStatement, key: &s
     session.execute(&statement).wait()
 }
 
-unsafe fn select_from_basic(session: &mut Session, prepared: &PreparedStatement, key: &str, basic: &mut Basic)
-                            -> Result<CassResult, CassError> {
+unsafe fn select_from_basic(session: &mut Session, prepared: &PreparedStatement, key: &str) -> Result<Basic, CassError> {
     let mut statement = prepared.bind();
     statement.bind_string_by_name("key", key).unwrap();
     match session.execute(&statement).wait() {
         Ok(result) => {
             println!("{:?}", result);
-            for row in result.iter() {
-                basic.bln = try!(row.get_column_by_name("bln").get_bool());
-                basic.dbl = try!(row.get_column_by_name("dbl").get_double());
-                basic.flt = try!(row.get_column_by_name("flt").get_float());
-                basic.i32 = try!(row.get_column_by_name("i32").get_i32());
-                basic.i64 = try!(row.get_column_by_name("i64").get_i64());
+            match result.iter().next() {
+                Some(row) => {
+                    Ok(Basic {
+                        bln: try!(row.get_col_by_name("bln")),
+                        dbl: try!(row.get_col_by_name("dbl")),
+                        flt: try!(row.get_col_by_name("flt")),
+                        i32: try!(row.get_col_by_name("i32")),
+                        i64: try!(row.get_col_by_name("i64")),
+                    })
+                }
+                None => unimplemented!(),
             }
-            Ok(result)
         }
-        Err(_) => panic!("err"),
+        Err(_) => unimplemented!(),
     }
 }
 
@@ -69,24 +64,26 @@ fn main() {
                     i32: 1,
                     i64: 2,
                 };
-                let mut output = Basic {
-                    bln: false,
-                    flt: 0f32,
-                    dbl: 0.0,
-                    i32: 0,
-                    i64: 0,
-                };
-                session.execute(&stmt!(CREATE_KEYSPACE)).wait().unwrap();
-                session.execute(&stmt!(CREATE_TABLE)).wait().unwrap();
-                match session.prepare(INSERT_QUERY).unwrap().wait() {
+                session.execute(&stmt!("CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
+                                        \'SimpleStrategy\', \'replication_factor\': \'3\' };"))
+                       .wait()
+                       .unwrap();
+                session.execute(&stmt!("CREATE TABLE IF NOT EXISTS examples.basic (key text, bln boolean, flt \
+                                        float, dbl double,i32 int, i64 bigint, PRIMARY KEY (key));"))
+                       .wait()
+                       .unwrap();
+                match session.prepare("INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, \
+                                       ?, ?, ?);")
+                             .unwrap()
+                             .wait() {
                     Ok(insert_prepared) => {
                         insert_into_basic(session, insert_prepared, "prepared_test", input).unwrap();
                     }
                     Err(err) => println!("error: {:?}", err),
                 }
-                match session.prepare(SELECT_QUERY).unwrap().wait() {
+                match session.prepare("SELECT * FROM examples.basic WHERE key = ?").unwrap().wait() {
                     Ok(ref mut select_prepared) => {
-                        select_from_basic(session, &select_prepared, "prepared_test", &mut output).unwrap();
+                        let output = select_from_basic(session, &select_prepared, "prepared_test").unwrap();
                         assert_eq!(input, output);
                         println!("results matched: {:?}", output);
                     }

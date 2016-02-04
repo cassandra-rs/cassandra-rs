@@ -56,6 +56,10 @@ impl Display for Row {
 pub trait AsRustType<T> {
     ///convert while reading cassandra columns
     fn get_col(&self, index: u64) -> Result<T, CassError>;
+
+    ///convert while reading cassandra columns by name
+    fn get_col_by_name<S>(&self, name: S) -> Result<T, CassError>
+        where S: Into<String>;
 }
 
 impl AsRustType<bool> for Row {
@@ -63,11 +67,36 @@ impl AsRustType<bool> for Row {
         let col = try!(self.get_column(index));
         col.get_bool()
     }
+
+    fn get_col_by_name<S>(&self, name: S) -> Result<bool, CassError>
+        where S: Into<String> {
+        let col = try!(self.get_column_by_name(name));
+        col.get_bool()
+    }
+}
+
+impl AsRustType<String> for Row {
+    fn get_col(&self, index: u64) -> Result<String, CassError> {
+        let col = try!(self.get_column(index));
+        col.get_string()
+    }
+
+    fn get_col_by_name<S>(&self, name: S) -> Result<String, CassError>
+        where S: Into<String> {
+        let col = try!(self.get_column_by_name(name));
+        col.get_string()
+    }
 }
 
 impl AsRustType<f64> for Row {
     fn get_col(&self, index: u64) -> Result<f64, CassError> {
         let col = try!(self.get_column(index));
+        col.get_double()
+    }
+
+    fn get_col_by_name<S>(&self, name: S) -> Result<f64, CassError>
+        where S: Into<String> {
+        let col = try!(self.get_column_by_name(name));
         col.get_double()
     }
 }
@@ -77,6 +106,12 @@ impl AsRustType<f32> for Row {
         let col = try!(self.get_column(index));
         col.get_float()
     }
+
+    fn get_col_by_name<S>(&self, name: S) -> Result<f32, CassError>
+        where S: Into<String> {
+        let col = try!(self.get_column_by_name(name));
+        col.get_float()
+    }
 }
 
 impl AsRustType<i64> for Row {
@@ -84,11 +119,23 @@ impl AsRustType<i64> for Row {
         let col = try!(self.get_column(index));
         col.get_i64()
     }
+
+    fn get_col_by_name<S>(&self, name: S) -> Result<i64, CassError>
+        where S: Into<String> {
+        let col = try!(self.get_column_by_name(name));
+        col.get_i64()
+    }
 }
 
 impl AsRustType<i32> for Row {
     fn get_col(&self, index: u64) -> Result<i32, CassError> {
         let col = try!(self.get_column(index));
+        col.get_i32()
+    }
+
+    fn get_col_by_name<S>(&self, name: S) -> Result<i32, CassError>
+        where S: Into<String> {
+        let col = try!(self.get_column_by_name(name));
         col.get_i32()
     }
 }
@@ -107,14 +154,15 @@ impl Row {
     }
 
     ///Get a particular column by name
-    pub fn get_column_by_name<S>(&self, name: S) -> Column
+    pub fn get_column_by_name<S>(&self, name: S) -> Result<Column, CassError>
         where S: Into<String> {
         unsafe {
             let name = CString::new(name.into()).unwrap();
-            println!("name: {:?}", name);
-            println!("self: {:?}", self);
-            // unimplemented!();
-            Column::build(cass_row_get_column_by_name(self.0, name.as_ptr()))
+            let col = cass_row_get_column_by_name(self.0, name.as_ptr());
+            match col.is_null() {
+                true => Err(CassError::build(CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS)),         	
+                false => Ok(Column::build(col)), 
+            }
         }
     }
 }

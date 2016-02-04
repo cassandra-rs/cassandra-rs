@@ -12,7 +12,7 @@ struct Basic {
     i64: i64,
 }
 
-fn insert_into_basic(session: &mut Session, key: &str, basic: &Basic) -> Result<CassResult, CassError> {
+fn insert_into_basic(session: &mut Session, key: &str, basic: Basic) -> Result<CassResult, CassError> {
 
     let mut statement = stmt!("INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, ?);");
     try!(statement.bind(0, key));
@@ -21,7 +21,7 @@ fn insert_into_basic(session: &mut Session, key: &str, basic: &Basic) -> Result<
     try!(statement.bind(3, basic.dbl));
     try!(statement.bind(4, basic.i32));
     try!(statement.bind(5, basic.i64));
-    Ok(try!(session.execute(&statement).wait()))
+    session.execute(&statement).wait()
 }
 
 fn select_from_basic(session: &mut Session, key: &str) -> Result<Option<Basic>, CassError> {
@@ -42,7 +42,6 @@ fn select_from_basic(session: &mut Session, key: &str) -> Result<Option<Basic>, 
         }
     }
 }
-
 
 fn main() {
 
@@ -71,7 +70,7 @@ fn main() {
             session.execute(ks_statement).wait().unwrap();
             session.execute(table_statement).wait().unwrap();
 
-            insert_into_basic(session, "test", &input).unwrap();
+            insert_into_basic(session, "test", input).unwrap();
             let output = select_from_basic(session, "test").unwrap().expect("no output from select");
 
             println!("{:?}", input);

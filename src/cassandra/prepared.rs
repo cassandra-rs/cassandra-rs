@@ -1,7 +1,7 @@
 use cassandra::statement::Statement;
 
 use cassandra_sys::CassPrepared as _PreparedStatement;
-// use cassandra_sys::cass_prepared_free;
+use cassandra_sys::cass_prepared_free;
 use cassandra_sys::cass_prepared_bind;
 use cassandra_sys::cass_prepared_parameter_name;
 use cassandra_sys::cass_prepared_parameter_data_type;
@@ -17,6 +17,14 @@ pub struct PreparedStatement(*const _PreparedStatement);
 
 unsafe impl Sync for PreparedStatement {}
 unsafe impl Send for PreparedStatement {}
+
+impl Drop for PreparedStatement {
+    ///Frees a prepared statement
+    fn drop(&mut self) {
+        unsafe { cass_prepared_free(self.0) }
+    }
+}
+
 
 impl Protected<*const _PreparedStatement> for PreparedStatement {
     fn inner(&self) -> *const _PreparedStatement {

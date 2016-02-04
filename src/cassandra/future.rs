@@ -227,6 +227,22 @@ impl PreparedFuture {
     }
 }
 
+pub struct ConnectFuture(*mut _Future);
+
+impl Protected<*mut _Future> for ConnectFuture {
+    fn inner(&self) -> *mut _Future {
+        self.0
+    }
+    fn build(inner: *mut _Future) -> Self {
+        ConnectFuture(inner)
+    }
+}
+
+impl Drop for ConnectFuture {
+    fn drop(&mut self) {
+        unsafe { cass_future_free(self.0) }
+    }
+}
 ///The future result of an attempt to create a new Cassandra session
 ///It can be waited on, polled or a callback
 ///can be attached.
@@ -264,6 +280,11 @@ impl SessionFuture {
     }
 }
 
+impl Drop for SessionFuture {
+    fn drop(&mut self) {
+        unsafe { cass_future_free(self.0) }
+    }
+}
 
 ///The future result of a session close statement.
 ///It can represent a result if the operation completed successfully or an

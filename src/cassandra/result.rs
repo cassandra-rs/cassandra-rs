@@ -75,14 +75,11 @@ impl Display for CassResult {
 
 impl Drop for CassResult {
     fn drop(&mut self) {
-        unsafe { self.free() }
+        unsafe { cass_result_free(self.0) }
     }
 }
 
 impl CassResult {
-    unsafe fn free(&mut self) {
-        // cass_result_free(self.0)
-    }
 
     ///Gets the number of rows for the specified result.
     pub fn row_count(&self) -> u64 {
