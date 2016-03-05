@@ -21,7 +21,9 @@ unsafe impl Send for PreparedStatement {}
 impl Drop for PreparedStatement {
     ///Frees a prepared statement
     fn drop(&mut self) {
-        unsafe { cass_prepared_free(self.0) }
+        if !self.0.is_null() {
+            unsafe { cass_prepared_free(self.0) }
+        }
     }
 }
 
