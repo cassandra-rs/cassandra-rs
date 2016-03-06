@@ -159,9 +159,10 @@ impl Row {
         unsafe {
             let name = CString::new(name.into()).unwrap();
             let col = cass_row_get_column_by_name(self.0, name.as_ptr());
-            match col.is_null() {
-                true => Err(CassError::build(CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS)),         	
-                false => Ok(Column::build(col)), 
+            if col.is_null() {
+                Err(CassError::build(CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS))
+            } else {
+                Ok(Column::build(col))
             }
         }
     }

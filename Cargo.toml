@@ -13,6 +13,7 @@ build = "build.rs"
 name = "cassandra"
 
 [dependencies]
+clippy = {version = "*", optional = true}
 libc = "0.2"
 num = "0.1"
 log = "0.3"

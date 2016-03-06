@@ -124,7 +124,7 @@ impl Session {
         unsafe {
             let mut metrics = mem::zeroed();
             cass_session_get_metrics(self.0, &mut metrics);
-            SessionMetrics::build(&mut metrics)
+            SessionMetrics::build(&metrics)
         }
     }
 

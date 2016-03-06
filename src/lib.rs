@@ -1,4 +1,6 @@
 //! This is a wrapper around the DataStax C++ driver for Cassandra. It aims to be 100% safe with minimal overhead added
+#![cfg_attr(feature="clippy", feature(plugin))]
+#![cfg_attr(feature="clippy", plugin(clippy))]
 
 #![warn(missing_docs)]
 
@@ -10,6 +12,7 @@ extern crate chrono;
 extern crate time;
 extern crate ip;
 extern crate uuid;
+
 
 pub use cassandra::consistency::Consistency;
 // pub use cassandra::inet::{Inet};

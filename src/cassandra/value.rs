@@ -318,7 +318,7 @@ impl Value {
     //                _ => Err(CassError::build(CassErrorTypes::LIB_INVALID_VALUE_TYPE as u32)),
     //            }
     //        }
-    //    }
+    //    } 
 
 
     // ~ pub fn map_iter(&self) -> Result<MapIterator,CassError> {unsafe{

@@ -324,7 +324,7 @@ impl CassError {
     //    }
 
     ///Gets the textual description for this error
-    pub fn desc<'a>(&'a self) -> &'a str {
+    pub fn desc(&self) -> &str {
         {
             panic!("");
             //            match *self {
