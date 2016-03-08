@@ -50,7 +50,7 @@ impl Drop for Session {
     /// Frees a session instance. If the session is still connected it will be synchronously
     /// closed before being deallocated.
     fn drop(&mut self) {
-    	println!("dropping session");
+        debug!("dropping session");
         unsafe { cass_session_free(self.0) }
     }
 }
@@ -74,8 +74,11 @@ impl Session {
 
     ///Connects a session and sets the keyspace.
     pub fn connect_keyspace(&self, cluster: &Cluster, keyspace: &str) -> Result<Future, NulError> {
-        let keyspace = try!(CString::new(keyspace));
-        unsafe { Ok(Future::build(cass_session_connect_keyspace(self.0, cluster.inner(), keyspace.as_ptr()))) }
+        unsafe {
+            Ok(Future::build(cass_session_connect_keyspace(self.0,
+                                                           cluster.inner(),
+                                                           try!(CString::new(keyspace)).as_ptr())))
+        }
     }
 
     ///Closes the session instance, outputs a close future which can
@@ -88,8 +91,7 @@ impl Session {
     ///Create a prepared statement.
     pub fn prepare(&self, query: &str) -> Result<PreparedFuture, CassError> {
         unsafe {
-            let query = CString::new(query).unwrap();
-            Ok(PreparedFuture::build(cass_session_prepare(self.0, query.as_ptr())))
+            Ok(PreparedFuture::build(cass_session_prepare(self.0, CString::new(query).expect("must be utf8").as_ptr())))
         }
     }
 

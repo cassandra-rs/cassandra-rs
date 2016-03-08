@@ -157,8 +157,8 @@ impl Row {
     pub fn get_column_by_name<S>(&self, name: S) -> Result<Column, CassError>
         where S: Into<String> {
         unsafe {
-            let name = CString::new(name.into()).unwrap();
-            let col = cass_row_get_column_by_name(self.0, name.as_ptr());
+            let col = cass_row_get_column_by_name(self.0,
+                                                  CString::new(name.into()).expect("must be utf8").as_ptr());
             if col.is_null() {
                 Err(CassError::build(CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS))
             } else {

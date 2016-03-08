@@ -220,8 +220,8 @@ impl Statement {
     ///Creates a new query statement.
     pub fn new(query: &str, parameter_count: u64) -> Self {
         unsafe {
-            let query = CString::new(query).unwrap();
-            Statement(cass_statement_new(query.as_ptr(), parameter_count))
+            Statement(cass_statement_new(CString::new(query).expect("must be utf8").as_ptr(),
+                                         parameter_count))
         }
     }
 
@@ -255,8 +255,9 @@ impl Statement {
     ///is determined in the metadata processed in the prepare phase.
     pub fn set_keyspace(&mut self, keyspace: String) -> Result<&Self, CassError> {
         unsafe {
-            let keyspace = CString::new(keyspace).unwrap();
-            CassError::build(cass_statement_set_keyspace(self.0, (keyspace.as_ptr()))).wrap(self)
+            CassError::build(cass_statement_set_keyspace(self.0,
+                                                         (CString::new(keyspace).expect("must be utf8").as_ptr())))
+                .wrap(self)
         }
     }
 
@@ -336,8 +337,9 @@ impl Statement {
     ///cass_prepared_bind().
     pub fn bind_null_by_name(&mut self, name: &str) -> Result<&mut Self, CassError> {
         unsafe {
-            let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_null_by_name(self.0, name.as_ptr())).wrap(self)
+            CassError::build(cass_statement_bind_null_by_name(self.0,
+                                                              CString::new(name).expect("must be utf8").as_ptr()))
+                .wrap(self)
         }
     }
 
@@ -349,8 +351,10 @@ impl Statement {
     ///Binds a "tinyint" to all the values with the specified name.
     pub fn bind_int8_by_name(&mut self, name: &str, value: i8) -> Result<&mut Self, CassError> {
         unsafe {
-            let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_int8_by_name(self.0, name.as_ptr(), value)).wrap(self)
+            CassError::build(cass_statement_bind_int8_by_name(self.0,
+                                                              CString::new(name).expect("must be utf8").as_ptr(),
+                                                              value))
+                .wrap(self)
         }
     }
 
@@ -362,8 +366,10 @@ impl Statement {
     ///Binds a "smallint" to all the values with the specified name.
     pub fn bind_int16_by_name(&mut self, name: &str, value: i16) -> Result<&mut Self, CassError> {
         unsafe {
-            let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_int16_by_name(self.0, name.as_ptr(), value)).wrap(self)
+            CassError::build(cass_statement_bind_int16_by_name(self.0,
+                                                               CString::new(name).expect("must be utf8").as_ptr(),
+                                                               value))
+                .wrap(self)
         }
     }
 
@@ -375,8 +381,10 @@ impl Statement {
     ///Binds an "int" to all the values with the specified name.
     pub fn bind_int32_by_name(&mut self, name: &str, value: i32) -> Result<&mut Self, CassError> {
         unsafe {
-            let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_int32_by_name(self.0, name.as_ptr(), value)).wrap(self)
+            CassError::build(cass_statement_bind_int32_by_name(self.0,
+                                                               CString::new(name).expect("must be utf8").as_ptr(),
+                                                               value))
+                .wrap(self)
         }
     }
 
@@ -391,8 +399,10 @@ impl Statement {
     ///cass_prepared_bind().
     pub fn bind_uint32_by_name(&mut self, name: &str, value: u32) -> Result<&mut Self, CassError> {
         unsafe {
-            let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_uint32_by_name(self.0, name.as_ptr(), value)).wrap(self)
+            CassError::build(cass_statement_bind_uint32_by_name(self.0,
+                                                                CString::new(name).expect("must be utf8").as_ptr(),
+                                                                value))
+                .wrap(self)
         }
     }
 
@@ -407,9 +417,7 @@ impl Statement {
     pub fn bind_int64_by_name(&mut self, name: &str, value: i64) -> Result<&mut Self, CassError> {
         unsafe {
             CassError::build(cass_statement_bind_int64_by_name(self.0,
-                                                               CString::new(name)
-                                                                   .unwrap()
-                                                                   .as_ptr(),
+                                                               CString::new(name).expect("must be utf8").as_ptr(),
                                                                value))
                 .wrap(self)
         }
@@ -426,8 +434,10 @@ impl Statement {
     ///cass_prepared_bind().
     pub fn bind_float_by_name(&mut self, name: &str, value: f32) -> Result<&mut Self, CassError> {
         unsafe {
-            let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_float_by_name(self.0, name.as_ptr(), value)).wrap(self)
+            CassError::build(cass_statement_bind_float_by_name(self.0,
+                                                               CString::new(name).expect("must be utf8").as_ptr(),
+                                                               value))
+                .wrap(self)
         }
     }
 
@@ -442,8 +452,10 @@ impl Statement {
     ///cass_prepared_bind().
     pub fn bind_double_by_name(&mut self, name: &str, value: f64) -> Result<&mut Self, CassError> {
         unsafe {
-            let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_double_by_name(self.0, name.as_ptr(), value)).wrap(self)
+            CassError::build(cass_statement_bind_double_by_name(self.0,
+                                                                CString::new(name).expect("must be utf8").as_ptr(),
+                                                                value))
+                .wrap(self)
         }
     }
 
@@ -461,9 +473,8 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_bool_by_name(&mut self, name: &str, value: bool) -> Result<&mut Self, CassError> {
         unsafe {
-            let name = CString::new(name).unwrap();
             CassError::build(cass_statement_bind_bool_by_name(self.0,
-                                                              name.as_ptr(),
+                                                              CString::new(name).expect("must be utf8").as_ptr(),
                                                               if value { cass_true } else { cass_false }))
                 .wrap(self)
         }
@@ -473,8 +484,10 @@ impl Statement {
     ///at the specified index.
     pub fn bind_string(&mut self, index: u64, value: &str) -> Result<&mut Self, CassError> {
         unsafe {
-            let value = CString::new(value).unwrap();
-            CassError::build(cass_statement_bind_string(self.0, index, value.as_ptr())).wrap(self)
+            CassError::build(cass_statement_bind_string(self.0,
+                                                        index,
+                                                        CString::new(value).expect("must be utf8").as_ptr()))
+                .wrap(self)
         }
     }
 
@@ -485,9 +498,9 @@ impl Statement {
     ///cass_prepared_bind().
     pub fn bind_string_by_name(&mut self, name: &str, value: &str) -> Result<&mut Self, CassError> {
         unsafe {
-            let name = CString::new(name).unwrap();
-            let value = CString::new(value).unwrap();
-            let result = cass_statement_bind_string_by_name(self.0, name.as_ptr(), value.as_ptr());
+            let result = cass_statement_bind_string_by_name(self.0,
+                                                            CString::new(name).expect("must be utf8").as_ptr(),
+                                                            CString::new(value).expect("must be utf8").as_ptr());
             CassError::build(result).wrap(self)
         }
     }
@@ -506,9 +519,10 @@ impl Statement {
     ///cass_prepared_bind().
     pub fn bind_bytes_by_name(&mut self, name: &str, mut value: Vec<u8>) -> Result<&mut Self, CassError> {
         unsafe {
-            let name = CString::new(name).unwrap();
-            let val = value.as_mut_ptr();
-            let result = cass_statement_bind_bytes_by_name(self.0, name.as_ptr(), val, value.len() as u64);
+            let result = cass_statement_bind_bytes_by_name(self.0,
+                                                           CString::new(name).expect("must be utf8").as_ptr(),
+                                                           value.as_mut_ptr(),
+                                                           value.len() as u64);
             CassError::build(result).wrap(self)
         }
     }
@@ -525,8 +539,10 @@ impl Statement {
     ///cass_prepared_bind().
     pub fn bind_uuid_by_name(&mut self, name: &str, value: Uuid) -> Result<&mut Self, CassError> {
         unsafe {
-            let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_uuid_by_name(self.0, name.as_ptr(), value.inner())).wrap(self)
+            CassError::build(cass_statement_bind_uuid_by_name(self.0,
+                                                              CString::new(name).expect("must be utf8").as_ptr(),
+                                                              value.inner()))
+                .wrap(self)
         }
     }
 
@@ -538,8 +554,10 @@ impl Statement {
     ///Binds an "inet" to all the values with the specified name.
     pub fn bind_inet_by_name(&mut self, name: &str, value: Inet) -> Result<&mut Self, CassError> {
         unsafe {
-            let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_inet_by_name(self.0, name.as_ptr(), value.inner())).wrap(self)
+            CassError::build(cass_statement_bind_inet_by_name(self.0,
+                                                              CString::new(name).expect("must be utf8").as_ptr(),
+                                                              value.inner()))
+                .wrap(self)
         }
     }
 
@@ -592,8 +610,10 @@ impl Statement {
     ///cass_prepared_bind().
     pub fn bind_map_by_name(&mut self, name: &str, map: Map) -> Result<&mut Self, CassError> {
         unsafe {
-            let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_collection_by_name(self.0, name.as_ptr(), map.inner())).wrap(self)
+            CassError::build(cass_statement_bind_collection_by_name(self.0,
+                                                                    CString::new(name).expect("must be utf8").as_ptr(),
+                                                                    map.inner()))
+                .wrap(self)
         }
     }
     ///Bind a "set" to a query or bound statement at the specified index.
@@ -608,8 +628,9 @@ impl Statement {
     ///cass_prepared_bind().
     pub fn bind_set_by_name(&mut self, name: &str, collection: Set) -> Result<&mut Self, CassError> {
         unsafe {
-            let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_collection_by_name(self.0, name.as_ptr(), collection.inner()))
+            CassError::build(cass_statement_bind_collection_by_name(self.0,
+                                                                    CString::new(name).expect("must be utf8").as_ptr(),
+                                                                    collection.inner()))
                 .wrap(self)
         }
     }
@@ -626,8 +647,9 @@ impl Statement {
     ///cass_prepared_bind().
     pub fn bind_list_by_name(&mut self, name: &str, collection: List) -> Result<&mut Self, CassError> {
         unsafe {
-            let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_collection_by_name(self.0, name.as_ptr(), collection.inner()))
+            CassError::build(cass_statement_bind_collection_by_name(self.0,
+                                                                    CString::new(name).expect("must be utf8").as_ptr(),
+                                                                    collection.inner()))
                 .wrap(self)
         }
     }
@@ -643,8 +665,10 @@ impl Statement {
     ///cass_prepared_bind().
     pub fn bind_tuple_by_name(&mut self, name: &str, value: Tuple) -> Result<&mut Self, CassError> {
         unsafe {
-            let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_tuple_by_name(self.0, name.as_ptr(), value.inner())).wrap(self)
+            CassError::build(cass_statement_bind_tuple_by_name(self.0,
+                                                               CString::new(name).expect("must be utf8").as_ptr(),
+                                                               value.inner()))
+                .wrap(self)
         }
     }
 
@@ -658,8 +682,10 @@ impl Statement {
     ///specified name.
     pub fn bind_user_type_by_name(&mut self, name: &str, value: &UserType) -> Result<&mut Self, CassError> {
         unsafe {
-            let name = CString::new(name).unwrap();
-            CassError::build(cass_statement_bind_user_type_by_name(self.0, name.as_ptr(), value.inner())).wrap(self)
+            CassError::build(cass_statement_bind_user_type_by_name(self.0,
+                                                                   CString::new(name).expect("must be utf8").as_ptr(),
+                                                                   value.inner()))
+                .wrap(self)
         }
     }
 }

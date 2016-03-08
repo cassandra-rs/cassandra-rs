@@ -19,7 +19,7 @@ pub struct LogLevel(CassLogLevel);
 impl LogLevel {
     ///Gets the string for a log level.
     pub fn as_string(&self) -> String {
-        unsafe { CStr::from_ptr(cass_log_level_string(self.0)).to_str().unwrap().to_owned() }
+        unsafe { CStr::from_ptr(cass_log_level_string(self.0)).to_str().expect("must be utf8").to_owned() }
     }
 }
 

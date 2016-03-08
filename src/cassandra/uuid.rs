@@ -107,7 +107,7 @@ impl str::FromStr for Uuid {
     fn from_str(str: &str) -> Result<Uuid, CassError> {
         unsafe {
             let mut uuid = mem::zeroed();
-            match cass_uuid_from_string(CString::new(str).unwrap().as_ptr(), &mut uuid) {
+            match cass_uuid_from_string(CString::new(str).expect("must be utf8").as_ptr(), &mut uuid) {
                 CASS_OK => Ok(Uuid(uuid)),
                 err => Err(CassError::build(err)),
             }

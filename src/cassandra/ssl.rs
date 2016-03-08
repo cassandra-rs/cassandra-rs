@@ -40,8 +40,8 @@ impl Ssl {
     ///the peer's certificate.
     pub fn add_trusted_cert(&mut self, cert: &str) -> Result<&Self, CassError> {
         unsafe {
-            let cert = CString::new(cert).unwrap();
-            CassError::build(cass_ssl_add_trusted_cert(self.0, cert.as_ptr())).wrap(self)
+            CassError::build(cass_ssl_add_trusted_cert(self.0, CString::new(cert).expect("must be utf8").as_ptr()))
+                .wrap(self)
         }
     }
 
@@ -65,8 +65,7 @@ impl Ssl {
     ///Certificate chain starting with the certificate itself.
     pub fn set_cert(&mut self, cert: &str) -> Result<&Self, CassError> {
         unsafe {
-            let cert = CString::new(cert).unwrap();
-            CassError::build(cass_ssl_set_cert(self.0, cert.as_ptr())).wrap(self)
+            CassError::build(cass_ssl_set_cert(self.0, CString::new(cert).expect("must be utf8").as_ptr())).wrap(self)
         }
     }
 
@@ -74,8 +73,10 @@ impl Ssl {
     ///the client on the server-side.
     pub fn set_private_key(&mut self, key: &str, password: *const i8) -> Result<&Self, CassError> {
         unsafe {
-            let key = CString::new(key).unwrap();
-            CassError::build(cass_ssl_set_private_key(self.0, key.as_ptr(), password)).wrap(self)
+            CassError::build(cass_ssl_set_private_key(self.0,
+                                                      CString::new(key).expect("must be utf8").as_ptr(),
+                                                      password))
+                .wrap(self)
         }
     }
 }

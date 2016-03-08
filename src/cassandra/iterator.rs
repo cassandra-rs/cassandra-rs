@@ -19,9 +19,6 @@ use cassandra_sys::cass_iterator_get_column_meta;
 use cassandra_sys::cass_iterator_get_user_type;
 use cassandra_sys::cass_iterator_get_value;
 use cassandra_sys::cass_iterator_next;
-// use cassandra_sys::cass_iterator_get_user_type_field_name;
-// use cassandra_sys::cass_iterator_get_user_type_field_value;
-use cassandra::error::CassError;
 use cassandra::value::Value;
 use cassandra::field::Field;
 use cassandra::data_type::ConstDataType;
@@ -152,6 +149,7 @@ pub struct FieldIterator(*mut _CassIterator);
 
 impl Iterator for FieldIterator {
     type Item = Field;
+    #[allow(cast_possible_truncation)]
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
@@ -162,11 +160,9 @@ impl Iterator for FieldIterator {
                     match cass_iterator_get_meta_field_name(self.0, &mut name, &mut name_length) {
                         CASS_OK => {
                             let slice = slice::from_raw_parts(name as *const u8, name_length as usize);
-                            let name = str::from_utf8(slice).unwrap();
-                            let value = cass_iterator_get_meta_field_value(self.0);
                             Some(Field {
-                                name: name.to_owned(),
-                                value: Value::build(value),
+                                name: str::from_utf8(slice).expect("must be utf8").to_owned(),
+                                value: Value::build(cass_iterator_get_meta_field_value(self.0)),
                             })
                         }
                         err => panic!("FIXME: no error handling. Err {:?}", err),
@@ -325,8 +321,8 @@ impl MapIterator {
     }
 
     ///Gets the next k/v pair in the map
-    pub fn get_pair(&mut self) -> Result<(Value, Value), CassError> {
-        Ok((self.get_key(), self.get_value()))
+    pub fn get_pair(&mut self) -> (Value, Value) {
+        (self.get_key(), self.get_value())
     }
 }
 
@@ -371,7 +367,7 @@ impl Iterator for MapIterator {
         unsafe {
             match cass_iterator_next(self.0) {
                 cass_false => None,
-                cass_true => Some(self.get_pair().unwrap()),
+                cass_true => Some(self.get_pair()),
             }
         }
     }

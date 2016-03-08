@@ -125,19 +125,19 @@ impl Debug for Column {
             CASS_VALUE_TYPE_TIMEUUID => write!(f, "TIMEUUID Cassandra type"),
             CASS_VALUE_TYPE_INET => write!(f, "INET Cassandra type"),
             CASS_VALUE_TYPE_LIST => {
-                for item in self.set_iter().unwrap() {
+                for item in self.set_iter().expect("a list should always be able to return a set iterator") {
                     try!(write!(f, "LIST {:?}", item))
                 }
                 Ok(())
             }
             CASS_VALUE_TYPE_MAP => {
-                for item in self.map_iter().unwrap() {
+                for item in self.map_iter().expect("a map should always be able to return a map iterator") {
                     try!(write!(f, "LIST {:?}", item))
                 }
                 Ok(())
             }
             CASS_VALUE_TYPE_SET => {
-                for item in self.set_iter().unwrap() {
+                for item in self.set_iter().expect("a set must be able to return a set iterator") {
                     try!(write!(f, "SET {:?}", item))
                 }
                 Ok(())
@@ -175,20 +175,20 @@ impl Display for Column {
             CASS_VALUE_TYPE_TIMEUUID => write!(f, "TIMEUUID Cassandra type"),
             CASS_VALUE_TYPE_INET => write!(f, "INET Cassandra type"),
             CASS_VALUE_TYPE_LIST => {
-                for item in self.set_iter().unwrap() {
-                    try!(write!(f, "LIST {:?}", item))
+                for item in self.set_iter().expect("a list must be able to return a set iterator") {
+                    try!(write!(f, "LIST {}", item))
                 }
                 Ok(())
             }
             CASS_VALUE_TYPE_MAP => {
-                for item in self.map_iter().unwrap() {
-                    try!(write!(f, "LIST {:?}", item))
+                for item in self.map_iter().expect("a map must be able to return a map iterator") {
+                    try!(write!(f, "MAP {}:{}", item.0, item.1))
                 }
                 Ok(())
             }
             CASS_VALUE_TYPE_SET => {
-                for item in self.set_iter().unwrap() {
-                    try!(write!(f, "SET {:?}", item))
+                for item in self.set_iter().expect("a set must be able to return a set iterator") {
+                    try!(write!(f, "SET {}", item))
                 }
                 Ok(())
             }
@@ -259,6 +259,7 @@ impl Column {
     //    }
 
     ///Gets the string from this column or errors if you ask for the wrong type
+    #[allow(cast_possible_truncation)]
     pub fn get_string(&self) -> Result<String, CassError> {
         unsafe {
             match cass_value_type(self.0) {
@@ -268,7 +269,7 @@ impl Column {
                     match cass_value_get_string(self.0, &mut message, &mut message_length) {
                         CASS_OK => {
                             let slice = slice::from_raw_parts(message as *const u8, message_length as usize);
-                            Ok(str::from_utf8(slice).unwrap().to_owned())
+                            Ok(str::from_utf8(slice).expect("must be utf8").to_owned())
                         }
                         err => Err(CassError::build(err)),
                     }

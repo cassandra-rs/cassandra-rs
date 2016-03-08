@@ -89,10 +89,10 @@ impl DataType {
     pub fn type_name<S>(data_type: DataType, type_name: S) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            let type_name = CString::new(type_name.into()).unwrap();
+            let type_name2 = CString::new(type_name.into()).expect("must be valid utf8");
             CassError::build(cass_data_type_type_name(data_type.0,
-                                                      &mut type_name.as_ptr(),
-                                                      &mut (type_name.as_bytes().len() as u64)))
+                                                      &mut type_name2.as_ptr(),
+                                                      &mut (type_name2.as_bytes().len() as u64)))
                 .wrap(())
         }
     }
@@ -103,8 +103,11 @@ impl DataType {
     pub fn set_type_name<S>(data_type: DataType, type_name: S) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            let type_name = CString::new(type_name.into()).unwrap();
-            CassError::build(cass_data_type_set_type_name(data_type.0, type_name.as_ptr())).wrap(())
+            CassError::build(cass_data_type_set_type_name(data_type.0,
+                                                          CString::new(type_name.into())
+                                                              .expect("must be utf8")
+                                                              .as_ptr()))
+                .wrap(())
         }
     }
 
@@ -114,10 +117,10 @@ impl DataType {
     pub fn keyspace<S>(data_type: DataType, keyspace: S) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            let keyspace = CString::new(keyspace.into()).unwrap();
+            let keyspace2 = CString::new(keyspace.into()).expect("must be utf8");
             CassError::build(cass_data_type_keyspace(data_type.0,
-                                                     &mut (keyspace.as_ptr()),
-                                                     &mut (keyspace.as_bytes().len() as u64)))
+                                                     &mut (keyspace2.as_ptr()),
+                                                     &mut (keyspace2.as_bytes().len() as u64)))
                 .wrap(())
         }
     }
@@ -128,8 +131,9 @@ impl DataType {
     pub fn set_keyspace<S>(data_type: DataType, keyspace: S) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            let keyspace = CString::new(keyspace.into()).unwrap();
-            CassError::build(cass_data_type_set_keyspace(data_type.0, keyspace.as_ptr())).wrap(())
+            CassError::build(cass_data_type_set_keyspace(data_type.0,
+                                                         CString::new(keyspace.into()).expect("must be utf8").as_ptr()))
+                .wrap(())
         }
     }
 
@@ -139,10 +143,10 @@ impl DataType {
     pub fn class_name<S>(data_type: DataType, class_name: S) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            let class_name = CString::new(class_name.into()).unwrap();
+            let class_name2 = CString::new(class_name.into()).expect("must be valid utf8");
             CassError::build(cass_data_type_class_name(data_type.0,
-                                                       &mut class_name.as_ptr(),
-                                                       &mut (class_name.as_bytes().len() as u64)))
+                                                       &mut class_name2.as_ptr(),
+                                                       &mut (class_name2.as_bytes().len() as u64)))
                 .wrap(())
         }
     }
@@ -153,8 +157,11 @@ impl DataType {
     pub fn set_class_name<S>(&self, class_name: S) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            let class_name = CString::new(class_name.into()).unwrap();
-            CassError::build(cass_data_type_set_class_name(self.0, class_name.as_ptr())).wrap(())
+            CassError::build(cass_data_type_set_class_name(self.0,
+                                                           CString::new(class_name.into())
+                                                               .expect("must be valid utf8")
+                                                               .as_ptr()))
+                .wrap(())
         }
     }
 
@@ -180,8 +187,10 @@ impl DataType {
     pub fn sub_data_type_by_name<S>(data_type: DataType, name: S) -> ConstDataType
         where S: Into<String> {
         unsafe {
-            let name = CString::new(name.into()).unwrap();
-            ConstDataType(cass_data_type_sub_data_type_by_name(data_type.0, name.as_ptr()))
+            ConstDataType(cass_data_type_sub_data_type_by_name(data_type.0,
+                                                               CString::new(name.into())
+                                                                   .expect("must be utf8")
+                                                                   .as_ptr()))
         }
     }
 
@@ -191,11 +200,11 @@ impl DataType {
     pub fn sub_type_name<S>(data_type: DataType, index: u64, name: S) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            let name = CString::new(name.into()).unwrap();
+            let name2 = CString::new(name.into()).expect("must be utf8");
             CassError::build(cass_data_type_sub_type_name(data_type.0,
                                                           index,
-                                                          &mut name.as_ptr(),
-                                                          &mut (name.as_bytes().len() as u64)))
+                                                          &mut name2.as_ptr(),
+                                                          &mut (name2.as_bytes().len() as u64)))
                 .wrap(())
         }
     }
@@ -213,8 +222,12 @@ impl DataType {
     pub fn add_sub_type_by_name<S>(&mut self, name: S, sub_data_type: DataType) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            let name = CString::new(name.into()).unwrap();
-            CassError::build(cass_data_type_add_sub_type_by_name(self.0, name.as_ptr(), sub_data_type.0)).wrap(())
+            CassError::build(cass_data_type_add_sub_type_by_name(self.0,
+                                                                 CString::new(name.into())
+                                                                     .expect("must be utf8")
+                                                                     .as_ptr(),
+                                                                 sub_data_type.0))
+                .wrap(())
         }
     }
 
@@ -232,8 +245,12 @@ impl DataType {
     pub fn add_sub_value_type_by_name<S>(&self, name: &str, typ: ValueType) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            let name = CString::new(name).unwrap();
-            CassError::build(cass_data_type_add_sub_value_type_by_name(self.0, name.as_ptr(), typ.inner())).wrap(())
+            CassError::build(cass_data_type_add_sub_value_type_by_name(self.0,
+                                                                       CString::new(name)
+                                                                           .expect("must be utf8")
+                                                                           .as_ptr(),
+                                                                       typ.inner()))
+                .wrap(())
         }
 
     }

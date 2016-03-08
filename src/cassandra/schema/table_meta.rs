@@ -50,13 +50,15 @@ impl TableMeta {
     }
 
     ///Gets the name of the table.
+    #[allow(cast_possible_truncation)]
     pub fn get_name(&self) -> String {
         unsafe {
             let mut name = mem::zeroed();
             let mut name_length = mem::zeroed();
             cass_table_meta_name(self.0, &mut name, &mut name_length);
-            let slice = slice::from_raw_parts(name as *const u8, name_length as usize);
-            str::from_utf8(slice).unwrap().to_owned()
+            str::from_utf8(slice::from_raw_parts(name as *const u8, name_length as usize))
+                .expect("must be utf8")
+                .to_owned()
         }
     }
 

@@ -47,7 +47,7 @@ impl AggregateMeta {
             let mut name = mem::zeroed();
             let mut name_length = mem::zeroed();
             cass_aggregate_meta_name(self.0, &mut name, &mut name_length);
-            raw2utf8(name, name_length).unwrap()
+            raw2utf8(name, name_length).expect("must be utf8")
         }
     }
 
@@ -57,7 +57,7 @@ impl AggregateMeta {
             let mut name = mem::zeroed();
             let mut name_length = mem::zeroed();
             cass_aggregate_meta_full_name(self.0, &mut name, &mut name_length);
-            raw2utf8(name, name_length).unwrap()
+            raw2utf8(name, name_length).expect("must be utf8")
         }
     }
 
@@ -100,7 +100,7 @@ impl AggregateMeta {
     ///access to the column data found in the underlying "aggregates" metadata table.
     pub fn field_by_name(&self, name: &str) -> Option<Value> {
         unsafe {
-            let agg = cass_aggregate_meta_field_by_name(self.0, CString::new(name).unwrap().as_ptr());
+            let agg = cass_aggregate_meta_field_by_name(self.0, CString::new(name).expect("must be utf8").as_ptr());
             if agg.is_null() { None } else { Some(Value::build(agg)) }
         }
     }

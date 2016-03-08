@@ -136,14 +136,14 @@ impl Debug for Value {
                 CASS_VALUE_TYPE_UUID => write!(f, "UUID: {}", self.get_uuid().unwrap()),
                 CASS_VALUE_TYPE_SET | CASS_VALUE_TYPE_LIST => {
                     try!(write!(f, "["));
-                    for item in self.get_set().unwrap() {
+                    for item in self.get_set().expect("set must be a set") {
                         try!(write!(f, "SET {:?} ", item))
                     }
                     try!(write!(f, "]"));
                     Ok(())
                 }
                 CASS_VALUE_TYPE_MAP => {
-                    for item in self.get_map().unwrap() {
+                    for item in self.get_map().expect("map must be a map") {
                         try!(write!(f, "MAP {:?}:{:?}", item.0, item.1))
                     }
                     Ok(())
@@ -185,20 +185,20 @@ impl Display for Value {
                 CASS_VALUE_TYPE_TIMEUUID => write!(f, "TIMEUUID: {}", self.get_uuid().unwrap()),
                 CASS_VALUE_TYPE_SET => {
                     try!(write!(f, "["));
-                    for item in self.get_set().unwrap() {
+                    for item in self.get_set().expect("set must be a set") {
                         try!(write!(f, "{} ", item))
                     }
                     try!(write!(f, "]"));
                     Ok(())
                 }
                 CASS_VALUE_TYPE_MAP => {
-                    for item in self.get_map().unwrap() {
+                    for item in self.get_map().expect("map must be a map") {
                         try!(write!(f, "MAP {}:{}", item.0, item.1))
                     }
                     Ok(())
                 }
                 // FIXME
-                err => write!(f, "{:?}", err),
+                _ => write!(f, "unknown type"),
             }
         }
     }
@@ -237,6 +237,7 @@ impl Value {
     //    }
 
     /// Gets the name of the keyspace.
+    #[allow(cast_possible_truncation)]
     pub fn get_bytes(&self) -> Result<&[u8], CassError> {
         unsafe {
             let mut output = mem::zeroed();
@@ -318,7 +319,7 @@ impl Value {
     //                _ => Err(CassError::build(CassErrorTypes::LIB_INVALID_VALUE_TYPE as u32)),
     //            }
     //        }
-    //    } 
+    //    }
 
 
     // ~ pub fn map_iter(&self) -> Result<MapIterator,CassError> {unsafe{
@@ -333,16 +334,16 @@ impl Value {
     // ~ }}
 
     ///Get this value as a string
+    #[allow(cast_possible_truncation)]
     pub fn get_string(&self) -> Result<String, CassError> {
         unsafe {
             let message: CString = mem::zeroed();
-            let mut message = message.as_ptr();
             let mut message_length = mem::zeroed();
-            cass_value_get_string(self.0, &mut message, &mut (message_length));
+            cass_value_get_string(self.0, &mut message.as_ptr(), &mut (message_length));
 
-            let slice = slice::from_raw_parts(message as *const u8, message_length as usize);
-            let err = CassError::build(cass_value_get_string(self.0, &mut message, &mut (message_length)));
-            err.wrap(str::from_utf8(slice).unwrap().to_owned())
+            let slice = slice::from_raw_parts(message.as_ptr() as *const u8, message_length as usize);
+            let err = CassError::build(cass_value_get_string(self.0, &mut message.as_ptr(), &mut (message_length)));
+            err.wrap(str::from_utf8(slice).expect("must be utf8").to_owned())
         }
     }
 

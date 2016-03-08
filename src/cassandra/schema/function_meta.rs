@@ -40,13 +40,14 @@ impl FunctionMeta {
     }
 
     ///Gets the name of the function.
+    #[allow(cast_possible_truncation)]
     pub fn get_name(&self) -> String {
         unsafe {
             let mut name = mem::zeroed();
             let mut name_length = mem::zeroed();
             cass_function_meta_name(self.0, &mut name, &mut name_length);
             str::from_utf8(slice::from_raw_parts(name as *const u8, name_length as usize))
-                .unwrap()
+                .expect("must be utf8")
                 .to_owned()
         }
     }
@@ -54,37 +55,40 @@ impl FunctionMeta {
     /// Gets the full name of the function. The full name includes the
     ///function's name and the function's signature:
     ///"name(type1 type2.. typeN)".
+    #[allow(cast_possible_truncation)]
     pub fn full_name(&self) -> String {
         unsafe {
             let mut name = mem::zeroed();
             let mut name_length = mem::zeroed();
             cass_function_meta_full_name(self.0, &mut name, &mut name_length);
             str::from_utf8(slice::from_raw_parts(name as *const u8, name_length as usize))
-                .unwrap()
+                .expect("must be utf8")
                 .to_owned()
         }
     }
 
     ///Gets the body of the function.
+    #[allow(cast_possible_truncation)]
     pub fn body(&self) -> String {
         unsafe {
             let mut name = mem::zeroed();
             let mut name_length = mem::zeroed();
             cass_function_meta_body(self.0, &mut name, &mut name_length);
             str::from_utf8(slice::from_raw_parts(name as *const u8, name_length as usize))
-                .unwrap()
+                .expect("must be utf8")
                 .to_owned()
         }
     }
 
     ///Gets the language of the function.
+    #[allow(cast_possible_truncation)]
     pub fn language(&self) -> String {
         unsafe {
             let mut name = mem::zeroed();
             let mut name_length = mem::zeroed();
             cass_function_meta_language(self.0, &mut name, &mut name_length);
             str::from_utf8(slice::from_raw_parts(name as *const u8, name_length as usize))
-                .unwrap()
+                .expect("must be utf8")
                 .to_owned()
         }
     }
@@ -118,7 +122,7 @@ impl FunctionMeta {
         unsafe {
             ConstDataType(cass_function_meta_argument_type_by_name(self.0,
                                                                    CString::new(name)
-                                                                       .unwrap()
+                                                                       .expect("must be utf8")
                                                                        .as_ptr()))
         }
     }
@@ -131,6 +135,8 @@ impl FunctionMeta {
     ///Gets a metadata field for the provided name. Metadata fields allow direct
     ///access to the column data found in the underlying "functions" metadata table.
     pub fn field_by_name(&self, name: &str) -> Value {
-        unsafe { Value::build(cass_function_meta_field_by_name(self.0, CString::new(name).unwrap().as_ptr())) }
+        unsafe {
+            Value::build(cass_function_meta_field_by_name(self.0, CString::new(name).expect("must be utf8").as_ptr()))
+        }
     }
 }

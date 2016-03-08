@@ -247,6 +247,7 @@ impl CassErrorResult {
     ///   <li>CASS_ERROR_SERVER_ALREADY_EXISTS</li>
     ///   <li>CASS_ERROR_SERVER_FUNCTION_FAILURE</li>
     ///</ul>
+    #[allow(cast_possible_truncation)]
     pub fn keyspace(&self) -> String {
         unsafe {
             let mut name = mem::zeroed();
@@ -254,7 +255,7 @@ impl CassErrorResult {
             match cass_error_result_keyspace(self.0, &mut name, &mut length) {
                 CASS_OK => {
                     let slice = slice::from_raw_parts(name as *const u8, length as usize);
-                    str::from_utf8(slice).unwrap().to_owned()
+                    str::from_utf8(slice).expect("must be utf8").to_owned()
                 }
                 err => panic!("impossible: {:?}", err),
             }
@@ -263,6 +264,7 @@ impl CassErrorResult {
 
     ///Gets the affected table for the already exists error
     ///(CASS_ERROR_SERVER_ALREADY_EXISTS) result type.
+    #[allow(cast_possible_truncation)]
     pub fn table(&self) -> String {
         unsafe {
             let mut name = mem::zeroed();
@@ -270,7 +272,7 @@ impl CassErrorResult {
             match cass_error_result_table(self.0, &mut name, &mut length) {
                 CASS_OK => {
                     let slice = slice::from_raw_parts(name as *const u8, length as usize);
-                    str::from_utf8(slice).unwrap().to_owned()
+                    str::from_utf8(slice).expect("must be utf8").to_owned()
                 }
                 err => panic!("impossible: {:?}", err),
             }
@@ -279,6 +281,7 @@ impl CassErrorResult {
 
     ///Gets the affected function for the function failure error
     ///(CASS_ERROR_SERVER_FUNCTION_FAILURE) result type.
+    #[allow(cast_possible_truncation)]
     pub fn function(&self) -> String {
         unsafe {
             let mut name = mem::zeroed();
@@ -286,7 +289,7 @@ impl CassErrorResult {
             match cass_error_result_function(self.0, &mut name, &mut length) {
                 CASS_OK => {
                     let slice = slice::from_raw_parts(name as *const u8, length as usize);
-                    str::from_utf8(slice).unwrap().to_owned()
+                    str::from_utf8(slice).expect("must be utf8").to_owned()
                 }
                 err => panic!("impossible: {:?}", err),
             }
@@ -303,7 +306,7 @@ impl CassErrorResult {
     ///error (CASS_ERROR_SERVER_FUNCTION_FAILURE) result type.
     pub fn arg_type(&self, index: u64, arg_type: &str) -> u32 {
         unsafe {
-            let cstr = CString::new(arg_type).unwrap();
+            let cstr = CString::new(arg_type).expect("must be utf8");
             cass_error_result_arg_type(self.0,
                                        index,
                                        &mut cstr.as_ptr(),

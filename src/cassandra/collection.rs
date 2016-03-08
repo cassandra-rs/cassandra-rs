@@ -214,7 +214,7 @@ impl CassCollection for List {
     ///Appends an "ascii", "text" or "varchar" to the collection.
     fn append_string(&mut self, value: &str) -> Result<&Self, CassError> {
         unsafe {
-            let cstr = CString::new(value).unwrap();
+            let cstr = CString::new(value).expect("must be utf8");
             let result = cass_collection_append_string(self.inner(), cstr.as_ptr());
             CassError::build(result).wrap(self)
         }
@@ -341,7 +341,7 @@ impl CassCollection for Set {
     ///Appends an "ascii", "text" or "varchar" to the collection.
     fn append_string(&mut self, value: &str) -> Result<&Self, CassError> {
         unsafe {
-            let cstr = CString::new(value).unwrap();
+            let cstr = CString::new(value).expect("must be utf8");
             let result = cass_collection_append_string(self.inner(), cstr.as_ptr());
             CassError::build(result).wrap(self)
         }
@@ -465,7 +465,7 @@ impl CassCollection for Map {
     ///Appends an "ascii", "text" or "varchar" to the collection.
     fn append_string(&mut self, value: &str) -> Result<&Self, CassError> {
         unsafe {
-            let cstr = CString::new(value).unwrap();
+            let cstr = CString::new(value).expect("must be utf8");
             let result = cass_collection_append_string(self.inner(), cstr.as_ptr());
             CassError::build(result).wrap(self)
         }

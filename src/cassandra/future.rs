@@ -97,7 +97,7 @@ impl Future {
             cass_future_error_message(self.0, message, message_length);
 
             let slice: &[u8] = slice::from_raw_parts(message as *const u8, message_length as usize);
-            str::from_utf8(slice).unwrap().to_owned()
+            str::from_utf8(slice).expect("must be utf8").to_owned()
         }
     }
 
@@ -118,10 +118,12 @@ impl Future {
             let value_length = mem::zeroed();
             match cass_future_custom_payload_item(self.0, index, name, name_length, value, value_length) {
                 CASS_OK => {
-                    let name: &[u8] = slice::from_raw_parts(name as *const u8, name_length as usize);
-                    let value: &[u8] = slice::from_raw_parts(value as *const u8, value_length as usize);
-                    Ok((str::from_utf8(name).unwrap().to_owned(),
-                        str::from_utf8(value).unwrap().to_owned()))
+                    Ok((str::from_utf8(slice::from_raw_parts(name as *const u8, name_length as usize))
+                            .expect("must be utf8")
+                            .to_owned(),
+                        str::from_utf8(slice::from_raw_parts(value as *const u8, value_length as usize))
+                            .expect("must be utf8")
+                            .to_owned()))
                 }
                 err => Err(CassError::build(err)),
             }
@@ -156,10 +158,12 @@ impl ResultFuture {
     ///wait for the future to be set.
     pub fn error_code(&mut self) -> Result<CassResult, CassError> {
         unsafe {
-            match self.get() {
-                Some(result) => CassError::build(cass_future_error_code(self.0)).wrap(result),
-                None => panic!("FIXME"),
+            if let Some(x) = self.get() {
+                CassError::build(cass_future_error_code(self.0)).wrap(x)
+            } else {
+                panic!("FIXME");
             }
+
         }
     }
 
@@ -172,7 +176,7 @@ impl ResultFuture {
             cass_future_error_message(self.0, message, message_length);
 
             let slice = slice::from_raw_parts(message as *const u8, message_length as usize);
-            str::from_utf8(slice).unwrap().to_owned()
+            str::from_utf8(slice).expect("must be utf8").to_owned()
         }
     }
 
@@ -261,9 +265,10 @@ impl SessionFuture {
     ///wait for the future to be set.
     pub fn error_code(&self) -> Result<(), CassError> {
         unsafe {
-            match self.get() {
-                Some(_) => CassError::build(cass_future_error_code(self.0)).wrap(()),
-                None => panic!("FIXME"),
+            if let Some(_) = self.get() {
+                CassError::build(cass_future_error_code(self.0)).wrap(())
+            } else {
+                panic!("FIXME")
             }
         }
     }
@@ -274,7 +279,7 @@ impl SessionFuture {
     pub fn get(&self) -> Option<CassResult> {
         unsafe {
             let result = cass_future_get_result(self.0);
-            println!("result is null: {}", result.is_null());
+            debug!("result is null: {}", result.is_null());
             if result.is_null() { None } else { Some(CassResult::build(result)) }
         }
     }

@@ -65,7 +65,7 @@ impl Debug for CassResult {
 
 impl Display for CassResult {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        try!(write!(f, "Result row count: {:?}\n", self.row_count()));
+        try!(write!(f, "Result row count: {}\n", self.row_count()));
         for row in self.iter() {
             try!(write!(f, "{}\n", row));
         }
@@ -80,7 +80,6 @@ impl Drop for CassResult {
 }
 
 impl CassResult {
-
     ///Gets the number of rows for the specified result.
     pub fn row_count(&self) -> u64 {
         unsafe { cass_result_row_count(self.0) as u64 }
@@ -98,7 +97,7 @@ impl CassResult {
             let name_length = mem::zeroed();
             cass_result_column_name(self.0, index, name, name_length);
             let slice = slice::from_raw_parts(name as *const u8, name_length as usize);
-            str::from_utf8(slice).unwrap().to_owned()
+            str::from_utf8(slice).expect("must be utf8").to_owned()
         }
     }
 
@@ -135,11 +134,11 @@ impl CassResult {
     // used to gain access to other data.
     pub fn set_paging_state_token(&mut self, paging_state: &str) -> Result<&Self, CassError> {
         unsafe {
-            let paging_state = CString::new(paging_state).unwrap();
+            let state = CString::new(paging_state).expect("must be utf8");
 
             CassError::build(cass_result_paging_state_token(self.0,
-                                                            &mut paging_state.as_ptr(),
-                                                            &mut (paging_state.to_bytes().len() as u64)))
+                                                            &mut state.as_ptr(),
+                                                            &mut (state.to_bytes().len() as u64)))
                 .wrap(self)
         }
     }

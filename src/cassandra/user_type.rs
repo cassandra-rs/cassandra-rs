@@ -92,8 +92,9 @@ impl UserType {
     pub fn set_null_by_name<S>(&mut self, name: S) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            let name = CString::new(name.into()).unwrap();
-            CassError::build(cass_user_type_set_null_by_name(self.0, name.as_ptr())).wrap(())
+            CassError::build(cass_user_type_set_null_by_name(self.0,
+                                                             CString::new(name.into()).expect("must be utf8").as_ptr()))
+                .wrap(())
         }
     }
 
@@ -189,8 +190,12 @@ impl UserType {
     pub fn set_int64_by_name<S>(&mut self, name: S, value: i64) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            let name = CString::new(name.into()).unwrap();
-            CassError::build(cass_user_type_set_int64_by_name(self.0, name.as_ptr(), value)).wrap(())
+            CassError::build(cass_user_type_set_int64_by_name(self.0,
+                                                              CString::new(name.into())
+                                                                  .expect("must be utf8")
+                                                                  .as_ptr(),
+                                                              value))
+                .wrap(())
         }
     }
 
@@ -203,8 +208,12 @@ impl UserType {
     pub fn set_float_by_name<S>(&mut self, name: S, value: f32) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            let name = CString::new(name.into()).unwrap();
-            CassError::build(cass_user_type_set_float_by_name(self.0, name.as_ptr(), value)).wrap(())
+            CassError::build(cass_user_type_set_float_by_name(self.0,
+                                                              CString::new(name.into())
+                                                                  .expect("must be utf8")
+                                                                  .as_ptr(),
+                                                              value))
+                .wrap(())
         }
     }
 
@@ -218,8 +227,12 @@ impl UserType {
     pub fn set_double_by_name<S>(&mut self, name: S, value: f64) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            let name = CString::new(name.into()).unwrap();
-            CassError::build(cass_user_type_set_double_by_name(self.0, name.as_ptr(), value)).wrap(())
+            CassError::build(cass_user_type_set_double_by_name(self.0,
+                                                               CString::new(name.into())
+                                                                   .expect("must be utf8")
+                                                                   .as_ptr(),
+                                                               value))
+                .wrap(())
         }
     }
 
@@ -235,9 +248,8 @@ impl UserType {
     pub fn set_bool_by_name<S>(&mut self, name: S, value: bool) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            let name = CString::new(name.into()).unwrap();
             CassError::build(cass_user_type_set_bool_by_name(self.0,
-                                                             name.as_ptr(),
+                                                             CString::new(name.into()).expect("must be utf8").as_ptr(),
                                                              if value { cass_true } else { cass_false }))
                 .wrap(())
         }
@@ -248,8 +260,10 @@ impl UserType {
     pub fn set_stringl<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            let value = CString::new(value.into()).unwrap();
-            CassError::build(cass_user_type_set_string(self.0, index, value.as_ptr())).wrap(())
+            CassError::build(cass_user_type_set_string(self.0,
+                                                       index,
+                                                       CString::new(value.into()).expect("must be utf8").as_ptr()))
+                .wrap(())
         }
     }
 
@@ -258,9 +272,14 @@ impl UserType {
     pub fn set_string_by_name<S>(&mut self, name: S, value: S) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            let name = CString::new(name.into()).unwrap();
-            let value = CString::new(value.into()).unwrap();
-            CassError::build(cass_user_type_set_string_by_name(self.0, name.as_ptr(), value.as_ptr())).wrap(())
+            CassError::build(cass_user_type_set_string_by_name(self.0,
+                                                               CString::new(name.into())
+                                                                   .expect("must be utf8")
+                                                                   .as_ptr(),
+                                                               CString::new(value.into())
+                                                                   .expect("must be utf8")
+                                                                   .as_ptr()))
+                .wrap(())
         }
     }
 
@@ -276,9 +295,10 @@ impl UserType {
     pub fn set_bytes_by_name<S>(&mut self, name: S, value: Vec<u8>) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            let name = CString::new(name.into()).unwrap();
             CassError::build(cass_user_type_set_bytes_by_name(self.0,
-                                                              name.as_ptr(),
+                                                              CString::new(name.into())
+                                                                  .expect("must be utf8")
+                                                                  .as_ptr(),
                                                               value.as_ptr(),
                                                               value.len() as u64))
                 .wrap(())
@@ -295,8 +315,10 @@ impl UserType {
     pub fn set_uuid_by_name<S, U>(&mut self, name: S, value: U) -> Result<(), CassError>
         where S: Into<String>, U: Into<Uuid> {
         unsafe {
-            let name = CString::new(name.into()).unwrap();
-            CassError::build(cass_user_type_set_uuid_by_name(self.0, name.as_ptr(), value.into().inner())).wrap(())
+            CassError::build(cass_user_type_set_uuid_by_name(self.0,
+                                                             CString::new(name.into()).expect("must be utf8").as_ptr(),
+                                                             value.into().inner()))
+                .wrap(())
         }
     }
 
@@ -309,9 +331,11 @@ impl UserType {
     ///Sets a "inet" in a user defined type at the specified name.
     pub fn set_inet_by_name<S, U>(&mut self, name: S, value: U) -> Result<(), CassError>
         where S: Into<String>, U: Into<Inet> {
-        let name = CString::new(name.into()).unwrap();
         unsafe {
-            CassError::build(cass_user_type_set_inet_by_name(self.0, name.as_ptr(), value.into().inner())).wrap(())
+            CassError::build(cass_user_type_set_inet_by_name(self.0,
+                                                             CString::new(name.into()).expect("must be utf8").as_ptr(),
+                                                             value.into().inner()))
+                .wrap(())
         }
     }
 
@@ -326,8 +350,12 @@ impl UserType {
     pub fn set_collection_by_name<S>(&mut self, name: S, value: Set) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            let name = CString::new(name.into()).unwrap();
-            CassError::build(cass_user_type_set_collection_by_name(self.0, name.as_ptr(), value.inner())).wrap(())
+            CassError::build(cass_user_type_set_collection_by_name(self.0,
+                                                                   CString::new(name.into())
+                                                                       .expect("must be utf8")
+                                                                       .as_ptr(),
+                                                                   value.inner()))
+                .wrap(())
         }
     }
 
@@ -340,8 +368,12 @@ impl UserType {
     pub fn set_tuple_by_name<S>(&mut self, name: S, value: Tuple) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            let name = CString::new(name.into()).unwrap();
-            CassError::build(cass_user_type_set_tuple_by_name(self.0, name.as_ptr(), value.inner())).wrap(())
+            CassError::build(cass_user_type_set_tuple_by_name(self.0,
+                                                              CString::new(name.into())
+                                                                  .expect("must be utf8")
+                                                                  .as_ptr(),
+                                                              value.inner()))
+                .wrap(())
         }
     }
 
@@ -354,8 +386,12 @@ impl UserType {
     pub fn set_user_type_by_name<S>(&mut self, name: S, value: UserType) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            let name = CString::new(name.into()).unwrap();
-            CassError::build(cass_user_type_set_user_type_by_name(self.0, name.as_ptr(), value.0)).wrap(())
+            CassError::build(cass_user_type_set_user_type_by_name(self.0,
+                                                                  CString::new(name.into())
+                                                                      .expect("must be utf8")
+                                                                      .as_ptr(),
+                                                                  value.0))
+                .wrap(())
         }
     }
 }

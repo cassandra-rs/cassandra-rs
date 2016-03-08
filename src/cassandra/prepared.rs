@@ -44,6 +44,7 @@ impl PreparedStatement {
     }
 
     ///Gets the name of a parameter at the specified index.
+    #[allow(cast_possible_truncation)]
     pub fn parameter_name(&self, index: u64) -> Result<&str, str::Utf8Error> {
         unsafe {
             let mut name = mem::zeroed();
@@ -69,7 +70,7 @@ impl PreparedStatement {
         unsafe {
             ConstDataType(cass_prepared_parameter_data_type_by_name(self.0,
                                                                     CString::new(name)
-                                                                        .unwrap()
+                                                                        .expect("must be utf8")
                                                                         .as_ptr()))
         }
     }

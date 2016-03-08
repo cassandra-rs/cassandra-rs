@@ -81,14 +81,11 @@ impl fmt::Display for ContactPoints {
 impl FromStr for ContactPoints {
     type Err = AddrParseError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let contact_points: Vec<&str> = s.split(",").collect();
+        let points: Vec<&str> = s.split(',').collect();
 
-        let contact_points = contact_points.iter()
-                                           .map(|addr| {
-                                               println!("{}", addr);
-                                               Ipv4Addr::from_str(addr)
-                                           })
-                                           .collect();
+        let contact_points = points.iter()
+                                   .map(|addr| Ipv4Addr::from_str(addr))
+                                   .collect();
         Ok(ContactPoints(try!(contact_points)))
     }
 }
@@ -110,7 +107,6 @@ pub struct Cluster(pub *mut _Cluster);
 impl Drop for Cluster {
     ///Frees a cluster instance.
     fn drop(&mut self) {
-    	println!("dropping cluster");
         unsafe { cass_cluster_free(self.0) }
     }
 }
@@ -141,10 +137,8 @@ impl Cluster {
     /// ```
     ///
     pub fn set_contact_points<T: Into<ContactPoints>>(&mut self, contact_points: T) -> Result<&mut Self, CassError> {
-        let contact_points = contact_points.into();
         unsafe {
-            println!("p:{}:", contact_points);
-            let s = CString::new(contact_points.to_string()).unwrap();
+            let s = CString::new(contact_points.into().to_string()).expect("must be utf8");
             let err = CassError::build(cass_cluster_set_contact_points(self.0, s.as_ptr()));
             err.wrap(self)
         }
@@ -334,6 +328,7 @@ impl Cluster {
     ///
     /// ```
     /// Default: 5000ms
+    #[allow(cast_possible_truncation,cast_sign_loss)]
     pub fn set_connect_timeout(&mut self, timeout: Duration) -> &Self {
         unsafe {
             cass_cluster_set_connect_timeout(self.0, timeout.num_milliseconds() as u32);
@@ -345,6 +340,7 @@ impl Cluster {
     ///
     /// ```
     /// Default: 12000ms
+    #[allow(cast_possible_truncation,cast_sign_loss)]
     pub fn set_request_timeout(&mut self, timeout: Duration) -> &Self {
         unsafe {
             cass_cluster_set_request_timeout(self.0, timeout.num_milliseconds() as u32);
@@ -389,7 +385,7 @@ impl Cluster {
                                         -> Result<&Self, CassError> {
         unsafe {
             CassError::build({
-                let local_dc = CString::new(local_dc).unwrap();
+                let local_dc = CString::new(local_dc).expect("must be utf8");
                 cass_cluster_set_load_balance_dc_aware(self.0,
                                                        local_dc.as_ptr(),
                                                        used_hosts_per_remote_dc,
@@ -448,6 +444,7 @@ impl Cluster {
     ///  <li>update_rate_ms: 100 milliseconds</li>
     ///  <li>min_measured: 50</li>
     ///</ul>
+    #[allow(cast_sign_loss)]
     pub fn set_latency_aware_routing_settings(&mut self, exclusion_threshold: f64, scale: Duration,
         retry_period: Duration, update_rate: Duration, min_measured: u64)
                                               -> &Self {
@@ -496,6 +493,7 @@ impl Cluster {
     ///
     /// ```
     ///Default: false (disabled).
+    #[allow(cast_possible_truncation,cast_sign_loss)]
     pub fn set_tcp_keepalive(&mut self, enable: bool, delay: Duration) -> &Self {
         unsafe {
             cass_cluster_set_tcp_keepalive(self.0,
@@ -524,6 +522,7 @@ impl Cluster {
     ///
     /// ````
     // Default: 30 seconds
+    #[allow(cast_possible_truncation,cast_sign_loss)]
     pub fn set_connection_heartbeat_interval(&mut self, hearbeat: Duration) -> &mut Self {
         unsafe {
             cass_cluster_set_connection_heartbeat_interval(self.0, hearbeat.num_seconds() as u32);
@@ -536,6 +535,7 @@ impl Cluster {
     ///
     /// ```
     ///Default: 60 seconds
+    #[allow(cast_possible_truncation,cast_sign_loss)]
     pub fn set_connection_idle_timeout(&mut self, timeout: Duration) -> &mut Self {
         unsafe {
             cass_cluster_set_connection_idle_timeout(self.0, timeout.num_seconds() as u32);

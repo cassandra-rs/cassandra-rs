@@ -116,8 +116,10 @@ impl Tuple {
     pub fn set_string<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
-            let value = CString::new(value.into()).unwrap();
-            CassError::build(cass_tuple_set_string(self.0, index, value.as_ptr())).wrap(())
+            CassError::build(cass_tuple_set_string(self.0,
+                                                   index,
+                                                   CString::new(value.into()).expect("must be utf8").as_ptr()))
+                .wrap(())
         }
     }
 

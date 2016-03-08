@@ -27,7 +27,7 @@ pub struct Inet(_Inet);
 
 impl Debug for Inet {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        unimplemented!();
+        write!(f, "can't format an inet")
     }
 }
 
@@ -84,8 +84,8 @@ impl FromStr for Inet {
         unsafe {
             let mut inet = mem::zeroed();
 
-            let s = CString::new(s).unwrap();
-            match cass_inet_from_string(s.as_ptr(), &mut inet) {
+            let str = CString::new(s).expect("must be utf8");
+            match cass_inet_from_string(str.as_ptr(), &mut inet) {
                 CASS_OK => Ok(Inet(inet)),
                 err => Err(CassError::build(err)),
             }
