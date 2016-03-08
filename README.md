@@ -12,18 +12,23 @@ Make sure that the driver (specifically `libcassandra_static.a` and `libcassandr
 
 You can use it from cargo with
 
+```toml
     [dependencies.cassandra]
     git = "https://github.com/tupshin/cassandra-rs"
+```
 
 Or just
 
+```toml
     [dependencies]
     cassandra="*"
+```
 
 
 Here's a straightforward example found in simple.rs:
 
 
+```rust
     extern crate cassandra;
     use cassandra::*;
 
@@ -44,5 +49,6 @@ Here's a straightforward example found in simple.rs:
         }
         session.close().wait().unwrap();
     }
+```
 
 There's additional examples included with the project in src/examples.
