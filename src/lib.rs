@@ -4,6 +4,7 @@
 #![warn(clippy)]
 #![warn(clippy_pedantic)]
 #![warn(missing_docs)]
+#![allow(unknown_lints)]
 
 extern crate libc;
 #[macro_use]
