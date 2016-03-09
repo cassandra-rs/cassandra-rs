@@ -1,8 +1,8 @@
 use std::fmt::Formatter;
 use std::fmt;
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
 use std::mem;
-use std::ffi::{CStr, CString};
+use std::ffi::CString;
 use std::str;
 
 
@@ -22,12 +22,11 @@ use cassandra_sys::cass_uuid_version;
 use cassandra::util::Protected;
 
 use cassandra_sys::cass_uuid_string;
-// use cassandra_sys::raw2utf8;
 use cassandra_sys::cass_uuid_from_string;
 
 use cassandra::error::CassError;
 
-// const CASS_UUID_STRING_LENGTH: usize = 37;
+const CASS_UUID_STRING_LENGTH: usize = 37;
 
 
 #[derive(Copy,Clone)]
@@ -62,20 +61,25 @@ impl Drop for UuidGen {
     }
 }
 
-// impl Debug for Uuid {
-//    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-//        write!(f, "{:?}", self.to_string())
-//    }
-// }
+impl Debug for Uuid {
+   fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+       fmt::Display::fmt(self, f)
+   }
+}
 
-// FIXME!!!!!!!
 impl Display for Uuid {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         unsafe {
-            let mut string = mem::zeroed();
-            cass_uuid_string(self.0, &mut string);
-            let slice = CStr::from_ptr(&string);
-            write!(f, "{}", str::from_utf8(slice.to_bytes()).unwrap())
+            // Allocate a CString large enough for cass_uuid_string to write to.
+            let mut buf = CString::from_vec_unchecked(vec!(0u8; CASS_UUID_STRING_LENGTH));
+            let cstr = buf.into_raw(); // Convert to *mut c_char
+            cass_uuid_string(self.0, cstr); // Write the UUID to *c_char
+            buf = CString::from_raw(cstr); // Convert from *c_char back to a CString.
+            let str = match buf.into_string() {
+              Ok(s) => s,
+              Err(_) => return Err(fmt::Error)
+            };
+            fmt::Display::fmt(&str, f)
         }
     }
 }
@@ -148,6 +152,18 @@ impl UuidGen {
     }
 
     ///Generates a V1 (time) UUID for the specified time.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use cassandra::{UuidGen, Uuid};
+    /// # #[allow(dead_code)]
+    /// # fn example() -> Uuid {
+    /// let generator = UuidGen::new();
+    /// let uuid = generator.gen_from_time(1457486866742u64);
+    /// # uuid
+    /// # }
+    /// ```
     pub fn gen_from_time(&self, timestamp: u64) -> Uuid {
         unsafe {
             let mut output: _Uuid = mem::zeroed();
@@ -155,4 +171,21 @@ impl UuidGen {
             Uuid(output)
         }
     }
+}
+
+#[test]
+#[allow(unused_variables)]
+fn test_uuid_display_gentime() {
+    let generator = UuidGen::new();
+    let uuid = generator.gen_from_time(1457486866742u64);
+    assert_eq!(uuid.timestamp(), 1457486866742u64);
+    let uuidstr = format!("{}", uuid); // Test Display trait
+}
+
+#[test]
+#[allow(unused_variables)]
+fn test_uuid_debug_genrand() {
+    let generator = UuidGen::new();
+    let uuid = generator.gen_random();
+    let uuidstr = format!("{:?}", uuid); // Test Debug trait
 }
