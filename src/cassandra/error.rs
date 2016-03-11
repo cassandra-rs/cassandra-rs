@@ -1,9 +1,11 @@
 use std::fmt::{Debug, Display, Formatter};
 use std::{fmt, mem, slice, str};
-use std::ffi::CString;
+use std::ffi::{CStr, CString};
 use std::error::Error;
+use std::os::raw::c_char;
 
 use cassandra_sys::CASS_OK;
+use cassandra_sys::cass_error_desc;
 use cassandra_sys::cass_error_num_arg_types;
 use cassandra_sys::cass_error_result_arg_type;
 use cassandra_sys::cass_error_result_code;
@@ -321,15 +323,15 @@ impl Drop for CassErrorResult {
 }
 
 impl CassError {
-    //    fn pointer_to_string<'a>(c_buf: *const i8) -> &'a str {
-    //        let buf: &[u8] = unsafe { CStr::from_ptr(c_buf).to_bytes() };
-    //        str::from_utf8(buf).unwrap()
-    //    }
+    fn pointer_to_string<'a>(c_buf: *const c_char) -> &'a str {
+        let buf: &[u8] = unsafe { CStr::from_ptr(c_buf).to_bytes() };
+        str::from_utf8(buf).unwrap()
+    }
 
     ///Gets the textual description for this error
     pub fn desc(&self) -> &str {
         {
-            panic!("");
+            CassError::pointer_to_string(unsafe { cass_error_desc(self.0) } )
             //            match *self {
             //                CassError::Lib(ref err) => CassError::pointer_to_string(cass_error_desc(err.err)),
             //                CassError::Ssl(ref err) => CassError::pointer_to_string(cass_error_desc(err.0)),
