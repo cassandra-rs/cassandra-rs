@@ -338,12 +338,17 @@ impl Value {
     pub fn get_string(&self) -> Result<String, CassError> {
         unsafe {
             let message: CString = mem::zeroed();
+            let mut message_ptr = message.as_ptr();
             let mut message_length = mem::zeroed();
-            cass_value_get_string(self.0, &mut message.as_ptr(), &mut (message_length));
+            cass_value_get_string(self.0, &mut message_ptr, &mut (message_length));
 
-            let slice = slice::from_raw_parts(message.as_ptr() as *const u8, message_length as usize);
-            let err = CassError::build(cass_value_get_string(self.0, &mut message.as_ptr(), &mut (message_length)));
-            err.wrap(str::from_utf8(slice).expect("must be utf8").to_owned())
+            let slice = slice::from_raw_parts(message_ptr as *const u8, message_length as usize);
+            let err = CassError::build(cass_value_get_string(self.0, &mut message_ptr, &mut (message_length)));
+            err.wrap(str::from_utf8(slice).unwrap().to_owned())
+
+            //            let slice = slice::from_raw_parts(message.as_ptr() as *const u8, message_length as usize);
+            //            let err = CassError::build(cass_value_get_string(self.0, &mut message.as_ptr(), &mut (message_length)));
+            //            err.wrap(str::from_utf8(slice).expect("must be utf8").to_owned())
         }
     }
 

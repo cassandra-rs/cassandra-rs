@@ -62,9 +62,9 @@ impl Drop for UuidGen {
 }
 
 impl Debug for Uuid {
-   fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-       fmt::Display::fmt(self, f)
-   }
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        fmt::Display::fmt(self, f)
+    }
 }
 
 impl Display for Uuid {
@@ -76,8 +76,8 @@ impl Display for Uuid {
             cass_uuid_string(self.0, cstr); // Write the UUID to *c_char
             buf = CString::from_raw(cstr); // Convert from *c_char back to a CString.
             let str = match buf.into_string() {
-              Ok(s) => s,
-              Err(_) => return Err(fmt::Error)
+                Ok(s) => s,
+                Err(_) => return Err(fmt::Error),
             };
             fmt::Display::fmt(&str, f)
         }

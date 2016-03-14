@@ -331,7 +331,7 @@ impl CassError {
     ///Gets the textual description for this error
     pub fn desc(&self) -> &str {
         {
-            CassError::pointer_to_string(unsafe { cass_error_desc(self.0) } )
+            CassError::pointer_to_string(unsafe { cass_error_desc(self.0) })
             //            match *self {
             //                CassError::Lib(ref err) => CassError::pointer_to_string(cass_error_desc(err.err)),
             //                CassError::Ssl(ref err) => CassError::pointer_to_string(cass_error_desc(err.0)),
