@@ -6,7 +6,7 @@ license = "Apache-2.0"
 homepage = "https://github.com/tupshin/cassandra-rust"
 repository = "https://github.com/tupshin/cassandra-rust"
 name = "cassandra"
-version = "0.6.7"
+version = "0.6.9"
 authors = ["Tupshin Harper <tupshin@tupshin.com>"]
 build = "build.rs"
 
