@@ -1,5 +1,5 @@
 use std::ffi::CStr;
-use libc::c_void;
+use std::os::raw;
 
 use cassandra_sys::CassLogMessage;
 use cassandra_sys::CassLogLevel;
@@ -24,7 +24,7 @@ impl LogLevel {
 }
 
 /// A callback that's used to handle logging.
-pub type CassLogCallback = Option<unsafe extern "C" fn(message: *const CassLogMessage, data: *mut c_void)>;
+pub type CassLogCallback = Option<unsafe extern "C" fn(message: *const CassLogMessage, data: *mut raw::c_void)>;
 
 ///Sets the log level.
 ///
@@ -37,5 +37,5 @@ pub fn set_level(level: LogLevel) {
 
 ///Sets a callback for handling logging events.
 pub fn set_callback(callback: CassLogCallback, mut data: Vec<u8>) {
-    unsafe { cass_log_set_callback(callback, &mut data as *mut _ as *mut c_void) }
+    unsafe { cass_log_set_callback(callback, &mut data as *mut _ as *mut raw::c_void) }
 }

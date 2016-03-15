@@ -1,6 +1,7 @@
 use std::mem;
 use std::str;
 use std::slice;
+use std::os::raw;
 
 use cassandra::error::CassError;
 use cassandra::result::CassResult;
@@ -26,8 +27,6 @@ use cassandra_sys::CassFutureCallback as _CassFutureCallback;
 use cassandra::error::CassErrorResult;
 use cassandra::util::Protected;
 
-use libc::c_void;
-
 use cassandra_sys::CASS_OK;
 
 ///A CQL Future representing the status of any asynchronous calls to Cassandra
@@ -45,7 +44,7 @@ impl Drop for Future {
 
 impl Future {
     ///Sets a callback that is called when a future is set
-    pub fn set_callback(&mut self, callback: FutureCallback, data: *mut c_void) -> Result<&Self, CassError> {
+    pub fn set_callback(&mut self, callback: FutureCallback, data: *mut raw::c_void) -> Result<&Self, CassError> {
         unsafe { CassError::build(cass_future_set_callback(self.0, callback.0, data)).wrap(self) }
     }
 

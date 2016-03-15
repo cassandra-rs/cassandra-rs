@@ -6,7 +6,7 @@ license = "Apache-2.0"
 homepage = "https://github.com/tupshin/cassandra-rust"
 repository = "https://github.com/tupshin/cassandra-rust"
 name = "cassandra"
-version = "0.6.7"
+version = "0.6.10"
 authors = ["Tupshin Harper <tupshin@tupshin.com>"]
 build = "build.rs"
 
@@ -18,7 +18,7 @@ clippy = {version = "0.0", optional = true}
 libc = "0.2"
 num = "0.1"
 log = "0.3"
-cassandra-sys = "0.4"
+cassandra-sys = "0.5"
 decimal = "0.2"
 chrono = "0.2"
 ip = "1.0"
