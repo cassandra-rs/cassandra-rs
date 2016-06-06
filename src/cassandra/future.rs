@@ -157,12 +157,12 @@ impl ResultFuture {
     ///wait for the future to be set.
     pub fn error_code(&mut self) -> Result<CassResult, CassError> {
         unsafe {
-            if let Some(x) = self.get() {
-                CassError::build(cass_future_error_code(self.0)).wrap(x)
-            } else {
-                panic!("FIXME");
+            let x = self.get();
+            let error_code = CassError::build(cass_future_error_code(self.0));
+            match x {
+                Some(x) => error_code.wrap(x),
+                None => Err(error_code)
             }
-
         }
     }
 
