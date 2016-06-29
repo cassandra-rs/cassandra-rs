@@ -55,7 +55,7 @@ impl Display for Row {
 ///Auto inferencing conversion from c* to rust
 pub trait AsRustType<T> {
     ///convert while reading cassandra columns
-    fn get_col(&self, index: u64) -> Result<T, CassError>;
+    fn get_col(&self, index: usize) -> Result<T, CassError>;
 
     ///convert while reading cassandra columns by name
     fn get_col_by_name<S>(&self, name: S) -> Result<T, CassError>
@@ -63,7 +63,7 @@ pub trait AsRustType<T> {
 }
 
 impl AsRustType<bool> for Row {
-    fn get_col(&self, index: u64) -> Result<bool, CassError> {
+    fn get_col(&self, index: usize) -> Result<bool, CassError> {
         let col = try!(self.get_column(index));
         col.get_bool()
     }
@@ -76,7 +76,7 @@ impl AsRustType<bool> for Row {
 }
 
 impl AsRustType<String> for Row {
-    fn get_col(&self, index: u64) -> Result<String, CassError> {
+    fn get_col(&self, index: usize) -> Result<String, CassError> {
         let col = try!(self.get_column(index));
         col.get_string()
     }
@@ -89,7 +89,7 @@ impl AsRustType<String> for Row {
 }
 
 impl AsRustType<f64> for Row {
-    fn get_col(&self, index: u64) -> Result<f64, CassError> {
+    fn get_col(&self, index: usize) -> Result<f64, CassError> {
         let col = try!(self.get_column(index));
         col.get_double()
     }
@@ -102,7 +102,7 @@ impl AsRustType<f64> for Row {
 }
 
 impl AsRustType<f32> for Row {
-    fn get_col(&self, index: u64) -> Result<f32, CassError> {
+    fn get_col(&self, index: usize) -> Result<f32, CassError> {
         let col = try!(self.get_column(index));
         col.get_float()
     }
@@ -115,7 +115,7 @@ impl AsRustType<f32> for Row {
 }
 
 impl AsRustType<i64> for Row {
-    fn get_col(&self, index: u64) -> Result<i64, CassError> {
+    fn get_col(&self, index: usize) -> Result<i64, CassError> {
         let col = try!(self.get_column(index));
         col.get_i64()
     }
@@ -128,7 +128,7 @@ impl AsRustType<i64> for Row {
 }
 
 impl AsRustType<i32> for Row {
-    fn get_col(&self, index: u64) -> Result<i32, CassError> {
+    fn get_col(&self, index: usize) -> Result<i32, CassError> {
         let col = try!(self.get_column(index));
         col.get_i32()
     }
@@ -142,7 +142,7 @@ impl AsRustType<i32> for Row {
 
 impl Row {
     ///Get a particular column by index
-    pub fn get_column(&self, index: u64) -> Result<Column, CassError> {
+    pub fn get_column(&self, index: usize) -> Result<Column, CassError> {
         unsafe {
             let col = cass_row_get_column(self.0, index);
             if col.is_null() {

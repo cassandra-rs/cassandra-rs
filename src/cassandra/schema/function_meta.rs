@@ -99,12 +99,12 @@ impl FunctionMeta {
     }
 
     ///Gets the number of arguments this function takes.
-    pub fn argument_count(&self) -> u64 {
+    pub fn argument_count(&self) -> usize {
         unsafe { cass_function_meta_argument_count(self.0) }
     }
 
     /// Gets the function's argument name and type for the provided index.
-    pub fn argument(&self, index: u64) -> Result<(), CassError> {
+    pub fn argument(&self, index: usize) -> Result<(), CassError> {
         unsafe {
             let mut name = mem::zeroed();
             let mut name_length = mem::zeroed();

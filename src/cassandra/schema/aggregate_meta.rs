@@ -62,12 +62,12 @@ impl AggregateMeta {
     }
 
     /// Gets the number of arguments this aggregate takes.
-    pub fn argument_count(&self) -> u64 {
+    pub fn argument_count(&self) -> usize {
         unsafe { cass_aggregate_meta_argument_count(self.0) }
     }
 
     /// Gets the aggregate's argument type for the provided index.
-    pub fn argument_type(&self, index: u64) -> ConstDataType {
+    pub fn argument_type(&self, index: usize) -> ConstDataType {
         unsafe { ConstDataType(cass_aggregate_meta_argument_type(self.0, index)) }
     }
 

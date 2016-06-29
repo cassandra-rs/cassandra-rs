@@ -50,10 +50,10 @@ pub trait CassCollection {
     type Value;
 
     ///Creates a new collection.
-    fn new(item_count: u64) -> Self;
+    fn new(item_count: usize) -> Self;
 
     ///Creates a new collection from an existing data type.
-    fn new_from_data_type(value: DataType, item_count: u64) -> Self;
+    fn new_from_data_type(value: DataType, item_count: usize) -> Self;
 
     ///Gets the data type of a collection.
     fn data_type(&self) -> ConstDataType;
@@ -153,11 +153,11 @@ impl CassCollection for List {
     type Value = _CassCollection;
 
     ///create a new list
-    fn new(item_count: u64) -> Self {
+    fn new(item_count: usize) -> Self {
         unsafe { List(cass_collection_new(CASS_COLLECTION_TYPE_LIST, item_count)) }
     }
 
-    fn new_from_data_type(value: DataType, item_count: u64) -> Self {
+    fn new_from_data_type(value: DataType, item_count: usize) -> Self {
         unsafe { List(cass_collection_new_from_data_type(value.inner(), item_count)) }
     }
 
@@ -223,7 +223,7 @@ impl CassCollection for List {
     /// Appends a "blob", "varint" or "custom" to the collection.
     fn append_bytes(&mut self, value: Vec<u8>) -> Result<&Self, CassError> {
         unsafe {
-            let bytes = cass_collection_append_bytes(self.inner(), value[..].as_ptr(), value.len() as u64);
+            let bytes = cass_collection_append_bytes(self.inner(), value[..].as_ptr(), value.len());
             CassError::build(bytes).wrap(self)
         }
     }
@@ -281,11 +281,11 @@ impl CassCollection for Set {
     type Value = _CassCollection;
 
     ///create a new list
-    fn new(item_count: u64) -> Self {
+    fn new(item_count: usize) -> Self {
         unsafe { Set(cass_collection_new(CASS_COLLECTION_TYPE_SET, item_count)) }
     }
 
-    fn new_from_data_type(value: DataType, item_count: u64) -> Self {
+    fn new_from_data_type(value: DataType, item_count: usize) -> Self {
         unsafe { Set(cass_collection_new_from_data_type(value.inner(), item_count)) }
     }
     ///Gets the data type of a collection.
@@ -350,7 +350,7 @@ impl CassCollection for Set {
     /// Appends a "blob", "varint" or "custom" to the collection.
     fn append_bytes(&mut self, value: Vec<u8>) -> Result<&Self, CassError> {
         unsafe {
-            let bytes = cass_collection_append_bytes(self.inner(), value[..].as_ptr(), value.len() as u64);
+            let bytes = cass_collection_append_bytes(self.inner(), value[..].as_ptr(), value.len());
             CassError::build(bytes).wrap(self)
         }
     }
@@ -404,11 +404,11 @@ impl Drop for Map {
 impl CassCollection for Map {
     type Value = _CassCollection;
     ///create a new list
-    fn new(item_count: u64) -> Self {
+    fn new(item_count: usize) -> Self {
         unsafe { Map(cass_collection_new(CASS_COLLECTION_TYPE_MAP, item_count)) }
     }
 
-    fn new_from_data_type(value: DataType, item_count: u64) -> Self {
+    fn new_from_data_type(value: DataType, item_count: usize) -> Self {
         unsafe { Map(cass_collection_new_from_data_type(value.inner(), item_count)) }
     }
 
@@ -474,7 +474,7 @@ impl CassCollection for Map {
     /// Appends a "blob", "varint" or "custom" to the collection.
     fn append_bytes(&mut self, value: Vec<u8>) -> Result<&Self, CassError> {
         unsafe {
-            let bytes = cass_collection_append_bytes(self.inner(), value[..].as_ptr(), value.len() as u64);
+            let bytes = cass_collection_append_bytes(self.inner(), value[..].as_ptr(), value.len());
             CassError::build(bytes).wrap(self)
         }
     }

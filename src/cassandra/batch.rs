@@ -60,7 +60,7 @@ impl CustomPayload {
             Ok(cass_custom_payload_set(self.0,
                                        try!(CString::new(name)).as_ptr(),
                                        value.as_ptr(),
-                                       value.len() as u64))
+                                       value.len()))
         }
     }
 }

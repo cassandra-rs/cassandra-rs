@@ -63,22 +63,22 @@ impl TableMeta {
     }
 
     ///Gets the total number of columns for the table.
-    pub fn column_count(&self) -> u64 {
+    pub fn column_count(&self) -> usize {
         unsafe { cass_table_meta_column_count(self.0) }
     }
 
     ///Gets the column metadata for the provided index.
-    pub fn column(&self, index: u64) -> ColumnMeta {
+    pub fn column(&self, index: usize) -> ColumnMeta {
         unsafe { ColumnMeta::build(cass_table_meta_column(self.0, index)) }
     }
 
     ///Gets the number of columns for the table's partition key.
-    pub fn partition_key_count(&self) -> u64 {
+    pub fn partition_key_count(&self) -> usize {
         unsafe { cass_table_meta_partition_key_count(self.0) }
     }
 
     ///Gets the partition key column metadata for the provided index.
-    pub fn partition_key(&self, index: u64) -> Option<ColumnMeta> {
+    pub fn partition_key(&self, index: usize) -> Option<ColumnMeta> {
         unsafe {
             let key = cass_table_meta_partition_key(self.0, index);
             if key.is_null() { None } else { Some(ColumnMeta::build(key)) }
@@ -86,12 +86,12 @@ impl TableMeta {
     }
 
     ///Gets the number of columns for the table's clustering key
-    pub fn clustering_key_count(&self) -> u64 {
+    pub fn clustering_key_count(&self) -> usize {
         unsafe { cass_table_meta_clustering_key_count(self.0) }
     }
 
     ///Gets the clustering key column metadata for the provided index.
-    pub fn cluster_key(&self, index: u64) -> Option<ColumnMeta> {
+    pub fn cluster_key(&self, index: usize) -> Option<ColumnMeta> {
         unsafe {
             let key = cass_table_meta_clustering_key(self.0, index);
             if key.is_null() { None } else { Some(ColumnMeta::build(key)) }

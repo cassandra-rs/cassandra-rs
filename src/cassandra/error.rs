@@ -300,19 +300,19 @@ impl CassErrorResult {
 
     ///Gets the number of argument types for the function failure error
     ///(CASS_ERROR_SERVER_FUNCTION_FAILURE) result type.
-    pub fn num_arg_types(error_result: CassErrorResult) -> u64 {
+    pub fn num_arg_types(error_result: CassErrorResult) -> usize {
         unsafe { cass_error_num_arg_types(error_result.0) }
     }
 
     ///Gets the argument type at the specified index for the function failure
     ///error (CASS_ERROR_SERVER_FUNCTION_FAILURE) result type.
-    pub fn arg_type(&self, index: u64, arg_type: &str) -> u32 {
+    pub fn arg_type(&self, index: usize, arg_type: &str) -> u32 {
         unsafe {
             let cstr = CString::new(arg_type).expect("must be utf8");
             cass_error_result_arg_type(self.0,
                                        index,
                                        &mut cstr.as_ptr(),
-                                       &mut (cstr.to_bytes().len() as u64)) as u32
+                                       &mut (cstr.to_bytes().len())) as u32
         }
     }
 }

@@ -103,13 +103,13 @@ impl Future {
 
     /// Gets a the number of custom payload items from a response future. If the future is not
     /// ready this method will wait for the future to be set.
-    pub fn payload_item_count(&self) -> u64 {
+    pub fn payload_item_count(&self) -> usize {
         unsafe { cass_future_custom_payload_item_count(self.0) }
     }
 
     ///Gets a custom payload item from a response future at the specified index. If the future is not
     ///ready this method will wait for the future to be set.
-    pub fn payload_item(&self, index: u64) -> Result<(String, String), CassError> {
+    pub fn payload_item(&self, index: usize) -> Result<(String, String), CassError> {
         unsafe {
             let name = mem::zeroed();
             let name_length = mem::zeroed();

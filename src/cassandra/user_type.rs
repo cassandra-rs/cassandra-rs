@@ -84,7 +84,7 @@ impl UserType {
     }
 
     ///Sets a null in a user defined type at the specified index.
-    pub fn set_null(&mut self, index: u64) -> Result<(), CassError> {
+    pub fn set_null(&mut self, index: usize) -> Result<(), CassError> {
         unsafe { CassError::build(cass_user_type_set_null(self.0, index)).wrap(()) }
     }
 
@@ -99,7 +99,7 @@ impl UserType {
     }
 
     ///Sets a "tinyint" in a user defined type at the specified index.
-    pub fn set_int8(&mut self, index: u64, value: i8) -> Result<(), CassError> {
+    pub fn set_int8(&mut self, index: usize, value: i8) -> Result<(), CassError> {
         unsafe { CassError::build(cass_user_type_set_int8(self.0, index, value)).wrap(()) }
     }
 
@@ -119,7 +119,7 @@ impl UserType {
     }
 
     ///Sets an "smallint" in a user defined type at the specified index.
-    pub fn set_int16(&mut self, index: u64, value: i16) -> Result<(), CassError> {
+    pub fn set_int16(&mut self, index: usize, value: i16) -> Result<(), CassError> {
         unsafe { CassError::build(cass_user_type_set_int16(self.0, index, value)).wrap(()) }
     }
 
@@ -139,7 +139,7 @@ impl UserType {
     }
 
     ///Sets an "int" in a user defined type at the specified index.
-    pub fn set_int32(&mut self, index: u64, value: i32) -> Result<(), CassError> {
+    pub fn set_int32(&mut self, index: usize, value: i32) -> Result<(), CassError> {
         unsafe { CassError::build(cass_user_type_set_int32(self.0, index, value)).wrap(()) }
     }
 
@@ -159,7 +159,7 @@ impl UserType {
     }
 
     ///Sets a "date" in a user defined type at the specified index.
-    pub fn set_uint32(&mut self, index: u64, value: u32) -> Result<(), CassError> {
+    pub fn set_uint32(&mut self, index: usize, value: u32) -> Result<(), CassError> {
         unsafe { CassError::build(cass_user_type_set_uint32(self.0, index, value)).wrap(()) }
     }
 
@@ -181,7 +181,7 @@ impl UserType {
 
     ///Sets an "bigint", "counter", "timestamp" or "time" in a
     ///user defined type at the specified index.
-    pub fn set_int64(&mut self, index: u64, value: i64) -> Result<(), CassError> {
+    pub fn set_int64(&mut self, index: usize, value: i64) -> Result<(), CassError> {
         unsafe { CassError::build(cass_user_type_set_int64(self.0, index, value)).wrap(()) }
     }
 
@@ -200,7 +200,7 @@ impl UserType {
     }
 
     ///Sets a "float" in a user defined type at the specified index.
-    pub fn set_float(&mut self, index: u64, value: f32) -> Result<(), CassError> {
+    pub fn set_float(&mut self, index: usize, value: f32) -> Result<(), CassError> {
         unsafe { CassError::build(cass_user_type_set_float(self.0, index, value)).wrap(()) }
     }
 
@@ -218,7 +218,7 @@ impl UserType {
     }
 
     ///Sets an "double" in a user defined type at the specified index.
-    pub fn set_double(&mut self, index: u64, value: f64) -> Result<(), CassError> {
+    pub fn set_double(&mut self, index: usize, value: f64) -> Result<(), CassError> {
         unsafe { CassError::build(cass_user_type_set_double(self.0, index, value)).wrap(()) }
     }
 
@@ -237,7 +237,7 @@ impl UserType {
     }
 
     ///Sets a "boolean" in a user defined type at the specified index.
-    pub fn set_bool(&mut self, index: u64, value: bool) -> Result<(), CassError> {
+    pub fn set_bool(&mut self, index: usize, value: bool) -> Result<(), CassError> {
         unsafe {
             CassError::build(cass_user_type_set_bool(self.0, index, if value { cass_true } else { cass_false }))
                 .wrap(())
@@ -257,7 +257,7 @@ impl UserType {
 
     ///Sets an "ascii", "text" or "varchar" in a user defined type at the
     ///specified index.
-    pub fn set_stringl<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
+    pub fn set_stringl<S>(&mut self, index: usize, value: S) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
             CassError::build(cass_user_type_set_string(self.0,
@@ -285,9 +285,9 @@ impl UserType {
 
     // FIXME. right way to pass the vec?
     ///Sets a "blob" "varint" or "custom" in a user defined type at the specified index.
-    pub fn set_bytes(&mut self, index: u64, value: Vec<u8>) -> Result<(), CassError> {
+    pub fn set_bytes(&mut self, index: usize, value: Vec<u8>) -> Result<(), CassError> {
         unsafe {
-            CassError::build(cass_user_type_set_bytes(self.0, index, value.as_ptr(), value.len() as u64)).wrap(())
+            CassError::build(cass_user_type_set_bytes(self.0, index, value.as_ptr(), value.len())).wrap(())
         }
     }
 
@@ -300,13 +300,13 @@ impl UserType {
                                                                   .expect("must be utf8")
                                                                   .as_ptr(),
                                                               value.as_ptr(),
-                                                              value.len() as u64))
+                                                              value.len()))
                 .wrap(())
         }
     }
 
     ///Sets a "uuid" or "timeuuid" in a user defined type at the specified index.
-    pub fn set_uuid<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
+    pub fn set_uuid<S>(&mut self, index: usize, value: S) -> Result<(), CassError>
         where S: Into<Uuid> {
         unsafe { CassError::build(cass_user_type_set_uuid(self.0, index, value.into().inner())).wrap(()) }
     }
@@ -323,7 +323,7 @@ impl UserType {
     }
 
     ///Sets a "inet" in a user defined type at the specified index.
-    pub fn set_inet<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
+    pub fn set_inet<S>(&mut self, index: usize, value: S) -> Result<(), CassError>
         where S: Into<Inet> {
         unsafe { CassError::build(cass_user_type_set_inet(self.0, index, value.into().inner())).wrap(()) }
     }
@@ -340,7 +340,7 @@ impl UserType {
     }
 
     ///Sets a "list", "map" or "set" in a user defined type at the specified index.
-    pub fn set_collection<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
+    pub fn set_collection<S>(&mut self, index: usize, value: S) -> Result<(), CassError>
         where S: Into<Set> {
         unsafe { CassError::build(cass_user_type_set_collection(self.0, index, value.into().inner())).wrap(()) }
     }
@@ -360,7 +360,7 @@ impl UserType {
     }
 
     ///Sets a "tuple" in a user defined type at the specified index.
-    pub fn set_tuple(&mut self, index: u64, value: Tuple) -> Result<(), CassError> {
+    pub fn set_tuple(&mut self, index: usize, value: Tuple) -> Result<(), CassError> {
         unsafe { CassError::build(cass_user_type_set_tuple(self.0, index, value.inner())).wrap(()) }
     }
 
@@ -378,7 +378,7 @@ impl UserType {
     }
 
     ///Sets a user defined type in a user defined type at the specified index.
-    pub fn set_user_type(&mut self, index: u64, value: UserType) -> Result<(), CassError> {
+    pub fn set_user_type(&mut self, index: usize, value: UserType) -> Result<(), CassError> {
         unsafe { CassError::build(cass_user_type_set_user_type(self.0, index, value.0)).wrap(()) }
     }
 

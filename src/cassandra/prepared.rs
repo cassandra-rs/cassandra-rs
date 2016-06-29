@@ -45,7 +45,7 @@ impl PreparedStatement {
 
     ///Gets the name of a parameter at the specified index.
     #[allow(cast_possible_truncation)]
-    pub fn parameter_name(&self, index: u64) -> Result<&str, str::Utf8Error> {
+    pub fn parameter_name(&self, index: usize) -> Result<&str, str::Utf8Error> {
         unsafe {
             let mut name = mem::zeroed();
             let mut name_length = mem::zeroed();
@@ -58,7 +58,7 @@ impl PreparedStatement {
     ///
     ///Returns a reference to the data type of the parameter. Do not free
     ///this reference as it is bound to the lifetime of the prepared.
-    pub fn parameter_data_type(&self, index: u64) -> ConstDataType {
+    pub fn parameter_data_type(&self, index: usize) -> ConstDataType {
         unsafe { ConstDataType(cass_prepared_parameter_data_type(self.0, index)) }
     }
 

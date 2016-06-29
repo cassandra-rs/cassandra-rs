@@ -71,12 +71,12 @@ impl DataType {
     }
 
     ///Creates a new tuple data type.
-    pub fn new_tuple(item_count: u64) -> Self {
+    pub fn new_tuple(item_count: usize) -> Self {
         unsafe { DataType(cass_data_type_new_tuple(item_count)) }
     }
 
     ///Creates a new UDT (user defined type) data type.
-    pub fn new_udt(field_count: u64) -> DataType {
+    pub fn new_udt(field_count: usize) -> DataType {
         unsafe { DataType(cass_data_type_new_udt(field_count)) }
     }
 
@@ -92,7 +92,7 @@ impl DataType {
             let type_name2 = CString::new(type_name.into()).expect("must be valid utf8");
             CassError::build(cass_data_type_type_name(data_type.0,
                                                       &mut type_name2.as_ptr(),
-                                                      &mut (type_name2.as_bytes().len() as u64)))
+                                                      &mut (type_name2.as_bytes().len())))
                 .wrap(())
         }
     }
@@ -120,7 +120,7 @@ impl DataType {
             let keyspace2 = CString::new(keyspace.into()).expect("must be utf8");
             CassError::build(cass_data_type_keyspace(data_type.0,
                                                      &mut (keyspace2.as_ptr()),
-                                                     &mut (keyspace2.as_bytes().len() as u64)))
+                                                     &mut (keyspace2.as_bytes().len())))
                 .wrap(())
         }
     }
@@ -146,7 +146,7 @@ impl DataType {
             let class_name2 = CString::new(class_name.into()).expect("must be valid utf8");
             CassError::build(cass_data_type_class_name(data_type.0,
                                                        &mut class_name2.as_ptr(),
-                                                       &mut (class_name2.as_bytes().len() as u64)))
+                                                       &mut (class_name2.as_bytes().len())))
                 .wrap(())
         }
     }
@@ -169,7 +169,7 @@ impl DataType {
     ///or collection.
     ///
     ///<b>Note:</b> Only valid for UDT, tuple and collection data types.
-    pub fn sub_type_count<S>(&self) -> u64 {
+    pub fn sub_type_count<S>(&self) -> usize {
         unsafe { cass_data_sub_type_count(self.0) }
     }
 
@@ -177,7 +177,7 @@ impl DataType {
     ///the specified index.
     ///
     ///<b>Note:</b> Only valid for UDT, tuple and collection data types.
-    pub fn sub_data_type(&self, index: u64) -> ConstDataType {
+    pub fn sub_data_type(&self, index: usize) -> ConstDataType {
         unsafe { ConstDataType(cass_data_type_sub_data_type(self.0, index)) }
     }
 
@@ -197,14 +197,14 @@ impl DataType {
     ///Gets the sub-type name of a UDT (user defined type) at the specified index.
     ///
     ///<b>Note:</b> Only valid for UDT data types.
-    pub fn sub_type_name<S>(data_type: DataType, index: u64, name: S) -> Result<(), CassError>
+    pub fn sub_type_name<S>(data_type: DataType, index: usize, name: S) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
             let name2 = CString::new(name.into()).expect("must be utf8");
             CassError::build(cass_data_type_sub_type_name(data_type.0,
                                                           index,
                                                           &mut name2.as_ptr(),
-                                                          &mut (name2.as_bytes().len() as u64)))
+                                                          &mut (name2.as_bytes().len())))
                 .wrap(())
         }
     }

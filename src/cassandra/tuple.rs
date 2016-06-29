@@ -50,7 +50,7 @@ impl Protected<*mut _Tuple> for Tuple {
 
 impl Tuple {
     ///Creates a new tuple.
-    pub fn new(item_count: u64) -> Self {
+    pub fn new(item_count: usize) -> Self {
         unsafe { Tuple(cass_tuple_new(item_count)) }
     }
 
@@ -65,55 +65,55 @@ impl Tuple {
     }
 
     ///Sets an null in a tuple at the specified index.
-    pub fn set_null(&mut self, index: u64) -> Result<(), CassError> {
+    pub fn set_null(&mut self, index: usize) -> Result<(), CassError> {
         unsafe { CassError::build(cass_tuple_set_null(self.0, index)).wrap(()) }
     }
 
     ///Sets a "tinyint" in a tuple at the specified index.
-    pub fn set_int8(&mut self, index: u64, value: i8) -> Result<(), CassError> {
+    pub fn set_int8(&mut self, index: usize, value: i8) -> Result<(), CassError> {
         unsafe { CassError::build(cass_tuple_set_int8(self.0, index, value)).wrap(()) }
     }
 
     ///Sets an "smallint" in a tuple at the specified index.
-    pub fn set_int16(&mut self, index: u64, value: i16) -> Result<(), CassError> {
+    pub fn set_int16(&mut self, index: usize, value: i16) -> Result<(), CassError> {
         unsafe { CassError::build(cass_tuple_set_int16(self.0, index, value)).wrap(()) }
     }
 
     ///Sets an "int" in a tuple at the specified index.
-    pub fn set_int32(&mut self, index: u64, value: i32) -> Result<(), CassError> {
+    pub fn set_int32(&mut self, index: usize, value: i32) -> Result<(), CassError> {
         unsafe { CassError::build(cass_tuple_set_int32(self.0, index, value)).wrap(()) }
     }
 
     ///Sets a "date" in a tuple at the specified index.
-    pub fn set_uint32(&mut self, index: u64, value: u32) -> Result<(), CassError> {
+    pub fn set_uint32(&mut self, index: usize, value: u32) -> Result<(), CassError> {
         unsafe { CassError::build(cass_tuple_set_uint32(self.0, index, value)).wrap(()) }
     }
 
     ///Sets a "bigint", "counter", "timestamp" or "time" in a tuple at the
     ///specified index.
-    pub fn set_int64(&mut self, index: u64, value: i64) -> Result<(), CassError> {
+    pub fn set_int64(&mut self, index: usize, value: i64) -> Result<(), CassError> {
         unsafe { CassError::build(cass_tuple_set_int64(self.0, index, value)).wrap(()) }
     }
 
     ///Sets a "float" in a tuple at the specified index.
-    pub fn set_float(&mut self, index: u64, value: f32) -> Result<(), CassError> {
+    pub fn set_float(&mut self, index: usize, value: f32) -> Result<(), CassError> {
         unsafe { CassError::build(cass_tuple_set_float(self.0, index, value)).wrap(()) }
     }
 
     ///Sets a "double" in a tuple at the specified index.
-    pub fn set_double(&mut self, index: u64, value: f64) -> Result<(), CassError> {
+    pub fn set_double(&mut self, index: usize, value: f64) -> Result<(), CassError> {
         unsafe { CassError::build(cass_tuple_set_double(self.0, index, value)).wrap(()) }
     }
 
     ///Sets a "boolean" in a tuple at the specified index.
-    pub fn set_bool(&mut self, index: u64, value: bool) -> Result<(), CassError> {
+    pub fn set_bool(&mut self, index: usize, value: bool) -> Result<(), CassError> {
         unsafe {
             CassError::build(cass_tuple_set_bool(self.0, index, if value { cass_true } else { cass_false })).wrap(())
         }
     }
 
     ///Sets an "ascii", "text" or "varchar" in a tuple at the specified index.
-    pub fn set_string<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
+    pub fn set_string<S>(&mut self, index: usize, value: S) -> Result<(), CassError>
         where S: Into<String> {
         unsafe {
             CassError::build(cass_tuple_set_string(self.0,
@@ -124,35 +124,35 @@ impl Tuple {
     }
 
     ///Sets a "blob", "varint" or "custom" in a tuple at the specified index.
-    pub fn set_bytes(&mut self, index: u64, value: Vec<u8>) -> Result<(), CassError> {
-        unsafe { CassError::build(cass_tuple_set_bytes(self.0, index, value.as_ptr(), value.len() as u64)).wrap(()) }
+    pub fn set_bytes(&mut self, index: usize, value: Vec<u8>) -> Result<(), CassError> {
+        unsafe { CassError::build(cass_tuple_set_bytes(self.0, index, value.as_ptr(), value.len())).wrap(()) }
     }
 
     ///Sets a "uuid" or "timeuuid" in a tuple at the specified index.
-    pub fn set_uuid<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
+    pub fn set_uuid<S>(&mut self, index: usize, value: S) -> Result<(), CassError>
         where S: Into<Uuid> {
         unsafe { CassError::build(cass_tuple_set_uuid(self.0, index, value.into().inner())).wrap(()) }
     }
 
     ///Sets an "inet" in a tuple at the specified index.
-    pub fn set_inet(&mut self, index: u64, value: SocketAddr) -> Result<(), CassError> {
+    pub fn set_inet(&mut self, index: usize, value: SocketAddr) -> Result<(), CassError> {
         let inet = AsInet::as_cass_inet(&value);
         unsafe { CassError::build(cass_tuple_set_inet(self.0, index, inet.inner())).wrap(()) }
     }
 
     ///Sets a "list", "map" or "set" in a tuple at the specified index.
-    pub fn set_collection<S>(&mut self, index: u64, value: S) -> Result<(), CassError>
+    pub fn set_collection<S>(&mut self, index: usize, value: S) -> Result<(), CassError>
         where S: Into<Set> {
         unsafe { CassError::build(cass_tuple_set_collection(self.0, index, value.into().inner())).wrap(()) }
     }
 
     ///Sets a "tuple" in a tuple at the specified index.
-    pub fn set_tuple(&mut self, index: u64, value: Tuple) -> Result<(), CassError> {
+    pub fn set_tuple(&mut self, index: usize, value: Tuple) -> Result<(), CassError> {
         unsafe { CassError::build(cass_tuple_set_tuple(self.0, index, value.0)).wrap(()) }
     }
 
     ///Sets a "udt" in a tuple at the specified index.
-    pub fn set_user_type(&mut self, index: u64, value: &UserType) -> Result<(), CassError> {
+    pub fn set_user_type(&mut self, index: usize, value: &UserType) -> Result<(), CassError> {
         unsafe { CassError::build(cass_tuple_set_user_type(self.0, index, value.inner())).wrap(()) }
     }
 }

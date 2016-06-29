@@ -91,7 +91,7 @@ impl CassResult {
     }
 
     ///Gets the column name at index for the specified result.
-    pub fn column_name(&self, index: u64) -> String {
+    pub fn column_name(&self, index: usize) -> String {
         unsafe {
             let name = mem::zeroed();
             let name_length = mem::zeroed();
@@ -102,12 +102,12 @@ impl CassResult {
     }
 
     ///Gets the column type at index for the specified result.
-    pub fn column_type(&self, index: u64) -> ValueType {
+    pub fn column_type(&self, index: usize) -> ValueType {
         unsafe { ValueType::build(cass_result_column_type(self.0, index)) }
     }
 
     ///Gets the column datatype at index for the specified result.
-    pub fn column_data_type(&self, index: u64) -> ConstDataType {
+    pub fn column_data_type(&self, index: usize) -> ConstDataType {
         unsafe { ConstDataType(cass_result_column_data_type(self.0, index)) }
     }
 
@@ -138,7 +138,7 @@ impl CassResult {
 
             CassError::build(cass_result_paging_state_token(self.0,
                                                             &mut state.as_ptr(),
-                                                            &mut (state.to_bytes().len() as u64)))
+                                                            &mut (state.to_bytes().len())))
                 .wrap(self)
         }
     }
