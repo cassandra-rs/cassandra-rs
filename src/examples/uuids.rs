@@ -30,8 +30,8 @@ fn select_from_log(session: &mut Session, key: &str) -> Result<CassResult, CassE
 }
 
 fn main() {
-    let uuid_gen = UuidGen::new();
-    let mut cluster = Cluster::new();
+    let uuid_gen = UuidGen::default();
+    let mut cluster = Cluster::default();
     cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
     match cluster.connect() {
         Ok(ref mut session) => {

@@ -114,9 +114,9 @@ impl Drop for Statement {
 
 ///All Rust types that can be bound to a cassandra statement
 /// //FIXME not yet implemented
-/// pub enum CassBindable {
-///
-/// }
+// pub enum CassBindable {
+//
+// }
 ///Any rust type that can have a default bind implementation
 pub trait BindRustType<T> {
     ///binds a rust type to C* by index
@@ -177,11 +177,11 @@ impl BindRustType<i64> for Statement {
 
 impl<'a> BindRustType<&'a str> for Statement {
     fn bind(&mut self, index: usize, value: &str) -> Result<&mut Self, CassError> {
-        self.bind_string(index, &value)
+        self.bind_string(index, value)
     }
 
     fn bind_by_name(&mut self, col: &str, value: &str) -> Result<&mut Self, CassError> {
-        self.bind_string_by_name(col, &value)
+        self.bind_string_by_name(col, value)
     }
 }
 

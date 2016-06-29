@@ -30,11 +30,14 @@ impl Drop for Ssl {
     }
 }
 
-impl Ssl {
+impl Default for Ssl {
     ///Creates a new SSL context.
-    pub fn new() -> Ssl {
+    fn default() -> Ssl {
         unsafe { Ssl(cass_ssl_new()) }
-    }
+    }    
+}
+
+impl Ssl {
 
     ///Adds a trusted certificate. This is used to verify
     ///the peer's certificate.

@@ -66,7 +66,7 @@ fn select_from_paging(session: &mut Session) -> Result<(), CassError> {
 fn main() {
     // let uuid_gen = &mut UuidGen::new();
 
-    let mut cluster = Cluster::new();
+    let mut cluster = Cluster::default();
     cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
     cluster.set_load_balance_round_robin();
 

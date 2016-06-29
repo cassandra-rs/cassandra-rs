@@ -45,7 +45,7 @@ fn main() {
         Pair{key:"d", value:"4"},
     );
 
-    let mut cluster = Cluster::new();
+    let mut cluster = Cluster::default();
     cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
 
     match cluster.connect() {

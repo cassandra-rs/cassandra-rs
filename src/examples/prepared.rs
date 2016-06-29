@@ -60,7 +60,7 @@ fn select_from_basic(session: &mut Session, prepared: &PreparedStatement, key: &
 }
 
 fn main() {
-    let mut cluster = Cluster::new();
+    let mut cluster = Cluster::default();
     cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
     cluster.set_protocol_version(CqlProtocol::THREE).unwrap();
 

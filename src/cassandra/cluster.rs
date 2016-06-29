@@ -120,13 +120,14 @@ impl Protected<*mut _Cluster> for Cluster {
     }
 }
 
-impl Cluster {
+impl Default for Cluster {
     ///Creates a new cluster
-    pub fn new() -> Cluster {
+    fn default() -> Cluster{
         unsafe { Cluster(cass_cluster_new()) }
     }
+}
 
-
+impl Cluster {
     ///Sets/Appends contact points. This *MUST* be set. The first call sets
     ///the contact points and any subsequent calls appends additional contact
     ///points. Passing an empty string will clear the contact points. White space

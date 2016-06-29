@@ -119,13 +119,14 @@ impl str::FromStr for Uuid {
     }
 }
 
-
-impl UuidGen {
+impl Default for UuidGen {
     ///Creates a new thread-safe UUID generator
-    pub fn new() -> Self {
+    fn default() -> Self {
         unsafe { UuidGen(cass_uuid_gen_new()) }
     }
+}
 
+impl UuidGen {
     ///Creates a new UUID generator with custom node information.
     ///<b>Note:</b> This object is thread-safe. It is best practice to create and reuse
     ///a single object per application.
@@ -176,7 +177,7 @@ impl UuidGen {
 #[test]
 #[allow(unused_variables)]
 fn test_uuid_display_gentime() {
-    let generator = UuidGen::new();
+    let generator = UuidGen::default();
     let uuid = generator.gen_from_time(1457486866742u64);
     assert_eq!(uuid.timestamp(), 1457486866742u64);
     let uuidstr = format!("{}", uuid); // Test Display trait
@@ -185,7 +186,7 @@ fn test_uuid_display_gentime() {
 #[test]
 #[allow(unused_variables)]
 fn test_uuid_debug_genrand() {
-    let generator = UuidGen::new();
+    let generator = UuidGen::default();
     let uuid = generator.gen_random();
     let uuidstr = format!("{:?}", uuid); // Test Debug trait
 }

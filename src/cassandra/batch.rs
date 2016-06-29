@@ -48,12 +48,14 @@ impl Protected<*mut _CassCustomPayload> for CustomPayload {
         CustomPayload(inner)
     }
 }
-impl CustomPayload {
+
+impl Default for CustomPayload {
     ///creates a new custom payload
-    pub fn new() -> Self {
+    fn default() -> Self {
         unsafe { CustomPayload(cass_custom_payload_new()) }
     }
-
+}
+impl CustomPayload {
     ///Sets an item to the custom payload.
     pub fn set(&self, name: String, value: &[u8]) -> Result<(), NulError> {
         unsafe {

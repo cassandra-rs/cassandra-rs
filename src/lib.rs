@@ -1,10 +1,7 @@
 //! This is a wrapper around the DataStax C++ driver for Cassandra. It aims to be 100% safe with minimal overhead added
-#![cfg_attr(feature="clippy", feature(plugin))]
-#![cfg_attr(feature="clippy", plugin(clippy))]
-#![warn(clippy)]
-#![warn(clippy_pedantic)]
 #![warn(missing_docs)]
 #![allow(unknown_lints)]
+#![allow(doc_markdown)]
 
 extern crate libc;
 #[macro_use]

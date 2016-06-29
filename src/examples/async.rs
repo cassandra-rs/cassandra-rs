@@ -32,7 +32,7 @@ fn insert_into_async(session: &mut Session, key: String) -> Result<Vec<ResultFut
 }
 
 pub fn main() {
-    let mut cluster = Cluster::new();
+    let mut cluster = Cluster::default();
     cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
     match cluster.connect() {
         Ok(ref mut session) => {

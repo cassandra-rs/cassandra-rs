@@ -52,7 +52,7 @@ unsafe fn select_from_basic(session: &mut Session, prepared: &PreparedStatement,
 
 fn main() {
     unsafe {
-        let mut cluster = Cluster::new();
+        let mut cluster = Cluster::default();
         cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
 
         match cluster.connect() {
@@ -83,7 +83,7 @@ fn main() {
                 }
                 match session.prepare("SELECT * FROM examples.basic WHERE key = ?").unwrap().wait() {
                     Ok(ref mut select_prepared) => {
-                        let output = select_from_basic(session, &select_prepared, "prepared_test").unwrap();
+                        let output = select_from_basic(session, select_prepared, "prepared_test").unwrap();
                         assert_eq!(input, output);
                         println!("results matched: {:?}", output);
                     }

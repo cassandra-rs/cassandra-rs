@@ -39,7 +39,7 @@ fn main() {
 
     let items = vec!["apple", "orange", "banana", "mango"];
     let contact_points = ContactPoints::from_str("127.0.0.1").unwrap();
-    let mut cluster = Cluster::new();
+    let mut cluster = Cluster::default();
     cluster.set_contact_points(contact_points).unwrap();
 
     match cluster.connect() {

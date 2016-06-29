@@ -106,12 +106,12 @@ fn print_schema_value(value: Value) {
 // }
 
 fn main() {
-    let foo = cass();
-    println!("{:?}", foo);
+    let result = cass();
+    println!("{:?}", result);
 }
 
 fn cass() -> Result<(), CassError> {
-    let mut cluster = Cluster::new();
+    let mut cluster = Cluster::default();
     cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
     cluster.set_load_balance_round_robin();
 
@@ -135,7 +135,7 @@ fn cass() -> Result<(), CassError> {
     match cluster.connect() {
         Ok(ref mut session) => {
             try!(session.execute(&create_ks).wait());
-            print_keyspace(&session, "examples");
+            print_keyspace(session, "examples");
             try!(session.execute(&create_table).wait());
             try!(session.execute(&create_func1).wait());
             try!(session.execute(&create_func2).wait());
