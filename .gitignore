@@ -12,3 +12,4 @@ Cargo.lock
 /target/
 .project
 /.settings/
+.travis.yml
