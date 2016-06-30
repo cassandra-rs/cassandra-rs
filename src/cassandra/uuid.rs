@@ -160,7 +160,7 @@ impl UuidGen {
     /// # use cassandra::{UuidGen, Uuid};
     /// # #[allow(dead_code)]
     /// # fn example() -> Uuid {
-    /// let generator = UuidGen::new();
+    /// let generator = UuidGen::default();
     /// let uuid = generator.gen_from_time(1457486866742u64);
     /// # uuid
     /// # }

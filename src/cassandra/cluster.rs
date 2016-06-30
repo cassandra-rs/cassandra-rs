@@ -97,8 +97,10 @@ impl FromStr for ContactPoints {
 ///
 /// # Examples
 /// ```
-/// let mut cluster = Cluster::new();
-/// cluster.set_contact_points("127.0.0.1").unwrap();
+/// use std::str::FromStr;
+/// use cassandra::{Cluster,ContactPoints};
+/// let mut cluster = Cluster::default();
+/// cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
 /// let mut session = cluster.connect().unwrap();
 /// ```
 
@@ -131,11 +133,11 @@ impl Cluster {
     ///Sets/Appends contact points. This *MUST* be set. The first call sets
     ///the contact points and any subsequent calls appends additional contact
     ///points. Passing an empty string will clear the contact points. White space
-    ///is striped from the contact points.
+    ///is stripped from the contact points.
     ///
-    /// ```
-    /// Example contact points: "127.0.0.1" "127.0.0.1,127.0.0.2", "server1.domain.com"
-    /// ```
+    /// 
+    /// {contact points: "127.0.0.1" "127.0.0.1,127.0.0.2", "server1.domain.com"}
+    /// 
     ///
     pub fn set_contact_points<T: Into<ContactPoints>>(&mut self, contact_points: T) -> Result<&mut Self, CassError> {
         unsafe {
@@ -147,9 +149,9 @@ impl Cluster {
 
     /// Sets the port
     ///
-    /// ```
+    ///
     /// Default: 9042
-    /// ```
+    ///
     pub fn set_port(&mut self, port: u16) -> Result<&mut Self, CassError> {
         unsafe { CassError::build(cass_cluster_set_port(self.0, port as i32)).wrap(self) }
     }
@@ -178,9 +180,9 @@ impl Cluster {
     ///Sets the protocol version. This will automatically downgrade to the lowest
     ///supported protocol version.
     ///
-    /// ```
+    /// 
     ///Default: version 4
-    /// ```
+    /// 
     pub fn set_protocol_version(&mut self, protocol_version: CqlProtocol) -> Result<&mut Self, CassError> {
         unsafe { CassError::build(cass_cluster_set_protocol_version(self.0, protocol_version as i32)).wrap(self) }
     }
@@ -188,36 +190,36 @@ impl Cluster {
     /// Sets the number of IO threads. This is the number of threads
     /// that will handle query requests.
     ///
-    /// ```
+    /// 
     /// Default: 1
-    /// ```
+    /// 
     pub fn set_num_threads_io(&mut self, num_threads: u32) -> Result<&Self, CassError> {
         unsafe { CassError::build(cass_cluster_set_num_threads_io(self.0, num_threads)).wrap(self) }
     }
 
     /// Sets the size of the fixed size queue that stores pending requests.
     ///
-    /// ```
+    /// 
     /// Default: 8192
-    /// ```
+    /// 
     pub fn set_queue_size_io(&mut self, queue_size: u32) -> Result<&mut Self, CassError> {
         unsafe { CassError::build(cass_cluster_set_queue_size_io(self.0, queue_size)).wrap(self) }
     }
 
     /// Sets the size of the fixed size queue that stores events.
     ///
-    /// ```
+    /// 
     /// Default: 8192
-    /// ```
+    /// 
     pub fn set_queue_size_event(&mut self, queue_size: u32) -> Result<&mut Self, CassError> {
         unsafe { CassError::build(cass_cluster_set_queue_size_event(self.0, queue_size)).wrap(self) }
     }
 
     /// Sets the size of the fixed size queue that stores log messages.
     ///
-    /// ```
+    /// 
     /// Default: 8192
-    /// ```
+    /// 
     pub fn set_queue_size_log(&mut self, queue_size: u32) -> Result<&mut Self, CassError> {
         unsafe { CassError::build(cass_cluster_set_queue_size_log(self.0, queue_size)).wrap(self) }
     }
@@ -225,9 +227,9 @@ impl Cluster {
     ///Sets the number of connections made to each server in each
     ///IO thread.
     ///
-    /// ```
+    /// 
     /// Default: 1
-    /// ```
+    /// 
     pub fn set_core_connections_per_host(&mut self, num_connections: u32) -> Result<&mut Self, CassError> {
         unsafe { CassError::build(cass_cluster_set_core_connections_per_host(self.0, num_connections)).wrap(self) }
     }
@@ -235,18 +237,18 @@ impl Cluster {
     /// Sets the maximum number of connections made to each server in each
     ///IO thread.
     ///
-    /// ```
+    /// 
     /// Default: 2
-    /// ```
+    /// 
     pub fn set_max_connections_per_host(&mut self, num_connections: u32) -> Result<&mut Self, CassError> {
         unsafe { CassError::build(cass_cluster_set_max_connections_per_host(self.0, num_connections)).wrap(self) }
     }
 
     ///Sets the amount of time to wait before attempting to reconnect.
     ///
-    /// ```
+    /// 
     /// Default: 1000ms
-    /// ```
+    /// 
     pub fn set_reconnect_wait_time(&mut self, wait_time: u32) -> &Self {
         unsafe {
             cass_cluster_set_reconnect_wait_time(self.0, wait_time);
@@ -258,7 +260,7 @@ impl Cluster {
     ///Connections are created when the current connections are unable to keep up with
     ///request throughput.
     ///
-    /// ```
+    /// 
     ///Default: 1
     pub fn set_max_concurrent_creation(&mut self, num_connections: u32) -> Result<&mut Self, CassError> {
         unsafe { CassError::build(cass_cluster_set_max_concurrent_creation(self.0, num_connections)).wrap(self) }
@@ -268,7 +270,7 @@ impl Cluster {
     ///on a connection before creating a new connection. The number of new connections
     ///created will not exceed max_connections_per_host.
     ///
-    /// ```
+    /// 
     /// Default: 100
     pub fn set_max_concurrent_requests_threshold(&mut self, num_requests: u32) -> Result<&mut Self, CassError> {
         unsafe { CassError::build(cass_cluster_set_max_concurrent_requests_threshold(self.0, num_requests)).wrap(self) }
@@ -277,7 +279,7 @@ impl Cluster {
     ///Sets the maximum number of requests processed by an IO worker
     ///per flush.
     ///
-    /// ```
+    /// 
     ///Default: 128
     pub fn set_max_requests_per_flush(&mut self, num_requests: u32) -> Result<&mut Self, CassError> {
         unsafe { CassError::build(cass_cluster_set_max_requests_per_flush(self.0, num_requests)).wrap(self) }
@@ -287,7 +289,7 @@ impl Cluster {
     /// on a connection. Disables writes to a connection if the number
     /// of bytes queued exceed this value.
     ///
-    /// ```
+    /// 
     /// Default: 64KB
     pub fn set_write_bytes_high_water_mark(&mut self, num_bytes: u32) -> Result<&mut Self, CassError> {
         unsafe { CassError::build(cass_cluster_set_write_bytes_high_water_mark(self.0, num_bytes)).wrap(self) }
@@ -297,7 +299,7 @@ impl Cluster {
     /// on a connection. Disables writes to a connection if the number
     /// of bytes queued fall below this value.
     ///
-    /// ```
+    /// 
     /// Default: 32KB
     pub fn set_write_bytes_low_water_mark(&mut self, num_bytes: u32) -> Result<&mut Self, CassError> {
         unsafe { CassError::build(cass_cluster_set_write_bytes_low_water_mark(self.0, num_bytes)).wrap(self) }
@@ -308,7 +310,7 @@ impl Cluster {
     ///host on an IO worker if the number of requests queued exceed this
     ///value.
     ///
-    /// ```
+    /// 
     /// Default: 256
     pub fn set_pending_requests_high_water_mark(&mut self, num_requests: u32) -> Result<&mut Self, CassError> {
         unsafe { CassError::build(cass_cluster_set_pending_requests_high_water_mark(self.0, num_requests)).wrap(self) }
@@ -319,7 +321,7 @@ impl Cluster {
     ///requests, writes to a host will only resume once the number of requests
     ///fall below this value.
     ///
-    ///```
+    ///
     /// Default: 128
     pub fn set_pending_requests_low_water_mark(&mut self, num_requests: u32) -> Result<&mut Self, CassError> {
         unsafe { CassError::build(cass_cluster_set_pending_requests_low_water_mark(self.0, num_requests)).wrap(self) }
@@ -327,7 +329,7 @@ impl Cluster {
 
     /// Sets the timeout for connecting to a node.
     ///
-    /// ```
+    ///
     /// Default: 5000ms
     #[allow(cast_possible_truncation,cast_sign_loss)]
     pub fn set_connect_timeout(&mut self, timeout: Duration) -> &Self {
@@ -339,7 +341,7 @@ impl Cluster {
 
     ///Sets the timeout for waiting for a response from a node.
     ///
-    /// ```
+    ///
     /// Default: 12000ms
     #[allow(cast_possible_truncation,cast_sign_loss)]
     pub fn set_request_timeout(&mut self, timeout: Duration) -> &Self {
@@ -402,9 +404,9 @@ impl Cluster {
     ///For this reason enabling token-aware routing will also enable the usage
     ///of schema metadata.
     ///
-    /// ```
+    ///
     ///Default: true (enabled).
-    /// ```
+    ///
     ///
     ///This routing policy composes the base routing policy, routing
     ///requests first to replicas on nodes considered 'local' by
@@ -418,9 +420,9 @@ impl Cluster {
 
     ///Configures the cluster to use latency-aware request routing or not.
     ///
-    /// ```
+    ///
     /// Default: false (disabled).
-    /// ```
+    ///
     ///
     /// This routing policy is a top-level routing policy. It uses the
     /// base routing policy to determine locality (dc-aware) and/or
@@ -435,7 +437,7 @@ impl Cluster {
 
     ///Configures the settings for latency-aware request routing.
     ///
-    /// ```
+    ///
     /// Defaults:
     ///
     /// <ul>
@@ -469,7 +471,7 @@ impl Cluster {
     ///be ignored and a connection will not be established. This policy is useful
     ///for ensuring that the driver will only connect to a predefined set of hosts.
     ///
-    ///```
+    ///
     ///Examples: "127.0.0.1" "127.0.0.1,127.0.0.2", "server1.domain.com"
     pub fn set_whitelist_filtering(&mut self, hosts: Vec<String>) -> &Self {
         // FIXME replace host strings with InetSomethings
@@ -481,7 +483,7 @@ impl Cluster {
 
     ///Enable/Disable Nagel's algorithm on connections.
     ///
-    /// ```
+    ///
     ///<b>Default:</b> true (disables Nagel's algorithm).
     pub fn set_tcp_nodelay(&mut self, enable: bool) -> &Self {
         unsafe {
@@ -492,7 +494,7 @@ impl Cluster {
 
     ///Enable/Disable TCP keep-alive
     ///
-    /// ```
+    ///
     ///Default: false (disabled).
     #[allow(cast_possible_truncation,cast_sign_loss)]
     pub fn set_tcp_keepalive(&mut self, enable: bool, delay: Duration) -> &Self {
@@ -507,7 +509,7 @@ impl Cluster {
     /// Sets the timestamp generator used to assign timestamps to all requests
     ///unless overridden by setting the timestamp on a statement or a batch.
     ///
-    /// ```
+    ///
     /// Default: server-side timestamp generator.
     pub fn set_timestamp_gen(&mut self, tsg: &TimestampGen) -> &mut Self {
         unsafe {
@@ -521,8 +523,8 @@ impl Cluster {
     ///is useful for preventing intermediate network devices from dropping
     ///connections.
     ///
-    /// ````
-    // Default: 30 seconds
+    ///
+    /// Default: 30 seconds
     #[allow(cast_possible_truncation,cast_sign_loss)]
     pub fn set_connection_heartbeat_interval(&mut self, hearbeat: Duration) -> &mut Self {
         unsafe {
@@ -534,7 +536,7 @@ impl Cluster {
     ///Sets the amount of time a connection is allowed to be without a successful
     ///heartbeat response before being terminated and scheduled for reconnection.
     ///
-    /// ```
+    /// 
     ///Default: 60 seconds
     #[allow(cast_possible_truncation,cast_sign_loss)]
     pub fn set_connection_idle_timeout(&mut self, timeout: Duration) -> &mut Self {
@@ -547,7 +549,7 @@ impl Cluster {
     ///Sets the retry policy used for all requests unless overridden by setting
     ///a retry policy on a statement or a batch.
     ///
-    /// ```
+    /// 
     ///Default: The same policy as would be created by the function:
     ///cass_retry_policy_default_new(). This policy will retry on a read timeout
     ///if there was enough replicas, but no data present, on a write timeout if a
@@ -567,7 +569,7 @@ impl Cluster {
     ///cass_session_get_schema() will always return an empty object. This can be
     ///useful for reducing the startup overhead of short-lived sessions.
     ///
-    /// ```
+    /// 
     ///Default: true (enabled).
     pub fn set_use_schema(&mut self, enabled: bool) -> &Self {
         unsafe {
