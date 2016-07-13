@@ -29,25 +29,33 @@ Here's a straightforward example found in simple.rs:
 
 
 ```rust
+    #[macro_use(stmt)]
     extern crate cassandra;
     use cassandra::*;
-
-    static QUERY:&'static str = "SELECT keyspace_name FROM system.schema_keyspaces;";
-    static COL_NAME:&'static str = "keyspace_name";
-    static CONTACT_POINTS:&'static str = "127.0.0.1";
-
+    use std::str::FromStr;
+    
+    
     fn main() {
-        let mut cluster = Cluster::new();
-        cluster
-            .set_contact_points(CONTACT_POINTS).unwrap()
-            .set_load_balance_round_robin().unwrap();
-        let session = cluster.connect().unwrap();
-        let result = session.execute(QUERY, 0).wait().unwrap();
-        println!("{}",result);
-        for row in result.iter() {
-            println!("ks name = {}", row.get_column_by_name(COL_NAME));
+        let query = stmt!("SELECT keyspace_name FROM system_schema.keyspaces;");
+        let col_name = "keyspace_name";
+    
+        let contact_points = ContactPoints::from_str("127.0.0.1").unwrap();
+    
+        let mut cluster = Cluster::default();
+        cluster.set_contact_points(contact_points).unwrap();
+        cluster.set_load_balance_round_robin();
+    
+        match cluster.connect() {
+            Ok(ref mut session) => {
+                let result = session.execute(&query).wait().unwrap();
+                println!("{}", result);
+                for row in result.iter() {
+                    let col: String = row.get_col_by_name(col_name).unwrap();
+                    println!("ks name = {}", col);
+                }
+            }
+            err => println!("{:?}", err),
         }
-        session.close().wait().unwrap();
     }
 ```
 
