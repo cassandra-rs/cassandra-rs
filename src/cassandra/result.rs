@@ -73,11 +73,12 @@ impl Display for CassResult {
     }
 }
 
-impl Drop for CassResult {
-    fn drop(&mut self) {
-        unsafe { cass_result_free(self.0) }
-    }
-}
+//FIXME Understand why this drop results in double freeing when binding by name
+//impl Drop for CassResult {
+//    fn drop(&mut self) {
+//        unsafe { cass_result_free(self.0) }
+//    }
+//}
 
 impl CassResult {
     ///Gets the number of rows for the specified result.
