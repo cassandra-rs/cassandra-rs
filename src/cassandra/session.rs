@@ -25,6 +25,7 @@ use cassandra_sys::cass_session_execute_batch;
 use cassandra_sys::cass_session_get_schema_meta;
 use cassandra_sys::cass_session_connect_keyspace;
 use cassandra_sys::cass_session_get_metrics;
+use cassandra_sys::cass_session_new;
 
 ///A session object is used to execute queries and maintains cluster state through
 ///the control connection. The control connection is used to auto-discover nodes and
@@ -56,13 +57,12 @@ impl Drop for Session {
 }
 
 impl Session {
-    //    /// Create a new Cassanda session.
-    //    /// It's recommended to use Cluster.connect() instead
-    //    // FIXME find a way to hide this from external api
-    //    pub fn new() -> Session {
-    //        unsafe { Session(cass_session_new()) }
-    //    }
-    //
+    /// Create a new Cassanda session.
+    /// It's recommended to use Cluster.connect() instead
+    pub fn new() -> Session {
+        unsafe { Session(cass_session_new()) }
+    }
+
     //    pub fn new2() -> *mut _Session {
     //        unsafe { cass_session_new() }
     //    }
