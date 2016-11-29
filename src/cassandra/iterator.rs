@@ -31,6 +31,7 @@ use cassandra_sys::cass_iterator_get_aggregate_meta;
 use cassandra::util::Protected;
 
 ///Iterates over the  aggregate metadata entries(??)
+#[derive(Debug)]
 pub struct AggregateIterator(*mut _CassIterator);
 
 impl Drop for AggregateIterator {
@@ -55,6 +56,7 @@ impl Iterator for AggregateIterator {
 }
 
 ///Iterater over the fields of a UDT
+#[derive(Debug)]
 pub struct UserTypeIterator(*mut _CassIterator);
 
 impl Drop for UserTypeIterator {
@@ -84,6 +86,7 @@ impl UserTypeIterator {
 
 
 ///Iterater over the  function metadata entries(??)
+#[derive(Debug)]
 pub struct FunctionIterator(*mut _CassIterator);
 
 impl Iterator for FunctionIterator {
@@ -100,6 +103,7 @@ impl Iterator for FunctionIterator {
 
 
 ///Iterater over the table's metadata entries(??)
+#[derive(Debug)]
 pub struct TableIterator(*mut _CassIterator);
 
 impl Iterator for TableIterator {
@@ -115,6 +119,7 @@ impl Iterator for TableIterator {
 }
 
 ///Iterater over the keyspace's metadata entries(??)
+#[derive(Debug)]
 pub struct KeyspaceIterator(*mut _CassIterator);
 
 impl Iterator for KeyspaceIterator {
@@ -130,6 +135,7 @@ impl Iterator for KeyspaceIterator {
 }
 
 ///Iterater over the columns's metadata entries(??)
+#[derive(Debug)]
 pub struct ColumnIterator(*mut _CassIterator);
 
 impl Iterator for ColumnIterator {
@@ -145,6 +151,7 @@ impl Iterator for ColumnIterator {
 }
 
 ///Iterater over the field's metadata entries(??)
+#[derive(Debug)]
 pub struct FieldIterator(*mut _CassIterator);
 
 impl Iterator for FieldIterator {
@@ -272,6 +279,7 @@ impl Protected<*mut _CassIterator> for SetIterator {
 
 
 ///Iterater over the set's metadata entries(??)
+#[derive(Debug)]
 pub struct SetIterator(*mut _CassIterator);
 
 // impl<'a> Display for &'a SetIterator {
@@ -310,6 +318,7 @@ impl SetIterator {
 }
 
 ///An iterator over the k/v pair in the map
+#[derive(Debug)]
 pub struct MapIterator(*mut _CassIterator);
 
 impl MapIterator {
@@ -327,6 +336,7 @@ impl MapIterator {
 }
 
 ///An iterator over the elements of a Cassandra tuple
+#[derive(Debug)]
 pub struct TupleIterator(pub *mut _CassIterator);
 
 impl Drop for TupleIterator {
