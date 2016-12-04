@@ -93,7 +93,6 @@ use std::str;
 // }
 
 /// A field's metadata
-#[derive(Debug)]
 pub struct Field {
     /// The field's name
     pub name: String,
