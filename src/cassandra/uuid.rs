@@ -46,6 +46,7 @@ impl Default for Uuid {
 /// A UUID generator object.
 ///
 /// Instances of the UUID generator object are thread-safe to generate UUIDs.
+#[derive(Debug)]
 pub struct UuidGen(*mut _UuidGen);
 unsafe impl Sync for UuidGen {}
 unsafe impl Send for UuidGen {}

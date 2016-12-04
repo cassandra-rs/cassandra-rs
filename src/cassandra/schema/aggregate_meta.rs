@@ -23,6 +23,7 @@ use std::mem;
 
 
 /// Metadata about a cassandra aggregate
+#[derive(Debug)]
 pub struct AggregateMeta(*const _CassAggregateMeta);
 
 impl Protected<*const _CassAggregateMeta> for AggregateMeta {

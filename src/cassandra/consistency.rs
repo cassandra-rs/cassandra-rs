@@ -8,6 +8,7 @@ use std::ffi::CStr;
 
 
 /// A Cassandra consistency level
+#[derive(Debug)]
 pub struct Consistency(_CassConsistency);
 
 impl ToString for Consistency {

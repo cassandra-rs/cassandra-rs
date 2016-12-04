@@ -6,6 +6,7 @@ use cassandra_sys::CassWriteType;
 
 
 /// The write type of a request
+#[derive(Debug)]
 pub struct WriteType(pub CassWriteType);
 
 impl WriteType {

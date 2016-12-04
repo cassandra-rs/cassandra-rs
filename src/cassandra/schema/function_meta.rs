@@ -22,6 +22,7 @@ use cassandra_sys::cass_true;
 use std::{mem, slice, str};
 use std::ffi::CString;
 /// The metadata for a function
+#[derive(Debug)]
 pub struct FunctionMeta(*const _CassFunctionMeta);
 
 impl Protected<*const _CassFunctionMeta> for FunctionMeta {

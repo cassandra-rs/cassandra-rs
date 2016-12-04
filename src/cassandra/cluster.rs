@@ -69,6 +69,7 @@ pub enum CqlProtocol {
 }
 
 /// A set of cassandra contact points
+#[derive(Debug)]
 pub struct ContactPoints(Vec<Ipv4Addr>);
 
 impl fmt::Display for ContactPoints {
@@ -103,6 +104,7 @@ impl FromStr for ContactPoints {
 /// let mut session = cluster.connect().unwrap();
 /// ```
 
+#[derive(Debug)]
 pub struct Cluster(pub *mut _Cluster);
 
 impl Drop for Cluster {

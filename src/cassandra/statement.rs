@@ -70,6 +70,7 @@ use std::ffi::CString;
 ///
 /// <b>Note:</b> Parameters for regular queries are not supported by the binary protocol
 /// version 1.
+#[derive(Debug)]
 pub struct Statement(*mut _Statement);
 
 impl Protected<*mut _Statement> for Statement {

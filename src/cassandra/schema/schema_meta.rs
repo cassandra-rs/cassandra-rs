@@ -9,6 +9,7 @@ use cassandra_sys::cass_schema_meta_keyspace_by_name;
 use cassandra_sys::cass_schema_meta_snapshot_version;
 
 /// A snapshot of the schema's metadata
+#[derive(Debug)]
 pub struct SchemaMeta(*const _CassSchemaMeta);
 
 impl Drop for SchemaMeta {

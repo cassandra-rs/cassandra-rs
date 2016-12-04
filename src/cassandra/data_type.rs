@@ -33,7 +33,9 @@ use std::ffi::CString;
 
 
 /// Any cassandra datatype
+#[derive(Debug)]
 pub struct DataType(*mut _CassDataType);
+#[derive(Debug)]
 pub struct ConstDataType(pub *const _CassDataType);
 
 impl Protected<*mut _CassDataType> for DataType {

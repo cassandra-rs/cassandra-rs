@@ -13,6 +13,7 @@ use std::ffi::CString;
 
 /// A statement that has been prepared against at least one Cassandra node.
 /// Instances of this class should not be created directly, but through Session.prepare().
+#[derive(Debug)]
 pub struct PreparedStatement(*const _PreparedStatement);
 
 unsafe impl Sync for PreparedStatement {}

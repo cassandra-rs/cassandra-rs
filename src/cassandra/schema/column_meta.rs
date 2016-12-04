@@ -12,6 +12,7 @@ use cassandra_sys::cass_column_meta_type;
 use cassandra_sys::cass_iterator_fields_from_column_meta;
 
 /// Column metadata
+#[derive(Debug)]
 pub struct ColumnMeta(*const _CassColumnMeta);
 
 use std::ffi::CString;

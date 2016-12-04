@@ -2,6 +2,7 @@ use cassandra::util::Protected;
 use cassandra_sys::CassMetrics as _CassMetrics;
 
 /// A view into server metrics FIXME not meaingfully implemented
+#[derive(Debug)]
 pub struct SessionMetrics(*const _CassMetrics);
 
 

@@ -26,6 +26,7 @@ use std::ffi::NulError;
 
 /// A group of statements that are executed as a single batch.
 /// <b>Note:</b> Batches are not supported by the binary protocol version 1.
+#[derive(Debug)]
 pub struct Batch(*mut _Batch);
 
 impl Protected<*mut _Batch> for Batch {
@@ -34,6 +35,7 @@ impl Protected<*mut _Batch> for Batch {
 }
 
 /// Custom payloads not fully supported yet
+#[derive(Debug)]
 pub struct CustomPayload(*mut _CassCustomPayload);
 
 impl Protected<*mut _CassCustomPayload> for CustomPayload {

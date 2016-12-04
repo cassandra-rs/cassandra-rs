@@ -11,6 +11,7 @@ use time::Duration;
 
 /// Generators of client-side, microsecond-precision timestamps.
 /// <b>Note:</b> This generator is thread-safe and can be shared by multiple sessions.
+#[derive(Debug)]
 pub struct TimestampGen(*mut _TimestampGen);
 unsafe impl Send for TimestampGen {}
 unsafe impl Sync for TimestampGen {}
@@ -26,6 +27,7 @@ impl Protected<*mut _TimestampGen> for TimestampGen {
 
 /// Converts a unix timestamp (in seconds) to the Cassandra "time" type. The "time" type
 /// represents the number of nanoseconds since midnight (range 0 to 86399999999999).
+#[derive(Debug)]
 pub struct Time(i64);
 
 

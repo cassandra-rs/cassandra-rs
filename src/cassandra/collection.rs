@@ -112,6 +112,7 @@ pub trait CassCollection {
 }
 
 /// A cassandra list collection
+#[derive(Debug)]
 pub struct List(*mut _CassCollection);
 unsafe impl Send for List {}
 unsafe impl Sync for List {}
@@ -248,6 +249,7 @@ impl CassCollection for List {
 }
 
 /// A Cassandra set
+#[derive(Debug)]
 pub struct Set(*mut _CassCollection);
 unsafe impl Send for Set {}
 unsafe impl Sync for Set {}
@@ -372,6 +374,7 @@ impl CassCollection for Set {
 
 
 /// A Cassandra Map
+#[derive(Debug)]
 pub struct Map(*mut _CassCollection);
 unsafe impl Send for Map {}
 unsafe impl Sync for Map {}

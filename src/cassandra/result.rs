@@ -40,6 +40,7 @@ use std::str;
 /// The result of a query.
 /// A result object is read-only and is thread-safe to read or iterate over
 /// concurrently.
+#[derive(Debug)]
 pub struct CassResult(*const _CassResult);
 unsafe impl Sync for CassResult {}
 unsafe impl Send for CassResult {}
@@ -139,6 +140,7 @@ impl CassResult {
 }
 
 /// An iterator over the results of a query
+#[derive(Debug)]
 pub struct ResultIterator(pub *mut _CassIterator);
 
 impl Drop for ResultIterator {

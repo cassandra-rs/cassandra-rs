@@ -13,6 +13,7 @@ use std::os::raw;
 
 #[repr(C)]
 /// The possible logging levels that can be set
+#[derive(Debug)]
 pub struct LogLevel(CassLogLevel);
 
 

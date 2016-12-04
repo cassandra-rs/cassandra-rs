@@ -29,6 +29,7 @@ use std::ffi::CString;
 use std::mem;
 
 /// A snapshot of the schema's metadata.
+#[derive(Debug)]
 pub struct KeyspaceMeta(*const _CassKeyspaceMeta);
 
 impl Protected<*const _CassKeyspaceMeta> for KeyspaceMeta {
@@ -36,6 +37,7 @@ impl Protected<*const _CassKeyspaceMeta> for KeyspaceMeta {
     fn build(inner: *const _CassKeyspaceMeta) -> Self { KeyspaceMeta(inner) }
 }
 
+#[derive(Debug)]
 pub struct MetadataFieldValue(*const _CassValue);
 
 impl KeyspaceMeta {

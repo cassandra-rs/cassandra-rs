@@ -53,6 +53,7 @@ use std::ffi::CString;
 // use cassandra::iterator::FieldIterator;
 
 /// A user defined type
+#[derive(Debug)]
 pub struct UserType(*mut _UserType);
 
 impl Protected<*mut _UserType> for UserType {

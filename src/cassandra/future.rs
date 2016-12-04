@@ -31,9 +31,11 @@ use std::slice;
 use std::str;
 
 /// A CQL Future representing the status of any asynchronous calls to Cassandra
+#[derive(Debug)]
 pub struct Future(*mut _Future);
 
 /// A callback registered to execute when the future returns
+#[derive(Debug)]
 pub struct FutureCallback(_CassFutureCallback);
 
 impl Drop for Future {
@@ -130,6 +132,7 @@ impl Future {
 /// It can represent a result if the operation completed successfully or an
 /// error if the operation failed. It can be waited on, polled or a callback
 /// can be attached.
+#[derive(Debug)]
 pub struct ResultFuture(*mut _Future);
 
 impl Drop for ResultFuture {
@@ -193,6 +196,7 @@ impl ResultFuture {
 /// It can represent a result if the operation completed successfully or an
 /// error if the operation failed. It can be waited on, polled or a callback
 /// can be attached.
+#[derive(Debug)]
 pub struct PreparedFuture(*mut _Future);
 
 impl Drop for PreparedFuture {
@@ -222,6 +226,7 @@ impl PreparedFuture {
     pub fn get(&mut self) -> PreparedStatement { unsafe { PreparedStatement::build(cass_future_get_prepared(self.0)) } }
 }
 
+#[derive(Debug)]
 pub struct ConnectFuture(*mut _Future);
 
 impl Protected<*mut _Future> for ConnectFuture {
@@ -235,6 +240,7 @@ impl Drop for ConnectFuture {
 /// The future result of an attempt to create a new Cassandra session
 /// It can be waited on, polled or a callback
 /// can be attached.
+#[derive(Debug)]
 pub struct SessionFuture(*mut _Future);
 
 impl SessionFuture {
@@ -276,6 +282,7 @@ impl Drop for SessionFuture {
 /// It can represent a result if the operation completed successfully or an
 /// error if the operation failed. It can be waited on, polled or a callback
 /// can be attached.
+#[derive(Debug)]
 pub struct CloseFuture(*mut _Future);
 
 impl Protected<*mut _Future> for Future {

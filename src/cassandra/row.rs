@@ -205,6 +205,7 @@ impl Row {
 }
 
 /// An iterator over the columns in a row
+#[derive(Debug)]
 pub struct RowIterator(pub *mut _CassIterator);
 
 

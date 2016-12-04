@@ -12,6 +12,7 @@ use cassandra_sys::cass_ssl_set_verify_flags;
 use std::ffi::CString;
 
 /// Describes the SSL configuration of a cluster.
+#[derive(Debug)]
 pub struct Ssl(*mut _Ssl);
 
 impl Protected<*mut _Ssl> for Ssl {

@@ -37,6 +37,7 @@ use std::net::SocketAddr;
 
 
 /// A tuple of values.
+#[derive(Debug)]
 pub struct Tuple(*mut _Tuple);
 
 impl Protected<*mut _Tuple> for Tuple {
