@@ -1,7 +1,7 @@
 #[macro_use(stmt)]
 extern crate cassandra;
-use std::str::FromStr;
 use cassandra::*;
+use std::str::FromStr;
 
 struct Pair<'a> {
     key: &'a str,
@@ -22,15 +22,15 @@ fn insert_into_maps(session: &mut Session, key: &str, items: Vec<Pair>) -> Resul
         map.append_string(item.key).unwrap();
         map.append_int32(item.value).unwrap();
     }
-    try!(insert_statement.bind(1, map));
-    try!(session.execute(&insert_statement).wait());
+    insert_statement.bind(1, map)?;
+    session.execute(&insert_statement).wait()?;
     Ok(())
 }
 
 fn select_from_maps(session: &mut Session, key: &str) -> Result<(), CassError> {
     let mut statement = Statement::new(SELECT_QUERY, 1);
-    try!(statement.bind(0, key));
-    let result = try!(session.execute(&statement).wait());
+    statement.bind(0, key)?;
+    let result = session.execute(&statement).wait()?;
     // println!("{:?}", result);
     for row in result.iter() {
         let column = row.get_column(0).unwrap(); //FIXME
@@ -72,10 +72,10 @@ fn foo() -> Result<(), CassError> {
                                 }];
     match cluster.connect() {
         Ok(ref mut session) => {
-            try!(session.execute(&stmt!(CREATE_KEYSPACE)).wait());
-            try!(session.execute(&stmt!(CREATE_TABLE)).wait());
-            try!(insert_into_maps(session, "test", items));
-            try!(select_from_maps(session, "test"));
+            session.execute(&stmt!(CREATE_KEYSPACE)).wait()?;
+            session.execute(&stmt!(CREATE_TABLE)).wait()?;
+            insert_into_maps(session, "test", items)?;
+            select_from_maps(session, "test")?;
             Ok(())
         }
         Err(err) => Err(err),

@@ -1,22 +1,22 @@
-extern crate cql_ffi;
+extern crate cassandra;
 
 use std::slice;
+use std::str::FromStr;
 
 use cassandra::*;
 
-unsafe fn print_error(future: &mut Future) {
+fn print_error(future: &mut Future) {
     let message = future.error_message();
-    let message = slice::from_raw_parts(&message.data, message.length as usize);
     println!("Error: {:?}", message);
 }
 
-unsafe fn create_cluster() -> *mut Cluster {
-    let cluster = Cluster::new();
-    cluster.set_contact_points(str2ref("127.0.0.1,127.0.0.2,127.0.0.3"));
+unsafe fn create_cluster() -> Result<CassError,Cluster> {
+    let cluster = Cluster::default();
+    cluster.set_contact_points(ContactPoints::from_str("127.0.0.1,127.0.0.2,127.0.0.3")?);
     cluster
 }
 
-unsafe fn connect_session(session: &mut Session, cluster: &mut Cluster) -> CassandraError {
+unsafe fn connect_session(session: &mut Session, cluster: &mut Cluster) -> CassError {
     let future: Future = &mut session.connect(cluster);
     future.wait();
     future
@@ -41,11 +41,12 @@ fn main() {
         //~ fprintf(stderr, "Unable to open log file\n");
     //~ }
 /* Log configuration *MUST* be done before any other driver call */
+    use CassLogLevel::*;
     cass_log_set_level(CASS_LOG_INFO);
     cass_log_set_callback(on_log, log_file);
     cluster = create_cluster();
     session = cass_session_new();
-    if (connect_session(session, cluster) != CASS_OK) {
+    if connect_session(session, cluster) != CASS_OK {
         cass_cluster_free(cluster);
         cass_session_free(session);
         return -1;

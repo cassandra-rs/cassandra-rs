@@ -1,70 +1,61 @@
-use std::fmt::Formatter;
-use std::fmt;
-use std::fmt::{Debug, Display};
-use std::mem;
-use std::ffi::CString;
-use std::str;
+
+
+use cassandra::error::CassError;
+use cassandra::util::Protected;
 
 
 use cassandra_sys::CASS_OK;
 use cassandra_sys::CassUuid as _Uuid;
 use cassandra_sys::CassUuidGen as _UuidGen;
-use cassandra_sys::cass_uuid_gen_new;
+use cassandra_sys::cass_uuid_from_string;
 use cassandra_sys::cass_uuid_gen_free;
-use cassandra_sys::cass_uuid_gen_time;
+use cassandra_sys::cass_uuid_gen_from_time;
+use cassandra_sys::cass_uuid_gen_new;
 use cassandra_sys::cass_uuid_gen_new_with_node;
 use cassandra_sys::cass_uuid_gen_random;
-use cassandra_sys::cass_uuid_gen_from_time;
-use cassandra_sys::cass_uuid_min_from_time;
+use cassandra_sys::cass_uuid_gen_time;
 use cassandra_sys::cass_uuid_max_from_time;
-use cassandra_sys::cass_uuid_timestamp;
-use cassandra_sys::cass_uuid_version;
-use cassandra::util::Protected;
+use cassandra_sys::cass_uuid_min_from_time;
 
 use cassandra_sys::cass_uuid_string;
-use cassandra_sys::cass_uuid_from_string;
-
-use cassandra::error::CassError;
+use cassandra_sys::cass_uuid_timestamp;
+use cassandra_sys::cass_uuid_version;
+use std::ffi::CString;
+use std::fmt;
+use std::fmt::{Debug, Display};
+use std::fmt::Formatter;
+use std::mem;
+use std::str;
 
 const CASS_UUID_STRING_LENGTH: usize = 37;
 
 
 #[derive(Copy,Clone)]
-///Version 1 (time-based) or version 4 (random) UUID.
+/// Version 1 (time-based) or version 4 (random) UUID.
 pub struct Uuid(_Uuid);
 
 impl Protected<_Uuid> for Uuid {
-    fn inner(&self) -> _Uuid {
-        self.0
-    }
-    fn build(inner: _Uuid) -> Self {
-        Uuid(inner)
-    }
+    fn inner(&self) -> _Uuid { self.0 }
+    fn build(inner: _Uuid) -> Self { Uuid(inner) }
 }
 
 impl Default for Uuid {
-    fn default() -> Uuid {
-        unsafe { ::std::mem::zeroed() }
-    }
+    fn default() -> Uuid { unsafe { ::std::mem::zeroed() } }
 }
 
-///A UUID generator object.
+/// A UUID generator object.
 ///
-///Instances of the UUID generator object are thread-safe to generate UUIDs.
+/// Instances of the UUID generator object are thread-safe to generate UUIDs.
 pub struct UuidGen(*mut _UuidGen);
 unsafe impl Sync for UuidGen {}
 unsafe impl Send for UuidGen {}
 
 impl Drop for UuidGen {
-    fn drop(&mut self) {
-        unsafe { cass_uuid_gen_free(self.0) }
-    }
+    fn drop(&mut self) { unsafe { cass_uuid_gen_free(self.0) } }
 }
 
 impl Debug for Uuid {
-   fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-       fmt::Display::fmt(self, f)
-   }
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result { fmt::Display::fmt(self, f) }
 }
 
 impl Display for Uuid {
@@ -76,8 +67,8 @@ impl Display for Uuid {
             cass_uuid_string(self.0, cstr); // Write the UUID to *c_char
             buf = CString::from_raw(cstr); // Convert from *c_char back to a CString.
             let str = match buf.into_string() {
-              Ok(s) => s,
-              Err(_) => return Err(fmt::Error)
+                Ok(s) => s,
+                Err(_) => return Err(fmt::Error),
             };
             fmt::Display::fmt(&str, f)
         }
@@ -86,24 +77,16 @@ impl Display for Uuid {
 
 impl Uuid {
     /// Generates a V1 (time) UUID for the specified time.
-    pub fn min_from_time(&mut self, time: u64) {
-        unsafe { cass_uuid_min_from_time(time, &mut self.0) }
-    }
+    pub fn min_from_time(&mut self, time: u64) { unsafe { cass_uuid_min_from_time(time, &mut self.0) } }
 
-    ///Sets the UUID to the minimum V1 (time) value for the specified tim
-    pub fn max_from_time(&mut self, time: u64) {
-        unsafe { cass_uuid_max_from_time(time, &mut self.0) }
-    }
+    /// Sets the UUID to the minimum V1 (time) value for the specified tim
+    pub fn max_from_time(&mut self, time: u64) { unsafe { cass_uuid_max_from_time(time, &mut self.0) } }
 
-    ///Gets the timestamp for a V1 UUID
-    pub fn timestamp(&self) -> u64 {
-        unsafe { cass_uuid_timestamp(self.0) }
-    }
+    /// Gets the timestamp for a V1 UUID
+    pub fn timestamp(&self) -> u64 { unsafe { cass_uuid_timestamp(self.0) } }
 
-    ///Gets the version for a UUID
-    pub fn version(&self) -> u8 {
-        unsafe { cass_uuid_version(self.0) }
-    }
+    /// Gets the version for a UUID
+    pub fn version(&self) -> u8 { unsafe { cass_uuid_version(self.0) } }
 }
 
 impl str::FromStr for Uuid {
@@ -120,21 +103,17 @@ impl str::FromStr for Uuid {
 }
 
 impl Default for UuidGen {
-    ///Creates a new thread-safe UUID generator
-    fn default() -> Self {
-        unsafe { UuidGen(cass_uuid_gen_new()) }
-    }
+    /// Creates a new thread-safe UUID generator
+    fn default() -> Self { unsafe { UuidGen(cass_uuid_gen_new()) } }
 }
 
 impl UuidGen {
-    ///Creates a new UUID generator with custom node information.
-    ///<b>Note:</b> This object is thread-safe. It is best practice to create and reuse
-    ///a single object per application.
-    pub fn new_with_node(node: u64) -> UuidGen {
-        unsafe { UuidGen(cass_uuid_gen_new_with_node(node)) }
-    }
+    /// Creates a new UUID generator with custom node information.
+    /// <b>Note:</b> This object is thread-safe. It is best practice to create and reuse
+    /// a single object per application.
+    pub fn new_with_node(node: u64) -> UuidGen { unsafe { UuidGen(cass_uuid_gen_new_with_node(node)) } }
 
-    ///Generates a V1 (time) UUID.
+    /// Generates a V1 (time) UUID.
     pub fn gen_time(&self) -> Uuid {
         unsafe {
             let mut output: _Uuid = mem::zeroed();
@@ -143,7 +122,7 @@ impl UuidGen {
         }
     }
 
-    ///Generates a new V4 (random) UUID
+    /// Generates a new V4 (random) UUID
     pub fn gen_random(&self) -> Uuid {
         unsafe {
             let mut output: _Uuid = mem::zeroed();
@@ -152,7 +131,7 @@ impl UuidGen {
         }
     }
 
-    ///Generates a V1 (time) UUID for the specified time.
+    /// Generates a V1 (time) UUID for the specified time.
     ///
     /// # Examples
     ///

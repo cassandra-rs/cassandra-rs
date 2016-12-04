@@ -1,54 +1,47 @@
-use std::str::FromStr;
-use std::string::ToString;
-use std::mem;
-use std::ffi::CString;
-// use std::ffi::NulError;
-use std::ffi::CStr;
-use std::net::{Ipv4Addr, Ipv6Addr};
+
+
+use cassandra::error::CassError;
+use cassandra::util::Protected;
+use cassandra_sys::CASS_OK;
 use cassandra_sys::CassInet as _Inet;
+use cassandra_sys::cass_inet_from_string;
 use cassandra_sys::cass_inet_init_v4;
 use cassandra_sys::cass_inet_init_v6;
 use cassandra_sys::cass_inet_string;
-use cassandra_sys::cass_inet_from_string;
-use cassandra_sys::CASS_OK;
-use std::net::SocketAddr;
 use std::default::Default;
-use std::fmt::{Debug, Formatter};
+// use std::ffi::NulError;
+use std::ffi::CStr;
+use std::ffi::CString;
 use std::fmt;
-use cassandra::util::Protected;
-
-use cassandra::error::CassError;
+use std::fmt::{Debug, Formatter};
+use std::mem;
+use std::net::{Ipv4Addr, Ipv6Addr};
+use std::net::SocketAddr;
+use std::str::FromStr;
+use std::string::ToString;
 // use cassandra::error::CassLibError;
 
 #[repr(C)]
-///Cassandra's version of an IP address
+/// Cassandra's version of an IP address
 
 pub struct Inet(_Inet);
 
 impl Debug for Inet {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "can't format an inet")
-    }
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result { write!(f, "can't format an inet") }
 }
 
 impl Protected<_Inet> for Inet {
-    fn inner(&self) -> _Inet {
-        self.0
-    }
-    fn build(inner: _Inet) -> Self {
-        Inet(inner)
-    }
+    fn inner(&self) -> _Inet { self.0 }
+    fn build(inner: _Inet) -> Self { Inet(inner) }
 }
 
 impl Default for Inet {
-    fn default() -> Inet {
-        unsafe { ::std::mem::zeroed() }
-    }
+    fn default() -> Inet { unsafe { ::std::mem::zeroed() } }
 }
 
-///Lets various things get converted to a Inet
+/// Lets various things get converted to a Inet
 pub trait AsInet {
-    ///Converts to a Cassandra Inet
+    /// Converts to a Cassandra Inet
     fn as_cass_inet(&self) -> Inet;
 }
 
@@ -69,7 +62,7 @@ impl AsInet for SocketAddr {
     }
 }
 
-///The types of errors that can occur when trying to parse an Inet String
+/// The types of errors that can occur when trying to parse an Inet String
 // pub enum InetParseError {
 //    ///Don't put a null in a string, silly!
 //    NulInString(NulError),
@@ -103,9 +96,9 @@ impl ToString for Inet {
     }
 }
 
-///Converts from an Cassandra Inet address
+/// Converts from an Cassandra Inet address
 pub trait FromInet {
-    ///Converts from an Cassandra Inet address
+    /// Converts from an Cassandra Inet address
     fn from_cass_inet(inet: Inet) -> Self;
 }
 
@@ -141,12 +134,12 @@ impl FromInet for Ipv6Addr {
 }
 
 impl Inet {
-    ///Constructs an inet v4 object.
+    /// Constructs an inet v4 object.
     pub fn cass_inet_init_v4(address: Ipv4Addr) -> Inet {
         unsafe { Inet(cass_inet_init_v4(address.octets().as_ptr())) }
     }
 
-    ///Constructs an inet v6 object.
+    /// Constructs an inet v6 object.
     pub fn cass_inet_init_v6(address: Ipv6Addr) -> Inet {
         unsafe { Inet(cass_inet_init_v6(address.segments().as_ptr() as *const u8)) }
     }

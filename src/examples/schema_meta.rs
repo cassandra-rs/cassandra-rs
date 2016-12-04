@@ -1,9 +1,9 @@
 #[macro_use(stmt)]
 extern crate cassandra;
 
-use std::str::FromStr;
 
 use cassandra::*;
+use std::str::FromStr;
 
 
 fn print_function(session: &Session, keyspace: &str, function: &str, arguments: Vec<&str>) -> Result<(), CassError> {
@@ -134,22 +134,22 @@ fn cass() -> Result<(), CassError> {
 
     match cluster.connect() {
         Ok(ref mut session) => {
-            try!(session.execute(&create_ks).wait());
+            session.execute(&create_ks).wait()?;
             print_keyspace(session, "examples");
-            try!(session.execute(&create_table).wait());
-            try!(session.execute(&create_func1).wait());
-            try!(session.execute(&create_func2).wait());
-            try!(session.execute(&create_aggregate).wait());
+            session.execute(&create_table).wait()?;
+            session.execute(&create_func1).wait()?;
+            session.execute(&create_func2).wait()?;
+            session.execute(&create_aggregate).wait()?;
             let schema = &session.get_schema_meta();
             let keyspace = schema.get_keyspace_by_name("examples");
             let mut table = keyspace.table_by_name("schema_meta").unwrap();
             print_table_meta(&mut table, 0);
-            try!(print_function(session,
-                                "examples",
-                                "avg_state",
-                                vec!["tuple<int,bigint>", "int"]));
-            try!(print_function(&session, "examples", "avg_final", vec!["tuple<int,bigint>"]));
-            try!(print_aggregate(&session, "examples", "average", vec!["int"]));
+            print_function(session,
+                           "examples",
+                           "avg_state",
+                           vec!["tuple<int,bigint>", "int"])?;
+            print_function(session, "examples", "avg_final", vec!["tuple<int,bigint>"])?;
+            print_aggregate(session, "examples", "average", vec!["int"])?;
             Ok(())
         }
         _ => panic!(),

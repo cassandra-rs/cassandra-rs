@@ -7,23 +7,23 @@ use std::str::FromStr;
 
 fn insert_into_collections(session: &mut Session, key: &str, items: Vec<&str>) -> Result<CassResult, CassError> {
     let mut statement = stmt!("INSERT INTO examples.collections (key, items) VALUES (?, ?);");
-    try!(statement.bind(0, key));
+    statement.bind(0, key)?;
     let mut set = Set::new(2);
     for item in items {
-        try!(set.append_string(&item));
+        set.append_string(item)?;
     }
-    try!(statement.bind_set(1, set));
+    statement.bind_set(1, set)?;
     session.execute(&statement).wait()
 }
 
 fn select_from_collections(session: &mut Session, key: &str) -> Result<(), CassError> {
     let mut statement = stmt!("SELECT items FROM examples.collections WHERE key = ?");
-    try!(statement.bind(0, key));
-    let result = try!(session.execute(&statement).wait());
+    statement.bind(0, key)?;
+    let result = session.execute(&statement).wait()?;
     println!("{:?}", result);
     for row in result.iter() {
         let column = row.get_column(0);
-        let items_iterator: SetIterator = try!(try!(column).set_iter());
+        let items_iterator: SetIterator = column?.set_iter()?;
         for item in items_iterator {
             println!("item: {:?}", item);
         }

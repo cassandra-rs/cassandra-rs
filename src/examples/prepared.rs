@@ -1,8 +1,8 @@
 #[macro_use(stmt)]
 extern crate cassandra;
-use std::str::FromStr;
 
 use cassandra::*;
+use std::str::FromStr;
 
 static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
                                         \'SimpleStrategy\', \'replication_factor\': \'1\' };";
@@ -24,15 +24,15 @@ struct Basic {
 fn insert_into_basic(session: &mut Session, key: &str, basic: &mut Basic) -> Result<(), CassError> {
     println!("Creating statement");
     let mut statement = stmt!(INSERT_QUERY);
-    try!(statement.bind(0, key));
-    try!(statement.bind(1, basic.bln));
-    try!(statement.bind(2, basic.flt));
-    try!(statement.bind(3, basic.dbl));
-    try!(statement.bind(4, basic.i32));
-    try!(statement.bind(5, basic.i64));
+    statement.bind(0, key)?;
+    statement.bind(1, basic.bln)?;
+    statement.bind(2, basic.flt)?;
+    statement.bind(3, basic.dbl)?;
+    statement.bind(4, basic.i32)?;
+    statement.bind(5, basic.i64)?;
 
     println!("Executing insert statement");
-    try!(session.execute(&statement).wait());
+    session.execute(&statement).wait()?;
     println!("Insert execute OK");
     Ok(())
 }
@@ -41,17 +41,17 @@ fn insert_into_basic(session: &mut Session, key: &str, basic: &mut Basic) -> Res
 fn select_from_basic(session: &mut Session, prepared: &PreparedStatement, key: &str, basic: &mut Basic)
                      -> Result<(), CassError> {
     let mut statement = prepared.bind();
-    try!(statement.bind_string(0, key));
+    statement.bind_string(0, key)?;
     let mut future = session.execute(&statement);
     match future.wait() {
         Ok(result) => {
             println!("{:?}", result);
             for row in result.iter() {
-                basic.bln = try!(row.get_col(1));
-                basic.dbl = try!(row.get_col(2));
-                basic.flt = try!(row.get_col(3));
-                basic.i32 = try!(row.get_col(4));
-                basic.i64 = try!(row.get_col(5));
+                basic.bln = row.get_col(1)?;
+                basic.dbl = row.get_col(2)?;
+                basic.flt = row.get_col(3)?;
+                basic.i32 = row.get_col(4)?;
+                basic.i64 = row.get_col(5)?;
             }
             Ok(())
         }

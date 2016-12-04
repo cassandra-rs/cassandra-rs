@@ -13,3 +13,6 @@ Cargo.lock
 .project
 /.settings/
 .travis.yml
+
+#rustfmt backup files
+*.bk

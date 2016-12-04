@@ -1,8 +1,8 @@
 #[macro_use(stmt)]
 extern crate cassandra;
 
-use std::str::FromStr;
 use cassandra::*;
+use std::str::FromStr;
 
 static NUM_CONCURRENT_REQUESTS: isize = 100;
 static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
@@ -22,8 +22,8 @@ fn insert_into_paging(session: &mut Session /* , uuid_gen:&mut UuidGen */)
         let key: &str = &(i.to_string());
         println!("key ={:?}", key);
         let mut statement = Statement::new(INSERT_QUERY, 2);
-        try!(statement.bind(0, key));
-        try!(statement.bind(1, key));
+        statement.bind(0, key)?;
+        statement.bind(1, key)?;
         let future = session.execute(&statement);
         futures.push(future);
     }
@@ -41,16 +41,16 @@ fn select_from_paging(session: &mut Session) -> Result<(), CassError> {
 
     // FIXME must understand statement lifetime better for paging
     while has_more_pages {
-        let result = try!(session.execute(&statement).wait());
+        let result = session.execute(&statement).wait()?;
         // println!("{:?}", result);
         for row in result.iter() {
-            match try!(row.get_column(0)).get_string() {
+            match row.get_column(0)?.get_string() {
                 Ok(key) => {
                     let key_str = key.to_string();
-                    let value = try!(row.get_column(1));
-                    print!("key: '{:?}' value: '{:?}'\n",
-                           key_str,
-                           &value.get_string().unwrap());
+                    let value = row.get_column(1)?;
+                    println!("key: '{:?}' value: '{:?}'",
+                             key_str,
+                             &value.get_string().unwrap());
                 }
                 Err(err) => panic!(err),
             }

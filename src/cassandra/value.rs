@@ -1,108 +1,99 @@
-use std::fmt::{Debug, Display, Formatter};
-use std::fmt;
-use std::ffi::CString;
-use std::str;
-use std::slice;
 
-use cassandra::error::CassError;
-use cassandra::inet::Inet;
-use cassandra_sys::CASS_ERROR_LIB_INVALID_VALUE_TYPE;
-use cassandra_sys::CASS_VALUE_TYPE_ASCII;
-use cassandra_sys::CASS_VALUE_TYPE_TEXT;
-use cassandra_sys::CASS_VALUE_TYPE_VARCHAR;
-use cassandra_sys::CASS_VALUE_TYPE_UNKNOWN;
-use cassandra_sys::CASS_VALUE_TYPE_BIGINT;
-use cassandra_sys::CASS_VALUE_TYPE_BLOB;
-use cassandra_sys::CASS_VALUE_TYPE_CUSTOM;
-use cassandra_sys::CASS_VALUE_TYPE_DATE;
-use cassandra_sys::CASS_VALUE_TYPE_TIME;
-use cassandra_sys::CASS_VALUE_TYPE_BOOLEAN;
-use cassandra_sys::CASS_VALUE_TYPE_COUNTER;
-use cassandra_sys::CASS_VALUE_TYPE_DECIMAL;
-use cassandra_sys::CASS_VALUE_TYPE_DOUBLE;
-use cassandra_sys::CASS_VALUE_TYPE_FLOAT;
-use cassandra_sys::CASS_VALUE_TYPE_TIMESTAMP;
-use cassandra_sys::CASS_VALUE_TYPE_INT;
-use cassandra_sys::CASS_VALUE_TYPE_SMALL_INT;
-use cassandra_sys::CASS_VALUE_TYPE_TINY_INT;
-use cassandra_sys::CASS_VALUE_TYPE_UUID;
-use cassandra_sys::CASS_VALUE_TYPE_LAST_ENTRY;
-use cassandra_sys::CASS_VALUE_TYPE_VARINT;
-use cassandra_sys::CASS_VALUE_TYPE_INET;
-use cassandra_sys::CASS_VALUE_TYPE_TIMEUUID;
-use cassandra_sys::CASS_VALUE_TYPE_LIST;
-use cassandra_sys::CASS_VALUE_TYPE_MAP;
-use cassandra_sys::CASS_VALUE_TYPE_SET;
-use cassandra_sys::CASS_VALUE_TYPE_UDT;
-use cassandra_sys::CASS_VALUE_TYPE_TUPLE;
-use cassandra_sys::cass_true;
-use cassandra_sys::CassValueType as _CassValueType;
-use cassandra::uuid::Uuid;
-use cassandra::iterator::MapIterator;
-use cassandra::iterator::SetIterator;
-use cassandra_sys::CassValue as _CassValue;
-#[allow(unused_imports)]
-use cassandra_sys::cass_value_secondary_sub_type;
-#[allow(unused_imports)]
-use cassandra_sys::cass_value_primary_sub_type;
-#[allow(unused_imports)]
-use cassandra_sys::cass_value_item_count;
-use cassandra_sys::cass_value_is_collection;
-use cassandra_sys::cass_value_is_null;
-use cassandra_sys::cass_value_type;
-#[allow(unused_imports)]
-use cassandra_sys::cass_collection_append_decimal;
-use cassandra_sys::cass_value_get_inet;
-use cassandra_sys::cass_value_get_string;
-use cassandra_sys::cass_value_get_bytes;
-use cassandra_sys::cass_value_get_uuid;
-use cassandra_sys::cass_value_get_bool;
-use cassandra_sys::cass_value_get_double;
-use cassandra_sys::cass_value_get_float;
-use cassandra_sys::cass_value_get_int64;
-use cassandra_sys::cass_value_get_int32;
-use cassandra_sys::cass_value_get_int16;
-use cassandra_sys::cass_value_get_int8;
-use cassandra_sys::cass_iterator_from_collection;
-use cassandra_sys::cass_iterator_from_map;
-use cassandra_sys::cass_value_data_type;
-use cassandra::util::Protected;
 
 use cassandra::data_type::ConstDataType;
 
-use std::mem;
+use cassandra::error::CassError;
+use cassandra::inet::Inet;
+use cassandra::iterator::MapIterator;
+use cassandra::iterator::SetIterator;
+use cassandra::util::Protected;
+use cassandra::uuid::Uuid;
+use cassandra_sys::CASS_ERROR_LIB_INVALID_VALUE_TYPE;
+use cassandra_sys::CASS_VALUE_TYPE_ASCII;
+use cassandra_sys::CASS_VALUE_TYPE_BIGINT;
+use cassandra_sys::CASS_VALUE_TYPE_BLOB;
+use cassandra_sys::CASS_VALUE_TYPE_BOOLEAN;
+use cassandra_sys::CASS_VALUE_TYPE_COUNTER;
+use cassandra_sys::CASS_VALUE_TYPE_CUSTOM;
+use cassandra_sys::CASS_VALUE_TYPE_DATE;
+use cassandra_sys::CASS_VALUE_TYPE_DECIMAL;
+use cassandra_sys::CASS_VALUE_TYPE_DOUBLE;
+use cassandra_sys::CASS_VALUE_TYPE_FLOAT;
+use cassandra_sys::CASS_VALUE_TYPE_INET;
+use cassandra_sys::CASS_VALUE_TYPE_INT;
+use cassandra_sys::CASS_VALUE_TYPE_LAST_ENTRY;
+use cassandra_sys::CASS_VALUE_TYPE_LIST;
+use cassandra_sys::CASS_VALUE_TYPE_MAP;
+use cassandra_sys::CASS_VALUE_TYPE_SET;
+use cassandra_sys::CASS_VALUE_TYPE_SMALL_INT;
+use cassandra_sys::CASS_VALUE_TYPE_TEXT;
+use cassandra_sys::CASS_VALUE_TYPE_TIME;
+use cassandra_sys::CASS_VALUE_TYPE_TIMESTAMP;
+use cassandra_sys::CASS_VALUE_TYPE_TIMEUUID;
+use cassandra_sys::CASS_VALUE_TYPE_TINY_INT;
+use cassandra_sys::CASS_VALUE_TYPE_TUPLE;
+use cassandra_sys::CASS_VALUE_TYPE_UDT;
+use cassandra_sys::CASS_VALUE_TYPE_UNKNOWN;
+use cassandra_sys::CASS_VALUE_TYPE_UUID;
+use cassandra_sys::CASS_VALUE_TYPE_VARCHAR;
+use cassandra_sys::CASS_VALUE_TYPE_VARINT;
+use cassandra_sys::CassValue as _CassValue;
+use cassandra_sys::CassValueType as _CassValueType;
+#[allow(unused_imports)]
+use cassandra_sys::cass_collection_append_decimal;
+use cassandra_sys::cass_iterator_from_collection;
+use cassandra_sys::cass_iterator_from_map;
+use cassandra_sys::cass_true;
+use cassandra_sys::cass_value_data_type;
+use cassandra_sys::cass_value_get_bool;
+use cassandra_sys::cass_value_get_bytes;
+use cassandra_sys::cass_value_get_double;
+use cassandra_sys::cass_value_get_float;
+use cassandra_sys::cass_value_get_inet;
+use cassandra_sys::cass_value_get_int16;
+use cassandra_sys::cass_value_get_int32;
+use cassandra_sys::cass_value_get_int64;
+use cassandra_sys::cass_value_get_int8;
+use cassandra_sys::cass_value_get_string;
+use cassandra_sys::cass_value_get_uuid;
+use cassandra_sys::cass_value_is_collection;
+use cassandra_sys::cass_value_is_null;
+#[allow(unused_imports)]
+use cassandra_sys::cass_value_item_count;
+#[allow(unused_imports)]
+use cassandra_sys::cass_value_primary_sub_type;
+#[allow(unused_imports)]
+use cassandra_sys::cass_value_secondary_sub_type;
+use cassandra_sys::cass_value_type;
+use std::ffi::CString;
+use std::fmt;
+use std::fmt::{Debug, Display, Formatter};
 
-///A single primitive value or a collection of values.
+use std::mem;
+use std::slice;
+use std::str;
+
+/// A single primitive value or a collection of values.
 pub struct Value(*const _CassValue);
 
 impl Protected<*const _CassValue> for Value {
-    fn inner(&self) -> *const _CassValue {
-        self.0
-    }
-    fn build(inner: *const _CassValue) -> Self {
-        Value(inner)
-    }
+    fn inner(&self) -> *const _CassValue { self.0 }
+    fn build(inner: *const _CassValue) -> Self { Value(inner) }
 }
 
 #[derive(Debug)]
-///The various types of types that a Cassandra value can be
+/// The various types of types that a Cassandra value can be
 #[allow(missing_docs)]
 pub struct ValueType(_CassValueType);
 
 impl ValueType {
     #[allow(missing_docs)]
-    pub fn build(typ: _CassValueType) -> Self {
-        ValueType(typ)
-    }
+    pub fn build(typ: _CassValueType) -> Self { ValueType(typ) }
 }
 
 impl Protected<_CassValueType> for ValueType {
-    fn inner(&self) -> _CassValueType {
-        self.0
-    }
-    fn build(inner: _CassValueType) -> Self {
-        ValueType(inner)
-    }
+    fn inner(&self) -> _CassValueType { self.0 }
+    fn build(inner: _CassValueType) -> Self { ValueType(inner) }
 }
 
 impl Debug for Value {
@@ -113,9 +104,9 @@ impl Debug for Value {
             match self.get_type().0 {
                 CASS_VALUE_TYPE_UNKNOWN => write!(f, "{:?}", "unknown"),
                 CASS_VALUE_TYPE_CUSTOM => write!(f, "{:?}", "custom"),
-                CASS_VALUE_TYPE_ASCII | CASS_VALUE_TYPE_TEXT | CASS_VALUE_TYPE_VARCHAR => {
-                    write!(f, "{:?}", self.get_string().unwrap())
-                }
+                CASS_VALUE_TYPE_ASCII |
+                CASS_VALUE_TYPE_TEXT |
+                CASS_VALUE_TYPE_VARCHAR => write!(f, "{:?}", self.get_string().unwrap()),
                 CASS_VALUE_TYPE_DECIMAL => write!(f, "{:?}", self.get_bytes().unwrap()),
                 CASS_VALUE_TYPE_COUNTER => write!(f, "{:?}", self.get_i64().unwrap()),
                 CASS_VALUE_TYPE_BIGINT => write!(f, "{:?}", self.get_i64().unwrap()),
@@ -134,17 +125,18 @@ impl Debug for Value {
                 CASS_VALUE_TYPE_TIMEUUID => write!(f, "TIMEUUID: {}", self.get_uuid().unwrap()),
                 CASS_VALUE_TYPE_LAST_ENTRY => unimplemented!(),
                 CASS_VALUE_TYPE_UUID => write!(f, "UUID: {}", self.get_uuid().unwrap()),
-                CASS_VALUE_TYPE_SET | CASS_VALUE_TYPE_LIST => {
-                    try!(write!(f, "["));
+                CASS_VALUE_TYPE_SET |
+                CASS_VALUE_TYPE_LIST => {
+                    write!(f, "[")?;
                     for item in self.get_set().expect("set must be a set") {
-                        try!(write!(f, "SET {:?} ", item))
+                        write!(f, "SET {:?} ", item)?
                     }
-                    try!(write!(f, "]"));
+                    write!(f, "]")?;
                     Ok(())
                 }
                 CASS_VALUE_TYPE_MAP => {
                     for item in self.get_map().expect("map must be a map") {
-                        try!(write!(f, "MAP {:?}:{:?}", item.0, item.1))
+                        write!(f, "MAP {:?}:{:?}", item.0, item.1)?
                     }
                     Ok(())
                 }
@@ -186,16 +178,16 @@ impl Display for Value {
                 CASS_VALUE_TYPE_INT => write!(f, "{}", self.get_i32().unwrap()),
                 CASS_VALUE_TYPE_TIMEUUID => write!(f, "TIMEUUID: {}", self.get_uuid().unwrap()),
                 CASS_VALUE_TYPE_SET => {
-                    try!(write!(f, "["));
+                    write!(f, "[")?;
                     for item in self.get_set().expect("set must be a set") {
-                        try!(write!(f, "{} ", item))
+                        write!(f, "{} ", item)?
                     }
-                    try!(write!(f, "]"));
+                    write!(f, "]")?;
                     Ok(())
                 }
                 CASS_VALUE_TYPE_MAP => {
                     for item in self.get_map().expect("map must be a map") {
-                        try!(write!(f, "MAP {}:{}", item.0, item.1))
+                        write!(f, "MAP {}:{}", item.0, item.1)?
                     }
                     Ok(())
                 }
@@ -257,25 +249,17 @@ impl Value {
     // output)).wrap(output)
     //    }}
 
-    ///Get the type of this Cassandra value
-    pub fn get_type(&self) -> ValueType {
-        unsafe { ValueType(cass_value_type(self.0)) }
-    }
+    /// Get the type of this Cassandra value
+    pub fn get_type(&self) -> ValueType { unsafe { ValueType(cass_value_type(self.0)) } }
 
-    ///Get the data type of this Cassandra value
-    pub fn data_type(&self) -> ConstDataType {
-        unsafe { ConstDataType(cass_value_data_type(self.0)) }
-    }
+    /// Get the data type of this Cassandra value
+    pub fn data_type(&self) -> ConstDataType { unsafe { ConstDataType(cass_value_data_type(self.0)) } }
 
-    ///Returns true if a specified value is null.
-    pub fn is_null(&self) -> bool {
-        unsafe { cass_value_is_null(self.0) == cass_true }
-    }
+    /// Returns true if a specified value is null.
+    pub fn is_null(&self) -> bool { unsafe { cass_value_is_null(self.0) == cass_true } }
 
-    ///Returns true if a specified value is a collection.
-    pub fn is_collection(&self) -> bool {
-        unsafe { cass_value_is_collection(self.0) == cass_true }
-    }
+    /// Returns true if a specified value is a collection.
+    pub fn is_collection(&self) -> bool { unsafe { cass_value_is_collection(self.0) == cass_true } }
 
 
     //    pub fn item_count(&self) -> u64 {
@@ -294,7 +278,7 @@ impl Value {
     //        unsafe { ValueType::build(cass_value_secondary_sub_type(self.0)).unwrap() }
     //    }
 
-    ///Gets this value as a set iterator.
+    /// Gets this value as a set iterator.
     pub fn get_set(&self) -> Result<SetIterator, CassError> {
         unsafe {
             match self.get_type().0 {
@@ -304,7 +288,7 @@ impl Value {
         }
     }
 
-    ///Gets this value as a map iterator.
+    /// Gets this value as a map iterator.
     pub fn get_map(&self) -> Result<MapIterator, CassError> {
         unsafe {
             match self.get_type().0 {
@@ -335,7 +319,7 @@ impl Value {
     // ~ }
     // ~ }}
 
-    ///Get this value as a string
+    /// Get this value as a string
     #[allow(cast_possible_truncation)]
     pub fn get_string(&self) -> Result<String, CassError> {
         unsafe {
@@ -367,7 +351,7 @@ impl Value {
     // ~ err.wrap(string)
     // ~ }}
 
-    ///Get this value as an Inet
+    /// Get this value as an Inet
     pub fn get_inet(&self) -> Result<Inet, CassError> {
         unsafe {
             let output: Inet = mem::zeroed();
@@ -375,7 +359,7 @@ impl Value {
         }
     }
 
-    ///Get this value as an i32
+    /// Get this value as an i32
     pub fn get_i32(&self) -> Result<i32, CassError> {
         unsafe {
             let mut output = mem::zeroed();
@@ -383,7 +367,7 @@ impl Value {
         }
     }
 
-    ///Get this value as an i16
+    /// Get this value as an i16
     pub fn get_i16(&self) -> Result<i16, CassError> {
         unsafe {
             let mut output = mem::zeroed();
@@ -391,7 +375,7 @@ impl Value {
         }
     }
 
-    ///Get this value as an i8
+    /// Get this value as an i8
     pub fn get_i8(&self) -> Result<i8, CassError> {
         unsafe {
             let mut output = mem::zeroed();
@@ -399,7 +383,7 @@ impl Value {
         }
     }
 
-    ///Get this value as an i64
+    /// Get this value as an i64
     pub fn get_i64(&self) -> Result<i64, CassError> {
         unsafe {
             let mut output = mem::zeroed();
@@ -407,7 +391,7 @@ impl Value {
         }
     }
 
-    ///Get this value as a float
+    /// Get this value as a float
     pub fn get_flt(&self) -> Result<f32, CassError> {
         unsafe {
             let mut output = mem::zeroed();
@@ -415,7 +399,7 @@ impl Value {
         }
     }
 
-    ///Get this value as a double
+    /// Get this value as a double
     pub fn get_dbl(&self) -> Result<f64, CassError> {
         unsafe {
             let mut output = mem::zeroed();
@@ -423,7 +407,7 @@ impl Value {
         }
     }
 
-    ///Get this value asa boolean
+    /// Get this value asa boolean
     pub fn get_bool(&self) -> Result<bool, CassError> {
         unsafe {
             let mut output = mem::zeroed();
@@ -431,7 +415,7 @@ impl Value {
         }
     }
 
-    ///Get this value as a UUID
+    /// Get this value as a UUID
     pub fn get_uuid(&self) -> Result<Uuid, CassError> {
         unsafe {
             let mut uuid = mem::zeroed();
