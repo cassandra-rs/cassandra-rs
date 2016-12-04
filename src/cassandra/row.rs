@@ -167,6 +167,19 @@ impl AsRustType<MapIterator> for Row {
     }
 }
 
+impl AsRustType<Vec<u8>> for Row {
+    fn get_col(&self, index: usize) -> Result<Vec<u8>, CassError> {
+        let col = try!(self.get_column(index));
+        col.get_blob()
+    }
+
+    fn get_col_by_name<S>(&self, name: S) -> Result<Vec<u8>, CassError>
+        where S: Into<String> {
+        let col = try!(self.get_column_by_name(name));
+        col.get_blob()
+    }
+}
+
 impl Row {
     ///Get a particular column by index
     pub fn get_column(&self, index: usize) -> Result<Column, CassError> {
