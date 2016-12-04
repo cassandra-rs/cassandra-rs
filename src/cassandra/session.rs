@@ -52,6 +52,12 @@ impl Drop for Session {
     }
 }
 
+impl Default for Session {
+    fn default() -> Session {
+        Session::new()
+    }
+}
+
 impl Session {
     /// Create a new Cassanda session.
     /// It's recommended to use Cluster.connect() instead
