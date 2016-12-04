@@ -114,6 +114,8 @@ pub trait CassCollection {
 
 ///A cassandra list collection
 pub struct List(*mut _CassCollection);
+unsafe impl Send for List {}
+unsafe impl Sync for List {}
 
 impl Protected<*mut _CassCollection> for List {
     fn inner(&self) -> *mut _CassCollection {
@@ -266,6 +268,8 @@ impl CassCollection for List {
 
 ///A Cassandra set
 pub struct Set(*mut _CassCollection);
+unsafe impl Send for Set {}
+unsafe impl Sync for Set {}
 
 impl Drop for Set {
     fn drop(&mut self) {
@@ -394,6 +398,8 @@ impl CassCollection for Set {
 
 ///A Cassandra Map
 pub struct Map(*mut _CassCollection);
+unsafe impl Send for Map {}
+unsafe impl Sync for Map {}
 
 impl Drop for Map {
     fn drop(&mut self) {
