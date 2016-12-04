@@ -21,6 +21,7 @@ use cassandra_sys::cass_false;
 
 use cassandra::error::CassError;
 use cassandra::column::Column;
+use cassandra::iterator::{SetIterator, MapIterator};
 
 ///A collection of column values.
 pub struct Row(*const _Row);
@@ -137,6 +138,32 @@ impl AsRustType<i32> for Row {
         where S: Into<String> {
         let col = try!(self.get_column_by_name(name));
         col.get_i32()
+    }
+}
+
+impl AsRustType<SetIterator> for Row {
+    fn get_col(&self, index: usize) -> Result<SetIterator, CassError> {
+        let col = try!(self.get_column(index));
+        col.set_iter()
+    }
+
+    fn get_col_by_name<S>(&self, name: S) -> Result<SetIterator, CassError>
+        where S: Into<String> {
+        let col = try!(self.get_column_by_name(name));
+        col.set_iter()
+    }
+}
+
+impl AsRustType<MapIterator> for Row {
+    fn get_col(&self, index: usize) -> Result<MapIterator, CassError> {
+        let col = try!(self.get_column(index));
+        col.map_iter()
+    }
+
+    fn get_col_by_name<S>(&self, name: S) -> Result<MapIterator, CassError>
+        where S: Into<String> {
+        let col = try!(self.get_column_by_name(name));
+        col.map_iter()
     }
 }
 
