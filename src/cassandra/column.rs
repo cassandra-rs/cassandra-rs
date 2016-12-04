@@ -281,6 +281,25 @@ impl Column {
         }
     }
 
+    /// Gets the blog from this column or errors if type if wrong
+    pub fn get_blob(&self) -> Result<Vec<u8>, CassError> {
+        unsafe {
+            match cass_value_type(self.0) {
+                CASS_VALUE_TYPE_BLOB => {
+                    let mut message = mem::zeroed();
+                    let mut message_length = mem::zeroed();
+                    match cass_value_get_string(self.0, &mut message, &mut message_length) {
+                        CASS_OK => {
+                            Ok(Vec::from(slice::from_raw_parts(message as *const u8, message_length as usize)))
+                        }
+                        err => Err(CassError::build(err)),
+                    }
+                }
+                _ => panic!("Value type is not BLOB")
+            }
+        }
+    }
+
     ///Gets the i32 from this column or errors if you ask for the wrong type
     pub fn get_i32(&self) -> Result<i32, CassError> {
         unsafe {

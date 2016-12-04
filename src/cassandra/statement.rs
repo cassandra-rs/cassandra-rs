@@ -215,6 +215,15 @@ impl BindRustType<Map> for Statement {
     }
 }
 
+impl BindRustType<Vec<u8>> for Statement {
+    fn bind(&mut self, index: usize, value: Vec<u8>) -> Result<&mut Self, CassError> {
+        self.bind_bytes(index, value)
+    }
+
+    fn bind_by_name(&mut self, col: &str, value: Vec<u8>) -> Result<&mut Self, CassError> {
+        self.bind_bytes_by_name(col, value)
+    }
+}
 
 impl Statement {
     ///Creates a new query statement.
