@@ -1,4 +1,4 @@
-
+use errors::*;
 
 use cassandra::error::CassError;
 use cassandra::util::Protected;
@@ -71,16 +71,16 @@ impl AsInet for SocketAddr {
 // }
 
 impl FromStr for Inet {
-    type Err = CassError;
+    type Err = Error;
 
-    fn from_str(s: &str) -> Result<Self, CassError> {
+    fn from_str(s: &str) -> Result<Self> {
         unsafe {
             let mut inet = mem::zeroed();
 
             let str = CString::new(s).expect("must be utf8");
             match cass_inet_from_string(str.as_ptr(), &mut inet) {
                 CASS_OK => Ok(Inet(inet)),
-                err => Err(CassError::build(err)),
+                err => err.to_result(Inet(inet)).chain_err(|| ""),
             }
         }
     }
@@ -134,6 +134,7 @@ impl FromInet for Ipv6Addr {
 }
 
 impl Inet {
+    
     /// Constructs an inet v4 object.
     pub fn cass_inet_init_v4(address: Ipv4Addr) -> Inet {
         unsafe { Inet(cass_inet_init_v4(address.octets().as_ptr())) }

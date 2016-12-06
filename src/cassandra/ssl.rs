@@ -1,4 +1,4 @@
-
+use errors::*;
 
 use cassandra::error::CassError;
 use cassandra::util::Protected;
@@ -34,10 +34,9 @@ impl Default for Ssl {
 impl Ssl {
     /// Adds a trusted certificate. This is used to verify
     /// the peer's certificate.
-    pub fn add_trusted_cert(&mut self, cert: &str) -> Result<&Self, CassError> {
+    pub fn add_trusted_cert(&mut self, cert: &str) -> Result<&mut Self> {
         unsafe {
-            CassError::build(cass_ssl_add_trusted_cert(self.0, CString::new(cert).expect("must be utf8").as_ptr()))
-                .wrap(self)
+            cass_ssl_add_trusted_cert(self.0, CString::new(cert).expect("must be utf8").as_ptr()).to_result(self).chain_err(|| "")
         }
     }
 
@@ -57,20 +56,19 @@ impl Ssl {
     /// Set client-side certificate chain. This is used to authenticate
     /// the client on the server-side. This should contain the entire
     /// Certificate chain starting with the certificate itself.
-    pub fn set_cert(&mut self, cert: &str) -> Result<&Self, CassError> {
+    pub fn set_cert(&mut self, cert: &str) -> Result<&mut Self> {
         unsafe {
-            CassError::build(cass_ssl_set_cert(self.0, CString::new(cert).expect("must be utf8").as_ptr())).wrap(self)
+            cass_ssl_set_cert(self.0, CString::new(cert).expect("must be utf8").as_ptr()).to_result(self).chain_err(|| "")
         }
     }
 
     /// Set client-side private key. This is used to authenticate
     /// the client on the server-side.
-    pub fn set_private_key(&mut self, key: &str, password: &str) -> Result<&Self, CassError> {
+    pub fn set_private_key(&mut self, key: &str, password: &str) -> Result<&mut Self> {
         unsafe {
-            CassError::build(cass_ssl_set_private_key(self.0,
+            cass_ssl_set_private_key(self.0,
                                                       CString::new(key).expect("must be utf8").as_ptr(),
-                                                      password.as_ptr() as *const i8))
-                .wrap(self)
+                                                      password.as_ptr() as *const i8).to_result(self).chain_err(|| "")
         }
     }
 }

@@ -1,4 +1,4 @@
-
+use errors::*;
 
 use cassandra::error::CassError;
 use cassandra::util::Protected;
@@ -91,13 +91,16 @@ impl Uuid {
 }
 
 impl str::FromStr for Uuid {
-    type Err = CassError;
-    fn from_str(str: &str) -> Result<Uuid, CassError> {
+    type Err = Error;
+    fn from_str(str: &str) -> Result<Uuid> {
         unsafe {
             let mut uuid = mem::zeroed();
             match cass_uuid_from_string(CString::new(str).expect("must be utf8").as_ptr(), &mut uuid) {
                 CASS_OK => Ok(Uuid(uuid)),
-                err => Err(CassError::build(err)),
+                err => {
+                    err.to_result(Uuid(uuid))
+                        .chain_err(|| "")
+                }
             }
         }
     }

@@ -1,7 +1,7 @@
 #[macro_use(stmt)]
 extern crate cassandra;
 use cassandra::*;
-
+use errors::*;
 extern crate num;
 
 use std::str::FromStr;
@@ -10,7 +10,7 @@ use std::str::FromStr;
 
 static NUM_CONCURRENT_REQUESTS: usize = 1000;
 
-fn insert_into_async(session: &mut Session, key: String) -> Result<Vec<ResultFuture>, CassError> {
+fn insert_into_async(session: &mut Session, key: String) -> Result<Vec<ResultFuture>> {
     let mut futures = Vec::<ResultFuture>::new();
     for i in 0..NUM_CONCURRENT_REQUESTS {
         let key: &str = &(key.clone() + &i.to_string());

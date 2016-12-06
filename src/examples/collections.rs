@@ -1,11 +1,11 @@
 #[macro_use(stmt)]
 extern crate cassandra;
-
+use errors::*;
 use cassandra::*;
 use std::str::FromStr;
 
 
-fn insert_into_collections(session: &mut Session, key: &str, items: Vec<&str>) -> Result<CassResult, CassError> {
+fn insert_into_collections(session: &mut Session, key: &str, items: Vec<&str>) -> Result<CassResult> {
     let mut statement = stmt!("INSERT INTO examples.collections (key, items) VALUES (?, ?);");
     statement.bind(0, key)?;
     let mut set = Set::new(2);
@@ -16,7 +16,7 @@ fn insert_into_collections(session: &mut Session, key: &str, items: Vec<&str>) -
     session.execute(&statement).wait()
 }
 
-fn select_from_collections(session: &mut Session, key: &str) -> Result<(), CassError> {
+fn select_from_collections(session: &mut Session, key: &str) -> Result<()> {
     let mut statement = stmt!("SELECT items FROM examples.collections WHERE key = ?");
     statement.bind(0, key)?;
     let result = session.execute(&statement).wait()?;

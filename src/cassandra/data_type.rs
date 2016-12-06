@@ -1,4 +1,4 @@
-
+use errors::*;
 
 use cassandra::error::CassError;
 
@@ -71,82 +71,87 @@ impl DataType {
     pub fn get_type(data_type: DataType) -> ValueType { unsafe { ValueType::build(cass_data_type_type(data_type.0)) } }
 
     /// Gets the type name of a UDT data type.
-    pub fn type_name<S>(data_type: DataType, type_name: S) -> Result<(), CassError>
+    pub fn type_name<S>(data_type: DataType, type_name: S) -> Result<()>
         where S: Into<String> {
         unsafe {
             let type_name2 = CString::new(type_name.into()).expect("must be valid utf8");
-            CassError::build(cass_data_type_type_name(data_type.0,
-                                                      &mut type_name2.as_ptr(),
-                                                      &mut (type_name2.as_bytes().len())))
-                .wrap(())
+            let err = cass_data_type_type_name(data_type.0,
+                                               &mut type_name2.as_ptr(),
+                                               &mut (type_name2.as_bytes().len()));
+            err.to_result(()).chain_err(|| "")
         }
     }
 
     /// Sets the type name of a UDT data type.
     ///
     /// <b>Note:</b> Only valid for UDT data types.
-    pub fn set_type_name<S>(data_type: DataType, type_name: S) -> Result<(), CassError>
+    pub fn set_type_name<S>(data_type: DataType, type_name: S) -> Result<()>
         where S: Into<String> {
         unsafe {
-            CassError::build(cass_data_type_set_type_name(data_type.0,
-                                                          CString::new(type_name.into())
-                                                              .expect("must be utf8")
-                                                              .as_ptr()))
-                .wrap(())
+            cass_data_type_set_type_name(data_type.0,
+                                         CString::new(type_name.into())
+                                             .expect("must be utf8")
+                                             .as_ptr())
+                .to_result(())
+                .chain_err(|| "")
         }
     }
 
     /// Gets the type name of a UDT data type.
     ///
     /// <b>Note:</b> Only valid for UDT data types.
-    pub fn keyspace<S>(data_type: DataType, keyspace: S) -> Result<(), CassError>
+    pub fn keyspace<S>(data_type: DataType, keyspace: S) -> Result<()>
         where S: Into<String> {
         unsafe {
             let keyspace2 = CString::new(keyspace.into()).expect("must be utf8");
-            CassError::build(cass_data_type_keyspace(data_type.0,
-                                                     &mut (keyspace2.as_ptr()),
-                                                     &mut (keyspace2.as_bytes().len())))
-                .wrap(())
+            cass_data_type_keyspace(data_type.0,
+                                    &mut (keyspace2.as_ptr()),
+                                    &mut (keyspace2.as_bytes().len()))
+                .to_result(())
+                .chain_err(|| "")
         }
     }
 
     /// Sets the keyspace of a UDT data type.
     ///
     /// <b>Note:</b> Only valid for UDT data types.
-    pub fn set_keyspace<S>(data_type: DataType, keyspace: S) -> Result<(), CassError>
+    pub fn set_keyspace<S>(data_type: DataType, keyspace: S) -> Result<()>
         where S: Into<String> {
         unsafe {
-            CassError::build(cass_data_type_set_keyspace(data_type.0,
-                                                         CString::new(keyspace.into()).expect("must be utf8").as_ptr()))
-                .wrap(())
+            cass_data_type_set_keyspace(data_type.0,
+                                        CString::new(keyspace.into()).expect("must be utf8").as_ptr())
+                .to_result(())
+                .chain_err(|| "")
         }
     }
 
     /// Gets the class name of a custom data type.
     ///
     /// <b>Note:</b> Only valid for custom data types.
-    pub fn class_name<S>(data_type: DataType, class_name: S) -> Result<(), CassError>
+    pub fn class_name<S>(data_type: DataType, class_name: S) -> Result<()>
         where S: Into<String> {
         unsafe {
             let class_name2 = CString::new(class_name.into()).expect("must be valid utf8");
-            CassError::build(cass_data_type_class_name(data_type.0,
-                                                       &mut class_name2.as_ptr(),
-                                                       &mut (class_name2.as_bytes().len())))
-                .wrap(())
+            cass_data_type_class_name(data_type.0,
+                                      &mut class_name2.as_ptr(),
+                                      &mut (class_name2.as_bytes().len()))
+                .to_result(())
+                .chain_err(|| "")
         }
     }
 
     /// Sets the class name of a custom data type.
     ///
     /// <b>Note:</b> Only valid for custom data types.
-    pub fn set_class_name<S>(&self, class_name: S) -> Result<(), CassError>
+    pub fn set_class_name<S>(&self, class_name: S) -> Result<()>
         where S: Into<String> {
         unsafe {
-            CassError::build(cass_data_type_set_class_name(self.0,
-                                                           CString::new(class_name.into())
-                                                               .expect("must be valid utf8")
-                                                               .as_ptr()))
-                .wrap(())
+            cass_data_type_set_class_name(self.0,
+                                          CString::new(class_name.into())
+                                              .expect("must be valid utf8")
+                                              .as_ptr())
+                .to_result(())
+                .chain_err(|| "")
         }
     }
 
@@ -180,60 +185,72 @@ impl DataType {
     /// Gets the sub-type name of a UDT (user defined type) at the specified index.
     ///
     /// <b>Note:</b> Only valid for UDT data types.
-    pub fn sub_type_name<S>(data_type: DataType, index: usize, name: S) -> Result<(), CassError>
+    pub fn sub_type_name<S>(data_type: DataType, index: usize, name: S) -> Result<()>
         where S: Into<String> {
         unsafe {
             let name2 = CString::new(name.into()).expect("must be utf8");
-            CassError::build(cass_data_type_sub_type_name(data_type.0,
-                                                          index,
-                                                          &mut name2.as_ptr(),
-                                                          &mut (name2.as_bytes().len())))
-                .wrap(())
+            cass_data_type_sub_type_name(data_type.0,
+                                         index,
+                                         &mut name2.as_ptr(),
+                                         &mut (name2.as_bytes().len()))
+                .to_result(())
+                .chain_err(|| "")
+
         }
     }
 
     /// Adds a sub-data type to a tuple or collection.
     ///
     /// <b>Note:</b> Only valid for tuple and collection data types.
-    pub fn add_sub_type(&self, sub_data_type: DataType) -> Result<(), CassError> {
-        unsafe { CassError::build(cass_data_type_add_sub_type(self.0, sub_data_type.0)).wrap(()) }
+    pub fn add_sub_type(&self, sub_data_type: DataType) -> Result<()> {
+        unsafe {
+            cass_data_type_add_sub_type(self.0, sub_data_type.0)
+                .to_result(())
+                .chain_err(|| "")
+        }
     }
 
     /// Gets the sub-data type of a UDT (user defined type) at the specified index.
     ///
     /// <b>Note:</b> Only valid for UDT data types.
-    pub fn add_sub_type_by_name<S>(&mut self, name: S, sub_data_type: DataType) -> Result<(), CassError>
+    pub fn add_sub_type_by_name<S>(&mut self, name: S, sub_data_type: DataType) -> Result<()>
         where S: Into<String> {
         unsafe {
-            CassError::build(cass_data_type_add_sub_type_by_name(self.0,
-                                                                 CString::new(name.into())
-                                                                     .expect("must be utf8")
-                                                                     .as_ptr(),
-                                                                 sub_data_type.0))
-                .wrap(())
+            cass_data_type_add_sub_type_by_name(self.0,
+                                                CString::new(name.into())
+                                                    .expect("must be utf8")
+                                                    .as_ptr(),
+                                                sub_data_type.0)
+                .to_result(())
+                .chain_err(|| "")
         }
     }
 
     /// Adds a sub-data type to a tuple or collection using a value type.
     ///
     /// <b>Note:</b> Only valid for tuple and collection data types.
-    pub fn add_sub_value_type<S>(&self, sub_value_type: ValueType) -> Result<(), CassError>
+    pub fn add_sub_value_type<S>(&self, sub_value_type: ValueType) -> Result<()>
         where S: Into<String> {
-        unsafe { CassError::build(cass_data_type_add_sub_value_type(self.0, sub_value_type.inner())).wrap(()) }
+        unsafe {
+            cass_data_type_add_sub_value_type(self.0, sub_value_type.inner())
+                .to_result(())
+                .chain_err(|| "")
+        }
     }
 
     /// Adds a sub-data type to a tuple or collection using a value type.
     ///
     /// <b>Note:</b> Only valid for tuple and collection data types.
-    pub fn add_sub_value_type_by_name<S>(&self, name: &str, typ: ValueType) -> Result<(), CassError>
+    pub fn add_sub_value_type_by_name<S>(&self, name: &str, typ: ValueType) -> Result<()>
         where S: Into<String> {
         unsafe {
-            CassError::build(cass_data_type_add_sub_value_type_by_name(self.0,
-                                                                       CString::new(name)
-                                                                           .expect("must be utf8")
-                                                                           .as_ptr(),
-                                                                       typ.inner()))
-                .wrap(())
+            cass_data_type_add_sub_value_type_by_name(self.0,
+                                                      CString::new(name)
+                                                          .expect("must be utf8")
+                                                          .as_ptr(),
+                                                      typ.inner())
+                .to_result(())
+                .chain_err(|| "")
         }
 
     }

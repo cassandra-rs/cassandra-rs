@@ -1,3 +1,5 @@
+use errors::*;
+
 use cassandra::data_type::ConstDataType;
 use cassandra::error::CassError;
 
@@ -99,7 +101,7 @@ impl FunctionMeta {
     pub fn argument_count(&self) -> usize { unsafe { cass_function_meta_argument_count(self.0) } }
 
     /// Gets the function's argument name and type for the provided index.
-    pub fn argument(&self, index: usize) -> Result<(), CassError> {
+    pub fn argument(&self, index: usize) -> Result<()> {
         unsafe {
             let mut name = mem::zeroed();
             let mut name_length = mem::zeroed();
@@ -107,7 +109,7 @@ impl FunctionMeta {
 
             match cass_function_meta_argument(self.0, index, &mut name, &mut name_length, &mut data_type) {
                 CASS_OK => Ok(()),
-                err => Err(CassError::build(err)),
+                err => err.to_result(()).chain_err(|| ""),
             }
         }
     }

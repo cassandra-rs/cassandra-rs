@@ -2,6 +2,8 @@
 #![deny(missing_docs)]
 #![allow(unknown_lints)]
 #![allow(doc_markdown)]
+// `error_chain!` can recurse deeply
+#![recursion_limit = "1024"]
 
 extern crate libc;
 #[macro_use]
@@ -19,7 +21,6 @@ pub use cassandra::collection::{CassCollection, List, Map, Set};
 pub use cassandra::column::Column;
 pub use cassandra::consistency::Consistency;
 pub use cassandra::data_type::DataType;
-pub use cassandra::error::{CassError, CassErrorResult};
 // pub use cassandra::write_type::*;
 pub use cassandra::field::Field;
 pub use cassandra::future::{CloseFuture, Future, FutureCallback, PreparedFuture, ResultFuture, SessionFuture};
@@ -57,6 +58,20 @@ pub use cassandra_sys::CassBatchType;
 extern crate cassandra_sys;
 
 
+// Import the macro. Don't forget to add `error-chain` in your
+// `Cargo.toml`!
+#[macro_use]
+extern crate error_chain;
+
+
+pub use cassandra::error::*;
+
+///A still clumsy use of error-chain. needs work
+pub mod errors {
+    error_chain!{}
+}
+
+// #[macro_use]
 mod cassandra {
     pub mod consistency;
     pub mod field;

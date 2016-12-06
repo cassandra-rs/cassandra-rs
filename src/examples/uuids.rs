@@ -1,6 +1,6 @@
 #[macro_use(stmt)]
 extern crate cassandra;
-
+use errors::*;
 use cassandra::*;
 
 use std::str::FromStr;
@@ -12,7 +12,7 @@ static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples W
 static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.log (key text, time timeuuid, entry text, \
                                      PRIMARY KEY (key, time));";
 
-fn insert_into_log(session: &mut Session, key: &str, time: Uuid, entry: &str) -> Result<CassResult, CassError> {
+fn insert_into_log(session: &mut Session, key: &str, time: Uuid, entry: &str) -> Result<CassResult> {
     let mut statement = stmt!(INSERT_QUERY);
     statement.bind(0, key)?;
     statement.bind(1, time)?;
@@ -21,7 +21,7 @@ fn insert_into_log(session: &mut Session, key: &str, time: Uuid, entry: &str) ->
     future.wait()
 }
 
-fn select_from_log(session: &mut Session, key: &str) -> Result<CassResult, CassError> {
+fn select_from_log(session: &mut Session, key: &str) -> Result<CassResult> {
     let mut statement = stmt!(SELECT_QUERY);
     statement.bind(0, key)?;
     let mut future = session.execute(&statement);

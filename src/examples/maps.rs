@@ -2,6 +2,8 @@
 extern crate cassandra;
 use cassandra::*;
 use std::str::FromStr;
+use std::error::Error;
+use errors::*;
 
 struct Pair<'a> {
     key: &'a str,
@@ -13,7 +15,7 @@ static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.maps (k
                                      PRIMARY KEY (key))";
 static SELECT_QUERY: &'static str = "SELECT items FROM examples.maps WHERE key = ?";
 
-fn insert_into_maps(session: &mut Session, key: &str, items: Vec<Pair>) -> Result<(), CassError> {
+fn insert_into_maps(session: &mut Session, key: &str, items: Vec<Pair>) -> Result<()> {
     let mut insert_statement = stmt!("INSERT INTO examples.maps (key, items) VALUES (?, ?);");
     insert_statement.bind(0, key).unwrap();
 
@@ -27,7 +29,7 @@ fn insert_into_maps(session: &mut Session, key: &str, items: Vec<Pair>) -> Resul
     Ok(())
 }
 
-fn select_from_maps(session: &mut Session, key: &str) -> Result<(), CassError> {
+fn select_from_maps(session: &mut Session, key: &str) -> Result<()> {
     let mut statement = Statement::new(SELECT_QUERY, 1);
     statement.bind(0, key)?;
     let result = session.execute(&statement).wait()?;
@@ -49,7 +51,7 @@ fn main() {
     }
 }
 
-fn foo() -> Result<(), CassError> {
+fn foo() -> Result<()> {
     let mut cluster = Cluster::default();
     cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
     cluster.set_load_balance_round_robin();

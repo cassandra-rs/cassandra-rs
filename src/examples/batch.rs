@@ -2,6 +2,7 @@
 extern crate cassandra;
 use cassandra::*;
 use std::str::FromStr;
+use errors::*;
 
 struct Pair<'a> {
     key: &'a str,
@@ -9,7 +10,7 @@ struct Pair<'a> {
 }
 
 
-fn insert_into_batch_with_prepared(session: &mut Session, pairs: Vec<Pair>) -> Result<PreparedStatement, CassError> {
+fn insert_into_batch_with_prepared(session: &mut Session, pairs: Vec<Pair>) -> Result<PreparedStatement> {
     let insert_query = "INSERT INTO examples.pairs (key, value) VALUES (?, ?)";
     let prepared = session.prepare(insert_query).unwrap().wait().unwrap();
     let mut batch = Batch::new(CASS_BATCH_TYPE_LOGGED);

@@ -2,6 +2,8 @@
 extern crate cassandra;
 use cassandra::*;
 use std::str::FromStr;
+use errors::*;
+
 
 #[derive(Debug,PartialEq,Clone,Copy)]
 struct Basic {
@@ -12,7 +14,7 @@ struct Basic {
     i64: i64,
 }
 
-fn insert_into_basic(session: &mut Session, key: &str, basic: Basic) -> Result<CassResult, CassError> {
+fn insert_into_basic(session: &mut Session, key: &str, basic: Basic) -> Result<CassResult> {
 
     let mut statement = stmt!("INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, ?);");
     statement.bind(0, key)?;
@@ -24,7 +26,7 @@ fn insert_into_basic(session: &mut Session, key: &str, basic: Basic) -> Result<C
     session.execute(&statement).wait()
 }
 
-fn select_from_basic(session: &mut Session, key: &str) -> Result<Option<Basic>, CassError> {
+fn select_from_basic(session: &mut Session, key: &str) -> Result<Option<Basic>> {
     let mut statement = stmt!("SELECT * FROM examples.basic WHERE key = ?");
     statement.bind_string(0, key)?;
     let result = session.execute(&statement).wait()?;

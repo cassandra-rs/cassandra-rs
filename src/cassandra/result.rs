@@ -1,6 +1,7 @@
 #![allow(non_camel_case_types)]
 #![allow(dead_code)]
 #![allow(missing_copy_implementations)]
+use errors::*;
 
 use cassandra::data_type::ConstDataType;
 use cassandra::error::CassError;
@@ -123,12 +124,11 @@ impl CassResult {
     /// <b>Warning:</b> The paging state should not be exposed to or come from
     /// untrusted environments. The paging state could be spoofed and potentially
     // used to gain access to other data.
-    pub fn set_paging_state_token(&mut self, paging_state: &str) -> Result<&Self, CassError> {
+    pub fn set_paging_state_token(&mut self, paging_state: &str) -> Result<&mut Self> {
         unsafe {
             let state = CString::new(paging_state).expect("must be utf8");
 
-            CassError::build(cass_result_paging_state_token(self.0, &mut state.as_ptr(), &mut (state.to_bytes().len())))
-                .wrap(self)
+            cass_result_paging_state_token(self.0, &mut state.as_ptr(), &mut (state.to_bytes().len())).to_result(self).chain_err(|| "")
         }
     }
 

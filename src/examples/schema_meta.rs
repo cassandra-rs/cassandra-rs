@@ -1,12 +1,13 @@
 #[macro_use(stmt)]
 extern crate cassandra;
 
+use errors::*;
 
 use cassandra::*;
 use std::str::FromStr;
 
 
-fn print_function(session: &Session, keyspace: &str, function: &str, arguments: Vec<&str>) -> Result<(), CassError> {
+fn print_function(session: &Session, keyspace: &str, function: &str, arguments: Vec<&str>) -> Result<()> {
     let schema_meta = session.get_schema_meta();
     let keyspace_meta: KeyspaceMeta = schema_meta.get_keyspace_by_name(keyspace);
 
@@ -110,7 +111,7 @@ fn main() {
     println!("{:?}", result);
 }
 
-fn cass() -> Result<(), CassError> {
+fn cass() -> Result<()> {
     let mut cluster = Cluster::default();
     cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
     cluster.set_load_balance_round_robin();
@@ -157,7 +158,7 @@ fn cass() -> Result<(), CassError> {
 }
 
 
-fn print_aggregate(session: &Session, keyspace: &str, aggregate: &str, arguments: Vec<&str>) -> Result<(), CassError> {
+fn print_aggregate(session: &Session, keyspace: &str, aggregate: &str, arguments: Vec<&str>) -> Result<()> {
     let schema_meta = session.get_schema_meta();
     let keyspace_meta = schema_meta.get_keyspace_by_name(keyspace);
 

@@ -1,6 +1,5 @@
 use cassandra::column::Column;
 
-use cassandra::error::CassError;
 use cassandra::iterator::{MapIterator, SetIterator};
 use cassandra::util::Protected;
 use cassandra::value::Value;
@@ -22,6 +21,8 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::iter;
 use std::iter::IntoIterator;
+use errors::*;
+use cassandra::error::*;
 
 /// A collection of column values.
 pub struct Row(*const _Row);
@@ -52,33 +53,32 @@ impl Display for Row {
 /// Auto inferencing conversion from c* to rust
 pub trait AsRustType<T> {
     /// convert while reading cassandra columns
-    fn get_col(&self, index: usize) -> Result<T, CassError>;
+    fn get_col(&self, index: usize) -> Result<T>;
 
     /// convert while reading cassandra columns by name
-    fn get_col_by_name<S>(&self, name: S) -> Result<T, CassError>
+    fn get_col_by_name<S>(&self, name: S) -> Result<T>
         where S: Into<String>;
 }
 
 impl AsRustType<bool> for Row {
-    fn get_col(&self, index: usize) -> Result<bool, CassError> {
+    fn get_col(&self, index: usize) -> Result<bool> {
         let col = self.get_column(index)?;
         col.get_bool()
     }
 
-    fn get_col_by_name<S>(&self, name: S) -> Result<bool, CassError>
+    fn get_col_by_name<S>(&self, name: S) -> Result<bool>
         where S: Into<String> {
-        let col = self.get_column_by_name(name)?;
-        col.get_bool()
+        self.get_column_by_name(name)?.get_bool()
     }
 }
 
 impl AsRustType<String> for Row {
-    fn get_col(&self, index: usize) -> Result<String, CassError> {
+    fn get_col(&self, index: usize) -> Result<String> {
         let col = self.get_column(index)?;
         col.get_string()
     }
 
-    fn get_col_by_name<S>(&self, name: S) -> Result<String, CassError>
+    fn get_col_by_name<S>(&self, name: S) -> Result<String>
         where S: Into<String> {
         let col = self.get_column_by_name(name)?;
         col.get_string()
@@ -86,12 +86,12 @@ impl AsRustType<String> for Row {
 }
 
 impl AsRustType<f64> for Row {
-    fn get_col(&self, index: usize) -> Result<f64, CassError> {
+    fn get_col(&self, index: usize) -> Result<f64> {
         let col = self.get_column(index)?;
         col.get_double()
     }
 
-    fn get_col_by_name<S>(&self, name: S) -> Result<f64, CassError>
+    fn get_col_by_name<S>(&self, name: S) -> Result<f64>
         where S: Into<String> {
         let col = self.get_column_by_name(name)?;
         col.get_double()
@@ -99,12 +99,12 @@ impl AsRustType<f64> for Row {
 }
 
 impl AsRustType<f32> for Row {
-    fn get_col(&self, index: usize) -> Result<f32, CassError> {
+    fn get_col(&self, index: usize) -> Result<f32> {
         let col = self.get_column(index)?;
         col.get_float()
     }
 
-    fn get_col_by_name<S>(&self, name: S) -> Result<f32, CassError>
+    fn get_col_by_name<S>(&self, name: S) -> Result<f32>
         where S: Into<String> {
         let col = self.get_column_by_name(name)?;
         col.get_float()
@@ -112,12 +112,12 @@ impl AsRustType<f32> for Row {
 }
 
 impl AsRustType<i64> for Row {
-    fn get_col(&self, index: usize) -> Result<i64, CassError> {
+    fn get_col(&self, index: usize) -> Result<i64> {
         let col = self.get_column(index)?;
         col.get_i64()
     }
 
-    fn get_col_by_name<S>(&self, name: S) -> Result<i64, CassError>
+    fn get_col_by_name<S>(&self, name: S) -> Result<i64>
         where S: Into<String> {
         let col = self.get_column_by_name(name)?;
         col.get_i64()
@@ -125,12 +125,12 @@ impl AsRustType<i64> for Row {
 }
 
 impl AsRustType<i32> for Row {
-    fn get_col(&self, index: usize) -> Result<i32, CassError> {
+    fn get_col(&self, index: usize) -> Result<i32> {
         let col = self.get_column(index)?;
         col.get_i32()
     }
 
-    fn get_col_by_name<S>(&self, name: S) -> Result<i32, CassError>
+    fn get_col_by_name<S>(&self, name: S) -> Result<i32>
         where S: Into<String> {
         let col = self.get_column_by_name(name)?;
         col.get_i32()
@@ -138,12 +138,12 @@ impl AsRustType<i32> for Row {
 }
 
 impl AsRustType<SetIterator> for Row {
-    fn get_col(&self, index: usize) -> Result<SetIterator, CassError> {
+    fn get_col(&self, index: usize) -> Result<SetIterator> {
         let col = self.get_column(index)?;
         col.set_iter()
     }
 
-    fn get_col_by_name<S>(&self, name: S) -> Result<SetIterator, CassError>
+    fn get_col_by_name<S>(&self, name: S) -> Result<SetIterator>
         where S: Into<String> {
         let col = self.get_column_by_name(name)?;
         col.set_iter()
@@ -151,12 +151,12 @@ impl AsRustType<SetIterator> for Row {
 }
 
 impl AsRustType<MapIterator> for Row {
-    fn get_col(&self, index: usize) -> Result<MapIterator, CassError> {
+    fn get_col(&self, index: usize) -> Result<MapIterator> {
         let col = self.get_column(index)?;
         col.map_iter()
     }
 
-    fn get_col_by_name<S>(&self, name: S) -> Result<MapIterator, CassError>
+    fn get_col_by_name<S>(&self, name: S) -> Result<MapIterator>
         where S: Into<String> {
         let col = self.get_column_by_name(name)?;
         col.map_iter()
@@ -164,12 +164,12 @@ impl AsRustType<MapIterator> for Row {
 }
 
 impl AsRustType<Vec<u8>> for Row {
-    fn get_col(&self, index: usize) -> Result<Vec<u8>, CassError> {
+    fn get_col(&self, index: usize) -> Result<Vec<u8>> {
         let col = self.get_column(index)?;
         col.get_blob()
     }
 
-    fn get_col_by_name<S>(&self, name: S) -> Result<Vec<u8>, CassError>
+    fn get_col_by_name<S>(&self, name: S) -> Result<Vec<u8>>
         where S: Into<String> {
         let col = self.get_column_by_name(name)?;
         col.get_blob()
@@ -178,11 +178,11 @@ impl AsRustType<Vec<u8>> for Row {
 
 impl Row {
     /// Get a particular column by index
-    pub fn get_column(&self, index: usize) -> Result<Column, CassError> {
+    pub fn get_column(&self, index: usize) -> Result<Column> {
         unsafe {
             let col = cass_row_get_column(self.0, index);
             if col.is_null() {
-                Err(CassError::build(CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS))
+                Err("LIB_INDEX_OUT_OF_BOUNDS".into())
             } else {
                 Ok(Column::build(col))
             }
@@ -190,13 +190,13 @@ impl Row {
     }
 
     /// Get a particular column by name
-    pub fn get_column_by_name<S>(&self, name: S) -> Result<Column, CassError>
+    pub fn get_column_by_name<S>(&self, name: S) -> Result<Column>
         where S: Into<String> {
         unsafe {
             let col = cass_row_get_column_by_name(self.0,
                                                   CString::new(name.into()).expect("must be utf8").as_ptr());
             if col.is_null() {
-                Err(CassError::build(CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS))
+                Err("LIB_INDEX_OUT_OF_BOUNDS".into())
             } else {
                 Ok(Column::build(col))
             }

@@ -1,6 +1,6 @@
 #[macro_use(stmt)]
 extern crate cassandra;
-
+use errors::*;
 use cassandra::*;
 use std::str::FromStr;
 
@@ -21,7 +21,7 @@ struct Basic {
     i64: i64,
 }
 
-fn insert_into_basic(session: &mut Session, key: &str, basic: &mut Basic) -> Result<(), CassError> {
+fn insert_into_basic(session: &mut Session, key: &str, basic: &mut Basic) -> Result<()> {
     println!("Creating statement");
     let mut statement = stmt!(INSERT_QUERY);
     statement.bind(0, key)?;
@@ -39,7 +39,7 @@ fn insert_into_basic(session: &mut Session, key: &str, basic: &mut Basic) -> Res
 
 
 fn select_from_basic(session: &mut Session, prepared: &PreparedStatement, key: &str, basic: &mut Basic)
-                     -> Result<(), CassError> {
+                     -> Result<()> {
     let mut statement = prepared.bind();
     statement.bind_string(0, key)?;
     let mut future = session.execute(&statement);
