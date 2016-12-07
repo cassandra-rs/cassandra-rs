@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/BenjaminGill-Metaswitch/cassandra-rs.svg?branch=master)](https://travis-ci.org/BenjaminGill-Metaswitch/cassandra-rs)
+
 # cassandra-rs
 
 This is a (hopefully) maintained rust project that unsafely
