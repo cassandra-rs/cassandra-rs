@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.org/BenjaminGill-Metaswitch/cassandra-rs.svg?branch=master)](https://travis-ci.org/BenjaminGill-Metaswitch/cassandra-rs)
+[![Current Version](http://meritbadge.herokuapp.com/cassandra)](https://crates.io/crates/cassandra)
+[![License: MPL-2.0](https://img.shields.io/crates/l/cassandra.svg)](#License)
 
 # cassandra-rs
 
