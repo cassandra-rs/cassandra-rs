@@ -4,7 +4,7 @@
 
 # cassandra-rs
 
-This is a (hopefully) maintained rust project that unsafely
+This is a maintained rust project that
 exposes the cpp driver at https://github.com/datastax/cpp-driver/
 in a somewhat-sane crate.
 
@@ -28,4 +28,38 @@ Or just
     cassandra="*"
 ```
 
-Examples are included with the project in src/examples.
+Here's a straightforward example found in simple.rs:
+
+
+```rust
+    #[macro_use(stmt)]
+    extern crate cassandra;
+    use cassandra::*;
+    use std::str::FromStr;
+    
+    
+    fn main() {
+        let query = stmt!("SELECT keyspace_name FROM system_schema.keyspaces;");
+        let col_name = "keyspace_name";
+    
+        let contact_points = ContactPoints::from_str("127.0.0.1").unwrap();
+    
+        let mut cluster = Cluster::default();
+        cluster.set_contact_points(contact_points).unwrap();
+        cluster.set_load_balance_round_robin();
+    
+        match cluster.connect() {
+            Ok(ref mut session) => {
+                let result = session.execute(&query).wait().unwrap();
+                println!("{}", result);
+                for row in result.iter() {
+                    let col: String = row.get_col_by_name(col_name).unwrap();
+                    println!("ks name = {}", col);
+                }
+            }
+            err => println!("{:?}", err),
+        }
+    }
+```
+
+There's additional examples included with the project in src/examples.
