@@ -1,4 +1,3 @@
-use errors::*;
 use cassandra::collection::Set;
 use cassandra::data_type::ConstDataType;
 use cassandra::data_type::DataType;
@@ -33,6 +32,7 @@ use cassandra_sys::cass_tuple_set_tuple;
 use cassandra_sys::cass_tuple_set_uint32;
 use cassandra_sys::cass_tuple_set_user_type;
 use cassandra_sys::cass_tuple_set_uuid;
+use errors::*;
 use std::ffi::CString;
 use std::net::SocketAddr;
 

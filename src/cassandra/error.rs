@@ -1,10 +1,9 @@
 #![macro_use]
-use errors::*;
-//use cassandra_sys;
+// use cassandra_sys;
+
 use cassandra::consistency::Consistency;
 use cassandra::util::Protected;
 use cassandra::write_type::WriteType;
-use std::error::Error as IError;
 
 use cassandra_sys::CASS_OK;
 use cassandra_sys::CassError as _CassError;
@@ -24,9 +23,11 @@ use cassandra_sys::cass_error_result_responses_received;
 use cassandra_sys::cass_error_result_responses_required;
 use cassandra_sys::cass_error_result_table;
 use cassandra_sys::cass_error_result_write_type;
-use std::{fmt, mem, slice, str};
 use errors::*;
-//use std::error::Error;
+use errors::*;
+use std::{fmt, mem, slice, str};
+use std::error::Error as IError;
+// use std::error::Error;
 use std::ffi::{CStr, CString};
 use std::fmt::{Debug, Display, Formatter};
 use std::os::raw::c_char;
@@ -34,14 +35,14 @@ use std::os::raw::c_char;
 // Simple and robust error handling with error-chain!
 // Use this as a template for new projects.
 
-//#[macro_export]
-//macro_rules! err_wrap {
+// #[macro_export]
+// macro_rules! err_wrap {
 //    ( $s:expr,$x:expr ) => {match $x {
 //                CASS_OK => Ok($s),
 //                err => Err(Error::from(err.into()))
 //            }
 //    }
-//}
+// }
 
 error_chain! {
        // Automatic conversions between this error chain and other
@@ -83,11 +84,11 @@ pub struct CassError(_CassError);
 //    msg: String,
 // }
 
-//impl From<_CassError> for CassError {
+// impl From<_CassError> for CassError {
 //    fn from(err:_CassError) -> CassError {
 //        CassError
 //    }
-//}
+// }
 
 // ///An error signaled by the server and sent to the client over CQL transport
 // pub struct CassServerError(_CassError);
@@ -96,8 +97,8 @@ pub struct CassError(_CassError);
 
 impl ::std::error::Error for CassError {
     fn description(&self) -> &str {
-           unimplemented!()
-       // self.desc()
+        unimplemented!()
+        // self.desc()
         // let c_buf: *const i8 = self.desc();
         // let buf: &[u8] = unsafe { CStr::from_ptr(c_buf).to_bytes() };
         // from_utf8(buf).unwrap()
@@ -146,8 +147,8 @@ impl Debug for CassError {
 //    }
 // }
 
-//impl CassError {
- //   /// Takes an upstream error and wraps it into the appropriate CassError
+// impl CassError {
+//   /// Takes an upstream error and wraps it into the appropriate CassError
 //    pub fn wrap<T>(self, wrappee: T) -> Result<T> {
 //        match self.0 {
 //            CASS_OK => Ok(wrappee),
@@ -155,8 +156,8 @@ impl Debug for CassError {
 //        }
 //    }
 //    //
-//}
- /// An error result of a request
+// }
+/// An error result of a request
 #[derive(Debug)]
 pub struct CassErrorResult(*const _CassErrorResult);
 
@@ -165,7 +166,7 @@ impl Protected<*const _CassErrorResult> for CassErrorResult {
     fn build(inner: *const _CassErrorResult) -> Self { CassErrorResult(inner) }
 }
 
-//impl CassErrorResult {
+// impl CassErrorResult {
 //    /// Gets error code for the error result. This error code will always
 //    /// have an server error source.
 //    pub fn result_code(&self) -> u32 { unsafe { cass_error_result_code(self.0) as u32 } }
@@ -305,12 +306,12 @@ impl Protected<*const _CassErrorResult> for CassErrorResult {
 //                                       &mut (cstr.to_bytes().len())) as u32
 //        }
 //    }
-//}
-//impl Drop for CassErrorResult {
+// }
+// impl Drop for CassErrorResult {
 //    fn drop(&mut self) { unsafe { cass_error_result_free(self.0) } }
-//}
+// }
 //
-//impl CassError {
+// impl CassError {
 //    pub fn new(err:_CassError) -> Self {
 //        CassError(err)
 //    }
@@ -320,12 +321,11 @@ impl Protected<*const _CassErrorResult> for CassErrorResult {
 //                err => Err(Error::from(err.into()))
 //            }
 //    }
-    
-    fn pointer_to_string<'a>(c_buf: *const c_char) -> &'a str {
-        let buf: &[u8] = unsafe { CStr::from_ptr(c_buf).to_bytes() };
-        str::from_utf8(buf).unwrap()
-    }
-//
+
+fn pointer_to_string<'a>(c_buf: *const c_char) -> &'a str {
+    let buf: &[u8] = unsafe { CStr::from_ptr(c_buf).to_bytes() };
+    str::from_utf8(buf).unwrap()
+}
 //    /// Gets the textual description for this error
 //    pub fn desc(&self) -> &str {
 //        {
@@ -344,4 +344,4 @@ impl Protected<*const _CassErrorResult> for CassErrorResult {
 //            //            }
 //        }
 //    }
-//}
+// }

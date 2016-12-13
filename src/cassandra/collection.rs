@@ -1,6 +1,5 @@
 use cassandra::data_type::ConstDataType;
 use cassandra::data_type::DataType;
-use errors::*;
 
 use cassandra::error::CassError;
 use cassandra::inet::Inet;
@@ -35,6 +34,7 @@ use cassandra_sys::cass_collection_new;
 use cassandra_sys::cass_collection_new_from_data_type;
 use cassandra_sys::cass_false;
 use cassandra_sys::cass_true;
+use errors::*;
 use std::ffi::CString;
 
 // #[repr(C)]
@@ -191,7 +191,9 @@ impl CassCollection for List {
     /// Appends a "boolean" to the collection.
     fn append_bool(&mut self, value: bool) -> Result<&mut Self> {
         unsafe {
-            cass_collection_append_bool(self.inner(), if value { cass_true } else { cass_false }).to_result(self).chain_err(|| "")
+            cass_collection_append_bool(self.inner(), if value { cass_true } else { cass_false })
+                .to_result(self)
+                .chain_err(|| "")
         }
     }
 
@@ -314,7 +316,9 @@ impl CassCollection for Set {
     /// Appends a "boolean" to the collection.
     fn append_bool(&mut self, value: bool) -> Result<&mut Self> {
         unsafe {
-            cass_collection_append_bool(self.inner(), if value { cass_true } else { cass_false }).to_result(self).chain_err(|| "")
+            cass_collection_append_bool(self.inner(), if value { cass_true } else { cass_false })
+                .to_result(self)
+                .chain_err(|| "")
         }
     }
 
@@ -434,7 +438,9 @@ impl CassCollection for Map {
     /// Appends a "boolean" to the collection.
     fn append_bool(&mut self, value: bool) -> Result<&mut Self> {
         unsafe {
-            cass_collection_append_bool(self.inner(), if value { cass_true } else { cass_false }).to_result(self).chain_err(|| "")
+            cass_collection_append_bool(self.inner(), if value { cass_true } else { cass_false })
+                .to_result(self)
+                .chain_err(|| "")
         }
     }
 

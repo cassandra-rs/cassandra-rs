@@ -1,8 +1,8 @@
 #[macro_use(stmt)]
 extern crate cassandra;
-use errors::*;
 
 use cassandra::*;
+use errors::*;
 use std::str::FromStr;
 
 static NUM_CONCURRENT_REQUESTS: isize = 100;
@@ -14,8 +14,7 @@ static SELECT_QUERY: &'static str = "SELECT * FROM paging";
 static INSERT_QUERY: &'static str = "INSERT INTO paging (key, value) VALUES (?, ?);";
 
 // FIXME uuids not yet working
-fn insert_into_paging(session: &mut Session /* , uuid_gen:&mut UuidGen */)
-                      -> Result<Vec<Option<ResultFuture>>> {
+fn insert_into_paging(session: &mut Session /* , uuid_gen:&mut UuidGen */) -> Result<Vec<Option<ResultFuture>>> {
     let mut futures = Vec::with_capacity(NUM_CONCURRENT_REQUESTS as usize);
     let mut results = Vec::with_capacity(NUM_CONCURRENT_REQUESTS as usize);
 

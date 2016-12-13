@@ -1,4 +1,4 @@
-use errors::*;
+
 
 use cassandra::collection::Set;
 use cassandra::data_type::ConstDataType;
@@ -51,6 +51,7 @@ use cassandra_sys::cass_user_type_set_user_type_by_name;
 use cassandra_sys::cass_user_type_set_uuid;
 
 use cassandra_sys::cass_user_type_set_uuid_by_name;
+use errors::*;
 use std::ffi::CString;
 // use cassandra::iterator::FieldIterator;
 
@@ -453,10 +454,11 @@ impl UserType {
         where S: Into<String> {
         unsafe {
             cass_user_type_set_user_type_by_name(self.0,
-                                                                  CString::new(name.into())
-                                                                      .expect("must be utf8")
-                                                                      .as_ptr(),
-                                                                  value.0).to_result(self)
+                                                 CString::new(name.into())
+                                                     .expect("must be utf8")
+                                                     .as_ptr(),
+                                                 value.0)
+                .to_result(self)
                 .chain_err(|| "")
         }
     }

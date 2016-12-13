@@ -1,4 +1,4 @@
-use errors::*;
+
 
 use cassandra::error::CassError;
 use cassandra::util::Protected;
@@ -20,6 +20,7 @@ use cassandra_sys::cass_uuid_min_from_time;
 use cassandra_sys::cass_uuid_string;
 use cassandra_sys::cass_uuid_timestamp;
 use cassandra_sys::cass_uuid_version;
+use errors::*;
 use std::ffi::CString;
 use std::fmt;
 use std::fmt::{Debug, Display};

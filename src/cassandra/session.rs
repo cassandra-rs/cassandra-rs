@@ -53,9 +53,7 @@ impl Drop for Session {
 }
 
 impl Default for Session {
-    fn default() -> Session {
-        Session::new()
-    }
+    fn default() -> Session { Session::new() }
 }
 
 impl Session {

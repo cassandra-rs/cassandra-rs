@@ -66,7 +66,7 @@ extern crate error_chain;
 
 pub use cassandra::error::*;
 
-///A still clumsy use of error-chain. needs work
+/// A still clumsy use of error-chain. needs work
 pub mod errors {
     error_chain!{}
 }

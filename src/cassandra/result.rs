@@ -1,7 +1,6 @@
 #![allow(non_camel_case_types)]
 #![allow(dead_code)]
 #![allow(missing_copy_implementations)]
-use errors::*;
 
 use cassandra::data_type::ConstDataType;
 use cassandra::error::CassError;
@@ -29,6 +28,7 @@ use cassandra_sys::cass_result_paging_state_token;
 use cassandra_sys::cass_result_row_count;
 
 use cassandra_sys::cass_true;
+use errors::*;
 use std::ffi::CString;
 use std::fmt;
 use std::fmt::Debug;
@@ -128,7 +128,9 @@ impl CassResult {
         unsafe {
             let state = CString::new(paging_state).expect("must be utf8");
 
-            cass_result_paging_state_token(self.0, &mut state.as_ptr(), &mut (state.to_bytes().len())).to_result(self).chain_err(|| "")
+            cass_result_paging_state_token(self.0, &mut state.as_ptr(), &mut (state.to_bytes().len()))
+                .to_result(self)
+                .chain_err(|| "")
         }
     }
 

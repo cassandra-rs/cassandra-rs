@@ -1,7 +1,7 @@
 #[macro_use(stmt)]
 extern crate cassandra;
-use errors::*;
 use cassandra::*;
+use errors::*;
 use std::str::FromStr;
 
 static CREATE_KEYSPACE: &'static str = "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
@@ -38,8 +38,7 @@ fn insert_into_basic(session: &mut Session, key: &str, basic: &mut Basic) -> Res
 }
 
 
-fn select_from_basic(session: &mut Session, prepared: &PreparedStatement, key: &str, basic: &mut Basic)
-                     -> Result<()> {
+fn select_from_basic(session: &mut Session, prepared: &PreparedStatement, key: &str, basic: &mut Basic) -> Result<()> {
     let mut statement = prepared.bind();
     statement.bind_string(0, key)?;
     let mut future = session.execute(&statement);

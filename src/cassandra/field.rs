@@ -1,4 +1,4 @@
-use errors::*;
+
 
 use cassandra::error::CassError;
 use cassandra::inet::Inet;
@@ -59,6 +59,7 @@ use cassandra_sys::cass_value_get_string;
 use cassandra_sys::cass_value_get_uint32;
 use cassandra_sys::cass_value_get_uuid;
 use cassandra_sys::cass_value_type;
+use errors::*;
 use std::fmt;
 use std::fmt::Debug;
 use std::fmt::Display;

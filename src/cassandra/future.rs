@@ -1,10 +1,9 @@
-use errors::*;
+use Session;
 
-use cassandra::error::{CassError,CassErrorResult};
+use cassandra::error::{CassError, CassErrorResult};
 use cassandra::prepared::PreparedStatement;
 use cassandra::result::CassResult;
 use cassandra::util::Protected;
-use Session;
 use cassandra_sys::CASS_OK;
 
 use cassandra_sys::CassFuture as _Future;
@@ -24,6 +23,7 @@ use cassandra_sys::cass_future_wait;
 use cassandra_sys::cass_future_wait_timed;
 
 use cassandra_sys::cass_true;
+use errors::*;
 use std::mem;
 use std::os::raw;
 use std::slice;
@@ -44,8 +44,7 @@ impl Drop for Future {
 
 impl Future {
     /// Sets a callback that is called when a future is set
-    pub unsafe fn set_callback(&mut self, callback: FutureCallback, data: *mut raw::c_void)
-                               -> Result<&mut Self> {
+    pub unsafe fn set_callback(&mut self, callback: FutureCallback, data: *mut raw::c_void) -> Result<&mut Self> {
         cass_future_set_callback(self.0, callback.0, data).to_result(self).chain_err(|| "")
     }
 
@@ -80,9 +79,7 @@ impl Future {
 
     /// Gets the error code from future. If the future is not ready this method will
     // wait for the future to be set.
-    fn error_code(self) -> Result<()> {
-        unsafe { cass_future_error_code(self.0).to_result(()).chain_err(|| "") }
-    }
+    fn error_code(self) -> Result<()> { unsafe { cass_future_error_code(self.0).to_result(()).chain_err(|| "") } }
 
     /// Gets the error message from future. If the future is not ready this method will
     /// wait for the future to be set.
@@ -153,10 +150,10 @@ impl ResultFuture {
         unsafe {
             let x = self.get();
             let error_code = cass_future_error_code(self.0);
-            match (x,error_code) {
-                (Some(x),_) => Ok(x),
-                (None,CASS_OK) => unimplemented!(),
-                (None,err) => Err(err.to_result("").unwrap().into()),
+            match (x, error_code) {
+                (Some(x), _) => Ok(x),
+                (None, CASS_OK) => unimplemented!(),
+                (None, err) => Err(err.to_result("").unwrap().into()),
             }
         }
     }
@@ -254,9 +251,7 @@ impl SessionFuture {
 
     /// Gets the error code from future. If the future is not ready this method will
     /// wait for the future to be set.
-    pub fn error_code(&self) -> Result<()> {
-        unsafe { cass_future_error_code(self.0).to_result(()).chain_err(|| "") }
-    }
+    pub fn error_code(&self) -> Result<()> { unsafe { cass_future_error_code(self.0).to_result(()).chain_err(|| "") } }
 
     /// Gets the result of a successful future. If the future is not ready this method will
     /// wait for the future to be set.
@@ -329,9 +324,7 @@ impl CloseFuture {
 
     /// Gets the error code from future. If the future is not ready this method will
     /// wait for the future to be set.
-    pub fn error_code(&self) -> Result<()> {
-        unsafe { cass_future_error_code(self.0).to_result(()).chain_err(|| "") }
-    }
+    pub fn error_code(&self) -> Result<()> { unsafe { cass_future_error_code(self.0).to_result(()).chain_err(|| "") } }
 
     /// Gets the error message from future. If the future is not ready this method will
     /// wait for the future to be set.

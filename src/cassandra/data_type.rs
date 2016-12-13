@@ -1,4 +1,4 @@
-use errors::*;
+
 
 use cassandra::error::CassError;
 
@@ -28,6 +28,7 @@ use cassandra_sys::cass_data_type_sub_type_name;
 use cassandra_sys::cass_data_type_type;
 use cassandra_sys::cass_data_type_type_name;
 use cassandra_sys::cass_user_type_new_from_data_type;
+use errors::*;
 
 use std::ffi::CString;
 

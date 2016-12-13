@@ -1,4 +1,4 @@
-use errors::*;
+
 
 use cassandra::data_type::ConstDataType;
 use cassandra::error::CassError;
@@ -20,6 +20,7 @@ use cassandra_sys::cass_function_meta_name;
 use cassandra_sys::cass_function_meta_return_type;
 use cassandra_sys::cass_iterator_fields_from_function_meta;
 use cassandra_sys::cass_true;
+use errors::*;
 
 use std::{mem, slice, str};
 use std::ffi::CString;

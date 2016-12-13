@@ -1,9 +1,9 @@
 #[macro_use(stmt)]
 extern crate cassandra;
 use cassandra::*;
-use std::str::FromStr;
-use std::error::Error;
 use errors::*;
+use std::error::Error;
+use std::str::FromStr;
 
 struct Pair<'a> {
     key: &'a str,

@@ -1,4 +1,4 @@
-use errors::*;
+
 
 use cassandra::batch::CustomPayload;
 use cassandra::collection::List;
@@ -65,6 +65,7 @@ use cassandra_sys::cass_statement_set_retry_policy;
 use cassandra_sys::cass_statement_set_serial_consistency;
 use cassandra_sys::cass_statement_set_timestamp;
 use cassandra_sys::cass_true;
+use errors::*;
 use std::ffi::CString;
 /// A statement object is an executable query. It represents either a regular
 /// (adhoc) statement or a prepared statement. It maintains the queries' parameter

@@ -1,14 +1,11 @@
-use errors::*;
 
-use std::result;
-use std::iter::Map;
+#[macro_use]
 use cassandra::future::ConnectFuture;
 use cassandra::policy::retry::RetryPolicy;
 use cassandra::session::Session;
 use cassandra::ssl::Ssl;
 use cassandra::time::TimestampGen;
 use cassandra::util::Protected;
-use cassandra_sys::CASS_OK;
 use cassandra_sys::CassCluster as _Cluster;
 use cassandra_sys::cass_bool_t;
 use cassandra_sys::cass_cluster_free;
@@ -53,16 +50,19 @@ use cassandra_sys::cass_future_error_code;
 use cassandra_sys::cass_session_connect;
 use cassandra_sys::cass_session_new;
 use cassandra_sys::cass_true;
+use errors::*;
+// use ip::IpAddr;
+use errors::*;
 use std::ffi::CString;
 use std::ffi::NulError;
 use std::fmt;
+use std::iter::Map;
 use std::net::AddrParseError;
 use std::net::Ipv4Addr;
+
+use std::result;
 use std::str::FromStr;
-// use ip::IpAddr;
-use errors::*;
 use time::Duration;
-#[macro_use] use cassandra::error::*;
 
 /// Possible Cql Protocol versions
 #[allow(missing_docs)]
@@ -88,7 +88,7 @@ impl FromStr for ContactPoints {
     type Err = Error;
     fn from_str(s: &str) -> Result<Self> {
         let points: Vec<&str> = s.split(',').collect();
-        let contact_points:result::Result<Vec<Ipv4Addr>,AddrParseError> = points.iter()
+        let contact_points: result::Result<Vec<Ipv4Addr>, AddrParseError> = points.iter()
             .map(|addr| Ipv4Addr::from_str(addr))
             .collect();
         Ok(ContactPoints(contact_points.unwrap()))
@@ -108,7 +108,6 @@ impl FromStr for ContactPoints {
 /// cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
 /// let mut session = cluster.connect().unwrap();
 /// ```
-
 #[derive(Debug)]
 pub struct Cluster(pub *mut _Cluster);
 
@@ -144,7 +143,7 @@ impl Cluster {
             err.to_result(self).chain_err(|| "Could not set contact points")
         }
     }
-    
+
 
     /// Sets the port
     ///
@@ -169,7 +168,7 @@ impl Cluster {
         unsafe {
             let session = Session(cass_session_new());
             let connect_future = ConnectFuture::build(cass_session_connect(session.0, self.0));
-            cass_future_error_code(connect_future.inner()).to_result(session).chain_err(|| "Could not connect") 
+            cass_future_error_code(connect_future.inner()).to_result(session).chain_err(|| "Could not connect")
         }
     }
 
@@ -180,7 +179,11 @@ impl Cluster {
     /// Default: version 4
     ///
     pub fn set_protocol_version(&mut self, protocol_version: CqlProtocol) -> Result<&mut Self> {
-        unsafe { cass_cluster_set_protocol_version(self.0, protocol_version as i32).to_result(self).chain_err(|| "Couldn't set protocol version") }
+        unsafe {
+            cass_cluster_set_protocol_version(self.0, protocol_version as i32)
+                .to_result(self)
+                .chain_err(|| "Couldn't set protocol version")
+        }
     }
 
     /// Sets the number of IO threads. This is the number of threads
@@ -190,7 +193,11 @@ impl Cluster {
     /// Default: 1
     ///
     pub fn set_num_threads_io(&mut self, num_threads: u32) -> Result<&mut Self> {
-        unsafe { cass_cluster_set_num_threads_io(self.0, num_threads).to_result(self).chain_err(|| "couldn't set thread count") }
+        unsafe {
+            cass_cluster_set_num_threads_io(self.0, num_threads)
+                .to_result(self)
+                .chain_err(|| "couldn't set thread count")
+        }
     }
 
     /// Sets the size of the fixed size queue that stores pending requests.
@@ -199,7 +206,11 @@ impl Cluster {
     /// Default: 8192
     ///
     pub fn set_queue_size_io(&mut self, queue_size: u32) -> Result<&mut Self> {
-        unsafe { cass_cluster_set_queue_size_io(self.0, queue_size).to_result(self).chain_err(|| "couldn't set io queue size") }
+        unsafe {
+            cass_cluster_set_queue_size_io(self.0, queue_size)
+                .to_result(self)
+                .chain_err(|| "couldn't set io queue size")
+        }
     }
 
     /// Sets the size of the fixed size queue that stores events.
@@ -208,7 +219,11 @@ impl Cluster {
     /// Default: 8192
     ///
     pub fn set_queue_size_event(&mut self, queue_size: u32) -> Result<&mut Self> {
-        unsafe { cass_cluster_set_queue_size_event(self.0, queue_size).to_result(self).chain_err(|| "couldn't set event queue size") }
+        unsafe {
+            cass_cluster_set_queue_size_event(self.0, queue_size)
+                .to_result(self)
+                .chain_err(|| "couldn't set event queue size")
+        }
     }
 
     /// Sets the size of the fixed size queue that stores log messages.
@@ -217,7 +232,11 @@ impl Cluster {
     /// Default: 8192
     ///
     pub fn set_queue_size_log(&mut self, queue_size: u32) -> Result<&mut Self> {
-        unsafe { cass_cluster_set_queue_size_log(self.0, queue_size).to_result(self).chain_err(|| "couldn't set log queue size") }
+        unsafe {
+            cass_cluster_set_queue_size_log(self.0, queue_size)
+                .to_result(self)
+                .chain_err(|| "couldn't set log queue size")
+        }
     }
 
     /// Sets the number of connections made to each server in each
@@ -227,7 +246,11 @@ impl Cluster {
     /// Default: 1
     ///
     pub fn set_core_connections_per_host(&mut self, num_connections: u32) -> Result<&mut Self> {
-        unsafe { cass_cluster_set_core_connections_per_host(self.0, num_connections).to_result(self).chain_err(|| "couldn't set connections per host") } 
+        unsafe {
+            cass_cluster_set_core_connections_per_host(self.0, num_connections)
+                .to_result(self)
+                .chain_err(|| "couldn't set connections per host")
+        }
     }
 
     /// Sets the maximum number of connections made to each server in each
@@ -237,7 +260,11 @@ impl Cluster {
     /// Default: 2
     ///
     pub fn set_max_connections_per_host(&mut self, num_connections: u32) -> Result<&mut Self> {
-        unsafe { cass_cluster_set_max_connections_per_host(self.0, num_connections).to_result(self).chain_err(|| "couldn't set max connections per host") }
+        unsafe {
+            cass_cluster_set_max_connections_per_host(self.0, num_connections)
+                .to_result(self)
+                .chain_err(|| "couldn't set max connections per host")
+        }
     }
 
     /// Sets the amount of time to wait before attempting to reconnect.
@@ -259,7 +286,11 @@ impl Cluster {
     ///
     /// Default: 1
     pub fn set_max_concurrent_creation(&mut self, num_connections: u32) -> Result<&mut Self> {
-        unsafe { cass_cluster_set_max_concurrent_creation(self.0, num_connections).to_result(self).chain_err(|| "couldn't set max_concurrent_creation") }
+        unsafe {
+            cass_cluster_set_max_concurrent_creation(self.0, num_connections)
+                .to_result(self)
+                .chain_err(|| "couldn't set max_concurrent_creation")
+        }
     }
 
     /// Sets the threshold for the maximum number of concurrent requests in-flight
@@ -269,7 +300,11 @@ impl Cluster {
     ///
     /// Default: 100
     pub fn set_max_concurrent_requests_threshold(&mut self, num_requests: u32) -> Result<&mut Self> {
-        unsafe { cass_cluster_set_max_concurrent_requests_threshold(self.0, num_requests).to_result(self).chain_err(|| "couldn't set max concurrend requests threshold") }
+        unsafe {
+            cass_cluster_set_max_concurrent_requests_threshold(self.0, num_requests)
+                .to_result(self)
+                .chain_err(|| "couldn't set max concurrend requests threshold")
+        }
     }
 
     /// Sets the maximum number of requests processed by an IO worker
@@ -278,7 +313,11 @@ impl Cluster {
     ///
     /// Default: 128
     pub fn set_max_requests_per_flush(&mut self, num_requests: u32) -> Result<&mut Self> {
-        unsafe { cass_cluster_set_max_requests_per_flush(self.0, num_requests).to_result(self).chain_err(|| "couldn't set max requests per flush") }
+        unsafe {
+            cass_cluster_set_max_requests_per_flush(self.0, num_requests)
+                .to_result(self)
+                .chain_err(|| "couldn't set max requests per flush")
+        }
     }
 
     /// Sets the high water mark for the number of bytes outstanding
@@ -288,7 +327,11 @@ impl Cluster {
     ///
     /// Default: 64KB
     pub fn set_write_bytes_high_water_mark(&mut self, num_bytes: u32) -> Result<&mut Self> {
-        unsafe { cass_cluster_set_write_bytes_high_water_mark(self.0, num_bytes).to_result(self).chain_err(|| "couldn't set write bytes high water mark") }
+        unsafe {
+            cass_cluster_set_write_bytes_high_water_mark(self.0, num_bytes)
+                .to_result(self)
+                .chain_err(|| "couldn't set write bytes high water mark")
+        }
     }
 
     /// Sets the low water mark for the number of bytes outstanding
@@ -298,7 +341,11 @@ impl Cluster {
     ///
     /// Default: 32KB
     pub fn set_write_bytes_low_water_mark(&mut self, num_bytes: u32) -> Result<&mut Self> {
-        unsafe { cass_cluster_set_write_bytes_low_water_mark(self.0, num_bytes).to_result(self).chain_err(|| "couldn't set write bytes low water mark") }
+        unsafe {
+            cass_cluster_set_write_bytes_low_water_mark(self.0, num_bytes)
+                .to_result(self)
+                .chain_err(|| "couldn't set write bytes low water mark")
+        }
     }
 
     /// Sets the high water mark for the number of requests queued waiting
@@ -309,7 +356,11 @@ impl Cluster {
     ///
     /// Default: 256
     pub fn set_pending_requests_high_water_mark(&mut self, num_requests: u32) -> Result<&mut Self> {
-        unsafe { cass_cluster_set_pending_requests_high_water_mark(self.0, num_requests).to_result(self).chain_err(|| "couldn't set pending requests high water mark") }
+        unsafe {
+            cass_cluster_set_pending_requests_high_water_mark(self.0, num_requests)
+                .to_result(self)
+                .chain_err(|| "couldn't set pending requests high water mark")
+        }
     }
 
     /// Sets the low water mark for the number of requests queued waiting
@@ -320,7 +371,11 @@ impl Cluster {
     ///
     /// Default: 128
     pub fn set_pending_requests_low_water_mark(&mut self, num_requests: u32) -> Result<&mut Self> {
-        unsafe { cass_cluster_set_pending_requests_low_water_mark(self.0, num_requests).to_result(self).chain_err(|| "couldn't set pending requests low water mark") }
+        unsafe {
+            cass_cluster_set_pending_requests_low_water_mark(self.0, num_requests)
+                .to_result(self)
+                .chain_err(|| "couldn't set pending requests low water mark")
+        }
     }
 
     /// Sets the timeout for connecting to a node.
@@ -389,7 +444,9 @@ impl Cluster {
                                                            local_dc.as_ptr(),
                                                            used_hosts_per_remote_dc,
                                                            allow_remote_dcs_for_local_cl)
-                }.to_result(self).chain_err(|| "couldn't set dc aware load balancing policy")
+                }
+                .to_result(self)
+                .chain_err(|| "couldn't set dc aware load balancing policy")
         }
     }
 

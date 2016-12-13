@@ -1,4 +1,4 @@
-use errors::*;
+
 
 use cassandra::data_type::ConstDataType;
 
@@ -65,6 +65,7 @@ use cassandra_sys::cass_value_primary_sub_type;
 #[allow(unused_imports)]
 use cassandra_sys::cass_value_secondary_sub_type;
 use cassandra_sys::cass_value_type;
+use errors::*;
 use std::ffi::CString;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
@@ -426,7 +427,7 @@ impl Value {
         unsafe {
             let mut output = mem::zeroed();
             cass_value_get_bool(self.0, &mut output)
-                .to_result(output== cass_true)
+                .to_result(output == cass_true)
                 .chain_err(|| "")
         }
     }
@@ -435,7 +436,8 @@ impl Value {
     pub fn get_uuid(&self) -> Result<Uuid> {
         unsafe {
             let mut uuid = mem::zeroed();
-            cass_value_get_uuid(self.0, &mut uuid).to_result(Uuid::build(uuid))
+            cass_value_get_uuid(self.0, &mut uuid)
+                .to_result(Uuid::build(uuid))
                 .chain_err(|| "")
         }
     }

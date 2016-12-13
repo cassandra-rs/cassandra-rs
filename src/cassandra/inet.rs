@@ -1,4 +1,4 @@
-use errors::*;
+
 
 use cassandra::error::CassError;
 use cassandra::util::Protected;
@@ -8,6 +8,7 @@ use cassandra_sys::cass_inet_from_string;
 use cassandra_sys::cass_inet_init_v4;
 use cassandra_sys::cass_inet_init_v6;
 use cassandra_sys::cass_inet_string;
+use errors::*;
 use std::default::Default;
 // use std::ffi::NulError;
 use std::ffi::CStr;
@@ -134,7 +135,6 @@ impl FromInet for Ipv6Addr {
 }
 
 impl Inet {
-    
     /// Constructs an inet v4 object.
     pub fn cass_inet_init_v4(address: Ipv4Addr) -> Inet {
         unsafe { Inet(cass_inet_init_v4(address.octets().as_ptr())) }
