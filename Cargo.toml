@@ -11,9 +11,6 @@ authors = ["Tupshin Harper <tupshin@tupshin.com>", "Keith Wansbrough <Keith.Wans
 build = "build.rs"
 publish = false
 
-[lib]
-name = "cassandra"
-
 [dependencies]
 clippy = {version = "0.0", optional = true}
 libc = "0.2"
@@ -30,55 +27,3 @@ error-chain="0.7"
 
 [build-dependencies]
 rusty-cheddar = "0.3"
-
-[[bin]]
-name="async"
-path="src/examples/async.rs"
-
-[[bin]]
-name="basic"
-path="src/examples/basic.rs"
-
-[[bin]]
-name="batch"
-path="src/examples/batch.rs"
-
-[[bin]]
-name="bind_by_name"
-path="src/examples/bind_by_name.rs"
-
-[[bin]]
-name="collections"
-path="src/examples/collections.rs"
-
-# [[bin]]
-# name="logging"
-# path="src/examples/logging.rs"
-
-[[bin]]
-name="maps"
-path="src/examples/maps.rs"
-
-[[bin]]
-name="paging"
-path="src/examples/paging.rs"
-
-[[bin]]
-name="prepared"
-path="src/examples/prepared.rs"
-
-[[bin]]
-name="schema_meta"
-path="src/examples/schema_meta.rs"
-
-[[bin]]
-name="simple"
-path="src/examples/simple.rs"
-
-# [[bin]]
-# name="udt"
-# path="src/examples/udt.rs"
-
-[[bin]]
-name="uuids"
-path="src/examples/uuids.rs"

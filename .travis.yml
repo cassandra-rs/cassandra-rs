@@ -32,7 +32,7 @@ before_script:
   export PATH=$HOME/.local/bin:/usr/local/bin:$PATH
 script:
 - |
-  cargo build &&
+  cargo build --all &&
   cargo test
 after_success:
 - travis-cargo coveralls --no-sudo
