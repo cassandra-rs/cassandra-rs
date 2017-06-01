@@ -8,6 +8,7 @@ use cassandra::iterator::MapIterator;
 use cassandra::iterator::SetIterator;
 use cassandra::util::Protected;
 use cassandra::uuid::Uuid;
+use cassandra_sys::CASS_OK;
 use cassandra_sys::CASS_ERROR_LIB_INVALID_VALUE_TYPE;
 use cassandra_sys::CASS_VALUE_TYPE_ASCII;
 use cassandra_sys::CASS_VALUE_TYPE_BIGINT;
@@ -329,9 +330,10 @@ impl Value {
             cass_value_get_string(self.0, &mut message, &mut (message_length));
 
             let slice = slice::from_raw_parts(message as *const u8, message_length as usize);
-            let err = cass_value_get_string(self.0, &mut message, &mut (message_length));
-            str::from_utf8(slice).chain_err(|| "")
-            // unimplemented!()
+            match cass_value_get_string(self.0, &mut message, &mut (message_length)) {
+                CASS_OK => str::from_utf8(slice).chain_err(|| ""),
+                err => Err(err).chain_err(|| ""),
+            }
         }
     }
 

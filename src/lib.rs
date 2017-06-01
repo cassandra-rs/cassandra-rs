@@ -2,6 +2,8 @@
 #![deny(missing_docs)]
 #![allow(unknown_lints)]
 #![allow(doc_markdown)]
+#![allow(unused_imports)]  // TODO: remove
+#![allow(dead_code)]  // TODO: remove
 // `error_chain!` can recurse deeply
 #![recursion_limit = "1024"]
 
