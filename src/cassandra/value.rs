@@ -72,6 +72,7 @@ use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 
 use std::mem;
+use std::ptr;
 use std::slice;
 use std::str;
 
@@ -324,14 +325,13 @@ impl Value {
     #[allow(cast_possible_truncation)]
     pub fn get_string(&self) -> Result<&str> {
         unsafe {
-            let message: CString = mem::zeroed();
-            let mut message = message.as_ptr();
-            let mut message_length = mem::zeroed();
-            cass_value_get_string(self.0, &mut message, &mut (message_length));
-
-            let slice = slice::from_raw_parts(message as *const u8, message_length as usize);
-            match cass_value_get_string(self.0, &mut message, &mut (message_length)) {
-                CASS_OK => str::from_utf8(slice).chain_err(|| ""),
+            let mut message_ptr = ptr::null();
+            let mut message_length = 0;
+            match cass_value_get_string(self.0, &mut message_ptr, &mut (message_length)) {
+                CASS_OK => {
+                    let slice = slice::from_raw_parts(message_ptr as *const u8, message_length as usize);
+                    str::from_utf8(slice).chain_err(|| "")
+                },
                 err => Err(err).chain_err(|| ""),
             }
         }
