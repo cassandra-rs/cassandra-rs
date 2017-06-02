@@ -27,3 +27,4 @@ error-chain="0.7"
 
 [build-dependencies]
 rusty-cheddar = "0.3"
+
