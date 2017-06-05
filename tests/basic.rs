@@ -73,6 +73,13 @@ fn select_from_basic_prepared(session: &Session, prepared: &PreparedStatement, k
 }
 
 #[test]
+fn test_basic_error() {
+    let session = help::create_test_session();
+    let s = stmt!("CREATE GOBBLEDEGOOK;");
+    session.execute(&s).wait().expect_err("Should cleanly return an error");
+}
+
+#[test]
 fn test_basic_round_trip() {
     let session = help::create_test_session();
     help::create_example_keyspace(&session);

@@ -152,8 +152,10 @@ impl ResultFuture {
             let error_code = cass_future_error_code(self.0);
             match (x, error_code) {
                 (Some(x), _) => Ok(x),
-                (None, CASS_OK) => unimplemented!(),
-                (None, err) => Err(err.to_result("").unwrap().into()),
+                (None, err) => match err.to_result(()) {
+                    Ok(_) => unimplemented!(),
+                    Err(e) => Err(Error::with_chain(e, ErrorKind::CassandraError)),
+                }
             }
         }
     }

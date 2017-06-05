@@ -70,7 +70,15 @@ pub use cassandra::error::*;
 
 /// A still clumsy use of error-chain. needs work
 pub mod errors {
-    error_chain!{}
+    error_chain! {
+        errors {
+            /// Generic Cassandra error.
+            CassandraError {
+                description("Cassandra error")
+                display("Cassandra error")
+            }
+        }
+    }
 }
 
 // #[macro_use]

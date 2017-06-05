@@ -84,11 +84,11 @@ pub struct CassError(_CassError);
 //    msg: String,
 // }
 
-// impl From<_CassError> for CassError {
-//    fn from(err:_CassError) -> CassError {
-//        CassError
-//    }
-// }
+impl From<_CassError> for CassError {
+    fn from(err:_CassError) -> CassError {
+        CassError(err)
+    }
+}
 
 // ///An error signaled by the server and sent to the client over CQL transport
 // pub struct CassServerError(_CassError);
