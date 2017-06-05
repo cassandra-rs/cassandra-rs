@@ -73,6 +73,26 @@ fn select_from_basic_prepared(session: &Session, prepared: &PreparedStatement, k
 }
 
 #[test]
+fn test_simple() {
+    let query = stmt!("SELECT keyspace_name FROM system_schema.keyspaces;");
+    let col_name = "keyspace_name";
+
+    let session = help::create_test_session();
+
+    let result = session.execute(&query).wait().unwrap();
+    println!("{}", result);
+    let mut names = vec![];
+    for row in result.iter() {
+        let col: String = row.get_col_by_name(col_name).unwrap();
+        println!("ks name = {}", col);
+        names.push(col);
+    }
+
+    assert!(names.contains(&"system_schema".to_string()));
+    assert!(names.contains(&"system_auth".to_string()));
+}
+
+#[test]
 fn test_basic_error() {
     let session = help::create_test_session();
     let s = stmt!("CREATE GOBBLEDEGOOK;");
