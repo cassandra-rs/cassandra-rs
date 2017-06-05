@@ -1,6 +1,8 @@
 #[macro_use(stmt)]
 extern crate cassandra;
 
+mod help;
+
 use cassandra::*;
 use errors::*;
 use std::str::FromStr;
@@ -45,24 +47,6 @@ fn select_from_basic(session: &Session, key: &str) -> Result<Option<Basic>> {
     }
 }
 
-/// Get a new session to the test Cassandra instance.
-fn create_test_session() -> Session {
-    let contact_points = ContactPoints::from_str("127.0.0.1").unwrap();
-
-    let mut cluster = Cluster::default();
-    cluster.set_contact_points(contact_points).unwrap();
-    cluster.set_load_balance_round_robin();
-
-    cluster.connect().expect("Failed to connect to Cassandra")
-}
-
-/// Create the keyspace for testing.
-fn create_example_keyspace(session: &Session) {
-    let ks_statement = &stmt!("CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
-                               \'SimpleStrategy\', \'replication_factor\': \'1\' };");
-    session.execute(ks_statement).wait().unwrap();
-}
-
 /// Create the table for basic testing.
 fn create_basic_table(session: &Session) {
     let table_statement = &stmt!("CREATE TABLE IF NOT EXISTS examples.basic (key text, bln boolean, flt \
@@ -73,8 +57,8 @@ fn create_basic_table(session: &Session) {
 
 #[test]
 fn test_basic_round_trip() {
-    let session = create_test_session();
-    create_example_keyspace(&session);
+    let session = help::create_test_session();
+    help::create_example_keyspace(&session);
     create_basic_table(&session);
 
     let input = Basic {
