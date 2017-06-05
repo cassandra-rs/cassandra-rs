@@ -6,8 +6,6 @@ extern crate num;
 
 mod help;
 
-use std::str::FromStr;
-
 
 static NUM_CONCURRENT_REQUESTS: usize = 1000;
 

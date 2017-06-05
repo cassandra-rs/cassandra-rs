@@ -1,5 +1,4 @@
 use cassandra::*;
-use errors::*;
 use std::str::FromStr;
 
 

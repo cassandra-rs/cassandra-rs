@@ -5,7 +5,6 @@ mod help;
 
 use cassandra::*;
 use errors::*;
-use std::str::FromStr;
 
 
 #[derive(Debug,PartialEq,Clone,Copy)]
