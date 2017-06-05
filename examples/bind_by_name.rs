@@ -1,4 +1,3 @@
-#[macro_use(stmt)]
 extern crate cassandra;
 use cassandra::*;
 use std::str::FromStr;

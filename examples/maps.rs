@@ -2,7 +2,6 @@
 extern crate cassandra;
 use cassandra::*;
 use errors::*;
-use std::error::Error;
 use std::str::FromStr;
 
 struct Pair<'a> {
