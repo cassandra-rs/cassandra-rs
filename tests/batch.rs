@@ -13,7 +13,6 @@ struct Pair {
     value: String,
 }
 
-
 fn insert_into_batch_with_prepared(session: &Session, pairs: &Vec<Pair>) -> Result<PreparedStatement> {
     let insert_query = "INSERT INTO examples.pairs (key, value) VALUES (?, ?)";
     let prepared = session.prepare(insert_query).unwrap().wait().unwrap();
@@ -60,6 +59,7 @@ fn test_batch() {
     session.execute(&stmt!(create_table)).wait().unwrap();
     insert_into_batch_with_prepared(&session, &pairs).unwrap();
     let result = retrieve_batch(&session);
+
     let set0: HashSet<_> = pairs.iter().collect();
     let set1: HashSet<_> = result.iter().collect();
     assert_eq!(set0, set1, "expected {:?} but got {:?}", &pairs, &result);
