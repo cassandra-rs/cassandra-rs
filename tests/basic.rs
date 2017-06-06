@@ -20,8 +20,9 @@ struct Basic {
 fn create_basic_table(session: &Session) {
     let table_statement = &stmt!("CREATE TABLE IF NOT EXISTS examples.basic (key text, bln boolean, flt \
                                   float, dbl double, i32 int, i64 bigint, PRIMARY KEY (key));");
-
     session.execute(table_statement).wait().unwrap();
+    let truncate_statement = &stmt!("TRUNCATE examples.basic;");
+    session.execute(truncate_statement).wait().unwrap();
 }
 
 fn insert_into_basic(session: &Session, key: &str, basic: &Basic) -> Result<CassResult> {
@@ -149,4 +150,47 @@ fn test_prepared_round_trip() {
     let prepared = session.prepare(SELECT_QUERY).unwrap().wait().expect("prepared");
     select_from_basic_prepared(&session, &prepared, "prepared_test", &mut output).unwrap();
     assert_eq!(input, output, "Input:  {:?}\noutput: {:?}", &input, &output);
+}
+
+#[test]
+fn test_null_retrieval() {
+    let session = help::create_test_session();
+    help::create_example_keyspace(&session);
+    create_basic_table(&session);
+
+    // Insert a partial row.
+    let partial = stmt!("INSERT INTO examples.basic (key, bln, flt) VALUES ('vacant', true, 3.14);");
+    session.execute(&partial).wait().expect("insert");
+
+    // Read the whole row.
+    let query = stmt!("SELECT key, bln, flt, dbl, i32, i64 FROM examples.basic WHERE key = 'vacant';");
+    let result = session.execute(&query).wait().expect("select");
+
+    // Check response is as expected.
+    assert_eq!(1, result.row_count());
+    let row = result.first_row().unwrap();
+
+    let v: String = row.get_col(0).unwrap();
+    assert_eq!(v, "vacant".to_string());
+    assert!(!row.get_column(0).unwrap().is_null());
+
+    let v: bool = row.get_col(1).unwrap();
+    assert_eq!(v, true);
+    assert!(!row.get_column(1).unwrap().is_null());
+
+    let v: f32 = row.get_col(2).unwrap();
+    assert_eq!(v, 3.14f32);
+    assert!(!row.get_column(2).unwrap().is_null());
+
+    let c = row.get_column(3).expect("should be present");
+    c.get_double().expect_err("should be null");
+    assert!(c.is_null());
+
+    let c = row.get_column(4).expect("should be present");
+    c.get_i32().expect_err("should be null");
+    assert!(c.is_null());
+
+    let c = row.get_column(5).expect("should be present");
+    c.get_i64().expect_err("should be null");
+    assert!(c.is_null());
 }

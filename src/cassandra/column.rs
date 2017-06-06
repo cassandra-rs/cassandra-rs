@@ -45,7 +45,7 @@ use cassandra_sys::CassValue as _Value;
 use cassandra_sys::cass_iterator_fields_from_user_type;
 use cassandra_sys::cass_iterator_from_collection;
 use cassandra_sys::cass_iterator_from_map;
-use cassandra_sys::cass_true;
+use cassandra_sys::{cass_true, cass_false};
 use cassandra_sys::cass_value_get_bool;
 
 #[allow(unused_imports)]
@@ -60,6 +60,7 @@ use cassandra_sys::cass_value_get_int8;
 use cassandra_sys::cass_value_get_string;
 use cassandra_sys::cass_value_get_uint32;
 use cassandra_sys::cass_value_get_uuid;
+use cassandra_sys::cass_value_is_null;
 use cassandra_sys::cass_value_type;
 use errors::*;
 use std::fmt;
@@ -331,7 +332,7 @@ impl Column {
         unsafe {
             let mut output = mem::zeroed();
             cass_value_get_bool(self.0, &mut output)
-                .to_result(if output == cass_true { true } else { false })
+                .to_result(output != cass_false)
                 .chain_err(|| "")
         }
     }
@@ -341,6 +342,13 @@ impl Column {
         unsafe {
             let mut output = mem::zeroed();
             cass_value_get_uuid(self.0, &mut output).to_result(Uuid::build(output)).chain_err(|| "")
+        }
+    }
+
+    /// Tests whether the column is null.
+    pub fn is_null(&self) -> bool {
+        unsafe {
+            cass_value_is_null(self.0) != cass_false
         }
     }
 
