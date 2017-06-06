@@ -30,9 +30,12 @@ before_script:
 - |
   pip install 'travis-cargo<0.2' --user &&
   export PATH=$HOME/.local/bin:/usr/local/bin:$PATH
+
+# Tests must be run on a single thread since they share keyspaces and tables.
 script:
 - |
   cargo build --all &&
-  cargo test
+  cargo test -- --test-threads 1
+
 after_success:
 - travis-cargo coveralls --no-sudo
