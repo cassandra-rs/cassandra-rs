@@ -194,3 +194,33 @@ fn test_null_retrieval() {
     c.get_i64().expect_err("should be null");
     assert!(c.is_null());
 }
+
+#[test]
+fn test_null_insertion() {
+    let session = help::create_test_session();
+    help::create_example_keyspace(&session);
+    create_basic_table(&session);
+
+    // Insert some explicit nulls.
+    let mut s = stmt!("INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, ?);");
+    s.bind(0, "shrdlu").unwrap();
+    s.bind(1, false).unwrap();
+    s.bind_null(2).unwrap();
+    s.bind(3, 2.72f64).unwrap();
+    // deliberately omit 4 - this should be equivalent to binding null
+    s.bind_null(5).unwrap();
+    session.execute(&s).wait();
+
+    // Read them back.
+    let s = stmt!("SELECT key, bln, flt, dbl, i32, i64 FROM examples.basic WHERE key = 'shrdlu';");
+    let result = session.execute(&s).wait().expect("select");
+    assert_eq!(1, result.row_count());
+    let row = result.first_row().unwrap();
+
+    assert!(!row.get_column(0).unwrap().is_null());
+    assert!(!row.get_column(1).unwrap().is_null());
+    assert!(row.get_column(2).unwrap().is_null());
+    assert!(!row.get_column(3).unwrap().is_null());
+    assert!(row.get_column(4).unwrap().is_null());
+    assert!(row.get_column(5).unwrap().is_null());
+}
