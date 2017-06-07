@@ -166,6 +166,13 @@ impl Protected<*const _CassErrorResult> for CassErrorResult {
     fn build(inner: *const _CassErrorResult) -> Self { CassErrorResult(inner) }
 }
 
+impl CassErrorResult {
+    /// Report as an `Error`.
+    pub fn to_result<T>(&self, t: T) -> Result<T> {
+        unsafe { cass_error_result_code(self.0) }.to_result(t).chain_err(|| "")
+    }
+}
+
 // impl CassErrorResult {
 //    /// Gets error code for the error result. This error code will always
 //    /// have an server error source.

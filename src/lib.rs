@@ -15,6 +15,7 @@ extern crate chrono;
 extern crate time;
 extern crate ip;
 extern crate uuid;
+extern crate futures;
 
 
 pub use cassandra::batch::{Batch, BatchType, CustomPayload};
