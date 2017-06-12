@@ -27,6 +27,7 @@ use std::fmt::{Debug, Display};
 use std::fmt::Formatter;
 use std::mem;
 use std::str;
+use std::cmp::Ordering;
 
 const CASS_UUID_STRING_LENGTH: usize = 37;
 
@@ -104,6 +105,28 @@ impl str::FromStr for Uuid {
                 }
             }
         }
+    }
+}
+
+impl PartialEq for Uuid {
+    fn eq(&self, other: &Uuid) -> bool {
+        self.0.time_and_version == other.0.time_and_version &&
+            self.0.clock_seq_and_node == other.0.clock_seq_and_node
+    }
+}
+
+impl Eq for Uuid {}
+
+impl Ord for Uuid {
+    fn cmp(&self, other: &Uuid) -> Ordering {
+        self.0.time_and_version.cmp(&other.0.time_and_version)
+            .then(self.0.clock_seq_and_node.cmp(&other.0.clock_seq_and_node))
+    }
+}
+
+impl PartialOrd for Uuid {
+    fn partial_cmp(&self, other: &Uuid) -> Option<Ordering> {
+       Some(self.cmp(other))
     }
 }
 
