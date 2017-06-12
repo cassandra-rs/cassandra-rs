@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/kw217/cassandra-rs.svg?branch=master)](https://travis-ci.org/kw217/cassandra-rs)
-[![Current Version](http://meritbadge.herokuapp.com/cassandra-kw217)](https://crates.io/crates/cassandra-kw217)
+[![Build Status](https://travis-ci.org/metaswitch/cassandra-rs.svg?branch=master)](https://travis-ci.org/metaswitch/cassandra-rs)
+[![Current Version](http://meritbadge.herokuapp.com/cassandra-metaswitch)](https://crates.io/crates/cassandra-metaswitch)
 [![License: MPL-2.0](https://img.shields.io/crates/l/cassandra.svg)](#License)
 
 # cassandra-rs
@@ -18,7 +18,7 @@ You can use it from cargo with
 
 ```toml
     [dependencies.cassandra]
-    git = "https://github.com/kw217/cassandra-rs"
+    git = "https://github.com/metaswitch/cassandra-rs"
 ```
 
 Or just
