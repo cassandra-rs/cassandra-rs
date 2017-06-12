@@ -1,5 +1,4 @@
 
-#[macro_use]
 use cassandra::future::ConnectFuture;
 use cassandra::policy::retry::RetryPolicy;
 use cassandra::session::Session;

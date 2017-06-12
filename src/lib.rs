@@ -2,6 +2,8 @@
 #![deny(missing_docs)]
 #![allow(unknown_lints)]
 #![allow(doc_markdown)]
+#![allow(unused_imports)]  // TODO: remove
+#![allow(dead_code)]  // TODO: remove
 // `error_chain!` can recurse deeply
 #![recursion_limit = "1024"]
 
@@ -68,7 +70,15 @@ pub use cassandra::error::*;
 
 /// A still clumsy use of error-chain. needs work
 pub mod errors {
-    error_chain!{}
+    error_chain! {
+        errors {
+            /// Generic Cassandra error.
+            CassandraError {
+                description("Cassandra error")
+                display("Cassandra error")
+            }
+        }
+    }
 }
 
 // #[macro_use]
