@@ -12,7 +12,10 @@ Cargo.lock
 /target/
 .project
 /.settings/
+
+# Development tools
 .travis.yml
+.idea
 
 #rustfmt backup files
 *.bk

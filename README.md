@@ -62,7 +62,8 @@ Here's a straightforward example found in simple.rs:
     }
 ```
 
-There's additional examples included with the project in src/examples.
+There are additional examples included with the project in `tests/` and
+in `src/examples`.
 
 
 ## License
@@ -75,3 +76,28 @@ described in [LICENSE].
 
 Please see [CONTRIBUTING.md] for details on how to contribute to this project.
 
+
+## Development
+
+The unit tests assume Cassandra is running on the local host accessible on the
+standard port. The easiest way to achieve this is using Docker and the standard
+Cassandra image, with
+```
+docker pull cassandra
+docker run -d --net=host cassandra
+```
+
+You should run them single-threaded to avoid the dreaded
+`org.apache.cassandra.exceptions.ConfigurationException: Column family ID mismatch`
+error. The tests share a keyspace and tables, so if run in parallel they
+interfere with each other.
+```
+cargo test -- --test-threads 1
+```
+
+Remember to destroy the container when you're done:
+```
+docker ps  # to determine the container ID
+docker stop <container-id>
+docker rm <container-id>
+```
