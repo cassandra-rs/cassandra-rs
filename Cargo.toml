@@ -3,12 +3,13 @@
 description = "A usable Cassandra CQL driver (this replaces the previous cql-ffi package).\nWraps the DataStax c++ native driver and uses cql-bindgen via rust-bindgen.\nWorks with nightly"
 keywords = ["cassandra"]
 license = "Apache-2.0"
-homepage = "https://github.com/tupshin/cassandra-rust"
-repository = "https://github.com/tupshin/cassandra-rust"
+homepage = "https://github.com/kw217/cassandra-rs"
+repository = "https://github.com/kw217/cassandra-rs"
 name = "cassandra"
 version = "0.8.2-pre"
-authors = ["Tupshin Harper <tupshin@tupshin.com>"]
+authors = ["Tupshin Harper <tupshin@tupshin.com>", "Keith Wansbrough <keithw@lochan.org>"]
 build = "build.rs"
+publish = false
 
 [lib]
 name = "cassandra"
