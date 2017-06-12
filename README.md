@@ -63,3 +63,15 @@ Here's a straightforward example found in simple.rs:
 ```
 
 There's additional examples included with the project in src/examples.
+
+
+## License
+
+This code is open source, licensed under the Apache License Version 2.0 as
+described in [LICENSE].
+
+
+## Contributing
+
+Please see [CONTRIBUTING.md] for details on how to contribute to this project.
+
