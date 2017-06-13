@@ -201,9 +201,7 @@ impl Drop for ResultFuture {
     /// This also drops its reference to the FutureTarget, but if
     /// we're waiting to be called back the FutureState::Awaiting holds another reference to
     /// the target, which keeps it alive until the callback fires.
-    fn drop(&mut self) { unsafe { cass_future_free(self.inner) };
-        println!("********* future ------------ - droppingfuture {:p}", self as *mut ResultFuture);
-    }
+    fn drop(&mut self) { unsafe { cass_future_free(self.inner) }; }
 }
 
 impl ResultFuture {
@@ -291,13 +289,11 @@ impl ResultFuture {
 /// Called by the C++ driver when the future is ready,
 /// with a pointer to the `ResultFuture`.
 unsafe extern "C" fn notify_task(_c_future: *mut _Future, data: *mut ::std::os::raw::c_void) {
-    println!("********* future ------------ - awaking future {:p}", data);
     let future_target: &FutureTarget = &*(data as *const FutureTarget);
     // The future is now ready, so transition to the appropriate state.
     let mut lock = future_target.inner.lock().expect("notify_task");
     let state = mem::replace(&mut *lock, FutureState::Ready);
     if let FutureState::Awaiting { ref task, .. } = state {
-        println!("                                      actual {:p}", task);
         task.notify();
     } else {
         /// This can never happen.
@@ -310,7 +306,6 @@ impl futures::Future for ResultFuture {
     type Error = Error;
 
     fn poll(&mut self) -> futures::Poll<Self::Item, Self::Error> {
-        println!("Polling   future {:p}", self);
         let mut install_callback = false;
         let ret = {
             // Perform the following computations under the lock, and then release it.
@@ -334,7 +329,6 @@ impl futures::Future for ResultFuture {
                     //
                     if self.ready() {
                         // Future is ready; wrap success in `Ok(Ready)` or report failure as `Err`.
-                        println!("    Ready future {:p}", self);
                         self.get_completion().map(futures::Async::Ready)
                     } else {
                         // Future is not ready; park this task and arrange to be called back when
@@ -352,13 +346,11 @@ impl futures::Future for ResultFuture {
                     // but be sure to swizzle the new task into place. No need to check for
                     // readiness here; we have to wait for the callback anyway so we might as well
                     // do all the work in one place.
-                    println!("  UnReady future {:p} - swizzling task", self);
                     *task = futures::task::current();
                     Ok(futures::Async::NotReady)
                 },
                 FutureState::Ready => {
                     // Future has been marked ready by callback. Safe to return now.
-                    println!(" Complete future {:p}", self);
                     self.get_completion().map(futures::Async::Ready)
                 }
             }
@@ -369,7 +361,6 @@ impl futures::Future for ResultFuture {
             unsafe {
                 let data =
                     (self.state.as_ref() as *const FutureTarget) as *mut ::std::os::raw::c_void;
-                println!(" NotReady future {:p} - parking future {:p}", self, data);
                 self.set_callback(FutureCallback(Some(notify_task)), data).map(|_| ())
             }
         } else {
