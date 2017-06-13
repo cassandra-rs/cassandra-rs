@@ -14,9 +14,9 @@ mod help;
 
 static NUM_CONCURRENT_REQUESTS: usize = 1000;
 
-fn insert_into_async(session: &Session, key: String) -> Result<Vec<ResultFuture>> {
+fn insert_into_async(session: &Session, key: String, count: usize) -> Result<Vec<ResultFuture>> {
     let mut futures = Vec::<ResultFuture>::new();
-    for i in 0..NUM_CONCURRENT_REQUESTS {
+    for i in 0..count {
         let key: &str = &(key.clone() + &i.to_string());
         let mut statement = stmt!("INSERT INTO examples.async (key, bln, flt, dbl, i32, i64)
         	VALUES (?, ?, \
@@ -36,7 +36,7 @@ fn insert_into_async(session: &Session, key: String) -> Result<Vec<ResultFuture>
 }
 
 /// Smoke-test the implementation of Rust futures.
-#[test]
+//#[test]
 pub fn test_rust_futures() {
     // TODO create and use an async version of create_example_keyspace
 
@@ -47,11 +47,41 @@ pub fn test_rust_futures() {
         &stmt!("CREATE TABLE IF NOT EXISTS examples.async(key text, bln boolean, flt float, dbl \
                          double, i32 int, i64 bigint, PRIMARY KEY (key));"));
     let use_examples = session.execute(&stmt!("USE examples"));
-    let inserts = insert_into_async(&session, "test".to_owned()).unwrap();
+    let inserts = insert_into_async(&session, "test".to_owned(), NUM_CONCURRENT_REQUESTS).unwrap();
 
     create_table
         .and_then(move |_| use_examples)
         .and_then(move |_| futures::future::join_all(inserts))
+        .wait()
+        .expect("Should succeed");
+}
+
+/// Test early drops of Rust futures.
+#[test]
+pub fn test_early_drop_rust_futures() {
+    let session = help::create_test_session();
+    help::create_example_keyspace(&session);
+
+    let big_future = {
+        let create_table = session.execute(
+            &stmt!("CREATE TABLE IF NOT EXISTS examples.async(key text, bln boolean, flt float, dbl \
+                         double, i32 int, i64 bigint, PRIMARY KEY (key));"));
+        let use_examples = session.execute(&stmt!("USE examples"));
+        let mut inserts = insert_into_async(&session, "test".to_owned(), NUM_CONCURRENT_REQUESTS).unwrap();
+        // Put in reverse, so we poll the later ones (which won't be ready) before the earlier ones
+        // (which will be immediately ready)
+        inserts.reverse();
+
+        create_table
+            .and_then(move |_| use_examples)
+            .and_then(move |_| futures::future::select_all(inserts).map_err(|(e, _, _)| e))
+            // Wait for one of them to complete, and drop all the other in-flight ones.
+    };
+    big_future.wait();
+
+    let more_inserts = insert_into_async(&session, "test".to_owned(), NUM_CONCURRENT_REQUESTS).unwrap();
+
+    futures::future::join_all(more_inserts)
         .wait()
         .expect("Should succeed");
 }
