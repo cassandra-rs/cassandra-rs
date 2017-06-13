@@ -36,10 +36,8 @@ fn insert_into_async(session: &Session, key: String, count: usize) -> Result<Vec
 }
 
 /// Smoke-test the implementation of Rust futures.
-//#[test]
+#[test]
 pub fn test_rust_futures() {
-    // TODO create and use an async version of create_example_keyspace
-
     let session = help::create_test_session();
     help::create_example_keyspace(&session);
 
@@ -56,7 +54,8 @@ pub fn test_rust_futures() {
         .expect("Should succeed");
 }
 
-/// Test early drops of Rust futures.
+/// Test early drops of Rust futures (a buggy implementation would lead to SIGSEGV, SIGILL,
+/// SIGABRT and friends).
 #[test]
 pub fn test_early_drop_rust_futures() {
     let session = help::create_test_session();
@@ -77,7 +76,7 @@ pub fn test_early_drop_rust_futures() {
             .and_then(move |_| futures::future::select_all(inserts).map_err(|(e, _, _)| e))
             // Wait for one of them to complete, and drop all the other in-flight ones.
     };
-    big_future.wait();
+    big_future.wait().expect("Should succeed");
 
     let more_inserts = insert_into_async(&session, "test".to_owned(), NUM_CONCURRENT_REQUESTS).unwrap();
 

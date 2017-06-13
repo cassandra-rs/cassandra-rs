@@ -169,18 +169,20 @@ pub struct ResultFuture {
 /// typically freed after completion, that means we must only complete after we receive the
 /// callback.
 ///
-/// TODO However there is a remaining concern - if the caller abandons the future it may be freed
-/// before the callback arrives.
+/// The FutureTarget is held by a ResultFuture, and (in the FutureState::Awaiting state) by
+/// a C++ Cassandra driver callback. The latter pointer is represented by one inside that state,
+/// so that it is not freed early.
 #[derive(Debug)]
 struct FutureTarget {
     inner: Mutex<FutureState>,
 }
 
-/// The state of the Cassandra future.
+/// The state of the corresponding ResultFuture.
 ///
+/// This is an FSM.
 #[derive(Debug)]
 enum FutureState {
-    /// The future has been created but no callback has yet been installed.
+    /// Initial state: the future has been created but no callback has yet been installed.
     Created,
 
     /// The future has been created and a callback has been installed, invoking this task.
@@ -194,6 +196,11 @@ enum FutureState {
 }
 
 impl Drop for ResultFuture {
+    /// Drop this ResultFuture.
+    ///
+    /// This also drops its reference to the FutureTarget, but if
+    /// we're waiting to be called back the FutureState::Awaiting holds another reference to
+    /// the target, which keeps it alive until the callback fires.
     fn drop(&mut self) { unsafe { cass_future_free(self.inner) };
         println!("********* future ------------ - droppingfuture {:p}", self as *mut ResultFuture);
     }
@@ -304,45 +311,70 @@ impl futures::Future for ResultFuture {
 
     fn poll(&mut self) -> futures::Poll<Self::Item, Self::Error> {
         println!("Polling   future {:p}", self);
-        let mut lock = self.state.as_ref().inner.lock().expect("poll");
-        match *lock {
-            ref mut state @ FutureState::Created => {
-                // No task yet - schedule a callback. But as an optimization, if it's ready
-                // already, complete now without scheduling a callback.
-                if self.ready() {
-                    // Future is ready; wrap success in `Ok(Ready)` or report failure as `Err`.
-                    println!("    Ready future {:p}", self);
+        let mut install_callback = false;
+        let ret = {
+            // Perform the following computations under the lock, and then release it.
+            //
+            // We must take care to avoid deadlock. The lock hierarchy is: take the Rust lock
+            // (self.state.inner) first, then take the C++ lock (internal to the C++
+            // implementation of futures).
+            //
+            // Poll is always called by the Rust event loop, never from within C++ code or
+            // from notify_task. `self.ready()` and `self.get_completion()` take an internal
+            // mutex within C++ code, but they never call back to Rust and so cannot violate
+            // the lock hierarchy. However `self.set_callback()` calls into Rust code
+            // (`notify_task`) if the future is already complete, so we must avoid holding the
+            // Rust lock while calling it. We achieve this by using a boolean flag to request
+            // the callback be set outside the lock region.
+            let mut lock = self.state.as_ref().inner.lock().expect("poll");
+            match *lock {
+                ref mut state @ FutureState::Created => {
+                    // No task yet - schedule a callback. But as an optimization, if it's ready
+                    // already, complete now without scheduling a callback.
+                    //
+                    if self.ready() {
+                        // Future is ready; wrap success in `Ok(Ready)` or report failure as `Err`.
+                        println!("    Ready future {:p}", self);
+                        self.get_completion().map(futures::Async::Ready)
+                    } else {
+                        // Future is not ready; park this task and arrange to be called back when
+                        // it is.
+                        *state = FutureState::Awaiting {
+                            task: futures::task::current(),
+                            keep_alive: self.state.clone(),
+                        };
+                        install_callback = true;
+                        Ok(futures::Async::NotReady)
+                    }
+                },
+                FutureState::Awaiting { ref mut task, .. } => {
+                    // Callback already scheduled; don't set it again (C doesn't support it anyway),
+                    // but be sure to swizzle the new task into place. No need to check for
+                    // readiness here; we have to wait for the callback anyway so we might as well
+                    // do all the work in one place.
+                    println!("  UnReady future {:p} - swizzling task", self);
+                    *task = futures::task::current();
+                    Ok(futures::Async::NotReady)
+                },
+                FutureState::Ready => {
+                    // Future has been marked ready by callback. Safe to return now.
+                    println!(" Complete future {:p}", self);
                     self.get_completion().map(futures::Async::Ready)
-                } else {
-                    // Future is not ready; park this task and arrange to be called back when it is.
-                    // If callback cannot be sent, report immediate `Err`.
-                    // The C code will call the callback immediately if the future is ready, so we
-                    // don't need to worry about the race between `self.ready()` and
-                    // `self.set_callback`.
-                    *state = FutureState::Awaiting { task: futures::task::current(), keep_alive: self.state.clone() };
-                    unsafe {
-                        let data = (self.state.as_ref() as *const FutureTarget) as *mut ::std::os::raw::c_void;
-                        println!(" NotReady future {:p} - parking future {:p}", self, data);
-                        self.set_callback(FutureCallback(Some(notify_task)), data)
-                    }.map(|_| futures::Async::NotReady)
                 }
-            },
-            FutureState::Awaiting { ref mut task, .. } => {
-                // Callback already scheduled; don't set it again (C doesn't support it anyway),
-                // but be sure to swizzle the new task into place.
-                // Do NOT check self.ready(); if there is a task in place, completion must come via
-                // the callback or else we risk dropping the future (and hence the task) before the
-                // callback arrives.
-                println!("  UnReady future {:p} - swizzling task", self);
-                *task = futures::task::current();
-                Ok(futures::Async::NotReady)
-            },
-            FutureState::Ready => {
-                // Future has been marked ready by callback. Safe to return now.
-                println!(" Complete future {:p}", self);
-                self.get_completion().map(futures::Async::Ready)
             }
-        }
+        };
+
+        if install_callback {
+            // Install the callback. If callback cannot be sent, report immediate `Err`.
+            unsafe {
+                let data =
+                    (self.state.as_ref() as *const FutureTarget) as *mut ::std::os::raw::c_void;
+                println!(" NotReady future {:p} - parking future {:p}", self, data);
+                self.set_callback(FutureCallback(Some(notify_task)), data).map(|_| ())
+            }
+        } else {
+            Ok(())
+        }.and_then(move |_| ret)
     }
 }
 
