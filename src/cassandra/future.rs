@@ -149,10 +149,10 @@ impl Future {
 #[derive(Debug)]
 pub struct ResultFuture {
     inner: *mut _Future,
-    state: FutureState,
+    state: FutureTarget,
 }
 
-/// The state of the Cassandra future.
+/// The target of a C++ Cassandra driver callback.
 ///
 /// The C++ Cassandra driver calls the callback in the following two scenarios only:
 ///
@@ -168,8 +168,15 @@ pub struct ResultFuture {
 /// typically freed after completion, that means we must only complete after we receive the
 /// callback.
 ///
-/// However there is a remaining concern - if the caller abandons the future it may be freed
+/// TODO However there is a remaining concern - if the caller abandons the future it may be freed
 /// before the callback arrives.
+#[derive(Debug)]
+struct FutureTarget {
+    inner: FutureState,
+}
+
+/// The state of the Cassandra future.
+///
 #[derive(Debug)]
 enum FutureState {
     /// The future has been created but no callback has yet been installed.
@@ -272,12 +279,12 @@ impl ResultFuture {
 /// Callback which wakes the task waiting on this future.
 /// Called by the C++ driver when the future is ready,
 /// with a pointer to the `ResultFuture`.
-unsafe extern "C" fn notify_task(_c_future: *mut _Future, rust_future: *mut ::std::os::raw::c_void) {
-    println!("********* future ------------ - awaking future {:p}", rust_future);
-    let rust_future: &mut ResultFuture = &mut *(rust_future as *mut ResultFuture);
+unsafe extern "C" fn notify_task(_c_future: *mut _Future, data: *mut ::std::os::raw::c_void) {
+    println!("********* future ------------ - awaking future {:p}", data);
+    let future_target: &mut FutureTarget = &mut *(data as *mut FutureTarget);
     // The future is now ready, so transition to the appropriate state.
     // TODO Does this need a memory barrier to ensure we see the Awaiting state?
-    let state = mem::replace(&mut rust_future.state, FutureState::Ready);
+    let state = mem::replace(&mut future_target.inner, FutureState::Ready);
     if let FutureState::Awaiting(ref task) = state {
         println!("                                      actual {:p}", task);
         task.notify();
@@ -293,7 +300,7 @@ impl futures::Future for ResultFuture {
 
     fn poll(&mut self) -> futures::Poll<Self::Item, Self::Error> {
         println!("Polling   future {:p}", self);
-        match self.state {
+        match self.state.inner {
             FutureState::Created => {
                 // No task yet - schedule a callback. But as an optimization, if it's ready
                 // already, complete now without scheduling a callback.
@@ -307,11 +314,11 @@ impl futures::Future for ResultFuture {
                     // The C code will call the callback immediately if the future is ready, so we
                     // don't need to worry about the race between `self.ready()` and
                     // `self.set_callback`.
-                    self.state = FutureState::Awaiting(futures::task::current());
+                    self.state.inner = FutureState::Awaiting(futures::task::current());
                     unsafe {
-                        let rust_future = (self as *mut ResultFuture) as *mut ::std::os::raw::c_void;
-                        println!(" NotReady future {:p} - parking future {:p}", self, rust_future);
-                        self.set_callback(FutureCallback(Some(notify_task)), rust_future)
+                        let data = (&mut self.state as *mut FutureTarget) as *mut ::std::os::raw::c_void;
+                        println!(" NotReady future {:p} - parking future {:p}", self, data);
+                        self.set_callback(FutureCallback(Some(notify_task)), data)
                     }.map(|_| futures::Async::NotReady)
                 }
             },
@@ -322,7 +329,7 @@ impl futures::Future for ResultFuture {
                 // the callback or else we risk dropping the future (and hence the task) before the
                 // callback arrives.
                 println!("  UnReady future {:p} - swizzling task", self);
-                self.state = FutureState::Awaiting(futures::task::current());
+                self.state.inner = FutureState::Awaiting(futures::task::current());
                 Ok(futures::Async::NotReady)
             },
             FutureState::Ready => {
@@ -436,7 +443,7 @@ impl Protected<*mut _Future> for PreparedFuture {
 
 impl Protected<*mut _Future> for ResultFuture {
     fn inner(&self) -> *mut _Future { self.inner }
-    fn build(inner: *mut _Future) -> Self { ResultFuture { inner, state: FutureState::Created } }
+    fn build(inner: *mut _Future) -> Self { ResultFuture { inner, state: FutureTarget { inner: FutureState::Created } } }
 }
 
 impl Protected<*mut _Future> for SessionFuture {
