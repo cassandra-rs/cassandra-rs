@@ -29,6 +29,7 @@ use std::os::raw;
 use std::slice;
 use std::str;
 use std::result;
+use std::sync::{Arc, Mutex};
 use futures;
 
 /// A CQL Future representing the status of any asynchronous calls to Cassandra
@@ -149,7 +150,7 @@ impl Future {
 #[derive(Debug)]
 pub struct ResultFuture {
     inner: *mut _Future,
-    state: FutureTarget,
+    state: Arc<FutureTarget>,
 }
 
 /// The target of a C++ Cassandra driver callback.
@@ -172,7 +173,7 @@ pub struct ResultFuture {
 /// before the callback arrives.
 #[derive(Debug)]
 struct FutureTarget {
-    inner: FutureState,
+    inner: Mutex<FutureState>,
 }
 
 /// The state of the Cassandra future.
@@ -183,7 +184,7 @@ enum FutureState {
     Created,
 
     /// The future has been created and a callback has been installed, invoking this task.
-    Awaiting(futures::task::Task),
+    Awaiting { task: futures::task::Task },
 
     /// The future has called back to indicate completion.
     Ready,
@@ -197,12 +198,12 @@ impl Drop for ResultFuture {
 
 impl ResultFuture {
     /// Sets a callback that is called when a future is set
-    unsafe fn set_callback(&mut self, callback: FutureCallback, data: *mut raw::c_void) -> Result<&mut Self> {
+    unsafe fn set_callback(&self, callback: FutureCallback, data: *mut raw::c_void) -> Result<&Self> {
         cass_future_set_callback(self.inner, callback.0, data).to_result(self).chain_err(|| "while setting callback")
     }
 
     /// Gets the set status of the future.
-    fn ready(&mut self) -> bool { unsafe { cass_future_ready(self.inner) == cass_true } }
+    fn ready(&self) -> bool { unsafe { cass_future_ready(self.inner) == cass_true } }
 
     /// Blocks until the future returns or times out
     pub fn wait(&mut self) -> Result<CassResult> {
@@ -281,11 +282,12 @@ impl ResultFuture {
 /// with a pointer to the `ResultFuture`.
 unsafe extern "C" fn notify_task(_c_future: *mut _Future, data: *mut ::std::os::raw::c_void) {
     println!("********* future ------------ - awaking future {:p}", data);
-    let future_target: &mut FutureTarget = &mut *(data as *mut FutureTarget);
+    let future_target: &FutureTarget = &*(data as *const FutureTarget);
     // The future is now ready, so transition to the appropriate state.
     // TODO Does this need a memory barrier to ensure we see the Awaiting state?
-    let state = mem::replace(&mut future_target.inner, FutureState::Ready);
-    if let FutureState::Awaiting(ref task) = state {
+    let mut lock = future_target.inner.lock().expect("notify_task");
+    let state = mem::replace(&mut *lock, FutureState::Ready);
+    if let FutureState::Awaiting { ref task, .. } = state {
         println!("                                      actual {:p}", task);
         task.notify();
     } else {
@@ -300,8 +302,9 @@ impl futures::Future for ResultFuture {
 
     fn poll(&mut self) -> futures::Poll<Self::Item, Self::Error> {
         println!("Polling   future {:p}", self);
-        match self.state.inner {
-            FutureState::Created => {
+        let mut lock = self.state.as_ref().inner.lock().expect("poll");
+        match *lock {
+            ref mut state @ FutureState::Created => {
                 // No task yet - schedule a callback. But as an optimization, if it's ready
                 // already, complete now without scheduling a callback.
                 if self.ready() {
@@ -314,22 +317,22 @@ impl futures::Future for ResultFuture {
                     // The C code will call the callback immediately if the future is ready, so we
                     // don't need to worry about the race between `self.ready()` and
                     // `self.set_callback`.
-                    self.state.inner = FutureState::Awaiting(futures::task::current());
+                    *state = FutureState::Awaiting { task: futures::task::current() };
                     unsafe {
-                        let data = (&mut self.state as *mut FutureTarget) as *mut ::std::os::raw::c_void;
+                        let data = (self.state.as_ref() as *const FutureTarget) as *mut ::std::os::raw::c_void;
                         println!(" NotReady future {:p} - parking future {:p}", self, data);
                         self.set_callback(FutureCallback(Some(notify_task)), data)
                     }.map(|_| futures::Async::NotReady)
                 }
             },
-            FutureState::Awaiting(_) => {
+            FutureState::Awaiting { ref mut task, .. } => {
                 // Callback already scheduled; don't set it again (C doesn't support it anyway),
                 // but be sure to swizzle the new task into place.
                 // Do NOT check self.ready(); if there is a task in place, completion must come via
                 // the callback or else we risk dropping the future (and hence the task) before the
                 // callback arrives.
                 println!("  UnReady future {:p} - swizzling task", self);
-                self.state.inner = FutureState::Awaiting(futures::task::current());
+                *task = futures::task::current();
                 Ok(futures::Async::NotReady)
             },
             FutureState::Ready => {
@@ -443,7 +446,7 @@ impl Protected<*mut _Future> for PreparedFuture {
 
 impl Protected<*mut _Future> for ResultFuture {
     fn inner(&self) -> *mut _Future { self.inner }
-    fn build(inner: *mut _Future) -> Self { ResultFuture { inner, state: FutureTarget { inner: FutureState::Created } } }
+    fn build(inner: *mut _Future) -> Self { ResultFuture { inner, state: Arc::new(FutureTarget { inner: Mutex::new(FutureState::Created) }) } }
 }
 
 impl Protected<*mut _Future> for SessionFuture {
