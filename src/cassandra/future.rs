@@ -184,7 +184,10 @@ enum FutureState {
     Created,
 
     /// The future has been created and a callback has been installed, invoking this task.
-    Awaiting { task: futures::task::Task },
+    /// `keep_alive` is an Arc to the enclosing target (i.e., a cycle) which stands for the
+    /// pointer held by the C++ Cassandra driver future as the callback target. This prevents
+    /// it from being freed early.
+    Awaiting { task: futures::task::Task, keep_alive: Arc<FutureTarget> },
 
     /// The future has called back to indicate completion.
     Ready,
@@ -284,7 +287,6 @@ unsafe extern "C" fn notify_task(_c_future: *mut _Future, data: *mut ::std::os::
     println!("********* future ------------ - awaking future {:p}", data);
     let future_target: &FutureTarget = &*(data as *const FutureTarget);
     // The future is now ready, so transition to the appropriate state.
-    // TODO Does this need a memory barrier to ensure we see the Awaiting state?
     let mut lock = future_target.inner.lock().expect("notify_task");
     let state = mem::replace(&mut *lock, FutureState::Ready);
     if let FutureState::Awaiting { ref task, .. } = state {
@@ -317,7 +319,7 @@ impl futures::Future for ResultFuture {
                     // The C code will call the callback immediately if the future is ready, so we
                     // don't need to worry about the race between `self.ready()` and
                     // `self.set_callback`.
-                    *state = FutureState::Awaiting { task: futures::task::current() };
+                    *state = FutureState::Awaiting { task: futures::task::current(), keep_alive: self.state.clone() };
                     unsafe {
                         let data = (self.state.as_ref() as *const FutureTarget) as *mut ::std::os::raw::c_void;
                         println!(" NotReady future {:p} - parking future {:p}", self, data);
