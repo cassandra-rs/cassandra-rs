@@ -69,12 +69,13 @@ in `src/examples`.
 ## License
 
 This code is open source, licensed under the Apache License Version 2.0 as
-described in [LICENSE].
+described in [`LICENSE`](LICENSE).
 
 
 ## Contributing
 
-Please see [CONTRIBUTING.md] for details on how to contribute to this project.
+Please see [`CONTRIBUTING.md`](CONTRIBUTING.md) for details on how to contribute 
+to this project.
 
 
 ## Development
