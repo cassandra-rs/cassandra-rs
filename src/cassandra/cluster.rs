@@ -31,7 +31,6 @@ use cassandra_sys::cass_cluster_set_port;
 use cassandra_sys::cass_cluster_set_protocol_version;
 use cassandra_sys::cass_cluster_set_queue_size_event;
 use cassandra_sys::cass_cluster_set_queue_size_io;
-use cassandra_sys::cass_cluster_set_queue_size_log;
 use cassandra_sys::cass_cluster_set_reconnect_wait_time;
 use cassandra_sys::cass_cluster_set_request_timeout;
 use cassandra_sys::cass_cluster_set_retry_policy;
@@ -222,19 +221,6 @@ impl Cluster {
             cass_cluster_set_queue_size_event(self.0, queue_size)
                 .to_result(self)
                 .chain_err(|| "couldn't set event queue size")
-        }
-    }
-
-    /// Sets the size of the fixed size queue that stores log messages.
-    ///
-    ///
-    /// Default: 8192
-    ///
-    pub fn set_queue_size_log(&mut self, queue_size: u32) -> Result<&mut Self> {
-        unsafe {
-            cass_cluster_set_queue_size_log(self.0, queue_size)
-                .to_result(self)
-                .chain_err(|| "couldn't set log queue size")
         }
     }
 
