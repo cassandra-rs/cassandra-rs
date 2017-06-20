@@ -85,7 +85,7 @@ standard port. The easiest way to achieve this is using Docker and the standard
 Cassandra image, with
 ```
 docker pull cassandra
-docker run -d --net=host cassandra
+docker run -d --net=host --name=cassandra cassandra
 ```
 
 You should run them single-threaded to avoid the dreaded
@@ -98,7 +98,6 @@ cargo test -- --test-threads 1
 
 Remember to destroy the container when you're done:
 ```
-docker ps  # to determine the container ID
-docker stop <container-id>
-docker rm <container-id>
+docker stop cassandra
+docker rm cassandra
 ```

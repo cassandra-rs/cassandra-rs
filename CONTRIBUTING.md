@@ -5,8 +5,8 @@ When opening issues please contain a description of the issue, plus example
 code which exhibits the issue.
 
 ## Code Contribution
-If you wish to contribute code to the UML parser library, you are welcome to do
-so using a github pull request, however you will need to sign each commit,
+If you wish to contribute code to this project, you are welcome to do so
+using a github pull request, however you will need to sign each commit,
 see details below.
 
 ### Sign your work
