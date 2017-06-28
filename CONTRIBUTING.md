@@ -63,3 +63,16 @@ Use your real name (sorry, no pseudonyms or anonymous contributions.)
 
 If you set your `user.name` and `user.email` git configs, you can sign your
 commit automatically with `git commit -s`.
+
+### Take care with the base revision
+
+This repository is a fork of another repository. This means that whenever
+you create a pull request, it defaults to using that other repository as
+base.
+
+**Please make sure you change the base to this repository's master branch
+before submitting the pull request.**
+
+If you make a mistake, unfortunately it is not possible to delete an 
+erroneous pull request from GitHub. However you can change the name 
+of the pull request to something like "(please ignore)" and close it.

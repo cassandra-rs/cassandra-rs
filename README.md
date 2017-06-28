@@ -4,32 +4,40 @@
 
 # cassandra-rs
 
-This is a maintained rust project that
-exposes the cpp driver at https://github.com/datastax/cpp-driver/
+This is a maintained Rust project that
+exposes the DataStax cpp driver at https://github.com/datastax/cpp-driver/
 in a somewhat-sane crate.
 
 For the wrapper to work, you must first have installed the datastax-cpp driver.
-
-Follow the steps on the cpp driver [docs](https://github.com/datastax/cpp-driver/blob/15215e170810433511c48c304b9e9ca51ff32b2f/topics/building/README.md)  to do so.
+Follow the steps in the
+[cpp driver docs](https://github.com/datastax/cpp-driver/tree/master/topics#installation)
+to do so. Pre-built ackages are available for most platforms.
 
 Make sure that the driver (specifically `libcassandra_static.a` and `libcassandra.so`) are in your `/usr/local/lib64/` directory
 
 You can use it from cargo with
 
 ```toml
-    [dependencies.cassandra]
-    git = "https://github.com/metaswitch/cassandra-rs"
-```
-
-Or just
-
-```toml
     [dependencies]
-    cassandra="*"
+    cassandra = { git = "https://github.com/metaswitch/cassandra-rs" }
 ```
+
+## Documentation
+
+You can view the API documentation by running `cargo doc` and visiting
+`target/doc` in your browser.
+
+The [Cassandra Query Language (CQL) documentation](http://docs.datastax.com/en/cql/3.3/cql/cql_reference/cqlCommandsTOC.html)
+is likely to be useful.
+
+Since this crate provides a relatively
+thin wrapper around the DataStax driver, you may also find the DataStax
+[documentation](http://datastax.github.io/cpp-driver/topics/) and
+[API docs](http://datastax.github.io/cpp-driver/api/) useful.
+
+## Example
 
 Here's a straightforward example found in simple.rs:
-
 
 ```rust
     #[macro_use(stmt)]
@@ -79,6 +87,9 @@ to this project.
 
 
 ## Development
+
+This crate is regularly built by Travis; to see details of the most recent builds
+click on the "build" badge at the top of this page.
 
 The unit tests assume Cassandra is running on the local host accessible on the
 standard port. The easiest way to achieve this is using Docker and the standard
