@@ -117,3 +117,7 @@ Remember to destroy the container when you're done:
 docker stop cassandra
 docker rm cassandra
 ```
+
+## History
+
+This project was forked from [cassandra](https://github.com/tupshin/cassandra-rs), which was no longer being maintained.
