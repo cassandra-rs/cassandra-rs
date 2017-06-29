@@ -1,5 +1,3 @@
-extern crate cheddar;
-
 fn main() {
     if let Some(datastax_dir) = option_env!("CASSANDRA_SYS_LIB_PATH") {
         for p in datastax_dir.split(";") {

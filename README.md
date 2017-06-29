@@ -12,7 +12,7 @@ It is a wrapper around the raw driver binding crate [cassandra-cpp-sys](https://
 For the wrapper to work, you must first have installed the datastax-cpp driver.
 Follow the steps in the
 [cpp driver docs](https://github.com/datastax/cpp-driver/tree/master/topics#installation)
-to do so. Pre-built ackages are available for most platforms.
+to do so. Pre-built packages are available for most platforms.
 
 Make sure that the driver (specifically `libcassandra_static.a` and `libcassandra.so`) are in your `/usr/local/lib64/` directory
 
