@@ -1,6 +1,6 @@
 #[macro_use(stmt)]
-extern crate cassandra;
-use cassandra::*;
+extern crate cassandra_cpp;
+use cassandra_cpp::*;
 use errors::*;
 extern crate num;
 

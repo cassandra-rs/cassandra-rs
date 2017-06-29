@@ -1,23 +1,27 @@
 [package]
-
-description = "A usable Cassandra CQL driver (this replaces the previous cql-ffi package).\nWraps the DataStax c++ native driver and uses cql-bindgen via rust-bindgen.\nWorks with nightly"
-keywords = ["cassandra"]
+description = "A Cassandra CQL driver, built on top of the DataStax C++ driver for performance and functionality."
+documentation = "https://docs.rs/cassandra-cpp"
+# no homepage yet
+repository = "https://github.com/Metaswitch/cassandra-rs"
+readme = "README.md"
+keywords = [ "Cassandra", "binding", "CQL", "client", "database" ]
+categories = [ "api-bindings", "database", "external-ffi-bindings", "asynchronous" ]
 license = "Apache-2.0"
-homepage = "https://github.com/metaswitch/cassandra-rs"
-repository = "https://github.com/metaswitch/cassandra-rs"
-name = "cassandra"
-version = "0.8.2-pre"
+name = "cassandra-cpp"
+version = "0.8.2"
 authors = ["Tupshin Harper <tupshin@tupshin.com>", "Keith Wansbrough <Keith.Wansbrough@metaswitch.com>"]
 build = "build.rs"
 publish = false
+
+[badges]
+travis-ci = { repository = "Metaswitch/cassandra-rs" }
 
 [dependencies]
 clippy = {version = "0.0", optional = true}
 libc = "0.2"
 num = "0.1"
 log = "0.3"
-# TODO change to depend on v0.8.x once cassandra-sys moves into crates.io.
-cassandra-sys = { git = "https://github.com/Metaswitch/cassandra-sys-rs.git", branch = "master" }
+cassandra-cpp-sys = "0.8"
 decimal = "0.2"
 chrono = "0.2"
 ip = "1.0"
@@ -25,7 +29,3 @@ time = "0.1"
 clap = "1"
 uuid = "0.1"
 error-chain="0.10"
-
-[build-dependencies]
-rusty-cheddar = "0.3"
-

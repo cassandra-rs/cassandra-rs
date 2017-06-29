@@ -101,7 +101,7 @@ impl FromStr for ContactPoints {
 /// # Examples
 /// ```
 /// use std::str::FromStr;
-/// use cassandra::{Cluster,ContactPoints};
+/// use cassandra_cpp::{Cluster,ContactPoints};
 /// let mut cluster = Cluster::default();
 /// cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
 /// let mut session = cluster.connect().unwrap();

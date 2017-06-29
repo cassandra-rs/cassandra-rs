@@ -1,17 +1,18 @@
 [![Build Status](https://travis-ci.org/Metaswitch/cassandra-rs.svg?branch=master)](https://travis-ci.org/Metaswitch/cassandra-rs)
-[![Current Version](https://img.shields.io/crates/v/cassandra-metaswitch.svg)](https://crates.io/crates/cassandra-metaswitch)
+[![Current Version](https://img.shields.io/crates/v/cassandra-cpp.svg)](https://crates.io/crates/cassandra-cpp)
 [![License](https://img.shields.io/github/license/Metaswitch/cassandra-rs.svg)](#License)
 
-# cassandra-rs
+# cassandra-cpp
 
 This is a maintained Rust project that
 exposes the DataStax cpp driver at https://github.com/datastax/cpp-driver/
 in a somewhat-sane crate.
 
+It is a wrapper around the raw driver binding crate [cassandra-cpp-sys](https://github.com/Metaswitch/cassandra-sys-rs).
 For the wrapper to work, you must first have installed the datastax-cpp driver.
 Follow the steps in the
 [cpp driver docs](https://github.com/datastax/cpp-driver/tree/master/topics#installation)
-to do so. Pre-built ackages are available for most platforms.
+to do so. Pre-built packages are available for most platforms.
 
 Make sure that the driver (specifically `libcassandra_static.a` and `libcassandra.so`) are in your `/usr/local/lib64/` directory
 
@@ -19,8 +20,9 @@ You can use it from cargo with
 
 ```toml
     [dependencies]
-    cassandra = { git = "https://github.com/metaswitch/cassandra-rs" }
+    cassandra-cpp = "0.8"
 ```
+
 
 ## Documentation
 
@@ -90,6 +92,9 @@ to this project.
 
 This crate is regularly built by Travis; to see details of the most recent builds
 click on the "build" badge at the top of this page.
+
+You must have the DataStax driver installed on your system in order to build
+this crate.
 
 The unit tests assume Cassandra is running on the local host accessible on the
 standard port. The easiest way to achieve this is using Docker and the standard

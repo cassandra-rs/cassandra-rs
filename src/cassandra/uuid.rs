@@ -164,7 +164,7 @@ impl UuidGen {
     /// # Examples
     ///
     /// ```
-    /// # use cassandra::{UuidGen, Uuid};
+    /// # use cassandra_cpp::{UuidGen, Uuid};
     /// # #[allow(dead_code)]
     /// # fn example() -> Uuid {
     /// let generator = UuidGen::default();
