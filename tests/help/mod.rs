@@ -1,4 +1,4 @@
-use cassandra::*;
+use cassandra_cpp::*;
 use std::str::FromStr;
 
 

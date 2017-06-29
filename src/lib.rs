@@ -57,7 +57,8 @@ pub use cassandra::value::{Value, ValueType};
 pub use cassandra_sys::CASS_BATCH_TYPE_LOGGED;
 pub use cassandra_sys::CassBatchType;
 
-extern crate cassandra_sys;
+extern crate cassandra_cpp_sys;
+use cassandra_cpp_sys as cassandra_sys;
 
 
 // Import the macro. Don't forget to add `error-chain` in your

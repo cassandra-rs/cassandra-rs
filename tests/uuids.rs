@@ -1,9 +1,9 @@
 #[macro_use(stmt)]
-extern crate cassandra;
+extern crate cassandra_cpp;
 
 mod help;
 
-use cassandra::*;
+use cassandra_cpp::*;
 use errors::*;
 
 static TRUNCATE_QUERY: &'static str = "TRUNCATE examples.log;";

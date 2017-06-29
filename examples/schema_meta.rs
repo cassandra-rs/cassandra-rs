@@ -1,8 +1,8 @@
 #[macro_use(stmt)]
-extern crate cassandra;
+extern crate cassandra_cpp;
 
 
-use cassandra::*;
+use cassandra_cpp::*;
 use errors::*;
 use std::str::FromStr;
 
