@@ -11,7 +11,6 @@ name = "cassandra-cpp"
 version = "0.8.2"
 authors = ["Tupshin Harper <tupshin@tupshin.com>", "Keith Wansbrough <Keith.Wansbrough@metaswitch.com>"]
 build = "build.rs"
-publish = false
 
 [badges]
 travis-ci = { repository = "Metaswitch/cassandra-rs" }
