@@ -43,8 +43,8 @@ Here's a straightforward example found in simple.rs:
 
 ```rust
     #[macro_use(stmt)]
-    extern crate cassandra;
-    use cassandra::*;
+    extern crate cassandra_cpp;
+    use cassandra_cpp::*;
     use std::str::FromStr;
 
 
