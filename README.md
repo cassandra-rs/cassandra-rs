@@ -39,10 +39,10 @@ thin wrapper around the DataStax driver, you may also find the DataStax
 
 ## Example
 
-For a straightforward example see `[simple.rs](examples/simple.rs)`.
+For a straightforward example see [`simple.rs`](examples/simple.rs).
 
-There are additional examples included with the project in `[tests](tests/)` and
-`[examples](examples/)`.
+There are additional examples included with the project in [`tests`](tests/) and
+[`examples`](examples/).
 
 
 ## License
