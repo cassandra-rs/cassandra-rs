@@ -39,41 +39,10 @@ thin wrapper around the DataStax driver, you may also find the DataStax
 
 ## Example
 
-Here's a straightforward example found in simple.rs:
+For a straightforward example see [`simple.rs`](examples/simple.rs).
 
-```rust
-    #[macro_use(stmt)]
-    extern crate cassandra_cpp;
-    use cassandra_cpp::*;
-    use std::str::FromStr;
-
-
-    fn main() {
-        let query = stmt!("SELECT keyspace_name FROM system_schema.keyspaces;");
-        let col_name = "keyspace_name";
-
-        let contact_points = ContactPoints::from_str("127.0.0.1").unwrap();
-
-        let mut cluster = Cluster::default();
-        cluster.set_contact_points(contact_points).unwrap();
-        cluster.set_load_balance_round_robin();
-
-        match cluster.connect() {
-            Ok(ref mut session) => {
-                let result = session.execute(&query).wait().unwrap();
-                println!("{}", result);
-                for row in result.iter() {
-                    let col: String = row.get_col_by_name(col_name).unwrap();
-                    println!("ks name = {}", col);
-                }
-            }
-            err => println!("{:?}", err),
-        }
-    }
-```
-
-There are additional examples included with the project in `tests/` and
-in `src/examples`.
+There are additional examples included with the project in [`tests`](tests/) and
+[`examples`](examples/).
 
 
 ## License
