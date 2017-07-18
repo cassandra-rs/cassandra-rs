@@ -4,11 +4,10 @@ extern crate cassandra_cpp;
 mod help;
 
 use cassandra_cpp::*;
-use errors::*;
 
 #[test]
 fn test_using_consistency() {
-    let s = stmt!("select 1+1;");
+    let mut s = stmt!("select 1+1;");
     s.set_consistency(Consistency::LOCAL_ONE).unwrap();
     s.set_serial_consistency(Consistency::SERIAL).unwrap();
 
@@ -55,12 +54,12 @@ fn test_parsing_printing_consistency() {
 
     for c in all {
         let s = c.to_string();
-        let c2: Consistency = s.parse().expect(format!("Failed on {} as {}", c, s));
+        let c2: Consistency = s.parse().expect(&format!("Failed on {} as {}", c, s));
         assert_eq!(c2, c, "with intermediate {}", s);
     }
 
     // Just a few spot checks to confirm the formatting hasn't regressed
     // or changed unexpectedly.
-    assert_eq!(Consistency::LOCAL_QUORUM, "LOCAL_QUORUM");
+    assert_eq!(Consistency::LOCAL_QUORUM.to_string(), "LOCAL_QUORUM");
     assert_eq!("THREE".parse::<Consistency>().unwrap(), Consistency::THREE);
 }
