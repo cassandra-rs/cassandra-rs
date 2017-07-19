@@ -19,43 +19,12 @@ fn test_using_consistency() {
 
 #[test]
 fn test_parsing_printing_consistency() {
-    let all = vec![
-        Consistency::UNKNOWN,
-        Consistency::ANY,
-        Consistency::ONE,
-        Consistency::TWO,
-        Consistency::THREE,
-        Consistency::QUORUM,
-        Consistency::ALL,
-        Consistency::LOCAL_QUORUM,
-        Consistency::EACH_QUORUM,
-        Consistency::SERIAL,
-        Consistency::LOCAL_SERIAL,
-        Consistency::LOCAL_ONE,
-    ];
-
-    // This match should be exhaustive. If it breaks, it means the set of
-    // valid alternatives has changed; in this case be sure to update
-    // the "all" list above as well.
-    match all[0] {
-        Consistency::UNKNOWN => (),
-        Consistency::ANY => (),
-        Consistency::ONE => (),
-        Consistency::TWO => (),
-        Consistency::THREE => (),
-        Consistency::QUORUM => (),
-        Consistency::ALL => (),
-        Consistency::LOCAL_QUORUM => (),
-        Consistency::EACH_QUORUM => (),
-        Consistency::SERIAL => (),
-        Consistency::LOCAL_SERIAL => (),
-        Consistency::LOCAL_ONE => (),
-    };
+    let all = Consistency::variants();
 
     for c in all {
         let s = c.to_string();
         let c2: Consistency = s.parse().expect(&format!("Failed on {:?} as {}", c, s));
-        assert_eq!(c2, c, "with intermediate {}", s);
+        assert_eq!(c2, *c, "with intermediate {}", s);
     }
 
     // Just a few spot checks to confirm the formatting hasn't regressed

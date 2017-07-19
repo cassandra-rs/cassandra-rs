@@ -7,6 +7,87 @@ use std::ffi::CStr;
 use std::fmt::{self, Display};
 use std::str::FromStr;
 
+/// Enhance a nullary enum as follows:
+///
+/// * `Display` / `to_string`
+/// * `FromStr` / `parse` (with just a simple `String` as error type)
+/// * Interconvert with another type (via `Protected`).
+/// * `variants` yields an array of all variants.
+///
+/// Only works for nullary enums, i.e., ones where no variants have any arguments.
+///
+/// # Syntax
+///
+/// ```ignore
+/// enhance_nullary_enum(ThisEnum, ThatEnum, {
+///     (ThisVariant1, ThatVariant1, "StringName1"),
+///     (ThisVariant2, ThatVariant2, "StringName2"),
+///     ...
+/// });
+/// ```
+/// where
+///
+/// * `ThisEnum` is the name of the type being enhanced.
+/// * `ThatEnum` is the name of the inner type wrapped by `ThisEnum`.
+/// * Then all variants of `ThisEnum` are listed:
+///   * `ThisVariant`i is the name of the variant.
+///   * `ThatVariant`i is the name of the corresponding variant of `ThatEnum`.
+///   * `StringName`i is the desired string representation of the enum for parsing and printing.
+///
+//
+// We attempted to use the `macro-attr` crate to achieve this more naturally, but sadly
+// identifier-oncatenation functionality is not yet available in stable Rust
+// per https://github.com/rust-lang/rust/issues/29599. We really don't want to use the verbose
+// identifiers (e.g., `CASS_CONSISTENCY_ANY`), so we have to provide an explicit list
+// of identifiers; however with `macro-attr` there's nowhere to hang them; we can't add
+// them in a custom attribute because custom attributes are unstable.
+// In the end the best approach is just the direct one, as shown here.
+macro_rules! enhance_nullary_enum {
+    ( $this_name:ident, $that_name: ident, { $( ($this:ident, $that:ident, $name:expr), )* } ) => {
+        impl Display for $this_name {
+            fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+                write!(f, "{}", match *self {
+                    $( $this_name::$this => $name, )*
+                })
+            }
+        }
+
+        impl FromStr for $this_name {
+            type Err = String;
+
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                match s {
+                    $( $name => Ok($this_name::$this), )*
+                    _ => Err(format!("Unrecognized {}: {}", stringify!($this_name), s)),
+                }
+            }
+        }
+
+        impl Protected<$that_name> for $this_name {
+            fn build(inner: $that_name) -> Self {
+                match inner {
+                    $( $that_name::$that=> $this_name::$this ),*
+                }
+            }
+            fn inner(&self) -> $that_name {
+                match *self {
+                    $( $this_name::$this => $that_name::$that ),*
+                }
+            }
+        }
+
+        impl $this_name {
+            /// List all the possible values of this enumeration.
+            pub fn variants() -> &'static [$this_name] {
+                // Nasty trick to calculate the length of the iteration - we must mention a
+                // variable inside the layer, even though we never actually use it.
+                static VARIANTS: [ $this_name; 0 $( + ($this_name::$this, 1).1 )* ] = [ $( $this_name::$this ),* ];
+                &VARIANTS
+            }
+        }
+    }
+}
+
 /// A Cassandra consistency level.
 #[derive(Debug, Eq, PartialEq)]
 #[allow(missing_docs)] // Meanings are defined in CQL documentation.
@@ -26,79 +107,17 @@ pub enum Consistency {
     LOCAL_ONE,
 }
 
-impl Display for Consistency {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "{}", match *self {
-            Consistency::UNKNOWN => "UNKNOWN",
-            Consistency::ANY => "ANY",
-            Consistency::ONE => "ONE",
-            Consistency::TWO => "TWO",
-            Consistency::THREE => "THREE",
-            Consistency::QUORUM => "QUORUM",
-            Consistency::ALL => "ALL",
-            Consistency::LOCAL_QUORUM => "LOCAL_QUORUM",
-            Consistency::EACH_QUORUM => "EACH_QUORUM",
-            Consistency::SERIAL => "SERIAL",
-            Consistency::LOCAL_SERIAL => "LOCAL_SERIAL",
-            Consistency::LOCAL_ONE => "LOCAL_ONE",
-        })
-    }
-}
-
-impl FromStr for Consistency {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "UNKNOWN" => Ok(Consistency::UNKNOWN),
-            "ANY" => Ok(Consistency::ANY),
-            "ONE" => Ok(Consistency::ONE),
-            "TWO" => Ok(Consistency::TWO),
-            "THREE" => Ok(Consistency::THREE),
-            "QUORUM" => Ok(Consistency::QUORUM),
-            "ALL" => Ok(Consistency::ALL),
-            "LOCAL_QUORUM" => Ok(Consistency::LOCAL_QUORUM),
-            "EACH_QUORUM" => Ok(Consistency::EACH_QUORUM),
-            "SERIAL" => Ok(Consistency::SERIAL),
-            "LOCAL_SERIAL" => Ok(Consistency::LOCAL_SERIAL),
-            "LOCAL_ONE" => Ok(Consistency::LOCAL_ONE),
-            _ => Err("Unrecognized consistency level: ".to_string() + s),
-        }
-    }
-}
-
-impl Protected<CassConsistency> for Consistency {
-    fn build(inner: CassConsistency) -> Self {
-        match inner {
-            CassConsistency::CASS_CONSISTENCY_UNKNOWN => Consistency::UNKNOWN,
-            CassConsistency::CASS_CONSISTENCY_ANY => Consistency::ANY,
-            CassConsistency::CASS_CONSISTENCY_ONE => Consistency::ONE,
-            CassConsistency::CASS_CONSISTENCY_TWO => Consistency::TWO,
-            CassConsistency::CASS_CONSISTENCY_THREE => Consistency::THREE,
-            CassConsistency::CASS_CONSISTENCY_QUORUM => Consistency::QUORUM,
-            CassConsistency::CASS_CONSISTENCY_ALL => Consistency::ALL,
-            CassConsistency::CASS_CONSISTENCY_LOCAL_QUORUM => Consistency::LOCAL_QUORUM,
-            CassConsistency::CASS_CONSISTENCY_EACH_QUORUM => Consistency::EACH_QUORUM,
-            CassConsistency::CASS_CONSISTENCY_SERIAL => Consistency::SERIAL,
-            CassConsistency::CASS_CONSISTENCY_LOCAL_SERIAL => Consistency::LOCAL_SERIAL,
-            CassConsistency::CASS_CONSISTENCY_LOCAL_ONE => Consistency::LOCAL_ONE,
-        }
-    }
-
-    fn inner(&self) -> CassConsistency {
-        match *self {
-            Consistency::UNKNOWN => CassConsistency::CASS_CONSISTENCY_UNKNOWN,
-            Consistency::ANY => CassConsistency::CASS_CONSISTENCY_ANY,
-            Consistency::ONE => CassConsistency::CASS_CONSISTENCY_ONE,
-            Consistency::TWO => CassConsistency::CASS_CONSISTENCY_TWO,
-            Consistency::THREE => CassConsistency::CASS_CONSISTENCY_THREE,
-            Consistency::QUORUM => CassConsistency::CASS_CONSISTENCY_QUORUM,
-            Consistency::ALL => CassConsistency::CASS_CONSISTENCY_ALL,
-            Consistency::LOCAL_QUORUM => CassConsistency::CASS_CONSISTENCY_LOCAL_QUORUM,
-            Consistency::EACH_QUORUM => CassConsistency::CASS_CONSISTENCY_EACH_QUORUM,
-            Consistency::SERIAL => CassConsistency::CASS_CONSISTENCY_SERIAL,
-            Consistency::LOCAL_SERIAL => CassConsistency::CASS_CONSISTENCY_LOCAL_SERIAL,
-            Consistency::LOCAL_ONE => CassConsistency::CASS_CONSISTENCY_LOCAL_ONE,
-        }
-    }
-}
+enhance_nullary_enum!(Consistency, CassConsistency, {
+    (UNKNOWN, CASS_CONSISTENCY_UNKNOWN, "UNKNOWN"),
+    (ANY, CASS_CONSISTENCY_ANY, "ANY"),
+    (ONE, CASS_CONSISTENCY_ONE, "ONE"),
+    (TWO, CASS_CONSISTENCY_TWO, "TWO"),
+    (THREE, CASS_CONSISTENCY_THREE, "THREE"),
+    (QUORUM, CASS_CONSISTENCY_QUORUM, "QUORUM"),
+    (ALL, CASS_CONSISTENCY_ALL, "ALL"),
+    (LOCAL_QUORUM, CASS_CONSISTENCY_LOCAL_QUORUM, "LOCAL_QUORUM"),
+    (EACH_QUORUM, CASS_CONSISTENCY_EACH_QUORUM, "EACH_QUORUM"),
+    (SERIAL, CASS_CONSISTENCY_SERIAL, "SERIAL"),
+    (LOCAL_SERIAL, CASS_CONSISTENCY_LOCAL_SERIAL, "LOCAL_SERIAL"),
+    (LOCAL_ONE, CASS_CONSISTENCY_LOCAL_ONE, "LOCAL_ONE"),
+});
