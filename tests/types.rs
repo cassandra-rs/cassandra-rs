@@ -34,3 +34,28 @@ fn test_parsing_printing_consistency() {
     assert_eq!("THREE".parse::<Consistency>().unwrap(), Consistency::THREE);
     let _ = "INVALID".parse::<Consistency>().expect_err("Should have failed to parse");
 }
+
+#[test]
+fn test_using_loglevel() {
+    set_level(LogLevel::DISABLED);
+    set_level(LogLevel::DEBUG);
+
+    assert!(LogLevel::DEBUG > LogLevel::WARN);
+    assert!(LogLevel::WARN > LogLevel::CRITICAL);
+}
+
+#[test]
+fn test_parsing_printing_loglevel() {
+    for v in LogLevel::variants() {
+        let s = v.to_string();
+        let v2: LogLevel = s.parse().expect(&format!("Failed on {:?} as {}", v, s));
+        assert_eq!(v2, *v, "with intermediate {}", s);
+    }
+
+    // Just a few spot checks to confirm the formatting hasn't regressed
+    // or changed unexpectedly.
+    assert_eq!(LogLevel::INFO.to_string(), "INFO");
+    assert_eq!(format!("{}", LogLevel::WARN), "WARN");
+    assert_eq!("ERROR".parse::<LogLevel>().unwrap(), LogLevel::ERROR);
+    let _ = "INVALID".parse::<LogLevel>().expect_err("Should have failed to parse");
+}

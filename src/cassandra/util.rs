@@ -65,7 +65,7 @@ macro_rules! enhance_nullary_enum {
             }
         }
 
-        impl Protected<$that_name> for $this_name {
+        impl $crate::cassandra::util::Protected<$that_name> for $this_name {
             fn build(inner: $that_name) -> Self {
                 match inner {
                     $( $that_name::$that=> $this_name::$this ),*
