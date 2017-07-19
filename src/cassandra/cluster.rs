@@ -59,17 +59,12 @@ use std::net::AddrParseError;
 use std::net::Ipv4Addr;
 
 use std::result;
+use std::fmt::Display;
 use std::str::FromStr;
 use time::Duration;
 
-/// Possible Cql Protocol versions
-#[allow(missing_docs)]
-pub enum CqlProtocol {
-    ONE = 1,
-    TWO = 2,
-    THREE = 3,
-    FOUR = 4,
-}
+/// A CQL protocol version is just an integer.
+pub type CqlProtocol = i32;
 
 /// A set of cassandra contact points
 #[derive(Debug)]

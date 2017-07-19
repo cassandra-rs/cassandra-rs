@@ -84,3 +84,10 @@ fn test_parsing_printing_ssl_verify_flags() {
     assert_eq!("NONE".parse::<SslVerifyFlag>().unwrap(), SslVerifyFlag::NONE);
     let _ = "INVALID".parse::<SslVerifyFlag>().expect_err("Should have failed to parse");
 }
+
+#[test]
+fn test_using_cql_protocol_version() {
+    let mut cluster = Cluster::default();
+    cluster.set_protocol_version(4);
+    cluster.set_protocol_version(2);
+}
