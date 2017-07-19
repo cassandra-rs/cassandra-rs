@@ -1,11 +1,9 @@
 use cassandra::util::Protected;
-use cassandra_sys::CassConsistency_ as CassConsistency;
+use cassandra_sys::CassConsistency_;
 
 use cassandra_sys::cass_consistency_string;
 
 use std::ffi::CStr;
-use std::fmt::{self, Display};
-use std::str::FromStr;
 
 /// A Cassandra consistency level.
 #[derive(Debug, Eq, PartialEq)]
@@ -26,7 +24,7 @@ pub enum Consistency {
     LOCAL_ONE,
 }
 
-enhance_nullary_enum!(Consistency, CassConsistency, {
+enhance_nullary_enum!(Consistency, CassConsistency_, {
     (UNKNOWN, CASS_CONSISTENCY_UNKNOWN, "UNKNOWN"),
     (ANY, CASS_CONSISTENCY_ANY, "ANY"),
     (ONE, CASS_CONSISTENCY_ONE, "ONE"),

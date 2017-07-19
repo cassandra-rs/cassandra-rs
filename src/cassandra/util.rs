@@ -46,15 +46,15 @@ pub(crate) trait Protected<T> {
 
 macro_rules! enhance_nullary_enum {
     ( $this_name:ident, $that_name: ident, { $( ($this:ident, $that:ident, $name:expr), )* } ) => {
-        impl Display for $this_name {
-            fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        impl ::std::fmt::Display for $this_name {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter) -> Result<(), ::std::fmt::Error> {
                 write!(f, "{}", match *self {
                     $( $this_name::$this => $name, )*
                 })
             }
         }
 
-        impl FromStr for $this_name {
+        impl ::std::str::FromStr for $this_name {
             type Err = String;
 
             fn from_str(s: &str) -> Result<Self, Self::Err> {
