@@ -59,3 +59,28 @@ fn test_parsing_printing_loglevel() {
     assert_eq!("ERROR".parse::<LogLevel>().unwrap(), LogLevel::ERROR);
     let _ = "INVALID".parse::<LogLevel>().expect_err("Should have failed to parse");
 }
+
+#[test]
+fn test_using_ssl_verify_flags() {
+    let mut ssl = Ssl::default();
+    ssl.set_verify_flags(&vec![]);
+    ssl.set_verify_flags(&vec![SslVerifyFlag::NONE]);
+    ssl.set_verify_flags(&vec![SslVerifyFlag::PEER_CERT]);
+    ssl.set_verify_flags(&vec![SslVerifyFlag::PEER_IDENTITY_DNS, SslVerifyFlag::PEER_CERT]);
+}
+
+#[test]
+fn test_parsing_printing_ssl_verify_flags() {
+    for v in SslVerifyFlag::variants() {
+        let s = v.to_string();
+        let v2: SslVerifyFlag = s.parse().expect(&format!("Failed on {:?} as {}", v, s));
+        assert_eq!(v2, *v, "with intermediate {}", s);
+    }
+
+    // Just a few spot checks to confirm the formatting hasn't regressed
+    // or changed unexpectedly.
+    assert_eq!(SslVerifyFlag::PEER_IDENTITY_DNS.to_string(), "PEER_IDENTITY_DNS");
+    assert_eq!(format!("{}", SslVerifyFlag::PEER_CERT), "PEER_CERT");
+    assert_eq!("NONE".parse::<SslVerifyFlag>().unwrap(), SslVerifyFlag::NONE);
+    let _ = "INVALID".parse::<SslVerifyFlag>().expect_err("Should have failed to parse");
+}

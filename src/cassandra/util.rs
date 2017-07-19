@@ -47,7 +47,7 @@ pub(crate) trait Protected<T> {
 macro_rules! enhance_nullary_enum {
     ( $this_name:ident, $that_name: ident, { $( ($this:ident, $that:ident, $name:expr), )* } ) => {
         impl ::std::fmt::Display for $this_name {
-            fn fmt(&self, f: &mut ::std::fmt::Formatter) -> Result<(), ::std::fmt::Error> {
+            fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
                 write!(f, "{}", match *self {
                     $( $this_name::$this => $name, )*
                 })
@@ -57,7 +57,7 @@ macro_rules! enhance_nullary_enum {
         impl ::std::str::FromStr for $this_name {
             type Err = String;
 
-            fn from_str(s: &str) -> Result<Self, Self::Err> {
+            fn from_str(s: &str) -> ::std::result::Result<Self, Self::Err> {
                 match s {
                     $( $name => Ok($this_name::$this), )*
                     _ => Err(format!("Unrecognized {}: {}", stringify!($this_name), s)),

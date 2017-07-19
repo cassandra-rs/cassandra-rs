@@ -2,6 +2,7 @@
 
 use cassandra::error::CassError;
 use cassandra::util::Protected;
+use cassandra_sys::CassSslVerifyFlags;
 use cassandra_sys::CassSsl as _Ssl;
 use cassandra_sys::cass_ssl_add_trusted_cert;
 use cassandra_sys::cass_ssl_free;
@@ -11,6 +12,32 @@ use cassandra_sys::cass_ssl_set_private_key;
 use cassandra_sys::cass_ssl_set_verify_flags;
 use errors::*;
 use std::ffi::CString;
+
+/// The individual SSL verification levels.
+#[derive(Debug, Eq, PartialEq)]
+#[allow(missing_docs)] // Meanings are defined in CQL documentation.
+#[allow(non_camel_case_types)] // Names are traditional.
+pub enum SslVerifyFlag {
+    NONE,
+    PEER_CERT,
+    PEER_IDENTITY,
+    PEER_IDENTITY_DNS,
+}
+
+enhance_nullary_enum!(SslVerifyFlag, CassSslVerifyFlags, {
+    (NONE, CASS_SSL_VERIFY_NONE, "NONE"),
+    (PEER_CERT, CASS_SSL_VERIFY_PEER_CERT, "PEER_CERT"),
+    (PEER_IDENTITY, CASS_SSL_VERIFY_PEER_IDENTITY, "PEER_IDENTITY"),
+    (PEER_IDENTITY_DNS, CASS_SSL_VERIFY_PEER_IDENTITY_DNS, "PEER_IDENTITY_DNS"),
+});
+
+fn to_bitset(flags: &[SslVerifyFlag]) -> i32 {
+    let mut res = 0;
+    for f in flags.iter() {
+        res = res | f.inner() as u32;
+    }
+    res as i32
+}
 
 /// Describes the SSL configuration of a cluster.
 #[derive(Debug)]
@@ -54,7 +81,7 @@ impl Ssl {
     /// certificate is also present.
     ///
     /// <b>Default:</b> CASS_SSL_VERIFY_PEER_CERT
-    pub fn set_verify_flags(&mut self, flags: i32) { unsafe { cass_ssl_set_verify_flags(self.0, flags) } }
+    pub fn set_verify_flags(&mut self, flags: &[SslVerifyFlag]) { unsafe { cass_ssl_set_verify_flags(self.0, to_bitset(flags)) } }
 
     /// Set client-side certificate chain. This is used to authenticate
     /// the client on the server-side. This should contain the entire
