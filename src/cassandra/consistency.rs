@@ -1,26 +1,40 @@
 use cassandra::util::Protected;
-use cassandra_sys::CassConsistency as _CassConsistency;
+use cassandra_sys::CassConsistency_;
 
 use cassandra_sys::cass_consistency_string;
 
 use std::ffi::CStr;
 
-
-
-/// A Cassandra consistency level
-#[derive(Debug)]
-pub struct Consistency(_CassConsistency);
-
-impl ToString for Consistency {
-    fn to_string(&self) -> String {
-        unsafe {
-            let my_string = cass_consistency_string(self.0);
-            CStr::from_ptr(my_string).to_string_lossy().into_owned()
-        }
-    }
+/// A Cassandra consistency level.
+#[derive(Debug, Eq, PartialEq)]
+#[allow(missing_docs)] // Meanings are defined in CQL documentation.
+#[allow(non_camel_case_types)] // Names are traditional.
+pub enum Consistency {
+    UNKNOWN,
+    ANY,
+    ONE,
+    TWO,
+    THREE,
+    QUORUM,
+    ALL,
+    LOCAL_QUORUM,
+    EACH_QUORUM,
+    SERIAL,
+    LOCAL_SERIAL,
+    LOCAL_ONE,
 }
 
-impl Protected<_CassConsistency> for Consistency {
-    fn inner(&self) -> _CassConsistency { self.0 }
-    fn build(inner: _CassConsistency) -> Self { Consistency(inner) }
-}
+enhance_nullary_enum!(Consistency, CassConsistency_, {
+    (UNKNOWN, CASS_CONSISTENCY_UNKNOWN, "UNKNOWN"),
+    (ANY, CASS_CONSISTENCY_ANY, "ANY"),
+    (ONE, CASS_CONSISTENCY_ONE, "ONE"),
+    (TWO, CASS_CONSISTENCY_TWO, "TWO"),
+    (THREE, CASS_CONSISTENCY_THREE, "THREE"),
+    (QUORUM, CASS_CONSISTENCY_QUORUM, "QUORUM"),
+    (ALL, CASS_CONSISTENCY_ALL, "ALL"),
+    (LOCAL_QUORUM, CASS_CONSISTENCY_LOCAL_QUORUM, "LOCAL_QUORUM"),
+    (EACH_QUORUM, CASS_CONSISTENCY_EACH_QUORUM, "EACH_QUORUM"),
+    (SERIAL, CASS_CONSISTENCY_SERIAL, "SERIAL"),
+    (LOCAL_SERIAL, CASS_CONSISTENCY_LOCAL_SERIAL, "LOCAL_SERIAL"),
+    (LOCAL_ONE, CASS_CONSISTENCY_LOCAL_ONE, "LOCAL_ONE"),
+});

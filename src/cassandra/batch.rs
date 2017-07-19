@@ -84,9 +84,9 @@ impl Batch {
     pub fn new(batch_type: BatchType) -> Batch { unsafe { Batch(cass_batch_new(batch_type)) } }
 
     /// Sets the batch's consistency level
-    pub fn set_consistency(&mut self, consistency: CassConsistency) -> Result<&Self, CassError> {
+    pub fn set_consistency(&mut self, consistency: Consistency) -> Result<&Self, CassError> {
         unsafe {
-            match cass_batch_set_consistency(self.0, consistency) {
+            match cass_batch_set_consistency(self.0, consistency.inner()) {
                 CASS_OK => Ok(self),
                 err => Err(err),
             }

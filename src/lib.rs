@@ -84,6 +84,8 @@ pub mod errors {
 
 // #[macro_use]
 mod cassandra {
+    #[macro_use]
+    pub mod util;
     pub mod consistency;
     pub mod field;
     pub mod inet;
@@ -111,7 +113,6 @@ mod cassandra {
     pub mod policy;
     pub mod custom_payload;
     pub mod time;
-    pub mod util;
     pub mod metrics;
     pub mod write_type;
 }
