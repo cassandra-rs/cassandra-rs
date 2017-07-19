@@ -54,12 +54,14 @@ fn test_parsing_printing_consistency() {
 
     for c in all {
         let s = c.to_string();
-        let c2: Consistency = s.parse().expect(&format!("Failed on {} as {}", c, s));
+        let c2: Consistency = s.parse().expect(&format!("Failed on {:?} as {}", c, s));
         assert_eq!(c2, c, "with intermediate {}", s);
     }
 
     // Just a few spot checks to confirm the formatting hasn't regressed
     // or changed unexpectedly.
     assert_eq!(Consistency::LOCAL_QUORUM.to_string(), "LOCAL_QUORUM");
+    assert_eq!(format!("{}", Consistency::LOCAL_QUORUM), "LOCAL_QUORUM");
     assert_eq!("THREE".parse::<Consistency>().unwrap(), Consistency::THREE);
+    let _ = "INVALID".parse::<Consistency>().expect_err("Should have failed to parse");
 }
