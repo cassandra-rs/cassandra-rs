@@ -51,7 +51,7 @@ use cassandra_sys::cass_true;
 use errors::*;
 // use ip::IpAddr;
 use errors::*;
-use std::ffi::CString;
+use std::ffi::{CString, CStr};
 use std::ffi::NulError;
 use std::fmt;
 use std::iter::Map;
@@ -66,28 +66,6 @@ use time::Duration;
 /// A CQL protocol version is just an integer.
 pub type CqlProtocol = i32;
 
-/// A set of cassandra contact points
-#[derive(Debug)]
-pub struct ContactPoints(Vec<Ipv4Addr>);
-
-impl fmt::Display for ContactPoints {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let contact_points: Vec<String> = self.0.iter().map(|ip| format!("{}", ip)).collect();
-        write!(f, "{} ", contact_points.join(","))
-    }
-}
-
-impl FromStr for ContactPoints {
-    type Err = Error;
-    fn from_str(s: &str) -> Result<Self> {
-        let points: Vec<&str> = s.split(',').collect();
-        let contact_points: result::Result<Vec<Ipv4Addr>, AddrParseError> = points.iter()
-            .map(|addr| Ipv4Addr::from_str(addr))
-            .collect();
-        Ok(ContactPoints(contact_points.unwrap()))
-    }
-}
-
 ///
 /// The main class to use when interacting with a Cassandra cluster.
 /// Typically, one instance of this class will be created for each separate
@@ -96,9 +74,9 @@ impl FromStr for ContactPoints {
 /// # Examples
 /// ```
 /// use std::str::FromStr;
-/// use cassandra_cpp::{Cluster,ContactPoints};
+/// use cassandra_cpp::Cluster;
 /// let mut cluster = Cluster::default();
-/// cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
+/// cluster.set_contact_points("127.0.0.1").unwrap();
 /// let mut session = cluster.connect().unwrap();
 /// ```
 #[derive(Debug)]
@@ -129,9 +107,10 @@ impl Cluster {
     /// {contact points: "127.0.0.1" "127.0.0.1,127.0.0.2", "server1.domain.com"}
     ///
     ///
-    pub fn set_contact_points<T: Into<ContactPoints>>(&mut self, contact_points: T) -> Result<&mut Self> {
+    pub fn set_contact_points(&mut self, contact_points: &str) -> Result<&mut Self> {
         unsafe {
-            let s = CString::new(contact_points.into().to_string()).expect("must be utf8");
+            let s = CString::new(contact_points.clone())
+                .chain_err(|| "Invalid contact_points string")?;
             let err = cass_cluster_set_contact_points(self.0, s.as_ptr());
             err.to_result(self).chain_err(|| "Could not set contact points")
         }
