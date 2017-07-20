@@ -1,16 +1,14 @@
 use cassandra_sys::CassLogLevel_;
-
 use cassandra_sys::CassLogMessage;
-
 // use cassandra_sys::cass_log_cleanup; @deprecated
 use cassandra_sys::cass_log_set_callback;
 use cassandra_sys::cass_log_set_level;
 use cassandra::util::Protected;
+// use cassandra_sys::cass_log_set_queue_size; @deprecated
 
 use std::ffi::CStr;
 use std::os::raw;
-// use cassandra_sys::cass_log_set_queue_size; @deprecated
-
+use slog;
 
 /// The possible logging levels that can be set.
 #[derive(Debug, Eq, PartialEq, PartialOrd, Ord)]
@@ -48,7 +46,9 @@ pub type CassLogCallback = Option<unsafe extern "C" fn(message: *const CassLogMe
 /// <b>Default:</b> WARN
 pub fn set_level(level: LogLevel) { unsafe { cass_log_set_level(level.inner()) } }
 
-/// Sets a callback for handling logging events.
-pub fn set_callback(callback: CassLogCallback, mut data: Vec<u8>) {
-    unsafe { cass_log_set_callback(callback, &mut data as *mut _ as *mut raw::c_void) }
+/// Sets a logger to receive all Cassandra driver logs.
+pub fn set_logger(logger: slog::Logger) {
+    unsafe {
+        // TODO cass_log_set_callback(callback, &mut data as *mut _ as *mut raw::c_void)
+    }
 }
