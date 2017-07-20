@@ -44,7 +44,7 @@ pub use cassandra::schema::keyspace_meta::KeyspaceMeta;
 pub use cassandra::schema::schema_meta::SchemaMeta;
 pub use cassandra::schema::table_meta::TableMeta;
 pub use cassandra::session::Session;
-pub use cassandra::ssl::Ssl;
+pub use cassandra::ssl::{Ssl, SslVerifyFlag};
 pub use cassandra::statement::BindRustType;
 pub use cassandra::statement::Statement;
 // pub use cassandra::custom_payload::CustomPayload;
