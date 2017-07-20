@@ -209,7 +209,7 @@ fn test_null_insertion() {
     s.bind(3, 2.72f64).unwrap();
     // deliberately omit 4 - this should be equivalent to binding null
     s.bind_null(5).unwrap();
-    session.execute(&s).wait();
+    session.execute(&s).wait().unwrap();
 
     // Read them back.
     let s = stmt!("SELECT key, bln, flt, dbl, i32, i64 FROM examples.basic WHERE key = 'shrdlu';");

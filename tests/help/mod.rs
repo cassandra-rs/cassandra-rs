@@ -1,3 +1,7 @@
+//! Helper methods for test code.
+//!
+#![allow(dead_code)] // Some functions are only used in some tests.
+
 use cassandra_cpp::*;
 
 
