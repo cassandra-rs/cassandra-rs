@@ -8,8 +8,6 @@
 #![recursion_limit = "1024"]
 
 extern crate libc;
-#[macro_use]
-extern crate log;
 extern crate decimal;
 extern crate chrono;
 extern crate time;

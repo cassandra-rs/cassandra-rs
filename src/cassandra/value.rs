@@ -144,14 +144,12 @@ impl Debug for Value {
                     Ok(())
                 }
                 CASS_VALUE_TYPE_UDT => {
-                    debug!("unimplemented for udt!");
                     //                    for item in self.as_map_iterator().unwrap() {
                     //                        try!(write!(f, "MAP {:?}:{:?}", item.0,item.1))
                     //                    }
                     Ok(())
                 }
                 CASS_VALUE_TYPE_TUPLE => {
-                    debug!("unimplemented for tuple!");
                     //                    for item in self.as_map_iterator().unwrap() {
                     //                        try!(write!(f, "MAP {:?}:{:?}", item.0,item.1))
                     //                    }

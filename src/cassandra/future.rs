@@ -261,7 +261,6 @@ impl SessionFuture {
     pub fn get(&self) -> Option<CassResult> {
         unsafe {
             let result = cass_future_get_result(self.0);
-            debug!("result is null: {}", result.is_null());
             if result.is_null() {
                 None
             } else {

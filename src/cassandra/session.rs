@@ -47,7 +47,6 @@ impl Drop for Session {
     /// Frees a session instance. If the session is still connected it will be synchronously
     /// closed before being deallocated.
     fn drop(&mut self) {
-        debug!("dropping session");
         unsafe { cass_session_free(self.0) }
     }
 }
