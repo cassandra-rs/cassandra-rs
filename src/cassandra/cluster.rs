@@ -73,11 +73,10 @@ pub type CqlProtocol = i32;
 ///
 /// # Examples
 /// ```
-/// use std::str::FromStr;
 /// use cassandra_cpp::Cluster;
 /// let mut cluster = Cluster::default();
 /// cluster.set_contact_points("127.0.0.1").unwrap();
-/// let mut session = cluster.connect().unwrap();
+/// let _session = cluster.connect().unwrap();
 /// ```
 #[derive(Debug)]
 pub struct Cluster(pub *mut _Cluster);
