@@ -45,3 +45,13 @@ fn test_logging() {
     let log_output: String = drain.0.lock().unwrap().clone();
     assert!(log_output.contains("Unable to resolve address for absolute-gibberish.invalid"), log_output);
 }
+
+#[test]
+fn test_metrics() {
+    let query = stmt!("SELECT keyspace_name FROM system_schema.keyspaces;");
+    let session = help::create_test_session();
+    session.execute(&query).wait().unwrap();
+    let metrics = session.get_metrics();
+    assert_eq!(metrics.total_connections, 1);
+    assert(metrics.min_us > 0);
+}
