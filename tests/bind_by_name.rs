@@ -1,8 +1,11 @@
 extern crate cassandra_cpp;
+extern crate futures;
 
 mod help;
 
 use cassandra_cpp::*;
+use futures::Future;
+
 
 #[test]
 fn test_bind_by_name() {

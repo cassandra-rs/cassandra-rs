@@ -4,6 +4,8 @@
 
 use cassandra_cpp::*;
 
+use futures::Future;
+
 
 /// Get a new session to the test Cassandra instance.
 pub fn create_test_session() -> Session {

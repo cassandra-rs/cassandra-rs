@@ -1,16 +1,19 @@
 #[macro_use(stmt)]
 extern crate cassandra_cpp;
-use cassandra_cpp::*;
-use errors::*;
+extern crate futures;
 extern crate num;
 
 mod help;
 
+use cassandra_cpp::*;
+use errors::*;
+use futures::Future;
+
 
 static NUM_CONCURRENT_REQUESTS: usize = 1000;
 
-fn insert_into_async(session: &Session, key: String) -> Result<Vec<ResultFuture>> {
-    let mut futures = Vec::<ResultFuture>::new();
+fn insert_into_async(session: &Session, key: String) -> Result<Vec<ResultFuture<CassResult>>> {
+    let mut futures = Vec::<ResultFuture<CassResult>>::new();
     for i in 0..NUM_CONCURRENT_REQUESTS {
         let key: &str = &(key.clone() + &i.to_string());
         let mut statement = stmt!("INSERT INTO examples.async (key, bln, flt, dbl, i32, i64)
@@ -42,7 +45,7 @@ pub fn test_async() {
     session.execute(&stmt!("USE examples")).wait().unwrap();
 
     let futures = insert_into_async(&session, "test".to_owned()).unwrap();
-    for mut future in futures {
+    for future in futures {
         let res = future.wait();
         res.expect("Should succeed");
     }

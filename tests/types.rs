@@ -1,9 +1,11 @@
 #[macro_use(stmt)]
 extern crate cassandra_cpp;
+extern crate futures;
 
 mod help;
 
 use cassandra_cpp::*;
+
 
 #[test]
 fn test_using_consistency() {

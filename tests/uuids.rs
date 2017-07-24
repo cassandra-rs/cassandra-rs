@@ -1,10 +1,13 @@
 #[macro_use(stmt)]
 extern crate cassandra_cpp;
+extern crate futures;
 
 mod help;
 
 use cassandra_cpp::*;
 use errors::*;
+use futures::Future;
+
 
 static TRUNCATE_QUERY: &'static str = "TRUNCATE examples.log;";
 static INSERT_QUERY: &'static str = "INSERT INTO examples.log (key, time, entry) VALUES (?, ?, ?);";
@@ -17,14 +20,14 @@ fn insert_into_log(session: &Session, key: &str, time: Uuid, entry: &str) -> Res
     statement.bind(0, key)?;
     statement.bind(1, time)?;
     statement.bind(2, entry)?;
-    let mut future = session.execute(&statement);
+    let future = session.execute(&statement);
     future.wait()
 }
 
 fn select_from_log(session: &Session, key: &str) -> Result<Vec<(Uuid, String)>> {
     let mut statement = stmt!(SELECT_QUERY);
     statement.bind(0, key)?;
-    let mut future = session.execute(&statement);
+    let future = session.execute(&statement);
     let results = future.wait();
     results.map(|r| {
         r.iter().map(|r| {

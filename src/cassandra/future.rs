@@ -4,6 +4,7 @@ use cassandra::error::{CassError, CassErrorResult};
 use cassandra::prepared::PreparedStatement;
 use cassandra::result::CassResult;
 use cassandra::util::Protected;
+use cassandra_sys::CassError_;
 use cassandra_sys::CASS_OK;
 
 use cassandra_sys::CassFuture as _Future;
@@ -30,17 +31,182 @@ use std::slice;
 use std::str;
 use std::result;
 use std::sync::{Arc, Mutex};
+use std::marker::PhantomData;
 use futures;
+use error_chain::ChainedError;
 
+/// A future representing the result of a Cassandra driver operation.
+///
+/// On success, returns a result of type `T`. On failure, returns a Cassandra error.
+///
+/// Take care only to construct this at the appropriate type (i.e., where the
+/// Cassandra driver future really does return the indicated type).
 #[must_use]
-/// The future result of an operation.
-/// It can represent a result if the operation completed successfully or an
-/// error if the operation failed. It can be waited on, polled or a callback
-/// can be attached.
 #[derive(Debug)]
-pub struct ResultFuture {
+pub struct ResultFuture<T> {
+    /// The underlying Cassandra driver future object.
     inner: *mut _Future,
+
+    /// The current state of this future.
     state: Arc<FutureTarget>,
+
+    /// Treat as if it contains a T.
+    phantom: PhantomData<T>,
+}
+
+impl<T> ResultFuture<T> {
+    /// Wrap a Cassandra driver future to make it a proper Rust future.
+    ///
+    /// Take care only to construct this at the appropriate type (i.e., where the
+    /// Cassandra driver future really does return the indicated type).
+    pub(crate) fn build(inner: *mut _Future) -> Self {
+        ResultFuture {
+            inner,
+            state: Arc::new(FutureTarget { inner: Mutex::new(FutureState::Created) }),
+            phantom: PhantomData,
+        }
+    }
+}
+
+impl<T> Drop for ResultFuture<T> {
+    /// Drop this ResultFuture.
+    ///
+    /// This also drops its reference to the FutureTarget, but if
+    /// we're waiting to be called back the FutureState::Awaiting holds another reference to
+    /// the target, which keeps it alive until the callback fires.
+    fn drop(&mut self) { unsafe { cass_future_free(self.inner) }; }
+}
+
+// @@@ rename the struct
+
+/// A type is Completable if it can be returned from a Cassandra driver future.
+/// You should only use this if you reasonably expect that a particular future will
+/// have such a result; for `ResultFuture`s we ensure this by construction.
+pub trait Completable where Self: Sized {
+    /// Extract the result from the future, if present.
+    unsafe fn get(inner: *mut _Future) -> Option<Self>;
+}
+
+/// Futures that complete with no value, or report an error.
+impl Completable for () {
+    unsafe fn get(_inner: *mut _Future) -> Option<Self> {
+        Some(())
+    }
+}
+
+/// The mainline case - a CassResult.
+impl Completable for CassResult {
+    unsafe fn get(inner: *mut _Future) -> Option<Self> {
+        cass_future_get_result(inner).as_ref().map(|r| CassResult::build(r as *const _))
+    }
+}
+
+/// Futures that complete with a prepared statement.
+impl Completable for PreparedStatement {
+    unsafe fn get(inner: *mut _Future) -> Option<Self> {
+        cass_future_get_prepared(inner).as_ref().map(|r| PreparedStatement::build(r as *const _))
+    }
+}
+
+/// A Cassandra future is a normal Rust future.
+impl<T: Completable> futures::Future for ResultFuture<T> {
+    type Item = T;
+    type Error = Error;
+
+    fn poll(&mut self) -> futures::Poll<Self::Item, Self::Error> { unsafe {
+        let mut install_callback = false;
+        let ret = {
+            // Perform the following computations under the lock, and then release it.
+            //
+            // We must take care to avoid deadlock. The lock hierarchy is: take the Rust lock
+            // (self.state.inner) first, then take the C++ lock (internal to the C++
+            // implementation of futures).
+            //
+            // Poll is always called by the Rust event loop, never from within C++ code or
+            // from notify_task. `self.ready()` and `self.get_completion()` take an internal
+            // mutex within C++ code, but they never call back to Rust and so cannot violate
+            // the lock hierarchy. However `self.set_callback()` calls into Rust code
+            // (`notify_task`) if the future is already complete, so we must avoid holding the
+            // Rust lock while calling it. We achieve this by using a boolean flag to request
+            // the callback be set outside the lock region.
+            let mut lock = self.state.as_ref().inner.lock().expect("poll");
+            match *lock {
+                ref mut state @ FutureState::Created => {
+                    // No task yet - schedule a callback. But as an optimization, if it's ready
+                    // already, complete now without scheduling a callback.
+                    if cass_future_ready(self.inner) == cass_true {
+                        // Future is ready; wrap success in `Ok(Ready)` or report failure as `Err`.
+                        get_completion(self.inner).map(futures::Async::Ready)
+                    } else {
+                        // Future is not ready; park this task and arrange to be called back when
+                        // it is.
+                        *state = FutureState::Awaiting {
+                            task: futures::task::current(),
+                            keep_alive: self.state.clone(),
+                        };
+                        install_callback = true;
+                        Ok(futures::Async::NotReady)
+                    }
+                },
+                FutureState::Awaiting { ref mut task, .. } => {
+                    // Callback already scheduled; don't set it again (C doesn't support it anyway),
+                    // but be sure to swizzle the new task into place. No need to check for
+                    // readiness here; we have to wait for the callback anyway so we might as well
+                    // do all the work in one place.
+                    *task = futures::task::current();
+                    Ok(futures::Async::NotReady)
+                },
+                FutureState::Ready => {
+                    // Future has been marked ready by callback. Safe to return now.
+                    get_completion(self.inner).map(futures::Async::Ready)
+                }
+            }
+        };
+
+        if install_callback {
+            // Install the callback. If callback cannot be sent, report immediate `Err`.
+            let data =
+                (self.state.as_ref() as *const FutureTarget) as *mut ::std::os::raw::c_void;
+            cass_future_set_callback(self.inner, Some(notify_task), data)
+                .to_result(()).chain_err(|| ErrorKind::DriverError("Unable to set callback"))
+        } else {
+            Ok(())
+        }.and_then(move |_| ret)
+    }}
+}
+
+/// Extract success or failure from a completed future.
+unsafe fn get_completion<T: Completable>(inner: *mut _Future) -> Result<T> {
+    // Future is ready; wrap success in `Ok(Ready)` or report failure as `Err`.
+    let rc = cass_future_error_code(inner);
+    match rc {
+        CASS_OK => {
+            match Completable::get(inner) {
+                None => Err(ErrorKind::DriverError("No result found").into()),
+                Some(v) => Ok(v)
+            }
+        },
+        _ => Err(get_cass_error(rc, inner)),
+    }
+}
+
+/// Extract the error code and message from a Cassandra driver future
+unsafe fn get_cass_error(rc: CassError_, inner: *mut _Future) -> Error {
+    let e = cass_future_get_error_result(inner);
+    if e.is_null() {
+        // No extended error available; just take the basic one.
+        let mut msg = mem::zeroed();
+        let mut msg_length = mem::zeroed();
+        cass_future_error_message(inner, &mut msg, &mut msg_length);
+        let slice = slice::from_raw_parts(msg as *const u8, msg_length as usize);
+        let message = String::from_utf8_lossy(slice).into_owned();
+        ErrorKind::CassDetailedError(CassError::from(rc), message).into()
+    } else {
+        // Get the extended error.
+        CassErrorResult::build(e).to_result(())
+            .chain_err(|| ErrorKind::CassandraError)
+            .expect_err("must fail")
+    }
 }
 
 /// The target of a C++ Cassandra driver callback.
@@ -67,7 +233,7 @@ struct FutureTarget {
     inner: Mutex<FutureState>,
 }
 
-/// The state of the corresponding ResultFuture.
+/// The state of a Cassandra future.
 ///
 /// This is an FSM.
 #[derive(Debug)]
@@ -85,96 +251,6 @@ enum FutureState {
     Ready,
 }
 
-impl Drop for ResultFuture {
-    /// Drop this ResultFuture.
-    ///
-    /// This also drops its reference to the FutureTarget, but if
-    /// we're waiting to be called back the FutureState::Awaiting holds another reference to
-    /// the target, which keeps it alive until the callback fires.
-    fn drop(&mut self) { unsafe { cass_future_free(self.inner) }; }
-}
-
-impl ResultFuture {
-    /// Sets a callback that is called when a future is set
-    unsafe fn set_callback(&self, callback: _CassFutureCallback, data: *mut raw::c_void) -> Result<&Self> {
-        cass_future_set_callback(self.inner, callback, data).to_result(self).chain_err(|| "while setting callback")
-    }
-
-    /// Gets the set status of the future.
-    fn ready(&self) -> bool { unsafe { cass_future_ready(self.inner) == cass_true } }
-
-    /// Blocks until the future returns or times out
-    pub fn wait(&mut self) -> Result<CassResult> {
-        unsafe {
-            cass_future_wait(self.inner);
-            self.error_code()
-        }
-    }
-
-    /// Gets the error code from future. If the future is not ready this method will
-    /// wait for the future to be set.
-    pub fn error_code(&mut self) -> Result<CassResult> {
-        unsafe {
-            let x = self.get();
-            let error_code = cass_future_error_code(self.inner);
-            match (x, error_code) {
-                (Some(x), _) => Ok(x),
-                (None, err) => match err.to_result(()) {
-                    Ok(_) => unimplemented!(),
-                    Err(e) => Err(Error::with_chain(e, ErrorKind::CassandraError)),
-                }
-            }
-        }
-    }
-
-    /// Gets the error message from future. If the future is not ready this method will
-    /// wait for the future to be set.
-    pub fn error_message(&mut self) -> String {
-        unsafe {
-            let message = mem::zeroed();
-            let message_length = mem::zeroed();
-            cass_future_error_message(self.inner, message, message_length);
-
-            let slice = slice::from_raw_parts(message as *const u8, message_length as usize);
-            str::from_utf8(slice).expect("must be utf8").to_owned()
-        }
-    }
-
-    /// Gets the result from a future (whether success or error). If the future is
-    /// not ready this method will wait for the future to be set.
-    fn get_completion(&self) -> Result<CassResult> {
-        unsafe {
-            let ret = cass_future_get_result(self.inner);
-            if ret.is_null() {
-                let ret = cass_future_get_error_result(self.inner);
-                if ret.is_null() {
-                    panic!("Unexpected double null");
-                } else {
-                    CassErrorResult::build(ret).to_result(())
-                        .chain_err(|| ErrorKind::CassandraError)
-                        .map(|_| panic!("must fail"))
-                }
-            } else {
-                Ok(CassResult::build(ret))
-            }
-        }
-    }
-
-    /// Gets the result of a successful future. If the future is not ready this method will
-    /// wait for the future to be set.
-    /// a None response indicates that there was an error
-    pub fn get(&mut self) -> Option<CassResult> {
-        unsafe {
-            let result = cass_future_get_result(self.inner);
-            if result.is_null() {
-                None
-            } else {
-                Some((CassResult::build(result)))
-            }
-        }
-    }
-}
-
 /// Callback which wakes the task waiting on this future.
 /// Called by the C++ driver when the future is ready,
 /// with a pointer to the `ResultFuture`.
@@ -189,170 +265,4 @@ unsafe extern "C" fn notify_task(_c_future: *mut _Future, data: *mut ::std::os::
         /// This can never happen.
         panic!("Callback invoked before callback set");
     }
-}
-
-impl futures::Future for ResultFuture {
-    type Item = CassResult;
-    type Error = Error;
-
-    fn poll(&mut self) -> futures::Poll<Self::Item, Self::Error> {
-        let mut install_callback = false;
-        let ret = {
-            // Perform the following computations under the lock, and then release it.
-            //
-            // We must take care to avoid deadlock. The lock hierarchy is: take the Rust lock
-            // (self.state.inner) first, then take the C++ lock (internal to the C++
-            // implementation of futures).
-            //
-            // Poll is always called by the Rust event loop, never from within C++ code or
-            // from notify_task. `self.ready()` and `self.get_completion()` take an internal
-            // mutex within C++ code, but they never call back to Rust and so cannot violate
-            // the lock hierarchy. However `self.set_callback()` calls into Rust code
-            // (`notify_task`) if the future is already complete, so we must avoid holding the
-            // Rust lock while calling it. We achieve this by using a boolean flag to request
-            // the callback be set outside the lock region.
-            let mut lock = self.state.as_ref().inner.lock().expect("poll");
-            match *lock {
-                ref mut state @ FutureState::Created => {
-                    // No task yet - schedule a callback. But as an optimization, if it's ready
-                    // already, complete now without scheduling a callback.
-                    //
-                    if self.ready() {
-                        // Future is ready; wrap success in `Ok(Ready)` or report failure as `Err`.
-                        self.get_completion().map(futures::Async::Ready)
-                    } else {
-                        // Future is not ready; park this task and arrange to be called back when
-                        // it is.
-                        *state = FutureState::Awaiting {
-                            task: futures::task::current(),
-                            keep_alive: self.state.clone(),
-                        };
-                        install_callback = true;
-                        Ok(futures::Async::NotReady)
-                    }
-                },
-                FutureState::Awaiting { ref mut task, .. } => {
-                    // Callback already scheduled; don't set it again (C doesn't support it anyway),
-                    // but be sure to swizzle the new task into place. No need to check for
-                    // readiness here; we have to wait for the callback anyway so we might as well
-                    // do all the work in one place.
-                    *task = futures::task::current();
-                    Ok(futures::Async::NotReady)
-                },
-                FutureState::Ready => {
-                    // Future has been marked ready by callback. Safe to return now.
-                    self.get_completion().map(futures::Async::Ready)
-                }
-            }
-        };
-
-        if install_callback {
-            // Install the callback. If callback cannot be sent, report immediate `Err`.
-            unsafe {
-                let data =
-                    (self.state.as_ref() as *const FutureTarget) as *mut ::std::os::raw::c_void;
-                self.set_callback(Some(notify_task), data).map(|_| ())
-            }
-        } else {
-            Ok(())
-        }.and_then(move |_| ret)
-    }
-}
-
-/// The future result of an prepared statement.
-/// It can represent a result if the operation completed successfully or an
-/// error if the operation failed. It can be waited on, polled or a callback
-/// can be attached.
-#[derive(Debug)]
-pub struct PreparedFuture(*mut _Future);
-
-impl Drop for PreparedFuture {
-    fn drop(&mut self) { unsafe { cass_future_free(self.0) } }
-}
-
-impl PreparedFuture {
-    /// Wait for the future to be set with either a result or error.
-    ///
-    /// Important: Do not wait in a future callback. Waiting in a future
-    /// callback will cause a deadlock.
-    pub fn wait(&mut self) -> Result<PreparedStatement> {
-        unsafe {
-            cass_future_wait(self.0);
-            self.error_code()
-        }
-    }
-
-    /// Gets the error code from future. If the future is not ready this method will
-    /// wait for the future to be set.
-    pub fn error_code(&mut self) -> Result<PreparedStatement> {
-        unsafe { cass_future_error_code(self.0).to_result(self.get()).chain_err(|| "") }
-    }
-
-    /// Gets the error message from future. If the future is not ready this method will
-    /// wait for the future to be set.
-    pub fn get(&mut self) -> PreparedStatement { unsafe { PreparedStatement::build(cass_future_get_prepared(self.0)) } }
-}
-
-#[derive(Debug)]
-pub struct ConnectFuture(*mut _Future);
-
-impl Protected<*mut _Future> for ConnectFuture {
-    fn inner(&self) -> *mut _Future { self.0 }
-    fn build(inner: *mut _Future) -> Self { ConnectFuture(inner) }
-}
-
-impl Drop for ConnectFuture {
-    fn drop(&mut self) { unsafe { cass_future_free(self.0) } }
-}
-/// The future result of an attempt to create a new Cassandra session
-/// It can be waited on, polled or a callback
-/// can be attached.
-#[derive(Debug)]
-pub struct SessionFuture(*mut _Future);
-
-impl SessionFuture {
-    /// blocks until the session connects or errors out
-    pub fn wait(&mut self) -> Result<()> {
-        unsafe {
-            cass_future_wait(self.0);
-            self.error_code()
-        }
-    }
-
-    /// Gets the error code from future. If the future is not ready this method will
-    /// wait for the future to be set.
-    pub fn error_code(&self) -> Result<()> { unsafe { cass_future_error_code(self.0).to_result(()).chain_err(|| "") } }
-
-    /// Gets the result of a successful future. If the future is not ready this method will
-    /// wait for the future to be set.
-    /// a None response indicates that there was an error
-    pub fn get(&self) -> Option<CassResult> {
-        unsafe {
-            let result = cass_future_get_result(self.0);
-            if result.is_null() {
-                None
-            } else {
-                Some(CassResult::build(result))
-            }
-        }
-    }
-}
-
-impl Drop for SessionFuture {
-    fn drop(&mut self) { unsafe { cass_future_free(self.0) } }
-}
-
-impl Protected<*mut _Future> for PreparedFuture {
-    fn inner(&self) -> *mut _Future { self.0 }
-    fn build(inner: *mut _Future) -> Self { PreparedFuture(inner) }
-}
-
-impl Protected<*mut _Future> for ResultFuture {
-    fn inner(&self) -> *mut _Future { self.inner }
-    fn build(inner: *mut _Future) -> Self { ResultFuture { inner, state: Arc::new(FutureTarget { inner: Mutex::new(FutureState::Created) }) } }
-}
-
-impl Protected<*mut _Future> for SessionFuture {
-    fn inner(&self) -> *mut _Future { self.0 }
-    fn build(inner: *mut _Future) -> Self { SessionFuture(inner) }
 }

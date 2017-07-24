@@ -16,6 +16,10 @@ extern crate time;
 extern crate ip;
 extern crate uuid;
 extern crate futures;
+extern crate cassandra_cpp_sys;
+use cassandra_cpp_sys as cassandra_sys;
+#[macro_use]
+extern crate error_chain;
 
 
 pub use cassandra::batch::{Batch, BatchType, CustomPayload};
@@ -26,7 +30,7 @@ pub use cassandra::consistency::Consistency;
 pub use cassandra::data_type::DataType;
 // pub use cassandra::write_type::*;
 pub use cassandra::field::Field;
-pub use cassandra::future::{PreparedFuture, ResultFuture, SessionFuture};
+pub use cassandra::future::ResultFuture;
 pub use cassandra::inet::Inet;
 // pub use cassandra::util::*;
 // pub use cassandra::metrics::*;
@@ -55,16 +59,6 @@ pub use cassandra::user_type::UserType;
 pub use cassandra::uuid::{Uuid, UuidGen};
 pub use cassandra::value::{Value, ValueType};
 
-extern crate cassandra_cpp_sys;
-use cassandra_cpp_sys as cassandra_sys;
-
-
-// Import the macro. Don't forget to add `error-chain` in your
-// `Cargo.toml`!
-#[macro_use]
-extern crate error_chain;
-
-
 pub use cassandra::error::*;
 
 /// A still clumsy use of error-chain. needs work
@@ -75,6 +69,18 @@ pub mod errors {
             CassandraError {
                 description("Cassandra error")
                 display("Cassandra error")
+            }
+
+            /// Detailed Cassandra error
+            CassDetailedError(code: super::CassError, msg: String) {
+                description("Cassandra error")
+                display("Cassandra error {:?}: {}", &code, &msg)
+            }
+
+            /// Driver error
+            DriverError(s: &'static str) {
+                description("Driver error")
+                display("Driver error: {}", s)
             }
         }
     }

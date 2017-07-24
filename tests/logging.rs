@@ -1,6 +1,7 @@
 #[macro_use(stmt)]
 extern crate cassandra_cpp;
 extern crate slog;
+extern crate futures;
 
 mod help;
 
@@ -9,6 +10,8 @@ use cassandra_cpp::*;
 use std::sync::Arc;
 use std::sync::Mutex;
 use slog::*;
+use futures::Future;
+
 
 /// Simple drain which accumulates all messages written to it.
 #[derive(Clone)]

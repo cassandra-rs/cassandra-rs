@@ -1,9 +1,11 @@
 #[macro_use(stmt)]
 extern crate cassandra_cpp;
-
+extern crate futures;
 
 use cassandra_cpp::*;
 use errors::*;
+
+use futures::Future;
 
 
 fn print_function(session: &Session, keyspace: &str, function: &str, arguments: Vec<&str>) -> Result<()> {

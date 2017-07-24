@@ -1,6 +1,11 @@
 #[macro_use(stmt)]
 extern crate cassandra_cpp;
+extern crate futures;
+
 use cassandra_cpp::*;
+
+use futures::Future;
+
 
 fn main() {
     let query = stmt!("SELECT keyspace_name FROM system_schema.keyspaces;");
