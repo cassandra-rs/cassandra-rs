@@ -2,11 +2,11 @@
 //! Based on `async`.
 
 #[macro_use(stmt)]
-extern crate cassandra;
+extern crate cassandra_cpp;
 extern crate num;
 extern crate futures;
 
-use cassandra::*;
+use cassandra_cpp::*;
 use errors::*;
 use futures::Future;
 
