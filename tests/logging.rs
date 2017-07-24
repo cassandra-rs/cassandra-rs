@@ -53,5 +53,5 @@ fn test_metrics() {
     session.execute(&query).wait().unwrap();
     let metrics = session.get_metrics();
     assert_eq!(metrics.total_connections, 1);
-    assert(metrics.min_us > 0);
+    assert!(metrics.min_us > 0);
 }
