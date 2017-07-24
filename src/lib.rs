@@ -26,7 +26,7 @@ pub use cassandra::consistency::Consistency;
 pub use cassandra::data_type::DataType;
 // pub use cassandra::write_type::*;
 pub use cassandra::field::Field;
-pub use cassandra::future::{CloseFuture, Future, FutureCallback, PreparedFuture, ResultFuture, SessionFuture};
+pub use cassandra::future::{PreparedFuture, ResultFuture, SessionFuture};
 pub use cassandra::inet::Inet;
 // pub use cassandra::util::*;
 // pub use cassandra::metrics::*;

@@ -5,7 +5,7 @@
 use cassandra::batch::Batch;
 use cassandra::cluster::Cluster;
 use cassandra::error::CassError;
-use cassandra::future::{CloseFuture, Future, PreparedFuture, ResultFuture, SessionFuture};
+use cassandra::future::{PreparedFuture, ResultFuture, SessionFuture};
 use cassandra::metrics::SessionMetrics;
 use cassandra::schema::schema_meta::SchemaMeta;
 use cassandra::statement::Statement;
@@ -70,16 +70,16 @@ impl Session {
     }
 
     /// Connects a session and sets the keyspace.
-    pub fn connect_keyspace(&self, cluster: &Cluster, keyspace: &str) -> Result<Future, NulError> {
+    pub fn connect_keyspace(&self, cluster: &Cluster, keyspace: &str) -> Result<SessionFuture, NulError> {
         unsafe {
-            Ok(Future::build(cass_session_connect_keyspace(self.0, cluster.inner(), CString::new(keyspace)?.as_ptr())))
+            Ok(SessionFuture::build(cass_session_connect_keyspace(self.0, cluster.inner(), CString::new(keyspace)?.as_ptr())))
         }
     }
 
     /// Closes the session instance, outputs a close future which can
     /// be used to determine when the session has been terminated. This allows
     /// in-flight requests to finish.
-    pub fn close(self) -> CloseFuture { unsafe { CloseFuture::build(cass_session_close(self.0)) } }
+    pub fn close(self) -> SessionFuture { unsafe { SessionFuture::build(cass_session_close(self.0)) } }
 
     /// Create a prepared statement.
     pub fn prepare(&self, query: &str) -> Result<PreparedFuture, CassError> {

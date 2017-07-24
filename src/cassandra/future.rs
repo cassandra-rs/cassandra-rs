@@ -32,116 +32,6 @@ use std::result;
 use std::sync::{Arc, Mutex};
 use futures;
 
-/// A CQL Future representing the status of any asynchronous calls to Cassandra
-#[derive(Debug)]
-pub struct Future(*mut _Future);
-
-/// A callback registered to execute when the future returns
-#[derive(Debug)]
-pub struct FutureCallback(_CassFutureCallback);
-
-impl Drop for Future {
-    /// Frees a future instance. A future can be freed anytime.
-    fn drop(&mut self) { unsafe { cass_future_free(self.0) } }
-}
-
-impl Future {
-    /// Sets a callback that is called when a future is set
-    pub unsafe fn set_callback(&mut self, callback: FutureCallback, data: *mut raw::c_void) -> Result<&mut Self> {
-        cass_future_set_callback(self.0, callback.0, data).to_result(self).chain_err(|| "")
-    }
-
-    /// Gets the set status of the future.
-    pub fn ready(&mut self) -> bool { unsafe { cass_future_ready(self.0) == cass_true } }
-
-    /// Wait for the future to be set with either a result or error.
-    ///
-    /// Important: Do not wait in a future callback. Waiting in a future
-    /// callback will cause a deadlock.
-    pub fn wait(self) -> Result<()> {
-        unsafe {
-            cass_future_wait(self.0);
-            self.error_code()
-        }
-    }
-
-    /// Wait for the future to be set or timeout.
-    pub fn wait_timed(&mut self, timeout_us: u64) -> bool {
-        unsafe { cass_future_wait_timed(self.0, timeout_us) == cass_true }
-    }
-
-    /// Gets the result of a successful future. If the future is not ready this method will
-    /// wait for the future to be set.
-    pub fn get_result(&self) -> CassResult {
-        unsafe {
-            let ret = cass_future_get_result(self.0);
-            if ret.is_null() {
-                panic!("Attempted to get result of failed future")
-            } else {
-                CassResult::build(ret)
-            }
-        }
-    }
-
-    /// Gets the error result from a future that failed as a result of a server error. If the
-    /// future is not ready this method will wait for the future to be set.
-    pub fn get_error_result(&self) -> CassErrorResult {
-        unsafe {
-            let ret = cass_future_get_error_result(self.0);
-            if ret.is_null() {
-                panic!("Attempted to get error result of successful future")
-            } else {
-                CassErrorResult::build(ret)
-            }
-        }
-    }
-
-    /// Gets the error code from future. If the future is not ready this method will
-    // wait for the future to be set.
-    fn error_code(self) -> Result<()> { unsafe { cass_future_error_code(self.0).to_result(()).chain_err(|| "") } }
-
-    /// Gets the error message from future. If the future is not ready this method will
-    /// wait for the future to be set.
-    pub fn error_message(&mut self) -> String {
-        unsafe {
-            let message = mem::zeroed();
-            let message_length = mem::zeroed();
-            cass_future_error_message(self.0, message, message_length);
-
-            let slice: &[u8] = slice::from_raw_parts(message as *const u8, message_length as usize);
-            str::from_utf8(slice).expect("must be utf8").to_owned()
-        }
-    }
-
-
-    /// Gets a the number of custom payload items from a response future. If the future is not
-    /// ready this method will wait for the future to be set.
-    pub fn payload_item_count(&self) -> usize { unsafe { cass_future_custom_payload_item_count(self.0) } }
-
-    /// Gets a custom payload item from a response future at the specified index. If the future is not
-    /// ready this method will wait for the future to be set.
-    pub fn payload_item(&self, index: usize) -> Result<(String, String)> {
-        unsafe {
-            let name = mem::zeroed();
-            let name_length = mem::zeroed();
-            let value = mem::zeroed();
-            let value_length = mem::zeroed();
-            match cass_future_custom_payload_item(self.0, index, name, name_length, value, value_length) {
-                CASS_OK => {
-                    Ok((str::from_utf8(slice::from_raw_parts(name as *const u8, name_length as usize))
-                        .expect("must be utf8")
-                        .to_owned(),
-                        str::from_utf8(slice::from_raw_parts(value as *const u8, value_length as usize))
-                        .expect("must be utf8")
-                        .to_owned()))
-                }
-                err => Err(err.to_result("").unwrap().into()),
-            }
-
-        }
-    }
-}
-
 #[must_use]
 /// The future result of an operation.
 /// It can represent a result if the operation completed successfully or an
@@ -206,8 +96,8 @@ impl Drop for ResultFuture {
 
 impl ResultFuture {
     /// Sets a callback that is called when a future is set
-    unsafe fn set_callback(&self, callback: FutureCallback, data: *mut raw::c_void) -> Result<&Self> {
-        cass_future_set_callback(self.inner, callback.0, data).to_result(self).chain_err(|| "while setting callback")
+    unsafe fn set_callback(&self, callback: _CassFutureCallback, data: *mut raw::c_void) -> Result<&Self> {
+        cass_future_set_callback(self.inner, callback, data).to_result(self).chain_err(|| "while setting callback")
     }
 
     /// Gets the set status of the future.
@@ -361,7 +251,7 @@ impl futures::Future for ResultFuture {
             unsafe {
                 let data =
                     (self.state.as_ref() as *const FutureTarget) as *mut ::std::os::raw::c_void;
-                self.set_callback(FutureCallback(Some(notify_task)), data).map(|_| ())
+                self.set_callback(Some(notify_task), data).map(|_| ())
             }
         } else {
             Ok(())
@@ -452,18 +342,6 @@ impl Drop for SessionFuture {
     fn drop(&mut self) { unsafe { cass_future_free(self.0) } }
 }
 
-/// The future result of a session close statement.
-/// It can represent a result if the operation completed successfully or an
-/// error if the operation failed. It can be waited on, polled or a callback
-/// can be attached.
-#[derive(Debug)]
-pub struct CloseFuture(*mut _Future);
-
-impl Protected<*mut _Future> for Future {
-    fn inner(&self) -> *mut _Future { self.0 }
-    fn build(inner: *mut _Future) -> Self { Future(inner) }
-}
-
 impl Protected<*mut _Future> for PreparedFuture {
     fn inner(&self) -> *mut _Future { self.0 }
     fn build(inner: *mut _Future) -> Self { PreparedFuture(inner) }
@@ -477,35 +355,4 @@ impl Protected<*mut _Future> for ResultFuture {
 impl Protected<*mut _Future> for SessionFuture {
     fn inner(&self) -> *mut _Future { self.0 }
     fn build(inner: *mut _Future) -> Self { SessionFuture(inner) }
-}
-
-impl Protected<*mut _Future> for CloseFuture {
-    fn inner(&self) -> *mut _Future { self.0 }
-    fn build(inner: *mut _Future) -> Self { CloseFuture(inner) }
-}
-
-
-impl Drop for CloseFuture {
-    fn drop(&mut self) { unsafe { cass_future_free(self.0) } }
-}
-
-impl CloseFuture {
-    /// Wait for the future to be set with either a result or error.
-    ///
-    /// Important: Do not wait in a future callback. Waiting in a future
-    /// callback will cause a deadlock.
-    pub fn wait(&self) -> Result<()> {
-        unsafe {
-            cass_future_wait(self.0);
-            self.error_code()
-        }
-    }
-
-    /// Gets the error code from future. If the future is not ready this method will
-    /// wait for the future to be set.
-    pub fn error_code(&self) -> Result<()> { unsafe { cass_future_error_code(self.0).to_result(()).chain_err(|| "") } }
-
-    /// Gets the error message from future. If the future is not ready this method will
-    /// wait for the future to be set.
-    pub fn get(&self) -> PreparedStatement { unsafe { PreparedStatement::build(cass_future_get_prepared(self.0)) } }
 }
