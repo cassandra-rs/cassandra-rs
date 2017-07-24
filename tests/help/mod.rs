@@ -1,10 +1,13 @@
+//! Helper methods for test code.
+//!
+#![allow(dead_code)] // Some functions are only used in some tests.
+
 use cassandra_cpp::*;
-use std::str::FromStr;
 
 
 /// Get a new session to the test Cassandra instance.
 pub fn create_test_session() -> Session {
-    let contact_points = ContactPoints::from_str("127.0.0.1").unwrap();
+    let contact_points = "127.0.0.1";
 
     let mut cluster = Cluster::default();
     cluster.set_contact_points(contact_points).unwrap();

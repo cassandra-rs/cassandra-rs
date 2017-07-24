@@ -9,7 +9,7 @@
 
 extern crate libc;
 #[macro_use]
-extern crate log;
+extern crate slog;
 extern crate decimal;
 extern crate chrono;
 extern crate time;
@@ -18,7 +18,7 @@ extern crate uuid;
 
 
 pub use cassandra::batch::{Batch, BatchType, CustomPayload};
-pub use cassandra::cluster::{Cluster, ContactPoints, CqlProtocol}; //FIXME this should not be exported
+pub use cassandra::cluster::{Cluster, CqlProtocol}; //FIXME this should not be exported
 pub use cassandra::collection::{CassCollection, List, Map, Set};
 pub use cassandra::column::Column;
 pub use cassandra::consistency::Consistency;
@@ -31,7 +31,7 @@ pub use cassandra::inet::Inet;
 // pub use cassandra::metrics::*;
 pub use cassandra::iterator::{AggregateIterator, ColumnIterator, FieldIterator, FunctionIterator, KeyspaceIterator,
                               MapIterator, SetIterator, TableIterator, UserTypeIterator};
-pub use cassandra::log::{LogLevel, set_callback, set_level};
+pub use cassandra::log::{LogLevel, set_logger, set_level};
 pub use cassandra::policy::retry::RetryPolicy;
 pub use cassandra::prepared::PreparedStatement;
 pub use cassandra::result::CassResult;

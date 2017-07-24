@@ -278,7 +278,7 @@ impl Column {
         }
     }
 
-    /// Gets the blog from this column or errors if type if wrong
+    /// Gets the blob from this column or errors if type if wrong
     pub fn get_blob(&self) -> Result<Vec<u8>> {
         unsafe {
             match cass_value_type(self.0) {

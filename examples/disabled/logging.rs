@@ -12,7 +12,7 @@ fn print_error(future: &mut Future) {
 
 unsafe fn create_cluster() -> Result<CassError,Cluster> {
     let cluster = Cluster::default();
-    cluster.set_contact_points(ContactPoints::from_str("127.0.0.1,127.0.0.2,127.0.0.3")?);
+    cluster.set_contact_points("127.0.0.1,127.0.0.2,127.0.0.3")?;
     cluster
 }
 

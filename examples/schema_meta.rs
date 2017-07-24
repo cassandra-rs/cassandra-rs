@@ -4,7 +4,6 @@ extern crate cassandra_cpp;
 
 use cassandra_cpp::*;
 use errors::*;
-use std::str::FromStr;
 
 
 fn print_function(session: &Session, keyspace: &str, function: &str, arguments: Vec<&str>) -> Result<()> {
@@ -113,7 +112,7 @@ fn main() {
 
 fn cass() -> Result<()> {
     let mut cluster = Cluster::default();
-    cluster.set_contact_points(ContactPoints::from_str("127.0.0.1").unwrap()).unwrap();
+    cluster.set_contact_points("127.0.0.1").unwrap();
     cluster.set_load_balance_round_robin();
 
     let create_ks = stmt!("CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \

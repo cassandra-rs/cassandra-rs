@@ -1,13 +1,12 @@
 #[macro_use(stmt)]
 extern crate cassandra_cpp;
 use cassandra_cpp::*;
-use std::str::FromStr;
 
 fn main() {
     let query = stmt!("SELECT keyspace_name FROM system_schema.keyspaces;");
     let col_name = "keyspace_name";
 
-    let contact_points = ContactPoints::from_str("127.0.0.1").unwrap();
+    let contact_points = "127.0.0.1";
 
     let mut cluster = Cluster::default();
     cluster.set_contact_points(contact_points).unwrap();
