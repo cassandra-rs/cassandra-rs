@@ -108,10 +108,9 @@ impl Cluster {
     ///
     pub fn set_contact_points(&mut self, contact_points: &str) -> Result<&mut Self> {
         unsafe {
-            let s = CString::new(contact_points.clone())
-                .chain_err(|| "Invalid contact_points string")?;
+            let s = CString::new(contact_points.clone())?;
             let err = cass_cluster_set_contact_points(self.0, s.as_ptr());
-            err.to_result(self).chain_err(|| "Could not set contact points")
+            err.as_result(self)
         }
     }
 
@@ -361,7 +360,7 @@ impl Cluster {
     }
 
     /// Sets credentials for plain text authentication.
-    pub fn set_credentials(&mut self, username: &str, password: &str) -> Result<&Self> {
+    pub fn set_credentials(&mut self, username: &str, password: &str) -> Result<&mut Self> {
         unsafe {
             cass_cluster_set_credentials(self.0,
                                          CString::new(username).chain_err(|| "username not a valid CString")?.as_ptr(),
