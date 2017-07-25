@@ -53,9 +53,6 @@ pub use cassandra::tuple::Tuple;
 pub use cassandra::user_type::UserType;
 pub use cassandra::uuid::{Uuid, UuidGen};
 pub use cassandra::value::{Value, ValueType};
-// pub use cassandra::inet::{Inet};
-pub use cassandra_sys::CASS_BATCH_TYPE_LOGGED;
-pub use cassandra_sys::CassBatchType;
 
 extern crate cassandra_cpp_sys;
 use cassandra_cpp_sys as cassandra_sys;

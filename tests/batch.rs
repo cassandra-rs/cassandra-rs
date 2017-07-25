@@ -16,7 +16,7 @@ struct Pair {
 fn insert_into_batch_with_prepared(session: &Session, pairs: &Vec<Pair>) -> Result<PreparedStatement> {
     let insert_query = "INSERT INTO examples.pairs (key, value) VALUES (?, ?)";
     let prepared = session.prepare(insert_query).unwrap().wait().unwrap();
-    let mut batch = Batch::new(CASS_BATCH_TYPE_LOGGED);
+    let mut batch = Batch::new(BatchType::LOGGED);
     for pair in pairs {
         let mut statement = prepared.bind();
         statement.bind(0, pair.key.as_ref())?;
