@@ -4,8 +4,8 @@ use cassandra::statement::Statement;
 use cassandra::util::Protected;
 
 use cassandra_sys::CASS_OK;
-pub use cassandra_sys::CassBatch as _Batch;
-pub use cassandra_sys::CassBatchType as BatchType;
+use cassandra_sys::CassBatch as _Batch;
+use cassandra_sys::CassBatchType_;
 use cassandra_sys::CassConsistency;
 use cassandra_sys::CassCustomPayload as _CassCustomPayload;
 use cassandra_sys::CassError;
@@ -81,7 +81,7 @@ impl Drop for Batch {
 
 impl Batch {
     /// Creates a new batch statement with batch type.
-    pub fn new(batch_type: BatchType) -> Batch { unsafe { Batch(cass_batch_new(batch_type)) } }
+    pub fn new(batch_type: BatchType) -> Batch { unsafe { Batch(cass_batch_new(batch_type.inner())) } }
 
     /// Sets the batch's consistency level
     pub fn set_consistency(&mut self, consistency: Consistency) -> Result<&Self, CassError> {
@@ -145,3 +145,19 @@ impl Batch {
         }
     }
 }
+
+/// A type of batch.
+#[derive(Debug, Eq, PartialEq)]
+#[allow(missing_docs)] // Meanings are defined in CQL documentation.
+#[allow(non_camel_case_types)] // Names are traditional.
+pub enum BatchType {
+    LOGGED,
+    UNLOGGED,
+    COUNTER,
+}
+
+enhance_nullary_enum!(BatchType, CassBatchType_, {
+    (LOGGED, CASS_BATCH_TYPE_LOGGED, "LOGGED"),
+    (UNLOGGED, CASS_BATCH_TYPE_UNLOGGED, "UNLOGGED"),
+    (COUNTER, CASS_BATCH_TYPE_COUNTER, "COUNTER"),
+});

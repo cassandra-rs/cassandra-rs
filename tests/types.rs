@@ -11,7 +11,7 @@ fn test_using_consistency() {
     s.set_consistency(Consistency::LOCAL_ONE).unwrap();
     s.set_serial_consistency(Consistency::SERIAL).unwrap();
 
-    let mut batch = Batch::new(CASS_BATCH_TYPE_LOGGED);
+    let mut batch = Batch::new(BatchType::LOGGED);
     batch.add_statement(&s).unwrap();
     batch.set_consistency(Consistency::TWO).unwrap();
     batch.set_serial_consistency(Consistency::LOCAL_SERIAL).unwrap();
@@ -90,4 +90,20 @@ fn test_using_cql_protocol_version() {
     let mut cluster = Cluster::default();
     cluster.set_protocol_version(4).unwrap();
     cluster.set_protocol_version(2).unwrap();
+}
+
+#[test]
+fn test_parsing_printing_batch_type() {
+    for v in BatchType::variants() {
+        let s = v.to_string();
+        let v2: BatchType = s.parse().expect(&format!("Failed on {:?} as {}", v, s));
+        assert_eq!(v2, *v, "with intermediate {}", s);
+    }
+
+    // Just a few spot checks to confirm the formatting hasn't regressed
+    // or changed unexpectedly.
+    assert_eq!(BatchType::LOGGED.to_string(), "LOGGED");
+    assert_eq!(format!("{}", BatchType::UNLOGGED), "UNLOGGED");
+    assert_eq!("COUNTER".parse::<BatchType>().unwrap(), BatchType::COUNTER);
+    let _ = "INVALID".parse::<BatchType>().expect_err("Should have failed to parse");
 }
