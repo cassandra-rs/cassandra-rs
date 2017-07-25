@@ -12,8 +12,8 @@ use futures::Future;
 
 static NUM_CONCURRENT_REQUESTS: usize = 1000;
 
-fn insert_into_async(session: &Session, key: String) -> Result<Vec<ResultFuture<CassResult>>> {
-    let mut futures = Vec::<ResultFuture<CassResult>>::new();
+fn insert_into_async(session: &Session, key: String) -> Result<Vec<CassFuture<CassResult>>> {
+    let mut futures = Vec::<CassFuture<CassResult>>::new();
     for i in 0..NUM_CONCURRENT_REQUESTS {
         let key: &str = &(key.clone() + &i.to_string());
         let mut statement = stmt!("INSERT INTO examples.async (key, bln, flt, dbl, i32, i64)

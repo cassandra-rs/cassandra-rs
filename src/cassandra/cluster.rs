@@ -1,5 +1,5 @@
 
-use cassandra::future::ResultFuture;
+use cassandra::future::CassFuture;
 use cassandra::policy::retry::RetryPolicy;
 use cassandra::session::Session;
 use cassandra::ssl::Ssl;
@@ -139,7 +139,7 @@ impl Cluster {
     pub fn connect(&mut self) -> Result<Session> {
         unsafe {
             let session = Session(cass_session_new());
-            let connect_future = <ResultFuture<()>>::build(cass_session_connect(session.0, self.0));
+            let connect_future = <CassFuture<()>>::build(cass_session_connect(session.0, self.0));
             connect_future.wait().map(|_| session).chain_err(|| "Could not connect")
         }
     }

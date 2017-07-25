@@ -6,7 +6,7 @@ use cassandra::batch::Batch;
 use cassandra::cluster::Cluster;
 use cassandra::result::CassResult;
 use cassandra::error::CassError;
-use cassandra::future::ResultFuture;
+use cassandra::future::CassFuture;
 use cassandra::metrics::SessionMetrics;
 use cassandra::schema::schema_meta::SchemaMeta;
 use cassandra::statement::Statement;
@@ -67,45 +67,45 @@ impl Session {
     //    }
 
     /// Connects a session.
-    pub fn connect(self, cluster: &Cluster) -> ResultFuture<()> {
-        unsafe { <ResultFuture<()>>::build(cass_session_connect(self.0, cluster.inner())) }
+    pub fn connect(self, cluster: &Cluster) -> CassFuture<()> {
+        unsafe { <CassFuture<()>>::build(cass_session_connect(self.0, cluster.inner())) }
     }
 
     /// Connects a session and sets the keyspace.
-    pub fn connect_keyspace(&self, cluster: &Cluster, keyspace: &str) -> Result<ResultFuture<()>, NulError> {
+    pub fn connect_keyspace(&self, cluster: &Cluster, keyspace: &str) -> Result<CassFuture<()>, NulError> {
         unsafe {
-            Ok(<ResultFuture<()>>::build(cass_session_connect_keyspace(self.0, cluster.inner(), CString::new(keyspace)?.as_ptr())))
+            Ok(<CassFuture<()>>::build(cass_session_connect_keyspace(self.0, cluster.inner(), CString::new(keyspace)?.as_ptr())))
         }
     }
 
     /// Closes the session instance, outputs a close future which can
     /// be used to determine when the session has been terminated. This allows
     /// in-flight requests to finish.
-    pub fn close(self) -> ResultFuture<()> { unsafe { <ResultFuture<()>>::build(cass_session_close(self.0)) } }
+    pub fn close(self) -> CassFuture<()> { unsafe { <CassFuture<()>>::build(cass_session_close(self.0)) } }
 
     /// Create a prepared statement.
-    pub fn prepare(&self, query: &str) -> Result<ResultFuture<PreparedStatement>, CassError> {
+    pub fn prepare(&self, query: &str) -> Result<CassFuture<PreparedStatement>, CassError> {
         unsafe {
-            Ok(<ResultFuture<PreparedStatement>>::build(cass_session_prepare(self.0, CString::new(query).expect("must be utf8").as_ptr())))
+            Ok(<CassFuture<PreparedStatement>>::build(cass_session_prepare(self.0, CString::new(query).expect("must be utf8").as_ptr())))
         }
     }
 
     //    ///Execute a query or bound statement.
-    //    pub fn execute(&self, statement: &str, parameter_count: u64) -> ResultFuture {
+    //    pub fn execute(&self, statement: &str, parameter_count: u64) -> CassFuture {
     //        unsafe {
-    //            ResultFuture::build(cass_session_execute(self.0,
+    //            CassFuture::build(cass_session_execute(self.0,
     //            Statement::new(statement, parameter_count).inner()))
     //        }
     //    }
 
     /// Execute a batch statement.
-    pub fn execute_batch(&self, batch: Batch) -> ResultFuture<CassResult> {
-        <ResultFuture<CassResult>>::build(unsafe { cass_session_execute_batch(self.0, batch.inner()) })
+    pub fn execute_batch(&self, batch: Batch) -> CassFuture<CassResult> {
+        <CassFuture<CassResult>>::build(unsafe { cass_session_execute_batch(self.0, batch.inner()) })
     }
 
     /// Execute a statement.
-    pub fn execute(&self, statement: &Statement) -> ResultFuture<CassResult> {
-        unsafe { <ResultFuture<CassResult>>::build(cass_session_execute(self.0, statement.inner())) }
+    pub fn execute(&self, statement: &Statement) -> CassFuture<CassResult> {
+        unsafe { <CassFuture<CassResult>>::build(cass_session_execute(self.0, statement.inner())) }
     }
 
     /// Gets a snapshot of this session's schema metadata. The returned

@@ -30,7 +30,7 @@ pub use cassandra::consistency::Consistency;
 pub use cassandra::data_type::DataType;
 // pub use cassandra::write_type::*;
 pub use cassandra::field::Field;
-pub use cassandra::future::ResultFuture;
+pub use cassandra::future::CassFuture;
 pub use cassandra::inet::Inet;
 // pub use cassandra::util::*;
 // pub use cassandra::metrics::*;

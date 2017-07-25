@@ -1,39 +1,27 @@
-use Session;
-
 use cassandra::error::{CassError, CassErrorResult};
 use cassandra::prepared::PreparedStatement;
 use cassandra::result::CassResult;
 use cassandra::util::Protected;
 use cassandra_sys::CassError_;
 use cassandra_sys::CASS_OK;
-
 use cassandra_sys::CassFuture as _Future;
-use cassandra_sys::CassFutureCallback as _CassFutureCallback;
-use cassandra_sys::cass_future_custom_payload_item;
-use cassandra_sys::cass_future_custom_payload_item_count;
 use cassandra_sys::cass_future_error_code;
 use cassandra_sys::cass_future_error_message;
-// use cassandra_sys::CassResult as _CassResult;
 use cassandra_sys::cass_future_free;
 use cassandra_sys::cass_future_get_error_result;
 use cassandra_sys::cass_future_get_prepared;
 use cassandra_sys::cass_future_get_result;
 use cassandra_sys::cass_future_ready;
 use cassandra_sys::cass_future_set_callback;
-use cassandra_sys::cass_future_wait;
-use cassandra_sys::cass_future_wait_timed;
-
 use cassandra_sys::cass_true;
+
 use errors::*;
 use std::mem;
-use std::os::raw;
 use std::slice;
 use std::str;
-use std::result;
 use std::sync::{Arc, Mutex};
 use std::marker::PhantomData;
 use futures;
-use error_chain::ChainedError;
 
 /// A future representing the result of a Cassandra driver operation.
 ///
@@ -43,7 +31,7 @@ use error_chain::ChainedError;
 /// Cassandra driver future really does return the indicated type).
 #[must_use]
 #[derive(Debug)]
-pub struct ResultFuture<T> {
+pub struct CassFuture<T> {
     /// The underlying Cassandra driver future object.
     inner: *mut _Future,
 
@@ -54,13 +42,13 @@ pub struct ResultFuture<T> {
     phantom: PhantomData<T>,
 }
 
-impl<T> ResultFuture<T> {
+impl<T> CassFuture<T> {
     /// Wrap a Cassandra driver future to make it a proper Rust future.
     ///
     /// Take care only to construct this at the appropriate type (i.e., where the
     /// Cassandra driver future really does return the indicated type).
     pub(crate) fn build(inner: *mut _Future) -> Self {
-        ResultFuture {
+        CassFuture {
             inner,
             state: Arc::new(FutureTarget { inner: Mutex::new(FutureState::Created) }),
             phantom: PhantomData,
@@ -68,8 +56,8 @@ impl<T> ResultFuture<T> {
     }
 }
 
-impl<T> Drop for ResultFuture<T> {
-    /// Drop this ResultFuture.
+impl<T> Drop for CassFuture<T> {
+    /// Drop this CassFuture.
     ///
     /// This also drops its reference to the FutureTarget, but if
     /// we're waiting to be called back the FutureState::Awaiting holds another reference to
@@ -77,11 +65,9 @@ impl<T> Drop for ResultFuture<T> {
     fn drop(&mut self) { unsafe { cass_future_free(self.inner) }; }
 }
 
-// @@@ rename the struct
-
 /// A type is Completable if it can be returned from a Cassandra driver future.
 /// You should only use this if you reasonably expect that a particular future will
-/// have such a result; for `ResultFuture`s we ensure this by construction.
+/// have such a result; for `CassFuture`s we ensure this by construction.
 pub trait Completable where Self: Sized {
     /// Extract the result from the future, if present.
     unsafe fn get(inner: *mut _Future) -> Option<Self>;
@@ -109,7 +95,7 @@ impl Completable for PreparedStatement {
 }
 
 /// A Cassandra future is a normal Rust future.
-impl<T: Completable> futures::Future for ResultFuture<T> {
+impl<T: Completable> futures::Future for CassFuture<T> {
     type Item = T;
     type Error = Error;
 
@@ -225,7 +211,7 @@ unsafe fn get_cass_error(rc: CassError_, inner: *mut _Future) -> Error {
 /// typically freed after completion, that means we must only complete after we receive the
 /// callback.
 ///
-/// The FutureTarget is held by a ResultFuture, and (in the FutureState::Awaiting state) by
+/// The FutureTarget is held by a CassFuture, and (in the FutureState::Awaiting state) by
 /// a C++ Cassandra driver callback. The latter pointer is represented by one inside that state,
 /// so that it is not freed early.
 #[derive(Debug)]
@@ -253,7 +239,7 @@ enum FutureState {
 
 /// Callback which wakes the task waiting on this future.
 /// Called by the C++ driver when the future is ready,
-/// with a pointer to the `ResultFuture`.
+/// with a pointer to the `CassFuture`.
 unsafe extern "C" fn notify_task(_c_future: *mut _Future, data: *mut ::std::os::raw::c_void) {
     let future_target: &FutureTarget = &*(data as *const FutureTarget);
     // The future is now ready, so transition to the appropriate state.
