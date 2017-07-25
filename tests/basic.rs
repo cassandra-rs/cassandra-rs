@@ -1,10 +1,12 @@
 #[macro_use(stmt)]
 extern crate cassandra_cpp;
+extern crate futures;
 
 mod help;
 
 use cassandra_cpp::*;
 use errors::*;
+use futures::Future;
 
 
 #[derive(Debug,PartialEq,Clone,Copy)]
@@ -60,7 +62,7 @@ fn select_from_basic(session: &Session, key: &str) -> Result<Option<Basic>> {
 fn select_from_basic_prepared(session: &Session, prepared: &PreparedStatement, key: &str, basic: &mut Basic) -> Result<()> {
     let mut statement = prepared.bind();
     statement.bind_string(0, key)?;
-    let mut future = session.execute(&statement);
+    let future = session.execute(&statement);
     let result = future.wait()?;
     println!("{:?}", result);
     for row in result.iter() {

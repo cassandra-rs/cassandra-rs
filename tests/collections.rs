@@ -1,11 +1,13 @@
 #[macro_use(stmt)]
 extern crate cassandra_cpp;
+extern crate futures;
 
 mod help;
 
 use cassandra_cpp::*;
 use errors::*;
 use std::collections::HashSet;
+use futures::Future;
 
 
 fn insert_into_collections(session: &Session, key: &str, items: &Vec<String>) -> Result<CassResult> {

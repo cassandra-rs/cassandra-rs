@@ -1,5 +1,5 @@
 
-use cassandra::future::ConnectFuture;
+use cassandra::future::CassFuture;
 use cassandra::policy::retry::RetryPolicy;
 use cassandra::session::Session;
 use cassandra::ssl::Ssl;
@@ -62,6 +62,7 @@ use std::result;
 use std::fmt::Display;
 use std::str::FromStr;
 use time::Duration;
+use futures::Future;
 
 /// A CQL protocol version is just an integer.
 pub type CqlProtocol = i32;
@@ -138,8 +139,8 @@ impl Cluster {
     pub fn connect(&mut self) -> Result<Session> {
         unsafe {
             let session = Session(cass_session_new());
-            let connect_future = ConnectFuture::build(cass_session_connect(session.0, self.0));
-            cass_future_error_code(connect_future.inner()).to_result(session).chain_err(|| "Could not connect")
+            let connect_future = <CassFuture<()>>::build(cass_session_connect(session.0, self.0));
+            connect_future.wait().map(|_| session).chain_err(|| "Could not connect")
         }
     }
 

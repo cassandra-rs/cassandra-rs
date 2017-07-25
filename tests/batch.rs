@@ -1,11 +1,14 @@
 #[macro_use(stmt)]
 extern crate cassandra_cpp;
+extern crate futures;
 
 mod help;
 
 use cassandra_cpp::*;
 use errors::*;
 use std::collections::HashSet;
+use futures::Future;
+
 
 #[derive(Debug,Eq,PartialEq,Hash)]
 struct Pair {
