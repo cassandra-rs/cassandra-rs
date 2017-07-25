@@ -27,8 +27,9 @@ use futures;
 ///
 /// On success, returns a result of type `T`. On failure, returns a Cassandra error.
 ///
-/// Take care only to construct this at the appropriate type (i.e., where the
-/// Cassandra driver future really does return the indicated type).
+/// When constructing this take care to supply the correct type argument, since it will
+/// be used to control how the result is extracted from the underlying Cassandra
+/// driver future (see `Completable`).
 #[must_use]
 #[derive(Debug)]
 pub struct CassFuture<T> {
@@ -45,8 +46,9 @@ pub struct CassFuture<T> {
 impl<T> CassFuture<T> {
     /// Wrap a Cassandra driver future to make it a proper Rust future.
     ///
-    /// Take care only to construct this at the appropriate type (i.e., where the
-    /// Cassandra driver future really does return the indicated type).
+    /// When invoking this take care to supply the correct type argument, since it will
+    /// be used to control how the result is extracted from the underlying Cassandra
+    /// driver future (see `Completable`).
     pub(crate) fn build(inner: *mut _Future) -> Self {
         CassFuture {
             inner,
