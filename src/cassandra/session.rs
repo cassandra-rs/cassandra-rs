@@ -5,13 +5,13 @@
 use cassandra::batch::Batch;
 use cassandra::cluster::Cluster;
 use cassandra::result::CassResult;
-use cassandra::error::CassError;
 use cassandra::future::CassFuture;
 use cassandra::metrics::SessionMetrics;
 use cassandra::schema::schema_meta::SchemaMeta;
 use cassandra::statement::Statement;
 use cassandra::prepared::PreparedStatement;
 use cassandra::util::Protected;
+use cassandra::error::*;
 
 use cassandra_sys::CassSession as _Session;
 use cassandra_sys::cass_session_close;
@@ -72,7 +72,7 @@ impl Session {
     }
 
     /// Connects a session and sets the keyspace.
-    pub fn connect_keyspace(&self, cluster: &Cluster, keyspace: &str) -> Result<CassFuture<()>, NulError> {
+    pub fn connect_keyspace(&self, cluster: &Cluster, keyspace: &str) -> Result<CassFuture<()>> {
         unsafe {
             Ok(<CassFuture<()>>::build(cass_session_connect_keyspace(self.0, cluster.inner(), CString::new(keyspace)?.as_ptr())))
         }
@@ -84,7 +84,7 @@ impl Session {
     pub fn close(self) -> CassFuture<()> { unsafe { <CassFuture<()>>::build(cass_session_close(self.0)) } }
 
     /// Create a prepared statement.
-    pub fn prepare(&self, query: &str) -> Result<CassFuture<PreparedStatement>, CassError> {
+    pub fn prepare(&self, query: &str) -> Result<CassFuture<PreparedStatement>> {
         unsafe {
             Ok(<CassFuture<PreparedStatement>>::build(cass_session_prepare(self.0, CString::new(query).expect("must be utf8").as_ptr())))
         }

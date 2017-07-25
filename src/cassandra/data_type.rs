@@ -1,10 +1,7 @@
-
-
-use cassandra::error::CassError;
-
 use cassandra::user_type::UserType;
 use cassandra::util::Protected;
 use cassandra::value::ValueType;
+use cassandra::error::*;
 
 use cassandra_sys::CassDataType as _CassDataType;
 use cassandra_sys::cass_data_sub_type_count;
@@ -28,7 +25,6 @@ use cassandra_sys::cass_data_type_sub_type_name;
 use cassandra_sys::cass_data_type_type;
 use cassandra_sys::cass_data_type_type_name;
 use cassandra_sys::cass_user_type_new_from_data_type;
-use errors::*;
 
 use std::ffi::CString;
 

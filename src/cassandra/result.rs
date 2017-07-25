@@ -3,13 +3,12 @@
 #![allow(missing_copy_implementations)]
 
 use cassandra::data_type::ConstDataType;
-use cassandra::error::CassError;
 use cassandra::row::Row;
 use cassandra::util::Protected;
-
 use cassandra::value::ValueType;
-use cassandra_sys::CassIterator as _CassIterator;
+use cassandra::error::*;
 
+use cassandra_sys::CassIterator as _CassIterator;
 use cassandra_sys::CassResult as _CassResult;
 use cassandra_sys::cass_false;
 use cassandra_sys::cass_iterator_free;
@@ -21,14 +20,12 @@ use cassandra_sys::cass_result_column_data_type;
 use cassandra_sys::cass_result_column_name;
 use cassandra_sys::cass_result_column_type;
 use cassandra_sys::cass_result_first_row;
-#[allow(unused_imports)]
 use cassandra_sys::cass_result_free;
 use cassandra_sys::cass_result_has_more_pages;
 use cassandra_sys::cass_result_paging_state_token;
 use cassandra_sys::cass_result_row_count;
-
 use cassandra_sys::cass_true;
-use errors::*;
+
 use std::ffi::CString;
 use std::fmt;
 use std::fmt::Debug;

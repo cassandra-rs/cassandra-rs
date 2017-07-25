@@ -1,16 +1,13 @@
-
-
-use cassandra::error::CassError;
 use cassandra::inet::Inet;
 use cassandra::iterator::MapIterator;
 use cassandra::iterator::SetIterator;
 // use decimal::d128;
 use cassandra::util::Protected;
-
 use cassandra::uuid::Uuid;
 use cassandra::value::{Value, ValueType};
-use cassandra_sys::CASS_ERROR_LIB_INVALID_VALUE_TYPE;
+use cassandra::error::*;
 
+use cassandra_sys::CASS_ERROR_LIB_INVALID_VALUE_TYPE;
 use cassandra_sys::CASS_OK;
 use cassandra_sys::CASS_VALUE_TYPE_ASCII;
 use cassandra_sys::CASS_VALUE_TYPE_BIGINT;
@@ -44,14 +41,11 @@ use cassandra_sys::cass_iterator_from_collection;
 use cassandra_sys::cass_iterator_from_map;
 use cassandra_sys::cass_true;
 use cassandra_sys::cass_value_get_bool;
-
-#[allow(unused_imports)]
 use cassandra_sys::cass_value_get_decimal;
 use cassandra_sys::cass_value_get_double;
 use cassandra_sys::cass_value_get_float;
 use cassandra_sys::cass_value_get_inet;
 use cassandra_sys::cass_value_get_int16;
-
 use cassandra_sys::cass_value_get_int32;
 use cassandra_sys::cass_value_get_int64;
 use cassandra_sys::cass_value_get_int8;
@@ -59,7 +53,7 @@ use cassandra_sys::cass_value_get_string;
 use cassandra_sys::cass_value_get_uint32;
 use cassandra_sys::cass_value_get_uuid;
 use cassandra_sys::cass_value_type;
-use errors::*;
+
 use std::fmt;
 use std::fmt::Debug;
 use std::fmt::Display;

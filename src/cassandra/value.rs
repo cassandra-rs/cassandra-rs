@@ -1,13 +1,13 @@
 
 
 use cassandra::data_type::ConstDataType;
-
-use cassandra::error::CassError;
 use cassandra::inet::Inet;
 use cassandra::iterator::MapIterator;
 use cassandra::iterator::SetIterator;
 use cassandra::util::Protected;
 use cassandra::uuid::Uuid;
+use cassandra::error::*;
+
 use cassandra_sys::CASS_OK;
 use cassandra_sys::CASS_ERROR_LIB_INVALID_VALUE_TYPE;
 use cassandra_sys::CASS_VALUE_TYPE_ASCII;
@@ -40,7 +40,6 @@ use cassandra_sys::CASS_VALUE_TYPE_VARCHAR;
 use cassandra_sys::CASS_VALUE_TYPE_VARINT;
 use cassandra_sys::CassValue as _CassValue;
 use cassandra_sys::CassValueType as _CassValueType;
-#[allow(unused_imports)]
 use cassandra_sys::cass_collection_append_decimal;
 use cassandra_sys::cass_iterator_from_collection;
 use cassandra_sys::cass_iterator_from_map;
@@ -59,18 +58,14 @@ use cassandra_sys::cass_value_get_string;
 use cassandra_sys::cass_value_get_uuid;
 use cassandra_sys::cass_value_is_collection;
 use cassandra_sys::cass_value_is_null;
-#[allow(unused_imports)]
 use cassandra_sys::cass_value_item_count;
-#[allow(unused_imports)]
 use cassandra_sys::cass_value_primary_sub_type;
-#[allow(unused_imports)]
 use cassandra_sys::cass_value_secondary_sub_type;
 use cassandra_sys::cass_value_type;
-use errors::*;
+
 use std::ffi::CString;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
-
 use std::mem;
 use std::ptr;
 use std::slice;

@@ -61,31 +61,6 @@ pub use cassandra::value::{Value, ValueType};
 
 pub use cassandra::error::*;
 
-/// A still clumsy use of error-chain. needs work
-pub mod errors {
-    error_chain! {
-        errors {
-            /// Generic Cassandra error.
-            CassandraError {
-                description("Cassandra error")
-                display("Cassandra error")
-            }
-
-            /// Detailed Cassandra error
-            CassDetailedError(code: super::CassError, msg: String) {
-                description("Cassandra error")
-                display("Cassandra error {:?}: {}", &code, &msg)
-            }
-
-            /// Driver error
-            DriverError(s: &'static str) {
-                description("Driver error")
-                display("Driver error: {}", s)
-            }
-        }
-    }
-}
-
 // #[macro_use]
 mod cassandra {
     #[macro_use]

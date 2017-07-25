@@ -15,7 +15,6 @@ use cassandra_sys::cass_iterator_next;
 use cassandra_sys::cass_row_get_column;
 use cassandra_sys::cass_row_get_column_by_name;
 use cassandra_sys::cass_true;
-use errors::*;
 use std::ffi::CString;
 use std::fmt;
 use std::fmt::Debug;

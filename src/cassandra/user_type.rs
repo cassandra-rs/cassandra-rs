@@ -2,15 +2,14 @@
 
 use cassandra::collection::Set;
 use cassandra::data_type::ConstDataType;
-use cassandra::error::CassError;
 use cassandra::inet::Inet;
 use cassandra::tuple::Tuple;
 use cassandra::util::Protected;
-
 use cassandra::uuid::Uuid;
+use cassandra::error::*;
+
 use cassandra_sys::CassUserType as _UserType;
 use cassandra_sys::cass_false;
-
 use cassandra_sys::cass_true;
 use cassandra_sys::cass_user_type_data_type;
 use cassandra_sys::cass_user_type_free;
@@ -20,9 +19,7 @@ use cassandra_sys::cass_user_type_set_bytes;
 use cassandra_sys::cass_user_type_set_bytes_by_name;
 use cassandra_sys::cass_user_type_set_collection;
 use cassandra_sys::cass_user_type_set_collection_by_name;
-#[allow(unused_imports)]
 use cassandra_sys::cass_user_type_set_decimal;
-#[allow(unused_imports)]
 use cassandra_sys::cass_user_type_set_decimal_by_name;
 use cassandra_sys::cass_user_type_set_double;
 use cassandra_sys::cass_user_type_set_double_by_name;
@@ -49,9 +46,8 @@ use cassandra_sys::cass_user_type_set_uint32_by_name;
 use cassandra_sys::cass_user_type_set_user_type;
 use cassandra_sys::cass_user_type_set_user_type_by_name;
 use cassandra_sys::cass_user_type_set_uuid;
-
 use cassandra_sys::cass_user_type_set_uuid_by_name;
-use errors::*;
+
 use std::ffi::CString;
 // use cassandra::iterator::FieldIterator;
 

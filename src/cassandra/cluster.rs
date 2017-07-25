@@ -5,12 +5,13 @@ use cassandra::session::Session;
 use cassandra::ssl::Ssl;
 use cassandra::time::TimestampGen;
 use cassandra::util::Protected;
+use cassandra::error::*;
+
 use cassandra_sys::CassCluster as _Cluster;
 use cassandra_sys::cass_bool_t;
 use cassandra_sys::cass_cluster_free;
 use cassandra_sys::cass_cluster_new;
 use cassandra_sys::cass_cluster_set_connect_timeout;
-
 use cassandra_sys::cass_cluster_set_connection_heartbeat_interval;
 use cassandra_sys::cass_cluster_set_connection_idle_timeout;
 use cassandra_sys::cass_cluster_set_contact_points;
@@ -48,16 +49,14 @@ use cassandra_sys::cass_future_error_code;
 use cassandra_sys::cass_session_connect;
 use cassandra_sys::cass_session_new;
 use cassandra_sys::cass_true;
-use errors::*;
+
 // use ip::IpAddr;
-use errors::*;
 use std::ffi::{CString, CStr};
 use std::ffi::NulError;
 use std::fmt;
 use std::iter::Map;
 use std::net::AddrParseError;
 use std::net::Ipv4Addr;
-
 use std::result;
 use std::fmt::Display;
 use std::str::FromStr;

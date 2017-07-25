@@ -1,7 +1,9 @@
-use cassandra::error::{CassError, CassErrorResult};
+use cassandra::error::*;
 use cassandra::prepared::PreparedStatement;
 use cassandra::result::CassResult;
 use cassandra::util::Protected;
+use cassandra::consistency::Consistency;
+use cassandra::write_type::WriteType;
 use cassandra_sys::CassError_;
 use cassandra_sys::CASS_OK;
 use cassandra_sys::CassFuture as _Future;
@@ -13,9 +15,8 @@ use cassandra_sys::cass_future_get_prepared;
 use cassandra_sys::cass_future_get_result;
 use cassandra_sys::cass_future_ready;
 use cassandra_sys::cass_future_set_callback;
-use cassandra_sys::cass_true;
+use cassandra_sys::{cass_true, cass_false};
 
-use errors::*;
 use std::mem;
 use std::slice;
 use std::str;
@@ -156,7 +157,7 @@ impl<T: Completable> futures::Future for CassFuture<T> {
             let data =
                 (self.state.as_ref() as *const FutureTarget) as *mut ::std::os::raw::c_void;
             cass_future_set_callback(self.inner, Some(notify_task), data)
-                .to_result(()).chain_err(|| ErrorKind::DriverError("Unable to set callback"))
+                .to_result(()).chain_err(|| ErrorKind::WrapperError("Unable to set callback"))
         } else {
             Ok(())
         }.and_then(move |_| ret)
@@ -170,30 +171,11 @@ unsafe fn get_completion<T: Completable>(inner: *mut _Future) -> Result<T> {
     match rc {
         CASS_OK => {
             match Completable::get(inner) {
-                None => Err(ErrorKind::DriverError("No result found").into()),
+                None => Err(ErrorKind::WrapperError("No result found").into()),
                 Some(v) => Ok(v)
             }
         },
-        _ => Err(get_cass_error(rc, inner)),
-    }
-}
-
-/// Extract the error code and message from a Cassandra driver future
-unsafe fn get_cass_error(rc: CassError_, inner: *mut _Future) -> Error {
-    let e = cass_future_get_error_result(inner);
-    if e.is_null() {
-        // No extended error available; just take the basic one.
-        let mut msg = mem::zeroed();
-        let mut msg_length = mem::zeroed();
-        cass_future_error_message(inner, &mut msg, &mut msg_length);
-        let slice = slice::from_raw_parts(msg as *const u8, msg_length as usize);
-        let message = String::from_utf8_lossy(slice).into_owned();
-        ErrorKind::CassDetailedError(CassError::from(rc), message).into()
-    } else {
-        // Get the extended error.
-        CassErrorResult::build(e).to_result(())
-            .chain_err(|| ErrorKind::CassandraError)
-            .expect_err("must fail")
+        _ => Err(get_cass_future_error(rc, inner)),
     }
 }
 

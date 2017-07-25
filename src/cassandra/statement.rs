@@ -1,12 +1,9 @@
-
-
 use cassandra::batch::CustomPayload;
 use cassandra::collection::List;
 use cassandra::collection::Map;
 // use decimal::d128;
 use cassandra::collection::Set;
 use cassandra::consistency::Consistency;
-use cassandra::error::CassError;
 use cassandra::inet::Inet;
 use cassandra::policy::retry::RetryPolicy;
 use cassandra::result::CassResult;
@@ -14,6 +11,8 @@ use cassandra::tuple::Tuple;
 use cassandra::user_type::UserType;
 use cassandra::util::Protected;
 use cassandra::uuid::Uuid;
+use cassandra::error::*;
+
 use cassandra_sys::CassStatement as _Statement;
 use cassandra_sys::cass_false;
 use cassandra_sys::cass_statement_add_key_index;
@@ -23,9 +22,7 @@ use cassandra_sys::cass_statement_bind_bytes;
 use cassandra_sys::cass_statement_bind_bytes_by_name;
 use cassandra_sys::cass_statement_bind_collection;
 use cassandra_sys::cass_statement_bind_collection_by_name;
-#[allow(unused_imports)]
 use cassandra_sys::cass_statement_bind_decimal;
-#[allow(unused_imports)]
 use cassandra_sys::cass_statement_bind_decimal_by_name;
 use cassandra_sys::cass_statement_bind_double;
 use cassandra_sys::cass_statement_bind_double_by_name;
@@ -65,7 +62,7 @@ use cassandra_sys::cass_statement_set_retry_policy;
 use cassandra_sys::cass_statement_set_serial_consistency;
 use cassandra_sys::cass_statement_set_timestamp;
 use cassandra_sys::cass_true;
-use errors::*;
+
 use std::ffi::CString;
 /// A statement object is an executable query. It represents either a regular
 /// (adhoc) statement or a prepared statement. It maintains the queries' parameter

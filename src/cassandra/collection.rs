@@ -1,12 +1,12 @@
 use cassandra::data_type::ConstDataType;
 use cassandra::data_type::DataType;
-
-use cassandra::error::CassError;
 use cassandra::inet::Inet;
 use cassandra::tuple::Tuple;
 use cassandra::user_type::UserType;
 use cassandra::util::Protected;
 use cassandra::uuid::Uuid;
+use cassandra::error::*;
+
 use cassandra_sys::CASS_COLLECTION_TYPE_LIST;
 use cassandra_sys::CASS_COLLECTION_TYPE_MAP;
 use cassandra_sys::CASS_COLLECTION_TYPE_SET;
@@ -14,7 +14,6 @@ use cassandra_sys::CassCollection as _CassCollection;
 use cassandra_sys::cass_collection_append_bool;
 use cassandra_sys::cass_collection_append_bytes;
 use cassandra_sys::cass_collection_append_collection;
-#[allow(unused_imports)]
 use cassandra_sys::cass_collection_append_decimal;
 use cassandra_sys::cass_collection_append_double;
 use cassandra_sys::cass_collection_append_float;
@@ -34,7 +33,7 @@ use cassandra_sys::cass_collection_new;
 use cassandra_sys::cass_collection_new_from_data_type;
 use cassandra_sys::cass_false;
 use cassandra_sys::cass_true;
-use errors::*;
+
 use std::ffi::CString;
 
 // #[repr(C)]

@@ -1,7 +1,6 @@
-
-
-use cassandra::error::CassError;
 use cassandra::util::Protected;
+use cassandra::error::*;
+
 use cassandra_sys::CassSslVerifyFlags;
 use cassandra_sys::CassSsl as _Ssl;
 use cassandra_sys::cass_ssl_add_trusted_cert;
@@ -10,7 +9,7 @@ use cassandra_sys::cass_ssl_new;
 use cassandra_sys::cass_ssl_set_cert;
 use cassandra_sys::cass_ssl_set_private_key;
 use cassandra_sys::cass_ssl_set_verify_flags;
-use errors::*;
+
 use std::ffi::CString;
 
 /// The individual SSL verification levels.

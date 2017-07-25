@@ -1,12 +1,12 @@
 use cassandra::collection::Set;
 use cassandra::data_type::ConstDataType;
 use cassandra::data_type::DataType;
-use cassandra::error::CassError;
-
 use cassandra::inet::AsInet;
 use cassandra::user_type::UserType;
 use cassandra::util::Protected;
 use cassandra::uuid::Uuid;
+use cassandra::error::*;
+
 use cassandra_sys::CassTuple as _Tuple;
 use cassandra_sys::cass_false;
 use cassandra_sys::cass_true;
@@ -17,7 +17,6 @@ use cassandra_sys::cass_tuple_new_from_data_type;
 use cassandra_sys::cass_tuple_set_bool;
 use cassandra_sys::cass_tuple_set_bytes;
 use cassandra_sys::cass_tuple_set_collection;
-#[allow(unused_imports)]
 use cassandra_sys::cass_tuple_set_decimal;
 use cassandra_sys::cass_tuple_set_double;
 use cassandra_sys::cass_tuple_set_float;
@@ -32,10 +31,9 @@ use cassandra_sys::cass_tuple_set_tuple;
 use cassandra_sys::cass_tuple_set_uint32;
 use cassandra_sys::cass_tuple_set_user_type;
 use cassandra_sys::cass_tuple_set_uuid;
-use errors::*;
+
 use std::ffi::CString;
 use std::net::SocketAddr;
-
 
 /// A tuple of values.
 #[derive(Debug)]

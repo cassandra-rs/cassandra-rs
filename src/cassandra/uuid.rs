@@ -1,8 +1,7 @@
 
 
-use cassandra::error::CassError;
 use cassandra::util::Protected;
-
+use cassandra::error::*;
 
 use cassandra_sys::CASS_OK;
 use cassandra_sys::CassUuid as _Uuid;
@@ -16,11 +15,10 @@ use cassandra_sys::cass_uuid_gen_random;
 use cassandra_sys::cass_uuid_gen_time;
 use cassandra_sys::cass_uuid_max_from_time;
 use cassandra_sys::cass_uuid_min_from_time;
-
 use cassandra_sys::cass_uuid_string;
 use cassandra_sys::cass_uuid_timestamp;
 use cassandra_sys::cass_uuid_version;
-use errors::*;
+
 use std::ffi::CString;
 use std::fmt;
 use std::fmt::{Debug, Display};

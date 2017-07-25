@@ -1,16 +1,14 @@
 
 
-use cassandra::error::CassError;
 use cassandra::util::Protected;
+use cassandra::error::*;
 use cassandra_sys::CASS_OK;
 use cassandra_sys::CassInet as _Inet;
 use cassandra_sys::cass_inet_from_string;
 use cassandra_sys::cass_inet_init_v4;
 use cassandra_sys::cass_inet_init_v6;
 use cassandra_sys::cass_inet_string;
-use errors::*;
 use std::default::Default;
-// use std::ffi::NulError;
 use std::ffi::CStr;
 use std::ffi::CString;
 use std::fmt;
@@ -20,7 +18,6 @@ use std::net::{Ipv4Addr, Ipv6Addr};
 use std::net::SocketAddr;
 use std::str::FromStr;
 use std::string::ToString;
-// use cassandra::error::CassLibError;
 
 #[repr(C)]
 /// Cassandra's version of an IP address
