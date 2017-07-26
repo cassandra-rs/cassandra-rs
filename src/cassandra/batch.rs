@@ -87,7 +87,7 @@ impl Batch {
     pub fn set_consistency(&mut self, consistency: Consistency) -> Result<&mut Self> {
         unsafe {
             // @@@ TODO fixme as_result should be associated. Here and below.
-            cass_batch_set_consistency(self.0, consistency.inner()).as_result(self)
+            cass_batch_set_consistency(self.0, consistency.inner()).to_result(self)
         }
     }
 
@@ -96,35 +96,35 @@ impl Batch {
     /// <b>Default:</b> Not set
     pub fn set_serial_consistency(&mut self, consistency: Consistency) -> Result<&mut Self> {
         unsafe {
-            cass_batch_set_serial_consistency(self.0, consistency.inner()).as_result(self)
+            cass_batch_set_serial_consistency(self.0, consistency.inner()).to_result(self)
         }
     }
 
     /// Sets the batch's timestamp.
     pub fn set_timestamp(&mut self, timestamp: i64) -> Result<&Self> {
         unsafe {
-            cass_batch_set_timestamp(self.0, timestamp).as_result(self)
+            cass_batch_set_timestamp(self.0, timestamp).to_result(self)
         }
     }
 
     /// Sets the batch's retry policy.
     pub fn set_retry_policy(&mut self, retry_policy: RetryPolicy) -> Result<&mut Self> {
         unsafe {
-            cass_batch_set_retry_policy(self.0, retry_policy.inner()).as_result(self)
+            cass_batch_set_retry_policy(self.0, retry_policy.inner()).to_result(self)
         }
     }
 
     /// Sets the batch's custom payload.
     pub fn set_custom_payload(&mut self, custom_payload: CustomPayload) -> Result<&mut Self> {
         unsafe {
-            cass_batch_set_custom_payload(self.0, custom_payload.0).as_result(self)
+            cass_batch_set_custom_payload(self.0, custom_payload.0).to_result(self)
         }
     }
 
     /// Adds a statement to a batch.
     pub fn add_statement(&mut self, statement: &Statement) -> Result<&Self> {
         unsafe {
-            cass_batch_add_statement(self.0, statement.inner()).as_result(self)
+            cass_batch_add_statement(self.0, statement.inner()).to_result(self)
         }
     }
 }

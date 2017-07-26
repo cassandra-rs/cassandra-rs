@@ -346,7 +346,7 @@ impl Field {
         unsafe {
             match self.get_type().inner() {
                 CASS_VALUE_TYPE_MAP => Ok(MapIterator::build(cass_iterator_from_map(self.value.inner()))),
-                _ => Err(CASS_ERROR_LIB_INVALID_VALUE_TYPE).chain_err(|| ""),
+                _ => Err(CASS_ERROR_LIB_INVALID_VALUE_TYPE.to_error())
             }
         }
     }
@@ -356,7 +356,7 @@ impl Field {
         unsafe {
             match self.get_type().inner() {
                 CASS_VALUE_TYPE_SET => Ok(SetIterator::build(cass_iterator_from_collection(self.value.inner()))),
-                _ => Err(CASS_ERROR_LIB_INVALID_VALUE_TYPE).chain_err(|| ""),
+                _ => Err(CASS_ERROR_LIB_INVALID_VALUE_TYPE.to_error()),
             }
         }
     }

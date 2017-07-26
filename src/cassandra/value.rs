@@ -320,13 +320,12 @@ impl Value {
         unsafe {
             let mut message_ptr = ptr::null();
             let mut message_length = 0;
-            match cass_value_get_string(self.0, &mut message_ptr, &mut (message_length)) {
-                CASS_OK => {
+            cass_value_get_string(self.0, &mut message_ptr, &mut (message_length)).to_result(())
+                .and_then(|_| {
                     let slice = slice::from_raw_parts(message_ptr as *const u8, message_length as usize);
                     str::from_utf8(slice).chain_err(|| "")
-                },
-                err => Err(err).chain_err(|| ""),
-            }
+                }
+            )
         }
     }
 

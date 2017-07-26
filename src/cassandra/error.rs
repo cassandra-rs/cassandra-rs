@@ -71,13 +71,14 @@ error_chain! {
 /// Extension trait for `CassError_`.
 pub(crate) trait CassErrorExt {
     /// If this operation is successful, return `default`, otherwise an appropriate error.
-    ///
-    /// The name is chosen so as not to conflict with `cassandra_sys::CassError_::to_result`.
-    fn as_result<T>(&self, default: T) -> Result<T>;
+    fn to_result<T>(&self, default: T) -> Result<T>;
+
+    /// This is definitely an error - return it as such.
+    fn to_error(&self) -> Error;
 }
 
 impl CassErrorExt for CassError_ {
-    fn as_result<T>(&self, default: T) -> Result<T> { unsafe {
+    fn to_result<T>(&self, default: T) -> Result<T> { unsafe {
         match *self {
             CASS_OK => Ok(default),
             _ => {
@@ -85,6 +86,11 @@ impl CassErrorExt for CassError_ {
                 Err(ErrorKind::CassError(CassErrorCode::build(*self), message).into())
             },
         }
+    }}
+
+    fn to_error(&self) -> Error { unsafe {
+        let message = CStr::from_ptr(cass_error_desc(*self)).to_string_lossy().into_owned();
+        ErrorKind::CassError(CassErrorCode::build(*self), message).into()
     }}
 }
 

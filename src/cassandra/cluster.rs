@@ -110,7 +110,7 @@ impl Cluster {
         unsafe {
             let s = CString::new(contact_points.clone())?;
             let err = cass_cluster_set_contact_points(self.0, s.as_ptr());
-            err.as_result(self)
+            err.to_result(self)
         }
     }
 
