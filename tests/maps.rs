@@ -41,7 +41,7 @@ fn select_from_maps(session: &Session, key: &str) -> Result<Vec<Pair>> {
     let mut res = vec![];
     for row in result.iter() {
         let column = row.get_column(0).unwrap(); //FIXME
-        let items_iterator: MapIterator = column.map_iter().unwrap();
+        let items_iterator: MapIterator = column.get_map().unwrap();
         for item in items_iterator {
             println!("item: {:?}", item);
             res.push(Pair {

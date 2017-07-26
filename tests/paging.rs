@@ -51,7 +51,7 @@ fn select_from_paging(session: &Session) -> Result<Vec<(String, String)>> {
             match row.get_column(0)?.get_string() {
                 Ok(key) => {
                     let key_str = key.to_string();
-                    let value = row.get_column(1)?.get_string().unwrap();
+                    let value = row.get_column(1)?.get_string()?;
                     println!("key: '{:?}' value: '{:?}'",
                              &key_str,
                              &value);

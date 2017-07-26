@@ -84,9 +84,9 @@ impl CassResult {
     /// Gets the column name at index for the specified result.
     pub fn column_name(&self, index: usize) -> Result<&str> {
         unsafe {
-            let name = mem::zeroed();
-            let name_length = mem::zeroed();
-            cass_result_column_name(self.0, index, name, name_length).to_result(())
+            let mut name = mem::zeroed();
+            let mut name_length = mem::zeroed();
+            cass_result_column_name(self.0, index, &mut name, &mut name_length).to_result(())
                 .and_then(|_| {
                     let slice = slice::from_raw_parts(name as *const u8, name_length as usize);
                     Ok(str::from_utf8(slice)?)

@@ -19,6 +19,7 @@ fn insert_into_batch_with_prepared(session: &Session, pairs: &Vec<Pair>) -> Resu
     let insert_query = "INSERT INTO examples.pairs (key, value) VALUES (?, ?)";
     let prepared = session.prepare(insert_query).unwrap().wait().unwrap();
     let mut batch = Batch::new(BatchType::LOGGED);
+    batch.set_consistency(Consistency::ONE)?;
     for pair in pairs {
         let mut statement = prepared.bind();
         statement.bind(0, pair.key.as_ref())?;
