@@ -157,7 +157,7 @@ impl<T: Completable> futures::Future for CassFuture<T> {
             let data =
                 (self.state.as_ref() as *const FutureTarget) as *mut ::std::os::raw::c_void;
             cass_future_set_callback(self.inner, Some(notify_task), data)
-                .to_result(()).chain_err(|| ErrorKind::WrapperError("Unable to set callback"))
+                .to_result(())
         } else {
             Ok(())
         }.and_then(move |_| ret)
@@ -171,7 +171,7 @@ unsafe fn get_completion<T: Completable>(inner: *mut _Future) -> Result<T> {
     match rc {
         CASS_OK => {
             match Completable::get(inner) {
-                None => Err(ErrorKind::WrapperError("No result found").into()),
+                None => Err(CassErrorCode::LIB_NULL_VALUE.to_error()),
                 Some(v) => Ok(v)
             }
         },

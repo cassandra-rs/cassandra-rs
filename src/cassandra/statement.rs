@@ -218,7 +218,7 @@ impl Statement {
     pub fn set_keyspace(&mut self, keyspace: String) -> Result<&mut Self> {
         unsafe {
             cass_statement_set_keyspace(self.0,
-                                        (CString::new(keyspace).expect("must be utf8").as_ptr()))
+                                        (CString::new(keyspace)?.as_ptr()))
                 .to_result(self)
 
         }
@@ -317,7 +317,7 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_null_by_name(&mut self, name: &str) -> Result<&mut Self> {
         unsafe {
-            cass_statement_bind_null_by_name(self.0, CString::new(name).expect("must be utf8").as_ptr())
+            cass_statement_bind_null_by_name(self.0, CString::new(name)?.as_ptr())
                 .to_result(self)
 
         }
@@ -336,7 +336,7 @@ impl Statement {
     pub fn bind_int8_by_name(&mut self, name: &str, value: i8) -> Result<&mut Self> {
         unsafe {
             cass_statement_bind_int8_by_name(self.0,
-                                             CString::new(name).expect("must be utf8").as_ptr(),
+                                             CString::new(name)?.as_ptr(),
                                              value)
                 .to_result(self)
 
@@ -356,7 +356,7 @@ impl Statement {
     pub fn bind_int16_by_name(&mut self, name: &str, value: i16) -> Result<&mut Self> {
         unsafe {
             cass_statement_bind_int16_by_name(self.0,
-                                              CString::new(name).expect("must be utf8").as_ptr(),
+                                              CString::new(name)?.as_ptr(),
                                               value)
                 .to_result(self)
 
@@ -376,7 +376,7 @@ impl Statement {
     pub fn bind_int32_by_name(&mut self, name: &str, value: i32) -> Result<&mut Self> {
         unsafe {
             cass_statement_bind_int32_by_name(self.0,
-                                              CString::new(name).expect("must be utf8").as_ptr(),
+                                              CString::new(name)?.as_ptr(),
                                               value)
                 .to_result(self)
 
@@ -399,7 +399,7 @@ impl Statement {
     pub fn bind_uint32_by_name(&mut self, name: &str, value: u32) -> Result<&mut Self> {
         unsafe {
             cass_statement_bind_uint32_by_name(self.0,
-                                               CString::new(name).expect("must be utf8").as_ptr(),
+                                               CString::new(name)?.as_ptr(),
                                                value)
                 .to_result(self)
 
@@ -421,7 +421,7 @@ impl Statement {
     pub fn bind_int64_by_name(&mut self, name: &str, value: i64) -> Result<&mut Self> {
         unsafe {
             cass_statement_bind_int64_by_name(self.0,
-                                              CString::new(name).expect("must be utf8").as_ptr(),
+                                              CString::new(name)?.as_ptr(),
                                               value)
                 .to_result(self)
 
@@ -444,7 +444,7 @@ impl Statement {
     pub fn bind_float_by_name(&mut self, name: &str, value: f32) -> Result<&mut Self> {
         unsafe {
             cass_statement_bind_float_by_name(self.0,
-                                              CString::new(name).expect("must be utf8").as_ptr(),
+                                              CString::new(name)?.as_ptr(),
                                               value)
                 .to_result(self)
 
@@ -467,7 +467,7 @@ impl Statement {
     pub fn bind_double_by_name(&mut self, name: &str, value: f64) -> Result<&mut Self> {
         unsafe {
             cass_statement_bind_double_by_name(self.0,
-                                               CString::new(name).expect("must be utf8").as_ptr(),
+                                               CString::new(name)?.as_ptr(),
                                                value)
                 .to_result(self)
 
@@ -490,7 +490,7 @@ impl Statement {
     pub fn bind_bool_by_name(&mut self, name: &str, value: bool) -> Result<&mut Self> {
         unsafe {
             cass_statement_bind_bool_by_name(self.0,
-                                             CString::new(name).expect("must be utf8").as_ptr(),
+                                             CString::new(name)?.as_ptr(),
                                              if value { cass_true } else { cass_false })
                 .to_result(self)
 
@@ -503,7 +503,7 @@ impl Statement {
         unsafe {
             cass_statement_bind_string(self.0,
                                        index,
-                                       CString::new(value).expect("must be utf8").as_ptr())
+                                       CString::new(value)?.as_ptr())
                 .to_result(self)
 
         }
@@ -517,8 +517,8 @@ impl Statement {
     pub fn bind_string_by_name(&mut self, name: &str, value: &str) -> Result<&mut Self> {
         unsafe {
             cass_statement_bind_string_by_name(self.0,
-                                               CString::new(name).expect("must be utf8").as_ptr(),
-                                               CString::new(value).expect("must be utf8").as_ptr())
+                                               CString::new(name)?.as_ptr(),
+                                               CString::new(value)?.as_ptr())
                 .to_result(self)
 
 
@@ -542,7 +542,7 @@ impl Statement {
     pub fn bind_bytes_by_name(&mut self, name: &str, mut value: Vec<u8>) -> Result<&mut Self> {
         unsafe {
             cass_statement_bind_bytes_by_name(self.0,
-                                              CString::new(name).expect("must be utf8").as_ptr(),
+                                              CString::new(name)?.as_ptr(),
                                               value.as_mut_ptr(),
                                               value.len())
                 .to_result(self)
@@ -567,7 +567,7 @@ impl Statement {
     pub fn bind_uuid_by_name(&mut self, name: &str, value: Uuid) -> Result<&mut Self> {
         unsafe {
             cass_statement_bind_uuid_by_name(self.0,
-                                             CString::new(name).expect("must be utf8").as_ptr(),
+                                             CString::new(name)?.as_ptr(),
                                              value.inner())
                 .to_result(self)
 
@@ -587,7 +587,7 @@ impl Statement {
     pub fn bind_inet_by_name(&mut self, name: &str, value: Inet) -> Result<&mut Self> {
         unsafe {
             cass_statement_bind_inet_by_name(self.0,
-                                             CString::new(name).expect("must be utf8").as_ptr(),
+                                             CString::new(name)?.as_ptr(),
                                              value.inner())
                 .to_result(self)
 
@@ -648,7 +648,7 @@ impl Statement {
     pub fn bind_map_by_name(&mut self, name: &str, map: Map) -> Result<&mut Self> {
         unsafe {
             cass_statement_bind_collection_by_name(self.0,
-                                                   CString::new(name).expect("must be utf8").as_ptr(),
+                                                   CString::new(name)?.as_ptr(),
                                                    map.inner())
                 .to_result(self)
 
@@ -671,7 +671,7 @@ impl Statement {
     pub fn bind_set_by_name(&mut self, name: &str, collection: Set) -> Result<&mut Self> {
         unsafe {
             cass_statement_bind_collection_by_name(self.0,
-                                                   CString::new(name).expect("must be utf8").as_ptr(),
+                                                   CString::new(name)?.as_ptr(),
                                                    collection.inner())
                 .to_result(self)
 
@@ -695,7 +695,7 @@ impl Statement {
     pub fn bind_list_by_name(&mut self, name: &str, collection: List) -> Result<&mut Self> {
         unsafe {
             cass_statement_bind_collection_by_name(self.0,
-                                                   CString::new(name).expect("must be utf8").as_ptr(),
+                                                   CString::new(name)?.as_ptr(),
                                                    collection.inner())
                 .to_result(self)
 
@@ -718,7 +718,7 @@ impl Statement {
     pub fn bind_tuple_by_name(&mut self, name: &str, value: Tuple) -> Result<&mut Self> {
         unsafe {
             cass_statement_bind_tuple_by_name(self.0,
-                                              CString::new(name).expect("must be utf8").as_ptr(),
+                                              CString::new(name)?.as_ptr(),
                                               value.inner())
                 .to_result(self)
 
@@ -740,7 +740,7 @@ impl Statement {
     pub fn bind_user_type_by_name(&mut self, name: &str, value: &UserType) -> Result<&mut Self> {
         unsafe {
             cass_statement_bind_user_type_by_name(self.0,
-                                                  CString::new(name).expect("must be utf8").as_ptr(),
+                                                  CString::new(name)?.as_ptr(),
                                                   value.inner())
                 .to_result(self)
 

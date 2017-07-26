@@ -144,7 +144,7 @@ impl Tuple {
         unsafe {
             cass_tuple_set_string(self.0,
                                   index,
-                                  CString::new(value.into()).expect("must be utf8").as_ptr())
+                                  CString::new(value.into())?.as_ptr())
                 .to_result(self)
 
         }

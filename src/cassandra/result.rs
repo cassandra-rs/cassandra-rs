@@ -82,13 +82,16 @@ impl CassResult {
     pub fn column_count(&self) -> u64 { unsafe { cass_result_column_count(self.0) as u64 } }
 
     /// Gets the column name at index for the specified result.
-    pub fn column_name(&self, index: usize) -> String {
+    pub fn column_name(&self, index: usize) -> Result<&str> {
         unsafe {
             let name = mem::zeroed();
             let name_length = mem::zeroed();
-            cass_result_column_name(self.0, index, name, name_length);
-            let slice = slice::from_raw_parts(name as *const u8, name_length as usize);
-            str::from_utf8(slice).expect("must be utf8").to_owned()
+            cass_result_column_name(self.0, index, name, name_length).to_result(())
+                .and_then(|_| {
+                    let slice = slice::from_raw_parts(name as *const u8, name_length as usize);
+                    Ok(str::from_utf8(slice)?)
+                }
+            )
         }
     }
 
@@ -123,8 +126,7 @@ impl CassResult {
     // used to gain access to other data.
     pub fn set_paging_state_token(&mut self, paging_state: &str) -> Result<&mut Self> {
         unsafe {
-            let state = CString::new(paging_state).expect("must be utf8");
-
+            let state = CString::new(paging_state)?;
             cass_result_paging_state_token(self.0, &mut state.as_ptr(), &mut (state.to_bytes().len()))
                 .to_result(self)
 

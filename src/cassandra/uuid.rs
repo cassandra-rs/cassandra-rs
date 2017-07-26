@@ -3,7 +3,6 @@
 use cassandra::util::Protected;
 use cassandra::error::*;
 
-use cassandra_sys::CASS_OK;
 use cassandra_sys::CassUuid as _Uuid;
 use cassandra_sys::CassUuidGen as _UuidGen;
 use cassandra_sys::cass_uuid_from_string;
@@ -95,13 +94,8 @@ impl str::FromStr for Uuid {
     fn from_str(str: &str) -> Result<Uuid> {
         unsafe {
             let mut uuid = mem::zeroed();
-            match cass_uuid_from_string(CString::new(str).expect("must be utf8").as_ptr(), &mut uuid) {
-                CASS_OK => Ok(Uuid(uuid)),
-                err => {
-                    err.to_result(Uuid(uuid))
-
-                }
-            }
+            cass_uuid_from_string(CString::new(str)?.as_ptr(), &mut uuid).to_result(())
+                .and_then(|_| Ok(Uuid(uuid)))
         }
     }
 }

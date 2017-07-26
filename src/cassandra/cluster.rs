@@ -396,7 +396,7 @@ impl Cluster {
                                         -> Result<&mut Self> {
         unsafe {
             {
-                    let local_dc = CString::new(local_dc).expect("must be utf8");
+                    let local_dc = CString::new(local_dc)?;
                     cass_cluster_set_load_balance_dc_aware(self.0,
                                                            local_dc.as_ptr(),
                                                            used_hosts_per_remote_dc,

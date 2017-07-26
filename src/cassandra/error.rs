@@ -4,6 +4,8 @@
 use cassandra::consistency::Consistency;
 use cassandra::util::Protected;
 use cassandra::write_type::WriteType;
+use cassandra::value::ValueType;
+
 use cassandra_sys::CASS_OK;
 use cassandra_sys::CassError_;
 use cassandra_sys::CassErrorResult as CassErrorResult_;
@@ -63,11 +65,12 @@ error_chain! {
             display("Cassandra detailed error {:?}: {}", &code, &msg)
         }
 
-        /// Rust Cassandra library internal error.
-        WrapperError(s: &'static str) {
-            description("Cassandra wrapper error")
-            display("Cassandra wrapper error: {}", s)
+        /// Unsupported type encountered.
+        UnsupportedType(expected: &'static str, actual: ValueType) {
+            description("Unsupported type")
+            display("Unsupported type {}; expected {}", actual, expected)
         }
+
     }
 }
 
@@ -97,6 +100,12 @@ impl CassErrorExt for CassError_ {
     }}
 }
 
+impl CassErrorExt for CassErrorCode {
+    fn to_result<T>(&self, default: T) -> Result<T> { self.inner().to_result(default) }
+    fn to_error(&self) -> Error { self.inner().to_error() }
+}
+
+
 /// Build an error from the code, message, and optional `CassErrorResult_`.
 pub(crate) unsafe fn build_error_result(code: CassErrorCode,
                              message: String,
@@ -122,7 +131,7 @@ pub(crate) unsafe fn build_error_result(code: CassErrorCode,
             let mut args = vec![];
             for i in 0..i {
                 let arg = get_lossy_string(|s, s_len| cass_error_result_arg_type(e, i, s, s_len))
-                    .unwrap();
+                    .unwrap_or("<error>".to_string());
                 args.push(arg);
             }
             (function, args)
@@ -150,7 +159,7 @@ pub(crate) unsafe fn get_cass_future_error(rc: CassError_, inner: *mut _Future) 
     let message = get_lossy_string(|s, s_len| {
         cass_future_error_message(inner, s, s_len);
         CASS_OK
-    }).unwrap();
+    }).unwrap(); // always OK so cannot fail
     build_error_result(code, message, cass_future_get_error_result(inner))
 }
 

@@ -4,7 +4,6 @@ use cassandra::error::*;
 use cassandra::iterator::{MapIterator, SetIterator};
 use cassandra::util::Protected;
 use cassandra::value::Value;
-use cassandra_sys::CASS_ERROR_LIB_INDEX_OUT_OF_BOUNDS;
 use cassandra_sys::CassIterator as _CassIterator;
 use cassandra_sys::CassRow as _Row;
 use cassandra_sys::cass_false;
@@ -165,13 +164,13 @@ impl AsRustType<MapIterator> for Row {
 impl AsRustType<Vec<u8>> for Row {
     fn get_col(&self, index: usize) -> Result<Vec<u8>> {
         let col = self.get_column(index)?;
-        col.get_blob()
+        col.get_blob().map(|b| b.to_vec())
     }
 
     fn get_col_by_name<S>(&self, name: S) -> Result<Vec<u8>>
         where S: Into<String> {
         let col = self.get_column_by_name(name)?;
-        col.get_blob()
+        col.get_blob().map(|b| b.to_vec())
     }
 }
 
@@ -181,7 +180,7 @@ impl Row {
         unsafe {
             let col = cass_row_get_column(self.0, index);
             if col.is_null() {
-                Err("LIB_INDEX_OUT_OF_BOUNDS".into())
+                Err(CassErrorCode::LIB_INDEX_OUT_OF_BOUNDS.to_error())
             } else {
                 Ok(Column::build(col))
             }
@@ -193,9 +192,9 @@ impl Row {
         where S: Into<String> {
         unsafe {
             let col = cass_row_get_column_by_name(self.0,
-                                                  CString::new(name.into()).expect("must be utf8").as_ptr());
+                                                  CString::new(name.into())?.as_ptr());
             if col.is_null() {
-                Err("LIB_INDEX_OUT_OF_BOUNDS".into())
+                Err(CassErrorCode::LIB_INDEX_OUT_OF_BOUNDS.to_error())
             } else {
                 Ok(Column::build(col))
             }

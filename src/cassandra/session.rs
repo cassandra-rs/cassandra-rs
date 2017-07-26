@@ -86,7 +86,7 @@ impl Session {
     /// Create a prepared statement.
     pub fn prepare(&self, query: &str) -> Result<CassFuture<PreparedStatement>> {
         unsafe {
-            Ok(<CassFuture<PreparedStatement>>::build(cass_session_prepare(self.0, CString::new(query).expect("must be utf8").as_ptr())))
+            Ok(<CassFuture<PreparedStatement>>::build(cass_session_prepare(self.0, CString::new(query)?.as_ptr())))
         }
     }
 

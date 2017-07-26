@@ -106,10 +106,7 @@ impl FunctionMeta {
             let mut name_length = mem::zeroed();
             let mut data_type = mem::zeroed();
 
-            match cass_function_meta_argument(self.0, index, &mut name, &mut name_length, &mut data_type) {
-                CASS_OK => Ok(()),
-                err => err.to_result(()),
-            }
+            cass_function_meta_argument(self.0, index, &mut name, &mut name_length, &mut data_type).to_result(())
         }
     }
 

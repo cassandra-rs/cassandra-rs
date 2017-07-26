@@ -4,7 +4,6 @@ use cassandra::statement::Statement;
 use cassandra::util::Protected;
 use cassandra::error::*;
 
-use cassandra_sys::CASS_OK;
 use cassandra_sys::CassBatch as _Batch;
 use cassandra_sys::CassBatchType_;
 use cassandra_sys::CassConsistency;
@@ -86,7 +85,6 @@ impl Batch {
     /// Sets the batch's consistency level
     pub fn set_consistency(&mut self, consistency: Consistency) -> Result<&mut Self> {
         unsafe {
-            // @@@ TODO fixme as_result should be associated. Here and below.
             cass_batch_set_consistency(self.0, consistency.inner()).to_result(self)
         }
     }
