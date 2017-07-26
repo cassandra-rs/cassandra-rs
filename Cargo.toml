@@ -20,7 +20,8 @@ clippy = {version = "0.0", optional = true}
 libc = "0.2"
 num = "0.1"
 slog = "2"
-cassandra-cpp-sys = "0.8"
+# cassandra-cpp-sys = "0.10"
+cassandra-cpp-sys = { git = "https://github.com/Metaswitch/cassandra-sys-rs.git", branch = "tidy-api" }
 decimal = "0.2"
 chrono = "0.2"
 ip = "1.0"

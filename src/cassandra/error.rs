@@ -13,7 +13,7 @@ use cassandra_sys::cass_error_result_code;
 use cassandra_sys::cass_error_result_free;
 use cassandra_sys::{cass_true, cass_false};
 use cassandra_sys::size_t;
-use cassandra_sys::{cass_error_result_responses_received, cass_error_result_responses_required,
+use cassandra_sys::{cass_error_result_actual, cass_error_result_required,
                     cass_error_result_num_failures, cass_error_result_data_present,
                     cass_error_result_write_type, cass_error_result_keyspace,
                     cass_error_result_table, cass_error_result_function, cass_error_num_arg_types,
@@ -47,8 +47,8 @@ error_chain! {
             code: CassErrorCode,
             msg: String,
             consistency: Consistency,
-            responses_received: i32,
-            responses_required: i32,
+            actual: i32,
+            required: i32,
             num_failures: i32,
             data_present: bool,
             write_type: WriteType,
@@ -98,11 +98,10 @@ pub(crate) unsafe fn build_error_result(code: CassErrorCode,
     } else {
         // Get the extended error.
         let consistency = Consistency::build(cass_error_result_consistency(e));
-        // TODO: Report and fix issue:
-        // - cassandra.h names cass_error_result_responses_received but symbol is cass_error_result_actual
-        // - cassandra.h names cass_error_result_responses_required but symbol is cass_error_result_required
-        let responses_received = -1; // cass_error_result_responses_received(e);
-        let responses_required = -1; // cass_error_result_responses_required(e);
+        let actual = cass_error_result_actual(e);
+        // See https://datastax-oss.atlassian.net/browse/CPP-502 for these names.
+        // cassandra-sys uses the actual names and works around the header bug.
+        let required = cass_error_result_required(e);
         let num_failures = cass_error_result_num_failures(e);
         let data_present = cass_error_result_data_present(e) != cass_false;
         let write_type = WriteType::build(cass_error_result_write_type(e));
@@ -124,8 +123,8 @@ pub(crate) unsafe fn build_error_result(code: CassErrorCode,
             code,
             message,
             consistency,
-            responses_received,
-            responses_required,
+            actual,
+            required,
             num_failures,
             data_present,
             write_type,
