@@ -81,7 +81,7 @@ use std::str;
 //    COMPACT_VALUE = 3,
 //    ///A Cassandra static column
 //    STATIC = 4,
-//    ///An unknown column type. FIXME not sure if ever used
+//    ///An unknown column type.
 //    UNKNOWN = 5,
 // }
 

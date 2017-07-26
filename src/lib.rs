@@ -23,7 +23,7 @@ extern crate error_chain;
 
 
 pub use cassandra::batch::{Batch, BatchType, CustomPayload};
-pub use cassandra::cluster::{Cluster, CqlProtocol}; //FIXME this should not be exported
+pub use cassandra::cluster::{Cluster, CqlProtocol};
 pub use cassandra::collection::{CassCollection, List, Map, Set};
 pub use cassandra::column::Column;
 pub use cassandra::consistency::Consistency;
