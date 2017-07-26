@@ -80,7 +80,7 @@ impl UserType {
         unsafe {
             cass_user_type_set_null(self.0, index)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -91,7 +91,7 @@ impl UserType {
             cass_user_type_set_null_by_name(self.0,
                                             CString::new(name.into()).expect("must be utf8").as_ptr())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -100,7 +100,7 @@ impl UserType {
         unsafe {
             cass_user_type_set_int8(self.0, index, value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -112,7 +112,7 @@ impl UserType {
                 Ok(name) => {
                     cass_user_type_set_int8_by_name(self.0, name.as_ptr(), value)
                         .to_result(self)
-                        .chain_err(|| "")
+
                 }
                 Err(err) => panic!("error: {}", err),
             }
@@ -125,7 +125,7 @@ impl UserType {
         unsafe {
             cass_user_type_set_int16(self.0, index, value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -137,7 +137,7 @@ impl UserType {
                 Ok(name) => {
                     cass_user_type_set_int16_by_name(self.0, name.as_ptr(), value)
                         .to_result(self)
-                        .chain_err(|| "")
+
                 }
                 Err(err) => panic!("error: {}", err),
             }
@@ -150,7 +150,7 @@ impl UserType {
         unsafe {
             cass_user_type_set_int32(self.0, index, value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -162,7 +162,7 @@ impl UserType {
                 Ok(name) => {
                     cass_user_type_set_int32_by_name(self.0, name.as_ptr(), value)
                         .to_result(self)
-                        .chain_err(|| "")
+
                 }
                 Err(err) => panic!("error: {}", err),
             }
@@ -175,7 +175,7 @@ impl UserType {
         unsafe {
             cass_user_type_set_uint32(self.0, index, value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -187,7 +187,7 @@ impl UserType {
                 Ok(name) => {
                     cass_user_type_set_uint32_by_name(self.0, name.as_ptr(), value)
                         .to_result(self)
-                        .chain_err(|| "")
+
                 }
                 Err(err) => panic!("error: {}", err),
             }
@@ -202,7 +202,7 @@ impl UserType {
         unsafe {
             cass_user_type_set_int64(self.0, index, value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -217,7 +217,7 @@ impl UserType {
                                                  .as_ptr(),
                                              value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -226,7 +226,7 @@ impl UserType {
         unsafe {
             cass_user_type_set_float(self.0, index, value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -240,7 +240,7 @@ impl UserType {
                                                  .as_ptr(),
                                              value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -249,7 +249,7 @@ impl UserType {
         unsafe {
             cass_user_type_set_double(self.0, index, value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -264,7 +264,7 @@ impl UserType {
                                                   .as_ptr(),
                                               value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -273,7 +273,7 @@ impl UserType {
         unsafe {
             cass_user_type_set_bool(self.0, index, if value { cass_true } else { cass_false })
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -285,7 +285,7 @@ impl UserType {
                                             CString::new(name.into()).expect("must be utf8").as_ptr(),
                                             if value { cass_true } else { cass_false })
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -298,7 +298,7 @@ impl UserType {
                                       index,
                                       CString::new(value.into()).expect("must be utf8").as_ptr())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -315,7 +315,7 @@ impl UserType {
                                                   .expect("must be utf8")
                                                   .as_ptr())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -325,7 +325,7 @@ impl UserType {
         unsafe {
             cass_user_type_set_bytes(self.0, index, value.as_ptr(), value.len())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -340,7 +340,7 @@ impl UserType {
                                              value.as_ptr(),
                                              value.len())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -350,7 +350,7 @@ impl UserType {
         unsafe {
             cass_user_type_set_uuid(self.0, index, value.into().inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -362,7 +362,7 @@ impl UserType {
                                             CString::new(name.into()).expect("must be utf8").as_ptr(),
                                             value.into().inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -372,7 +372,7 @@ impl UserType {
         unsafe {
             cass_user_type_set_inet(self.0, index, value.into().inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -384,7 +384,7 @@ impl UserType {
                                             CString::new(name.into()).expect("must be utf8").as_ptr(),
                                             value.into().inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -394,7 +394,7 @@ impl UserType {
         unsafe {
             cass_user_type_set_collection(self.0, index, value.into().inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -409,7 +409,7 @@ impl UserType {
                                                       .as_ptr(),
                                                   value.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -418,7 +418,7 @@ impl UserType {
         unsafe {
             cass_user_type_set_tuple(self.0, index, value.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -432,7 +432,7 @@ impl UserType {
                                                  .as_ptr(),
                                              value.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -441,7 +441,7 @@ impl UserType {
         unsafe {
             cass_user_type_set_user_type(self.0, index, value.0)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -455,7 +455,7 @@ impl UserType {
                                                      .as_ptr(),
                                                  value.0)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 }

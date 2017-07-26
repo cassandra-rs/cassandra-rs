@@ -108,7 +108,7 @@ impl FunctionMeta {
 
             match cass_function_meta_argument(self.0, index, &mut name, &mut name_length, &mut data_type) {
                 CASS_OK => Ok(()),
-                err => err.to_result(()).chain_err(|| ""),
+                err => err.to_result(()),
             }
         }
     }

@@ -78,7 +78,7 @@ impl FromStr for Inet {
             let str = CString::new(s).expect("must be utf8");
             match cass_inet_from_string(str.as_ptr(), &mut inet) {
                 CASS_OK => Ok(Inet(inet)),
-                err => err.to_result(Inet(inet)).chain_err(|| ""),
+                err => err.to_result(Inet(inet)),
             }
         }
     }

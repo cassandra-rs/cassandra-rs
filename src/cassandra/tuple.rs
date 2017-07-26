@@ -61,7 +61,7 @@ impl Tuple {
         unsafe {
             cass_tuple_set_null(self.0, index)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -70,7 +70,7 @@ impl Tuple {
         unsafe {
             cass_tuple_set_int8(self.0, index, value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -79,7 +79,7 @@ impl Tuple {
         unsafe {
             cass_tuple_set_int16(self.0, index, value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -88,7 +88,7 @@ impl Tuple {
         unsafe {
             cass_tuple_set_int32(self.0, index, value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -97,7 +97,7 @@ impl Tuple {
         unsafe {
             cass_tuple_set_uint32(self.0, index, value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -107,7 +107,7 @@ impl Tuple {
         unsafe {
             cass_tuple_set_int64(self.0, index, value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -116,7 +116,7 @@ impl Tuple {
         unsafe {
             cass_tuple_set_float(self.0, index, value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -125,7 +125,7 @@ impl Tuple {
         unsafe {
             cass_tuple_set_double(self.0, index, value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -134,7 +134,7 @@ impl Tuple {
         unsafe {
             cass_tuple_set_bool(self.0, index, if value { cass_true } else { cass_false })
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -146,7 +146,7 @@ impl Tuple {
                                   index,
                                   CString::new(value.into()).expect("must be utf8").as_ptr())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -155,7 +155,7 @@ impl Tuple {
         unsafe {
             cass_tuple_set_bytes(self.0, index, value.as_ptr(), value.len())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -165,7 +165,7 @@ impl Tuple {
         unsafe {
             cass_tuple_set_uuid(self.0, index, value.into().inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -175,7 +175,7 @@ impl Tuple {
         unsafe {
             cass_tuple_set_inet(self.0, index, inet.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -185,7 +185,7 @@ impl Tuple {
         unsafe {
             cass_tuple_set_collection(self.0, index, value.into().inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -194,7 +194,7 @@ impl Tuple {
         unsafe {
             cass_tuple_set_tuple(self.0, index, value.0)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -203,7 +203,7 @@ impl Tuple {
         unsafe {
             cass_tuple_set_user_type(self.0, index, value.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 }

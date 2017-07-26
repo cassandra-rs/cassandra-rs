@@ -221,7 +221,7 @@ impl Field {
             let mut output = mem::zeroed();
             cass_value_get_inet(self.value.inner(), &mut output)
                 .to_result(Inet::build(output))
-                .chain_err(|| "")
+
         }
     }
 
@@ -230,7 +230,7 @@ impl Field {
         unsafe {
             cass_value_get_uint32(self.value.inner(), &mut output)
                 .to_result(output)
-                .chain_err(|| "")
+
         }
     }
 
@@ -239,7 +239,7 @@ impl Field {
         unsafe {
             cass_value_get_int8(self.value.inner(), &mut output)
                 .to_result(output)
-                .chain_err(|| "")
+
         }
     }
 
@@ -248,7 +248,7 @@ impl Field {
         unsafe {
             cass_value_get_int16(self.value.inner(), &mut output)
                 .to_result(output)
-                .chain_err(|| "")
+
         }
     }
     //    //    pub fn get_decimal(&self, mut output: d128) -> Result<d128, CassError> {
@@ -289,7 +289,7 @@ impl Field {
             let mut output = mem::zeroed();
             cass_value_get_int32(self.value.inner(), &mut output)
                 .to_result(output)
-                .chain_err(|| "")
+
         }
     }
 
@@ -299,7 +299,7 @@ impl Field {
             let mut output = mem::zeroed();
             cass_value_get_int64(self.value.inner(), &mut output)
                 .to_result(output)
-                .chain_err(|| "")
+
         }
     }
 
@@ -309,7 +309,7 @@ impl Field {
             let mut output = mem::zeroed();
             cass_value_get_float(self.value.inner(), &mut output)
                 .to_result(output)
-                .chain_err(|| "")
+
         }
     }
 
@@ -319,7 +319,7 @@ impl Field {
             let mut output = mem::zeroed();
             cass_value_get_double(self.value.inner(), &mut output)
                 .to_result(output)
-                .chain_err(|| "")
+
         }
     }
 
@@ -329,7 +329,7 @@ impl Field {
             let mut output = mem::zeroed();
             cass_value_get_bool(self.value.inner(), &mut output)
                 .to_result(output == cass_true)
-                .chain_err(|| "")
+
         }
     }
 
@@ -337,7 +337,7 @@ impl Field {
     pub fn get_uuid(&self) -> Result<Uuid> {
         unsafe {
             let mut uuid = mem::zeroed();
-            cass_value_get_uuid(self.value.inner(), &mut uuid).to_result(Uuid::build(uuid)).chain_err(|| "")
+            cass_value_get_uuid(self.value.inner(), &mut uuid).to_result(Uuid::build(uuid))
         }
     }
 

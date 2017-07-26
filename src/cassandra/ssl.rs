@@ -65,7 +65,7 @@ impl Ssl {
         unsafe {
             cass_ssl_add_trusted_cert(self.0, CString::new(cert).expect("must be utf8").as_ptr())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -89,7 +89,7 @@ impl Ssl {
         unsafe {
             cass_ssl_set_cert(self.0, CString::new(cert).expect("must be utf8").as_ptr())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -101,7 +101,7 @@ impl Ssl {
                                      CString::new(key).expect("must be utf8").as_ptr(),
                                      password.as_ptr() as *const i8)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 }

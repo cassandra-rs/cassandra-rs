@@ -208,7 +208,7 @@ impl Statement {
     /// This is not necessary for prepared statements, as the key
     /// parameters are determined in the metadata processed in the prepare phase.
     pub fn add_key_index(&mut self, index: usize) -> Result<&mut Self> {
-        unsafe { cass_statement_add_key_index(self.0, index).to_result(self).chain_err(|| "") }
+        unsafe { cass_statement_add_key_index(self.0, index).to_result(self) }
     }
 
     /// Sets the statement's keyspace for use with token-aware routing.
@@ -220,7 +220,7 @@ impl Statement {
             cass_statement_set_keyspace(self.0,
                                         (CString::new(keyspace).expect("must be utf8").as_ptr()))
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -231,7 +231,7 @@ impl Statement {
         unsafe {
             cass_statement_set_consistency(self.0, consistency.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -242,7 +242,7 @@ impl Statement {
         unsafe {
             cass_statement_set_serial_consistency(self.0, serial_consistency.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -250,13 +250,13 @@ impl Statement {
     ///
     /// <b>Default:</b> -1 (Disabled)
     pub fn set_paging_size(&mut self, page_size: i32) -> Result<&mut Self> {
-        unsafe { cass_statement_set_paging_size(self.0, page_size).to_result(self).chain_err(|| "") }
+        unsafe { cass_statement_set_paging_size(self.0, page_size).to_result(self) }
     }
 
     /// Sets the statement's paging state. This can be used to get the next page of
     /// data in a multi-page query.
     pub fn set_paging_state(&mut self, result: CassResult) -> Result<&mut Self> {
-        unsafe { cass_statement_set_paging_state(self.0, result.inner()).to_result(self).chain_err(|| "") }
+        unsafe { cass_statement_set_paging_state(self.0, result.inner()).to_result(self) }
     }
 
     /// Sets the statement's paging state.  This can be used to get the next page of
@@ -271,7 +271,7 @@ impl Statement {
                                                   paging_state.as_ptr() as *const i8,
                                                   paging_state.len())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -280,7 +280,7 @@ impl Statement {
         unsafe {
             cass_statement_set_timestamp(self.0, timestamp)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -289,7 +289,7 @@ impl Statement {
         unsafe {
             cass_statement_set_retry_policy(self.0, retry_policy.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -298,7 +298,7 @@ impl Statement {
         unsafe {
             cass_statement_set_custom_payload(self.0, payload.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -307,7 +307,7 @@ impl Statement {
         unsafe {
             cass_statement_bind_null(self.0, index)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -319,7 +319,7 @@ impl Statement {
         unsafe {
             cass_statement_bind_null_by_name(self.0, CString::new(name).expect("must be utf8").as_ptr())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -328,7 +328,7 @@ impl Statement {
         unsafe {
             cass_statement_bind_int8(self.0, index, value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -339,7 +339,7 @@ impl Statement {
                                              CString::new(name).expect("must be utf8").as_ptr(),
                                              value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -348,7 +348,7 @@ impl Statement {
         unsafe {
             cass_statement_bind_int16(self.0, index, value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -359,7 +359,7 @@ impl Statement {
                                               CString::new(name).expect("must be utf8").as_ptr(),
                                               value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -368,7 +368,7 @@ impl Statement {
         unsafe {
             cass_statement_bind_int32(self.0, index, value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -379,7 +379,7 @@ impl Statement {
                                               CString::new(name).expect("must be utf8").as_ptr(),
                                               value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -388,7 +388,7 @@ impl Statement {
         unsafe {
             cass_statement_bind_uint32(self.0, index, value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -402,7 +402,7 @@ impl Statement {
                                                CString::new(name).expect("must be utf8").as_ptr(),
                                                value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -412,7 +412,7 @@ impl Statement {
         unsafe {
             cass_statement_bind_int64(self.0, index, value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -424,7 +424,7 @@ impl Statement {
                                               CString::new(name).expect("must be utf8").as_ptr(),
                                               value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -433,7 +433,7 @@ impl Statement {
         unsafe {
             cass_statement_bind_float(self.0, index, value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -447,7 +447,7 @@ impl Statement {
                                               CString::new(name).expect("must be utf8").as_ptr(),
                                               value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -456,7 +456,7 @@ impl Statement {
         unsafe {
             cass_statement_bind_double(self.0, index, value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -470,7 +470,7 @@ impl Statement {
                                                CString::new(name).expect("must be utf8").as_ptr(),
                                                value)
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -479,7 +479,7 @@ impl Statement {
         unsafe {
             cass_statement_bind_bool(self.0, index, if value { cass_true } else { cass_false })
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -493,7 +493,7 @@ impl Statement {
                                              CString::new(name).expect("must be utf8").as_ptr(),
                                              if value { cass_true } else { cass_false })
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -505,7 +505,7 @@ impl Statement {
                                        index,
                                        CString::new(value).expect("must be utf8").as_ptr())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -520,7 +520,7 @@ impl Statement {
                                                CString::new(name).expect("must be utf8").as_ptr(),
                                                CString::new(value).expect("must be utf8").as_ptr())
                 .to_result(self)
-                .chain_err(|| "")
+
 
         }
     }
@@ -530,7 +530,7 @@ impl Statement {
         unsafe {
             cass_statement_bind_bytes(self.0, index, value.as_ptr(), value.len())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -546,7 +546,7 @@ impl Statement {
                                               value.as_mut_ptr(),
                                               value.len())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -555,7 +555,7 @@ impl Statement {
         unsafe {
             cass_statement_bind_uuid(self.0, index, value.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -570,7 +570,7 @@ impl Statement {
                                              CString::new(name).expect("must be utf8").as_ptr(),
                                              value.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -579,7 +579,7 @@ impl Statement {
         unsafe {
             cass_statement_bind_inet(self.0, index, value.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -590,7 +590,7 @@ impl Statement {
                                              CString::new(name).expect("must be utf8").as_ptr(),
                                              value.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -636,7 +636,7 @@ impl Statement {
         unsafe {
             cass_statement_bind_collection(self.0, index, map.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -651,7 +651,7 @@ impl Statement {
                                                    CString::new(name).expect("must be utf8").as_ptr(),
                                                    map.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
     /// Bind a "set" to a query or bound statement at the specified index.
@@ -659,7 +659,7 @@ impl Statement {
         unsafe {
             cass_statement_bind_collection(self.0, index, collection.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -674,7 +674,7 @@ impl Statement {
                                                    CString::new(name).expect("must be utf8").as_ptr(),
                                                    collection.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -683,7 +683,7 @@ impl Statement {
         unsafe {
             cass_statement_bind_collection(self.0, index, collection.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -698,7 +698,7 @@ impl Statement {
                                                    CString::new(name).expect("must be utf8").as_ptr(),
                                                    collection.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -707,7 +707,7 @@ impl Statement {
         unsafe {
             cass_statement_bind_tuple(self.0, index, value.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -721,7 +721,7 @@ impl Statement {
                                               CString::new(name).expect("must be utf8").as_ptr(),
                                               value.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -731,7 +731,7 @@ impl Statement {
         unsafe {
             cass_statement_bind_user_type(self.0, index, value.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -743,7 +743,7 @@ impl Statement {
                                                   CString::new(name).expect("must be utf8").as_ptr(),
                                                   value.inner())
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 }

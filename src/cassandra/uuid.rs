@@ -99,7 +99,7 @@ impl str::FromStr for Uuid {
                 CASS_OK => Ok(Uuid(uuid)),
                 err => {
                     err.to_result(Uuid(uuid))
-                        .chain_err(|| "")
+
                 }
             }
         }

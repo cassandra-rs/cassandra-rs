@@ -127,7 +127,7 @@ impl CassResult {
 
             cass_result_paging_state_token(self.0, &mut state.as_ptr(), &mut (state.to_bytes().len()))
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 

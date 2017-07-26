@@ -235,7 +235,7 @@ impl Value {
             let result = cass_value_get_bytes(self.0, &mut output, &mut output_size);
             // raw2utf8(output, output_size).unwrap()
             let slice = slice::from_raw_parts(output, output_size as usize);
-            result.to_result(slice).chain_err(|| "")
+            result.to_result(slice)
         }
     }
     // pub fn get_decimal<'a>(&'a self, mut output: String) ->
@@ -323,7 +323,7 @@ impl Value {
             cass_value_get_string(self.0, &mut message_ptr, &mut (message_length)).to_result(())
                 .and_then(|_| {
                     let slice = slice::from_raw_parts(message_ptr as *const u8, message_length as usize);
-                    str::from_utf8(slice).chain_err(|| "")
+                    str::from_utf8(slice).map_err(|e| e.into())
                 }
             )
         }
@@ -352,7 +352,7 @@ impl Value {
             let output: Inet = mem::zeroed();
             cass_value_get_inet(self.0, &mut Inet::inner(&output))
                 .to_result(output)
-                .chain_err(|| "")
+
         }
     }
 
@@ -362,7 +362,7 @@ impl Value {
             let mut output = mem::zeroed();
             cass_value_get_int32(self.0, &mut output)
                 .to_result(output)
-                .chain_err(|| "")
+
         }
     }
 
@@ -372,7 +372,7 @@ impl Value {
             let mut output = mem::zeroed();
             cass_value_get_int16(self.0, &mut output)
                 .to_result(output)
-                .chain_err(|| "")
+
         }
     }
 
@@ -382,7 +382,7 @@ impl Value {
             let mut output = mem::zeroed();
             cass_value_get_int8(self.0, &mut output)
                 .to_result(output)
-                .chain_err(|| "")
+
         }
     }
 
@@ -392,7 +392,7 @@ impl Value {
             let mut output = mem::zeroed();
             cass_value_get_int64(self.0, &mut output)
                 .to_result(output)
-                .chain_err(|| "")
+
         }
     }
 
@@ -402,7 +402,7 @@ impl Value {
             let mut output = mem::zeroed();
             cass_value_get_float(self.0, &mut output)
                 .to_result(output)
-                .chain_err(|| "")
+
         }
     }
 
@@ -412,7 +412,7 @@ impl Value {
             let mut output = mem::zeroed();
             cass_value_get_double(self.0, &mut output)
                 .to_result(output)
-                .chain_err(|| "")
+
         }
     }
 
@@ -422,7 +422,7 @@ impl Value {
             let mut output = mem::zeroed();
             cass_value_get_bool(self.0, &mut output)
                 .to_result(output == cass_true)
-                .chain_err(|| "")
+
         }
     }
 
@@ -432,7 +432,7 @@ impl Value {
             let mut uuid = mem::zeroed();
             cass_value_get_uuid(self.0, &mut uuid)
                 .to_result(Uuid::build(uuid))
-                .chain_err(|| "")
+
         }
     }
 }

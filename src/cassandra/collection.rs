@@ -153,38 +153,38 @@ impl CassCollection for List {
 
     /// Appends a "tinyint" to the collection.
     fn append_int8(&mut self, value: i8) -> Result<&mut Self> {
-        unsafe { cass_collection_append_int8(self.inner(), value).to_result(self).chain_err(|| "couldn't append i8") }
+        unsafe { cass_collection_append_int8(self.inner(), value).to_result(self) }
     }
 
     /// Appends an "smallint" to the collection.
     fn append_int16(&mut self, value: i16) -> Result<&mut Self> {
-        unsafe { cass_collection_append_int16(self.inner(), value).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_int16(self.inner(), value).to_result(self) }
     }
 
     /// Appends an "int" to the collection.
     fn append_int32(&mut self, value: i32) -> Result<&mut Self> {
-        unsafe { cass_collection_append_int32(self.inner(), value).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_int32(self.inner(), value).to_result(self) }
     }
 
     /// Appends a "date" to the collection.
     fn append_uint32(&mut self, value: u32) -> Result<&mut Self> {
-        unsafe { cass_collection_append_uint32(self.inner(), value).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_uint32(self.inner(), value).to_result(self) }
     }
 
     /// Appends a "bigint", "counter", "timestamp" or "time" to the
     /// collection.
     fn append_int64(&mut self, value: i64) -> Result<&mut Self> {
-        unsafe { cass_collection_append_int64(self.inner(), value).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_int64(self.inner(), value).to_result(self) }
     }
 
     /// Appends a "float" to the collection.
     fn append_float(&mut self, value: f32) -> Result<&mut Self> {
-        unsafe { cass_collection_append_float(self.inner(), value).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_float(self.inner(), value).to_result(self) }
     }
 
     /// Appends a "double" to the collection.
     fn append_double(&mut self, value: f64) -> Result<&mut Self> {
-        unsafe { cass_collection_append_double(self.inner(), value).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_double(self.inner(), value).to_result(self) }
     }
 
     /// Appends a "boolean" to the collection.
@@ -192,7 +192,7 @@ impl CassCollection for List {
         unsafe {
             cass_collection_append_bool(self.inner(), if value { cass_true } else { cass_false })
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -201,7 +201,7 @@ impl CassCollection for List {
         unsafe {
             let cstr = CString::new(value).expect("must be utf8");
             let result = cass_collection_append_string(self.inner(), cstr.as_ptr());
-            result.to_result(self).chain_err(|| "")
+            result.to_result(self)
         }
     }
 
@@ -209,43 +209,43 @@ impl CassCollection for List {
     fn append_bytes(&mut self, value: Vec<u8>) -> Result<&mut Self> {
         unsafe {
             let bytes = cass_collection_append_bytes(self.inner(), value[..].as_ptr(), value.len());
-            bytes.to_result(self).chain_err(|| "")
+            bytes.to_result(self)
         }
     }
 
     /// Appends a "uuid" or "timeuuid"  to the collection.
     fn append_uuid(&mut self, value: Uuid) -> Result<&mut Self> {
-        unsafe { cass_collection_append_uuid(self.inner(), value.inner()).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_uuid(self.inner(), value.inner()).to_result(self) }
     }
 
     /// Appends an "inet" to the collection.
     fn append_inet(&mut self, value: Inet) -> Result<&mut Self> {
-        unsafe { cass_collection_append_inet(self.inner(), value.inner()).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_inet(self.inner(), value.inner()).to_result(self) }
     }
 
     /// Appends a "list" to the collection.
     fn append_list(&mut self, value: List) -> Result<&mut Self> {
-        unsafe { cass_collection_append_collection(self.inner(), value.0).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_collection(self.inner(), value.0).to_result(self) }
     }
 
     /// Appends a "set" to the collection.
     fn append_set(&mut self, value: Set) -> Result<&mut Self> {
-        unsafe { cass_collection_append_collection(self.inner(), value.0).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_collection(self.inner(), value.0).to_result(self) }
     }
 
     /// Appends a "map" to the collection.
     fn append_map(&mut self, value: Map) -> Result<&mut Self> {
-        unsafe { cass_collection_append_collection(self.inner(), value.0).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_collection(self.inner(), value.0).to_result(self) }
     }
 
     /// Appends a "tuple" to the collection.
     fn append_tuple(&mut self, value: Tuple) -> Result<&mut Self> {
-        unsafe { cass_collection_append_tuple(self.inner(), value.inner()).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_tuple(self.inner(), value.inner()).to_result(self) }
     }
 
     /// Appends a "udt" to the collection.
     fn append_user_type(&mut self, value: &UserType) -> Result<&mut Self> {
-        unsafe { cass_collection_append_user_type(self.inner(), value.inner()).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_user_type(self.inner(), value.inner()).to_result(self) }
     }
 }
 
@@ -278,38 +278,38 @@ impl CassCollection for Set {
 
     /// Appends a "tinyint" to the collection.
     fn append_int8(&mut self, value: i8) -> Result<&mut Self> {
-        unsafe { cass_collection_append_int8(self.inner(), value).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_int8(self.inner(), value).to_result(self) }
     }
 
     /// Appends an "smallint" to the collection.
     fn append_int16(&mut self, value: i16) -> Result<&mut Self> {
-        unsafe { cass_collection_append_int16(self.inner(), value).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_int16(self.inner(), value).to_result(self) }
     }
 
     /// Appends an "int" to the collection.
     fn append_int32(&mut self, value: i32) -> Result<&mut Self> {
-        unsafe { cass_collection_append_int32(self.inner(), value).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_int32(self.inner(), value).to_result(self) }
     }
 
     /// Appends a "date" to the collection.
     fn append_uint32(&mut self, value: u32) -> Result<&mut Self> {
-        unsafe { cass_collection_append_uint32(self.inner(), value).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_uint32(self.inner(), value).to_result(self) }
     }
 
     /// Appends a "bigint", "counter", "timestamp" or "time" to the
     /// collection.
     fn append_int64(&mut self, value: i64) -> Result<&mut Self> {
-        unsafe { cass_collection_append_int64(self.inner(), value).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_int64(self.inner(), value).to_result(self) }
     }
 
     /// Appends a "float" to the collection.
     fn append_float(&mut self, value: f32) -> Result<&mut Self> {
-        unsafe { cass_collection_append_float(self.inner(), value).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_float(self.inner(), value).to_result(self) }
     }
 
     /// Appends a "double" to the collection.
     fn append_double(&mut self, value: f64) -> Result<&mut Self> {
-        unsafe { cass_collection_append_double(self.inner(), value).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_double(self.inner(), value).to_result(self) }
     }
 
     /// Appends a "boolean" to the collection.
@@ -317,7 +317,7 @@ impl CassCollection for Set {
         unsafe {
             cass_collection_append_bool(self.inner(), if value { cass_true } else { cass_false })
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -326,7 +326,7 @@ impl CassCollection for Set {
         unsafe {
             let cstr = CString::new(value).expect("must be utf8");
             let result = cass_collection_append_string(self.inner(), cstr.as_ptr());
-            result.to_result(self).chain_err(|| "")
+            result.to_result(self)
         }
     }
 
@@ -334,43 +334,43 @@ impl CassCollection for Set {
     fn append_bytes(&mut self, value: Vec<u8>) -> Result<&mut Self> {
         unsafe {
             let bytes = cass_collection_append_bytes(self.inner(), value[..].as_ptr(), value.len());
-            bytes.to_result(self).chain_err(|| "")
+            bytes.to_result(self)
         }
     }
 
     /// Appends a "uuid" or "timeuuid"  to the collection.
     fn append_uuid(&mut self, value: Uuid) -> Result<&mut Self> {
-        unsafe { cass_collection_append_uuid(self.inner(), value.inner()).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_uuid(self.inner(), value.inner()).to_result(self) }
     }
 
     /// Appends an "inet" to the collection.
     fn append_inet(&mut self, value: Inet) -> Result<&mut Self> {
-        unsafe { cass_collection_append_inet(self.inner(), value.inner()).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_inet(self.inner(), value.inner()).to_result(self) }
     }
 
     /// Appends a "list" to the collection.
     fn append_list(&mut self, value: List) -> Result<&mut Self> {
-        unsafe { cass_collection_append_collection(self.inner(), value.0).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_collection(self.inner(), value.0).to_result(self) }
     }
 
     /// Appends a "set" to the collection.
     fn append_set(&mut self, value: Set) -> Result<&mut Self> {
-        unsafe { cass_collection_append_collection(self.inner(), value.0).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_collection(self.inner(), value.0).to_result(self) }
     }
 
     /// Appends a "map" to the collection.
     fn append_map(&mut self, value: Map) -> Result<&mut Self> {
-        unsafe { cass_collection_append_collection(self.inner(), value.0).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_collection(self.inner(), value.0).to_result(self) }
     }
 
     /// Appends a "tuple" to the collection.
     fn append_tuple(&mut self, value: Tuple) -> Result<&mut Self> {
-        unsafe { cass_collection_append_tuple(self.inner(), value.inner()).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_tuple(self.inner(), value.inner()).to_result(self) }
     }
 
     /// Appends a "udt" to the collection.
     fn append_user_type(&mut self, value: &UserType) -> Result<&mut Self> {
-        unsafe { cass_collection_append_user_type(self.inner(), value.inner()).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_user_type(self.inner(), value.inner()).to_result(self) }
     }
 }
 
@@ -400,38 +400,38 @@ impl CassCollection for Map {
 
     /// Appends a "tinyint" to the collection.
     fn append_int8(&mut self, value: i8) -> Result<&mut Self> {
-        unsafe { cass_collection_append_int8(self.inner(), value).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_int8(self.inner(), value).to_result(self) }
     }
 
     /// Appends an "smallint" to the collection.
     fn append_int16(&mut self, value: i16) -> Result<&mut Self> {
-        unsafe { cass_collection_append_int16(self.inner(), value).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_int16(self.inner(), value).to_result(self) }
     }
 
     /// Appends an "int" to the collection.
     fn append_int32(&mut self, value: i32) -> Result<&mut Self> {
-        unsafe { cass_collection_append_int32(self.inner(), value).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_int32(self.inner(), value).to_result(self) }
     }
 
     /// Appends a "date" to the collection.
     fn append_uint32(&mut self, value: u32) -> Result<&mut Self> {
-        unsafe { cass_collection_append_uint32(self.inner(), value).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_uint32(self.inner(), value).to_result(self) }
     }
 
     /// Appends a "bigint", "counter", "timestamp" or "time" to the
     /// collection.
     fn append_int64(&mut self, value: i64) -> Result<&mut Self> {
-        unsafe { cass_collection_append_int64(self.inner(), value).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_int64(self.inner(), value).to_result(self) }
     }
 
     /// Appends a "float" to the collection.
     fn append_float(&mut self, value: f32) -> Result<&mut Self> {
-        unsafe { cass_collection_append_float(self.inner(), value).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_float(self.inner(), value).to_result(self) }
     }
 
     /// Appends a "double" to the collection.
     fn append_double(&mut self, value: f64) -> Result<&mut Self> {
-        unsafe { cass_collection_append_double(self.inner(), value).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_double(self.inner(), value).to_result(self) }
     }
 
     /// Appends a "boolean" to the collection.
@@ -439,7 +439,7 @@ impl CassCollection for Map {
         unsafe {
             cass_collection_append_bool(self.inner(), if value { cass_true } else { cass_false })
                 .to_result(self)
-                .chain_err(|| "")
+
         }
     }
 
@@ -448,7 +448,7 @@ impl CassCollection for Map {
         unsafe {
             let cstr = CString::new(value).expect("must be utf8");
             let result = cass_collection_append_string(self.inner(), cstr.as_ptr());
-            result.to_result(self).chain_err(|| "")
+            result.to_result(self)
         }
     }
 
@@ -456,42 +456,42 @@ impl CassCollection for Map {
     fn append_bytes(&mut self, value: Vec<u8>) -> Result<&mut Self> {
         unsafe {
             let bytes = cass_collection_append_bytes(self.inner(), value[..].as_ptr(), value.len());
-            bytes.to_result(self).chain_err(|| "")
+            bytes.to_result(self)
         }
     }
 
     /// Appends a "uuid" or "timeuuid"  to the collection.
     fn append_uuid(&mut self, value: Uuid) -> Result<&mut Self> {
-        unsafe { cass_collection_append_uuid(self.inner(), value.inner()).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_uuid(self.inner(), value.inner()).to_result(self) }
     }
 
     /// Appends an "inet" to the collection.
     fn append_inet(&mut self, value: Inet) -> Result<&mut Self> {
-        unsafe { cass_collection_append_inet(self.inner(), value.inner()).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_inet(self.inner(), value.inner()).to_result(self) }
     }
 
     /// Appends a "list" to the collection.
     fn append_list(&mut self, value: List) -> Result<&mut Self> {
-        unsafe { cass_collection_append_collection(self.inner(), value.0).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_collection(self.inner(), value.0).to_result(self) }
     }
 
     /// Appends a "set" to the collection.
     fn append_set(&mut self, value: Set) -> Result<&mut Self> {
-        unsafe { cass_collection_append_collection(self.inner(), value.0).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_collection(self.inner(), value.0).to_result(self) }
     }
 
     /// Appends a "map" to the collection.
     fn append_map(&mut self, value: Map) -> Result<&mut Self> {
-        unsafe { cass_collection_append_collection(self.inner(), value.0).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_collection(self.inner(), value.0).to_result(self) }
     }
 
     /// Appends a "tuple" to the collection.
     fn append_tuple(&mut self, value: Tuple) -> Result<&mut Self> {
-        unsafe { cass_collection_append_tuple(self.inner(), value.inner()).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_tuple(self.inner(), value.inner()).to_result(self) }
     }
 
     /// Appends a "udt" to the collection.
     fn append_user_type(&mut self, value: &UserType) -> Result<&mut Self> {
-        unsafe { cass_collection_append_user_type(self.inner(), value.inner()).to_result(self).chain_err(|| "") }
+        unsafe { cass_collection_append_user_type(self.inner(), value.inner()).to_result(self) }
     }
 }

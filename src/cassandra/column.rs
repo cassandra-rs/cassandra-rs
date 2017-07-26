@@ -224,23 +224,23 @@ impl Column {
     pub fn get_inet(&self) -> Result<Inet> {
         unsafe {
             let mut inet = mem::zeroed();
-            cass_value_get_inet(self.0, &mut inet).to_result(Inet::build(inet)).chain_err(|| "")
+            cass_value_get_inet(self.0, &mut inet).to_result(Inet::build(inet))
         }
     }
 
     /// Gets the u32 from this column or errors if you ask for the wrong type
     pub fn get_u32(&self, mut output: u32) -> Result<u32> {
-        unsafe { cass_value_get_uint32(self.0, &mut output).to_result(output).chain_err(|| "") }
+        unsafe { cass_value_get_uint32(self.0, &mut output).to_result(output) }
     }
 
     /// Gets the i8 from this column or errors if you ask for the wrong type
     pub fn get_i8(&self, mut output: i8) -> Result<i8> {
-        unsafe { cass_value_get_int8(self.0, &mut output).to_result(output).chain_err(|| "") }
+        unsafe { cass_value_get_int8(self.0, &mut output).to_result(output) }
     }
 
     /// Gets the i16 from this column or errors if you ask for the wrong type
     pub fn get_i16(&self, mut output: i16) -> Result<i16> {
-        unsafe { cass_value_get_int16(self.0, &mut output).to_result(output).chain_err(|| "") }
+        unsafe { cass_value_get_int16(self.0, &mut output).to_result(output) }
     }
 
     //    pub fn get_decimal(&self, mut output: d128) -> Result<d128, CassError> {
@@ -295,7 +295,7 @@ impl Column {
     pub fn get_i32(&self) -> Result<i32> {
         unsafe {
             let mut output = mem::zeroed();
-            cass_value_get_int32(self.0, &mut output).to_result(output).chain_err(|| "")
+            cass_value_get_int32(self.0, &mut output).to_result(output)
         }
     }
 
@@ -303,7 +303,7 @@ impl Column {
     pub fn get_i64(&self) -> Result<i64> {
         unsafe {
             let mut output = mem::zeroed();
-            cass_value_get_int64(self.0, &mut output).to_result(output).chain_err(|| "")
+            cass_value_get_int64(self.0, &mut output).to_result(output)
         }
     }
 
@@ -311,7 +311,7 @@ impl Column {
     pub fn get_float(&self) -> Result<f32> {
         unsafe {
             let mut output = mem::zeroed();
-            cass_value_get_float(self.0, &mut output).to_result(output).chain_err(|| "")
+            cass_value_get_float(self.0, &mut output).to_result(output)
         }
     }
 
@@ -319,7 +319,7 @@ impl Column {
     pub fn get_double(&self) -> Result<f64> {
         unsafe {
             let mut output = mem::zeroed();
-            cass_value_get_double(self.0, &mut output).to_result(output).chain_err(|| "")
+            cass_value_get_double(self.0, &mut output).to_result(output)
         }
     }
 
@@ -329,7 +329,7 @@ impl Column {
             let mut output = mem::zeroed();
             cass_value_get_bool(self.0, &mut output)
                 .to_result(output != cass_false)
-                .chain_err(|| "")
+
         }
     }
 
@@ -337,7 +337,7 @@ impl Column {
     pub fn get_uuid(&self) -> Result<Uuid> {
         unsafe {
             let mut output = mem::zeroed();
-            cass_value_get_uuid(self.0, &mut output).to_result(Uuid::build(output)).chain_err(|| "")
+            cass_value_get_uuid(self.0, &mut output).to_result(Uuid::build(output))
         }
     }
 

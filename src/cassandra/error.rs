@@ -32,7 +32,10 @@ use std::os::raw::c_char;
 error_chain! {
     foreign_links {
         StringContainsNul(::std::ffi::NulError)
-          #[doc = "Attempted to pass a string containing `\0` to Cassandra."];
+            #[doc = "Attempted to pass a string containing `\0` to Cassandra"];
+
+        InvalidUtf8(::std::str::Utf8Error)
+            #[doc = "Attempted to decode an invalid UTF-8-encoded string"];
     }
 
     errors {

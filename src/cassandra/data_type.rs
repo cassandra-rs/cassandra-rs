@@ -75,7 +75,7 @@ impl DataType {
             let err = cass_data_type_type_name(data_type.0,
                                                &mut type_name2.as_ptr(),
                                                &mut (type_name2.as_bytes().len()));
-            err.to_result(()).chain_err(|| "")
+            err.to_result(())
         }
     }
 
@@ -90,7 +90,7 @@ impl DataType {
                                              .expect("must be utf8")
                                              .as_ptr())
                 .to_result(())
-                .chain_err(|| "")
+
         }
     }
 
@@ -105,7 +105,7 @@ impl DataType {
                                     &mut (keyspace2.as_ptr()),
                                     &mut (keyspace2.as_bytes().len()))
                 .to_result(())
-                .chain_err(|| "")
+
         }
     }
 
@@ -118,7 +118,7 @@ impl DataType {
             cass_data_type_set_keyspace(data_type.0,
                                         CString::new(keyspace.into()).expect("must be utf8").as_ptr())
                 .to_result(())
-                .chain_err(|| "")
+
         }
     }
 
@@ -133,7 +133,7 @@ impl DataType {
                                       &mut class_name2.as_ptr(),
                                       &mut (class_name2.as_bytes().len()))
                 .to_result(())
-                .chain_err(|| "")
+
         }
     }
 
@@ -148,7 +148,7 @@ impl DataType {
                                               .expect("must be valid utf8")
                                               .as_ptr())
                 .to_result(())
-                .chain_err(|| "")
+
         }
     }
 
@@ -191,7 +191,7 @@ impl DataType {
                                          &mut name2.as_ptr(),
                                          &mut (name2.as_bytes().len()))
                 .to_result(())
-                .chain_err(|| "")
+
 
         }
     }
@@ -203,7 +203,7 @@ impl DataType {
         unsafe {
             cass_data_type_add_sub_type(self.0, sub_data_type.0)
                 .to_result(())
-                .chain_err(|| "")
+
         }
     }
 
@@ -219,7 +219,7 @@ impl DataType {
                                                     .as_ptr(),
                                                 sub_data_type.0)
                 .to_result(())
-                .chain_err(|| "")
+
         }
     }
 
@@ -231,7 +231,7 @@ impl DataType {
         unsafe {
             cass_data_type_add_sub_value_type(self.0, sub_value_type.inner())
                 .to_result(())
-                .chain_err(|| "")
+
         }
     }
 
@@ -247,7 +247,7 @@ impl DataType {
                                                           .as_ptr(),
                                                       typ.inner())
                 .to_result(())
-                .chain_err(|| "")
+
         }
 
     }
