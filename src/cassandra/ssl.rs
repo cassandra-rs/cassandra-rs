@@ -65,7 +65,6 @@ impl Ssl {
         unsafe {
             cass_ssl_add_trusted_cert(self.0, CString::new(cert)?.as_ptr())
                 .to_result(self)
-
         }
     }
 
@@ -89,7 +88,6 @@ impl Ssl {
         unsafe {
             cass_ssl_set_cert(self.0, CString::new(cert)?.as_ptr())
                 .to_result(self)
-
         }
     }
 
@@ -101,7 +99,6 @@ impl Ssl {
                                      CString::new(key)?.as_ptr(),
                                      password.as_ptr() as *const i8)
                 .to_result(self)
-
         }
     }
 }

@@ -192,7 +192,6 @@ impl CassCollection for List {
         unsafe {
             cass_collection_append_bool(self.inner(), if value { cass_true } else { cass_false })
                 .to_result(self)
-
         }
     }
 
@@ -317,7 +316,6 @@ impl CassCollection for Set {
         unsafe {
             cass_collection_append_bool(self.inner(), if value { cass_true } else { cass_false })
                 .to_result(self)
-
         }
     }
 
@@ -439,7 +437,6 @@ impl CassCollection for Map {
         unsafe {
             cass_collection_append_bool(self.inner(), if value { cass_true } else { cass_false })
                 .to_result(self)
-
         }
     }
 

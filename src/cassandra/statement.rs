@@ -220,7 +220,6 @@ impl Statement {
             cass_statement_set_keyspace(self.0,
                                         (CString::new(keyspace)?.as_ptr()))
                 .to_result(self)
-
         }
     }
 
@@ -231,7 +230,6 @@ impl Statement {
         unsafe {
             cass_statement_set_consistency(self.0, consistency.inner())
                 .to_result(self)
-
         }
     }
 
@@ -242,7 +240,6 @@ impl Statement {
         unsafe {
             cass_statement_set_serial_consistency(self.0, serial_consistency.inner())
                 .to_result(self)
-
         }
     }
 
@@ -271,7 +268,6 @@ impl Statement {
                                                   paging_state.as_ptr() as *const i8,
                                                   paging_state.len())
                 .to_result(self)
-
         }
     }
 
@@ -280,7 +276,6 @@ impl Statement {
         unsafe {
             cass_statement_set_timestamp(self.0, timestamp)
                 .to_result(self)
-
         }
     }
 
@@ -289,7 +284,6 @@ impl Statement {
         unsafe {
             cass_statement_set_retry_policy(self.0, retry_policy.inner())
                 .to_result(self)
-
         }
     }
 
@@ -298,7 +292,6 @@ impl Statement {
         unsafe {
             cass_statement_set_custom_payload(self.0, payload.inner())
                 .to_result(self)
-
         }
     }
 
@@ -307,7 +300,6 @@ impl Statement {
         unsafe {
             cass_statement_bind_null(self.0, index)
                 .to_result(self)
-
         }
     }
 
@@ -319,7 +311,6 @@ impl Statement {
         unsafe {
             cass_statement_bind_null_by_name(self.0, CString::new(name)?.as_ptr())
                 .to_result(self)
-
         }
     }
 
@@ -328,7 +319,6 @@ impl Statement {
         unsafe {
             cass_statement_bind_int8(self.0, index, value)
                 .to_result(self)
-
         }
     }
 
@@ -339,7 +329,6 @@ impl Statement {
                                              CString::new(name)?.as_ptr(),
                                              value)
                 .to_result(self)
-
         }
     }
 
@@ -348,7 +337,6 @@ impl Statement {
         unsafe {
             cass_statement_bind_int16(self.0, index, value)
                 .to_result(self)
-
         }
     }
 
@@ -359,7 +347,6 @@ impl Statement {
                                               CString::new(name)?.as_ptr(),
                                               value)
                 .to_result(self)
-
         }
     }
 
@@ -368,7 +355,6 @@ impl Statement {
         unsafe {
             cass_statement_bind_int32(self.0, index, value)
                 .to_result(self)
-
         }
     }
 
@@ -379,7 +365,6 @@ impl Statement {
                                               CString::new(name)?.as_ptr(),
                                               value)
                 .to_result(self)
-
         }
     }
 
@@ -388,7 +373,6 @@ impl Statement {
         unsafe {
             cass_statement_bind_uint32(self.0, index, value)
                 .to_result(self)
-
         }
     }
 
@@ -402,7 +386,6 @@ impl Statement {
                                                CString::new(name)?.as_ptr(),
                                                value)
                 .to_result(self)
-
         }
     }
 
@@ -412,7 +395,6 @@ impl Statement {
         unsafe {
             cass_statement_bind_int64(self.0, index, value)
                 .to_result(self)
-
         }
     }
 
@@ -424,7 +406,6 @@ impl Statement {
                                               CString::new(name)?.as_ptr(),
                                               value)
                 .to_result(self)
-
         }
     }
 
@@ -433,7 +414,6 @@ impl Statement {
         unsafe {
             cass_statement_bind_float(self.0, index, value)
                 .to_result(self)
-
         }
     }
 
@@ -447,7 +427,6 @@ impl Statement {
                                               CString::new(name)?.as_ptr(),
                                               value)
                 .to_result(self)
-
         }
     }
 
@@ -456,7 +435,6 @@ impl Statement {
         unsafe {
             cass_statement_bind_double(self.0, index, value)
                 .to_result(self)
-
         }
     }
 
@@ -470,7 +448,6 @@ impl Statement {
                                                CString::new(name)?.as_ptr(),
                                                value)
                 .to_result(self)
-
         }
     }
 
@@ -479,7 +456,6 @@ impl Statement {
         unsafe {
             cass_statement_bind_bool(self.0, index, if value { cass_true } else { cass_false })
                 .to_result(self)
-
         }
     }
 
@@ -493,7 +469,6 @@ impl Statement {
                                              CString::new(name)?.as_ptr(),
                                              if value { cass_true } else { cass_false })
                 .to_result(self)
-
         }
     }
 
@@ -505,7 +480,6 @@ impl Statement {
                                        index,
                                        CString::new(value)?.as_ptr())
                 .to_result(self)
-
         }
     }
 
@@ -521,7 +495,6 @@ impl Statement {
                                                CString::new(value)?.as_ptr())
                 .to_result(self)
 
-
         }
     }
 
@@ -530,7 +503,6 @@ impl Statement {
         unsafe {
             cass_statement_bind_bytes(self.0, index, value.as_ptr(), value.len())
                 .to_result(self)
-
         }
     }
 
@@ -546,7 +518,6 @@ impl Statement {
                                               value.as_mut_ptr(),
                                               value.len())
                 .to_result(self)
-
         }
     }
 
@@ -555,7 +526,6 @@ impl Statement {
         unsafe {
             cass_statement_bind_uuid(self.0, index, value.inner())
                 .to_result(self)
-
         }
     }
 
@@ -570,7 +540,6 @@ impl Statement {
                                              CString::new(name)?.as_ptr(),
                                              value.inner())
                 .to_result(self)
-
         }
     }
 
@@ -579,7 +548,6 @@ impl Statement {
         unsafe {
             cass_statement_bind_inet(self.0, index, value.inner())
                 .to_result(self)
-
         }
     }
 
@@ -590,7 +558,6 @@ impl Statement {
                                              CString::new(name)?.as_ptr(),
                                              value.inner())
                 .to_result(self)
-
         }
     }
 
@@ -636,7 +603,6 @@ impl Statement {
         unsafe {
             cass_statement_bind_collection(self.0, index, map.inner())
                 .to_result(self)
-
         }
     }
 
@@ -651,7 +617,6 @@ impl Statement {
                                                    CString::new(name)?.as_ptr(),
                                                    map.inner())
                 .to_result(self)
-
         }
     }
     /// Bind a "set" to a query or bound statement at the specified index.
@@ -659,7 +624,6 @@ impl Statement {
         unsafe {
             cass_statement_bind_collection(self.0, index, collection.inner())
                 .to_result(self)
-
         }
     }
 
@@ -674,7 +638,6 @@ impl Statement {
                                                    CString::new(name)?.as_ptr(),
                                                    collection.inner())
                 .to_result(self)
-
         }
     }
 
@@ -683,7 +646,6 @@ impl Statement {
         unsafe {
             cass_statement_bind_collection(self.0, index, collection.inner())
                 .to_result(self)
-
         }
     }
 
@@ -698,7 +660,6 @@ impl Statement {
                                                    CString::new(name)?.as_ptr(),
                                                    collection.inner())
                 .to_result(self)
-
         }
     }
 
@@ -707,7 +668,6 @@ impl Statement {
         unsafe {
             cass_statement_bind_tuple(self.0, index, value.inner())
                 .to_result(self)
-
         }
     }
 
@@ -721,7 +681,6 @@ impl Statement {
                                               CString::new(name)?.as_ptr(),
                                               value.inner())
                 .to_result(self)
-
         }
     }
 
@@ -731,7 +690,6 @@ impl Statement {
         unsafe {
             cass_statement_bind_user_type(self.0, index, value.inner())
                 .to_result(self)
-
         }
     }
 
@@ -743,7 +701,6 @@ impl Statement {
                                                   CString::new(name)?.as_ptr(),
                                                   value.inner())
                 .to_result(self)
-
         }
     }
 }

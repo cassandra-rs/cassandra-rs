@@ -80,7 +80,6 @@ impl UserType {
         unsafe {
             cass_user_type_set_null(self.0, index)
                 .to_result(self)
-
         }
     }
 
@@ -99,7 +98,6 @@ impl UserType {
         unsafe {
             cass_user_type_set_int8(self.0, index, value)
                 .to_result(self)
-
         }
     }
 
@@ -118,7 +116,6 @@ impl UserType {
         unsafe {
             cass_user_type_set_int16(self.0, index, value)
                 .to_result(self)
-
         }
     }
 
@@ -137,7 +134,6 @@ impl UserType {
         unsafe {
             cass_user_type_set_int32(self.0, index, value)
                 .to_result(self)
-
         }
     }
 

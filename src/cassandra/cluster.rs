@@ -152,7 +152,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_protocol_version(self.0, protocol_version as i32)
                 .to_result(self)
-
         }
     }
 
@@ -166,7 +165,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_num_threads_io(self.0, num_threads)
                 .to_result(self)
-
         }
     }
 
@@ -179,7 +177,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_queue_size_io(self.0, queue_size)
                 .to_result(self)
-
         }
     }
 
@@ -192,7 +189,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_queue_size_event(self.0, queue_size)
                 .to_result(self)
-
         }
     }
 
@@ -206,7 +202,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_core_connections_per_host(self.0, num_connections)
                 .to_result(self)
-
         }
     }
 
@@ -220,7 +215,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_max_connections_per_host(self.0, num_connections)
                 .to_result(self)
-
         }
     }
 
@@ -246,7 +240,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_max_concurrent_creation(self.0, num_connections)
                 .to_result(self)
-
         }
     }
 
@@ -260,7 +253,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_max_concurrent_requests_threshold(self.0, num_requests)
                 .to_result(self)
-
         }
     }
 
@@ -273,7 +265,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_max_requests_per_flush(self.0, num_requests)
                 .to_result(self)
-
         }
     }
 
@@ -287,7 +278,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_write_bytes_high_water_mark(self.0, num_bytes)
                 .to_result(self)
-
         }
     }
 
@@ -301,7 +291,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_write_bytes_low_water_mark(self.0, num_bytes)
                 .to_result(self)
-
         }
     }
 
@@ -316,7 +305,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_pending_requests_high_water_mark(self.0, num_requests)
                 .to_result(self)
-
         }
     }
 
@@ -331,7 +319,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_pending_requests_low_water_mark(self.0, num_requests)
                 .to_result(self)
-
         }
     }
 
@@ -403,7 +390,6 @@ impl Cluster {
                                                            allow_remote_dcs_for_local_cl)
                 }
                 .to_result(self)
-
         }
     }
 
