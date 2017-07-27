@@ -50,32 +50,32 @@ impl Display for Row {
 /// Auto inferencing conversion from c* to rust
 pub trait AsRustType<T> {
     /// convert while reading cassandra columns
-    fn get_col(&self, index: usize) -> Result<T>;
+    fn get(&self, index: usize) -> Result<T>;
 
     /// convert while reading cassandra columns by name
-    fn get_col_by_name<S>(&self, name: S) -> Result<T>
+    fn get_by_name<S>(&self, name: S) -> Result<T>
         where S: Into<String>;
 }
 
 impl AsRustType<bool> for Row {
-    fn get_col(&self, index: usize) -> Result<bool> {
+    fn get(&self, index: usize) -> Result<bool> {
         let col = self.get_column(index)?;
         col.get_bool()
     }
 
-    fn get_col_by_name<S>(&self, name: S) -> Result<bool>
+    fn get_by_name<S>(&self, name: S) -> Result<bool>
         where S: Into<String> {
         self.get_column_by_name(name)?.get_bool()
     }
 }
 
 impl AsRustType<String> for Row {
-    fn get_col(&self, index: usize) -> Result<String> {
+    fn get(&self, index: usize) -> Result<String> {
         let col = self.get_column(index)?;
         col.get_string()
     }
 
-    fn get_col_by_name<S>(&self, name: S) -> Result<String>
+    fn get_by_name<S>(&self, name: S) -> Result<String>
         where S: Into<String> {
         let col = self.get_column_by_name(name)?;
         col.get_string()
@@ -83,12 +83,12 @@ impl AsRustType<String> for Row {
 }
 
 impl AsRustType<f64> for Row {
-    fn get_col(&self, index: usize) -> Result<f64> {
+    fn get(&self, index: usize) -> Result<f64> {
         let col = self.get_column(index)?;
         col.get_f64()
     }
 
-    fn get_col_by_name<S>(&self, name: S) -> Result<f64>
+    fn get_by_name<S>(&self, name: S) -> Result<f64>
         where S: Into<String> {
         let col = self.get_column_by_name(name)?;
         col.get_f64()
@@ -96,12 +96,12 @@ impl AsRustType<f64> for Row {
 }
 
 impl AsRustType<f32> for Row {
-    fn get_col(&self, index: usize) -> Result<f32> {
+    fn get(&self, index: usize) -> Result<f32> {
         let col = self.get_column(index)?;
         col.get_f32()
     }
 
-    fn get_col_by_name<S>(&self, name: S) -> Result<f32>
+    fn get_by_name<S>(&self, name: S) -> Result<f32>
         where S: Into<String> {
         let col = self.get_column_by_name(name)?;
         col.get_f32()
@@ -109,12 +109,12 @@ impl AsRustType<f32> for Row {
 }
 
 impl AsRustType<i64> for Row {
-    fn get_col(&self, index: usize) -> Result<i64> {
+    fn get(&self, index: usize) -> Result<i64> {
         let col = self.get_column(index)?;
         col.get_i64()
     }
 
-    fn get_col_by_name<S>(&self, name: S) -> Result<i64>
+    fn get_by_name<S>(&self, name: S) -> Result<i64>
         where S: Into<String> {
         let col = self.get_column_by_name(name)?;
         col.get_i64()
@@ -122,12 +122,12 @@ impl AsRustType<i64> for Row {
 }
 
 impl AsRustType<i32> for Row {
-    fn get_col(&self, index: usize) -> Result<i32> {
+    fn get(&self, index: usize) -> Result<i32> {
         let col = self.get_column(index)?;
         col.get_i32()
     }
 
-    fn get_col_by_name<S>(&self, name: S) -> Result<i32>
+    fn get_by_name<S>(&self, name: S) -> Result<i32>
         where S: Into<String> {
         let col = self.get_column_by_name(name)?;
         col.get_i32()
@@ -135,12 +135,12 @@ impl AsRustType<i32> for Row {
 }
 
 impl AsRustType<SetIterator> for Row {
-    fn get_col(&self, index: usize) -> Result<SetIterator> {
+    fn get(&self, index: usize) -> Result<SetIterator> {
         let col = self.get_column(index)?;
         col.get_set()
     }
 
-    fn get_col_by_name<S>(&self, name: S) -> Result<SetIterator>
+    fn get_by_name<S>(&self, name: S) -> Result<SetIterator>
         where S: Into<String> {
         let col = self.get_column_by_name(name)?;
         col.get_set()
@@ -148,12 +148,12 @@ impl AsRustType<SetIterator> for Row {
 }
 
 impl AsRustType<MapIterator> for Row {
-    fn get_col(&self, index: usize) -> Result<MapIterator> {
+    fn get(&self, index: usize) -> Result<MapIterator> {
         let col = self.get_column(index)?;
         col.get_map()
     }
 
-    fn get_col_by_name<S>(&self, name: S) -> Result<MapIterator>
+    fn get_by_name<S>(&self, name: S) -> Result<MapIterator>
         where S: Into<String> {
         let col = self.get_column_by_name(name)?;
         col.get_map()
@@ -161,12 +161,12 @@ impl AsRustType<MapIterator> for Row {
 }
 
 impl AsRustType<Vec<u8>> for Row {
-    fn get_col(&self, index: usize) -> Result<Vec<u8>> {
+    fn get(&self, index: usize) -> Result<Vec<u8>> {
         let col = self.get_column(index)?;
         col.get_bytes().map(|b| b.to_vec())
     }
 
-    fn get_col_by_name<S>(&self, name: S) -> Result<Vec<u8>>
+    fn get_by_name<S>(&self, name: S) -> Result<Vec<u8>>
         where S: Into<String> {
         let col = self.get_column_by_name(name)?;
         col.get_bytes().map(|b| b.to_vec())

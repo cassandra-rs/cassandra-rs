@@ -48,11 +48,11 @@ fn select_from_basic(session: &Session, key: &str) -> Result<Option<Basic>> {
         None => Ok(None),
         Some(row) => {
             Ok(Some(Basic {
-                bln: row.get_col(1)?,
-                dbl: row.get_col(2)?,
-                flt: row.get_col(3)?,
-                i32: row.get_col(4)?,
-                i64: row.get_col(5)?,
+                bln: row.get(1)?,
+                dbl: row.get(2)?,
+                flt: row.get(3)?,
+                i32: row.get(4)?,
+                i64: row.get(5)?,
             }))
         }
     }
@@ -65,11 +65,11 @@ fn select_from_basic_prepared(session: &Session, prepared: &PreparedStatement, k
     let result = future.wait()?;
     println!("{:?}", result);
     for row in result.iter() {
-        basic.bln = row.get_col(1)?;
-        basic.dbl = row.get_col(2)?;
-        basic.flt = row.get_col(3)?;
-        basic.i32 = row.get_col(4)?;
-        basic.i64 = row.get_col(5)?;
+        basic.bln = row.get(1)?;
+        basic.dbl = row.get(2)?;
+        basic.flt = row.get(3)?;
+        basic.i32 = row.get(4)?;
+        basic.i64 = row.get(5)?;
     }
     Ok(())
 }
@@ -85,7 +85,7 @@ fn test_simple() {
     println!("{}", result);
     let mut names = vec![];
     for row in result.iter() {
-        let col: String = row.get_col_by_name(col_name).unwrap();
+        let col: String = row.get_by_name(col_name).unwrap();
         println!("ks name = {}", col);
         names.push(col);
     }
@@ -171,15 +171,15 @@ fn test_null_retrieval() {
     assert_eq!(1, result.row_count());
     let row = result.first_row().unwrap();
 
-    let v: String = row.get_col(0).unwrap();
+    let v: String = row.get(0).unwrap();
     assert_eq!(v, "vacant".to_string());
     assert!(!row.get_column(0).unwrap().is_null());
 
-    let v: bool = row.get_col(1).unwrap();
+    let v: bool = row.get(1).unwrap();
     assert_eq!(v, true);
     assert!(!row.get_column(1).unwrap().is_null());
 
-    let v: f32 = row.get_col(2).unwrap();
+    let v: f32 = row.get(2).unwrap();
     assert_eq!(v, 3.14f32);
     assert!(!row.get_column(2).unwrap().is_null());
 

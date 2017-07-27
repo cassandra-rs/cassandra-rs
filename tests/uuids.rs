@@ -31,7 +31,7 @@ fn select_from_log(session: &Session, key: &str) -> Result<Vec<(Uuid, String)>> 
     results.map(|r| {
         r.iter().map(|r| {
             let t: Uuid = r.get_column(1).expect("time0").get_uuid().expect("time");
-            let e: String = r.get_col(2).expect("entry");
+            let e: String = r.get(2).expect("entry");
             (t, e)
         }).collect()
     })

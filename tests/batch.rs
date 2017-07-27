@@ -39,8 +39,8 @@ fn retrieve_batch(session: &Session) -> Vec<Pair> {
     let result = session.execute(&select_query).wait().unwrap();
     result.iter().map(|r| {
         Pair {
-            key: r.get_col(0).expect("Key"),
-            value: r.get_col(1).expect("Value"),
+            key: r.get(0).expect("Key"),
+            value: r.get(1).expect("Value"),
         }
     }).collect()
 }
