@@ -32,8 +32,7 @@ Make sure that the driver (specifically `libcassandra_static.a` and `libcassandr
 
 ## Documentation
 
-You can view the API documentation by running `cargo doc` and visiting
-`target/doc` in your browser.
+See the [API documentation](https://docs.rs/cassandra-cpp).
 
 The [Cassandra Query Language (CQL) documentation](http://docs.datastax.com/en/cql/3.3/cql/cql_reference/cqlCommandsTOC.html)
 is likely to be useful.
