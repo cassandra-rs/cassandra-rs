@@ -1,16 +1,13 @@
 
 
-use cassandra::error::CassError;
 use cassandra::util::Protected;
-use cassandra_sys::CASS_OK;
+use cassandra::error::*;
 use cassandra_sys::CassInet as _Inet;
 use cassandra_sys::cass_inet_from_string;
 use cassandra_sys::cass_inet_init_v4;
 use cassandra_sys::cass_inet_init_v6;
 use cassandra_sys::cass_inet_string;
-use errors::*;
 use std::default::Default;
-// use std::ffi::NulError;
 use std::ffi::CStr;
 use std::ffi::CString;
 use std::fmt;
@@ -20,7 +17,6 @@ use std::net::{Ipv4Addr, Ipv6Addr};
 use std::net::SocketAddr;
 use std::str::FromStr;
 use std::string::ToString;
-// use cassandra::error::CassLibError;
 
 #[repr(C)]
 /// Cassandra's version of an IP address
@@ -78,11 +74,9 @@ impl FromStr for Inet {
         unsafe {
             let mut inet = mem::zeroed();
 
-            let str = CString::new(s).expect("must be utf8");
-            match cass_inet_from_string(str.as_ptr(), &mut inet) {
-                CASS_OK => Ok(Inet(inet)),
-                err => err.to_result(Inet(inet)).chain_err(|| ""),
-            }
+            let str = CString::new(s)?;
+            cass_inet_from_string(str.as_ptr(), &mut inet).to_result(())
+                .and_then(|_| Ok(Inet(inet)))
         }
     }
 }
@@ -108,7 +102,7 @@ impl FromInet for Ipv4Addr {
         let raw_addr: [u8; 16] = inet.0.address;
         match inet.0.address_length {
             4 => Ipv4Addr::new(raw_addr[0], raw_addr[1], raw_addr[2], raw_addr[3]),
-            16 => panic!(),
+            16 => panic!("Cannot convert IPv6 address to IPv4"),
             unsupported => panic!("impossible inet type: {:?}", unsupported),
         }
     }
@@ -118,7 +112,7 @@ impl FromInet for Ipv6Addr {
     fn from_cass_inet(inet: Inet) -> Self {
         let raw_addr: [u8; 16] = inet.0.address;
         match inet.0.address_length {
-            4 => panic!(),
+            4 => panic!("Cannot convert IPv4 address to IPv6"),
             16 => {
                 Ipv6Addr::new((raw_addr[1] as u16) << (8 + raw_addr[0] as u16),
                               (raw_addr[3] as u16) << (8 + raw_addr[2] as u16),

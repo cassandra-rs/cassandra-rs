@@ -1,5 +1,4 @@
-// use cassandra::error::CassError;
-
+//
 use cassandra::inet::Inet;
 use cassandra::iterator::MapIterator;
 use cassandra::iterator::SetIterator;
@@ -7,10 +6,10 @@ use cassandra::iterator::UserTypeIterator;
 use cassandra::util::Protected;
 use cassandra::uuid::Uuid;
 use cassandra::value::ValueType;
-use cassandra_sys::CASS_ERROR_LIB_INVALID_VALUE_TYPE;
+use cassandra::error::*;
 
+use cassandra_sys::CASS_ERROR_LIB_INVALID_VALUE_TYPE;
 // use cassandra_sys::Enum_CassValueType_::*;
-use cassandra_sys::CASS_OK;
 use cassandra_sys::CASS_VALUE_TYPE_ASCII;
 use cassandra_sys::CASS_VALUE_TYPE_BIGINT;
 use cassandra_sys::CASS_VALUE_TYPE_BLOB;
@@ -35,8 +34,6 @@ use cassandra_sys::CASS_VALUE_TYPE_TIMEUUID;
 use cassandra_sys::CASS_VALUE_TYPE_TINY_INT;
 use cassandra_sys::CASS_VALUE_TYPE_TUPLE;
 use cassandra_sys::CASS_VALUE_TYPE_UDT;
-
-
 use cassandra_sys::CASS_VALUE_TYPE_UNKNOWN;
 use cassandra_sys::CASS_VALUE_TYPE_UUID;
 use cassandra_sys::CASS_VALUE_TYPE_VARCHAR;
@@ -47,8 +44,6 @@ use cassandra_sys::cass_iterator_from_collection;
 use cassandra_sys::cass_iterator_from_map;
 use cassandra_sys::{cass_true, cass_false};
 use cassandra_sys::cass_value_get_bool;
-
-#[allow(unused_imports)]
 use cassandra_sys::cass_value_get_decimal;
 use cassandra_sys::cass_value_get_double;
 use cassandra_sys::cass_value_get_float;
@@ -62,7 +57,7 @@ use cassandra_sys::cass_value_get_uint32;
 use cassandra_sys::cass_value_get_uuid;
 use cassandra_sys::cass_value_is_null;
 use cassandra_sys::cass_value_type;
-use errors::*;
+
 use std::fmt;
 use std::fmt::Debug;
 use std::fmt::Display;
@@ -86,7 +81,7 @@ use std::str;
 //    COMPACT_VALUE = 3,
 //    ///A Cassandra static column
 //    STATIC = 4,
-//    ///An unknown column type. FIXME not sure if ever used
+//    ///An unknown column type.
 //    UNKNOWN = 5,
 // }
 
@@ -124,22 +119,37 @@ impl Debug for Column {
             CASS_VALUE_TYPE_TIMEUUID => write!(f, "TIMEUUID Cassandra type"),
             CASS_VALUE_TYPE_INET => write!(f, "INET Cassandra type"),
             CASS_VALUE_TYPE_LIST => {
-                for item in self.set_iter().expect("a list should always be able to return a set iterator") {
-                    write!(f, "LIST {:?}", item)?
+                match self.set_iter() {
+                    Err(_) => write!(f, "LIST <error>"),
+                    Ok(iter) => {
+                        for item in iter {
+                            write!(f, "LIST {:?}", item)?
+                        };
+                        Ok(())
+                    },
                 }
-                Ok(())
             }
             CASS_VALUE_TYPE_MAP => {
-                for item in self.map_iter().expect("a map should always be able to return a map iterator") {
-                    write!(f, "LIST {:?}", item)?
+                match self.set_iter() {
+                    Err(_) => write!(f, "MAP <error>"),
+                    Ok(iter) => {
+                        for item in iter {
+                            write!(f, "MAP {:?}", item)?
+                        };
+                        Ok(())
+                    },
                 }
-                Ok(())
             }
             CASS_VALUE_TYPE_SET => {
-                for item in self.set_iter().expect("a set must be able to return a set iterator") {
-                    write!(f, "SET {:?}", item)?
+                match self.set_iter() {
+                    Err(_) => write!(f, "SET <error>"),
+                    Ok(iter) => {
+                        for item in iter {
+                            write!(f, "SET {:?}", item)?
+                        };
+                        Ok(())
+                    },
                 }
-                Ok(())
             }
             CASS_VALUE_TYPE_UDT => write!(f, "UDT Cassandra type"),
             CASS_VALUE_TYPE_TUPLE => write!(f, "Tuple Cassandra type"),
@@ -169,27 +179,42 @@ impl Display for Column {
             CASS_VALUE_TYPE_TEXT => write!(f, "TEXT Cassandra type"),
             CASS_VALUE_TYPE_TIMESTAMP => write!(f, "TIMESTAMP Cassandra type"),
             CASS_VALUE_TYPE_UUID => write!(f, "UUID Cassandra type"),
-            CASS_VALUE_TYPE_VARCHAR => write!(f, "{}", self.get_string().unwrap()),
+            CASS_VALUE_TYPE_VARCHAR => write!(f, "{}", self.get_string().unwrap_or("<error>".to_string())),
             CASS_VALUE_TYPE_VARINT => Ok(()),
             CASS_VALUE_TYPE_TIMEUUID => write!(f, "TIMEUUID Cassandra type"),
             CASS_VALUE_TYPE_INET => write!(f, "INET Cassandra type"),
             CASS_VALUE_TYPE_LIST => {
-                for item in self.set_iter().expect("a list must be able to return a set iterator") {
-                    write!(f, "LIST {}", item)?
+                match self.set_iter() {
+                    Err(_) => write!(f, "LIST <error>"),
+                    Ok(iter) => {
+                        for item in iter {
+                            write!(f, "LIST {}", item)?
+                        };
+                        Ok(())
+                    },
                 }
-                Ok(())
             }
             CASS_VALUE_TYPE_MAP => {
-                for item in self.map_iter().expect("a map must be able to return a map iterator") {
-                    write!(f, "MAP {}:{}", item.0, item.1)?
+                match self.map_iter() {
+                    Err(_) => write!(f, "MAP <error>"),
+                    Ok(iter) => {
+                        for item in iter {
+                            write!(f, "MAP {}:{}", item.0, item.1)?
+                        };
+                        Ok(())
+                    },
                 }
-                Ok(())
             }
             CASS_VALUE_TYPE_SET => {
-                for item in self.set_iter().expect("a set must be able to return a set iterator") {
-                    write!(f, "SET {}", item)?
+                match self.set_iter() {
+                    Err(_) => write!(f, "SET <error>"),
+                    Ok(iter) => {
+                        for item in iter {
+                            write!(f, "SET {}", item)?
+                        };
+                        Ok(())
+                    },
                 }
-                Ok(())
             }
             CASS_VALUE_TYPE_UDT => write!(f, "UDT Cassandra type"),
             CASS_VALUE_TYPE_TUPLE => write!(f, "Tuple Cassandra type"),
@@ -228,23 +253,23 @@ impl Column {
     pub fn get_inet(&self) -> Result<Inet> {
         unsafe {
             let mut inet = mem::zeroed();
-            cass_value_get_inet(self.0, &mut inet).to_result(Inet::build(inet)).chain_err(|| "")
+            cass_value_get_inet(self.0, &mut inet).to_result(Inet::build(inet))
         }
     }
 
     /// Gets the u32 from this column or errors if you ask for the wrong type
     pub fn get_u32(&self, mut output: u32) -> Result<u32> {
-        unsafe { cass_value_get_uint32(self.0, &mut output).to_result(output).chain_err(|| "") }
+        unsafe { cass_value_get_uint32(self.0, &mut output).to_result(output) }
     }
 
     /// Gets the i8 from this column or errors if you ask for the wrong type
     pub fn get_i8(&self, mut output: i8) -> Result<i8> {
-        unsafe { cass_value_get_int8(self.0, &mut output).to_result(output).chain_err(|| "") }
+        unsafe { cass_value_get_int8(self.0, &mut output).to_result(output) }
     }
 
     /// Gets the i16 from this column or errors if you ask for the wrong type
     pub fn get_i16(&self, mut output: i16) -> Result<i16> {
-        unsafe { cass_value_get_int16(self.0, &mut output).to_result(output).chain_err(|| "") }
+        unsafe { cass_value_get_int16(self.0, &mut output).to_result(output) }
     }
 
     //    pub fn get_decimal(&self, mut output: d128) -> Result<d128, CassError> {
@@ -255,7 +280,7 @@ impl Column {
 
     /// Gets the string from this column or errors if you ask for the wrong type
     #[allow(cast_possible_truncation)]
-    pub fn get_string(&self) -> Result<String> {
+    pub fn get_str(&self) -> Result<&str> {
         unsafe {
             match cass_value_type(self.0) {
                 CASS_VALUE_TYPE_ASCII |
@@ -263,34 +288,37 @@ impl Column {
                 CASS_VALUE_TYPE_VARCHAR => {
                     let mut message = mem::zeroed();
                     let mut message_length = mem::zeroed();
-                    match cass_value_get_string(self.0, &mut message, &mut message_length) {
-                        CASS_OK => {
+                    cass_value_get_string(self.0, &mut message, &mut message_length).to_result(())
+                        .and_then(|_| {
                             let slice = slice::from_raw_parts(message as *const u8, message_length as usize);
-                            Ok(str::from_utf8(slice).expect("must be utf8").to_owned())
+                            Ok(str::from_utf8(slice)?)
                         }
-                        err => Err(err.to_result("").unwrap().into()),
-                    }
-
-
+                    )
                 }
-                other => panic!("Unsupported type: {:?}", other), //FIXME
+                other => Err(ErrorKind::UnsupportedType("a text type", ValueType::build(other)).into())
             }
         }
     }
 
+    /// Gets the string from this column or errors if you ask for the wrong type
+    pub fn get_string(&self) -> Result<String> {
+        self.get_str().map(str::to_owned)
+    }
+
     /// Gets the blob from this column or errors if type if wrong
-    pub fn get_blob(&self) -> Result<Vec<u8>> {
+    pub fn get_blob(&self) -> Result<&[u8]> {
         unsafe {
             match cass_value_type(self.0) {
                 CASS_VALUE_TYPE_BLOB => {
                     let mut message = mem::zeroed();
                     let mut message_length = mem::zeroed();
-                    match cass_value_get_string(self.0, &mut message, &mut message_length) {
-                        CASS_OK => Ok(Vec::from(slice::from_raw_parts(message as *const u8, message_length as usize))),
-                        err => Err(err.to_result("").unwrap().into()),
-                    }
+                    cass_value_get_string(self.0, &mut message, &mut message_length).to_result(())
+                        .and_then(|_| {
+                            Ok(slice::from_raw_parts(message as *const u8, message_length as usize))
+                        }
+                    )
                 }
-                _ => panic!("Value type is not BLOB"),
+                other => Err(ErrorKind::UnsupportedType("blob", ValueType::build(other)).into()),
             }
         }
     }
@@ -299,7 +327,7 @@ impl Column {
     pub fn get_i32(&self) -> Result<i32> {
         unsafe {
             let mut output = mem::zeroed();
-            cass_value_get_int32(self.0, &mut output).to_result(output).chain_err(|| "")
+            cass_value_get_int32(self.0, &mut output).to_result(output)
         }
     }
 
@@ -307,7 +335,7 @@ impl Column {
     pub fn get_i64(&self) -> Result<i64> {
         unsafe {
             let mut output = mem::zeroed();
-            cass_value_get_int64(self.0, &mut output).to_result(output).chain_err(|| "")
+            cass_value_get_int64(self.0, &mut output).to_result(output)
         }
     }
 
@@ -315,7 +343,7 @@ impl Column {
     pub fn get_float(&self) -> Result<f32> {
         unsafe {
             let mut output = mem::zeroed();
-            cass_value_get_float(self.0, &mut output).to_result(output).chain_err(|| "")
+            cass_value_get_float(self.0, &mut output).to_result(output)
         }
     }
 
@@ -323,7 +351,7 @@ impl Column {
     pub fn get_double(&self) -> Result<f64> {
         unsafe {
             let mut output = mem::zeroed();
-            cass_value_get_double(self.0, &mut output).to_result(output).chain_err(|| "")
+            cass_value_get_double(self.0, &mut output).to_result(output)
         }
     }
 
@@ -333,7 +361,7 @@ impl Column {
             let mut output = mem::zeroed();
             cass_value_get_bool(self.0, &mut output)
                 .to_result(output != cass_false)
-                .chain_err(|| "")
+
         }
     }
 
@@ -341,7 +369,8 @@ impl Column {
     pub fn get_uuid(&self) -> Result<Uuid> {
         unsafe {
             let mut output = mem::zeroed();
-            cass_value_get_uuid(self.0, &mut output).to_result(Uuid::build(output)).chain_err(|| "")
+            cass_value_get_uuid(self.0, &mut output).to_result(())
+                .and_then(|_| Ok(Uuid::build(output)))
         }
     }
 
@@ -357,7 +386,7 @@ impl Column {
         unsafe {
             match self.get_type().inner() {
                 CASS_VALUE_TYPE_MAP => Ok(MapIterator::build(cass_iterator_from_map(self.0))),
-                _ => Err(CASS_ERROR_LIB_INVALID_VALUE_TYPE.to_result("").unwrap().into()),
+                _ => Err(CASS_ERROR_LIB_INVALID_VALUE_TYPE.to_error()),
             }
         }
     }
@@ -367,7 +396,7 @@ impl Column {
         unsafe {
             match self.get_type().inner() {
                 CASS_VALUE_TYPE_SET => Ok(SetIterator::build(cass_iterator_from_collection(self.0))),
-                _ => Err(CASS_ERROR_LIB_INVALID_VALUE_TYPE.to_result("").unwrap().into()),
+                _ => Err(CASS_ERROR_LIB_INVALID_VALUE_TYPE.to_error()),
             }
         }
     }
@@ -377,7 +406,7 @@ impl Column {
         unsafe {
             match self.get_type().inner() {
                 CASS_VALUE_TYPE_UDT => Ok(UserTypeIterator::build(cass_iterator_fields_from_user_type(self.0))),
-                _ => Err(CASS_ERROR_LIB_INVALID_VALUE_TYPE.to_result("").unwrap().into()),
+                _ => Err(CASS_ERROR_LIB_INVALID_VALUE_TYPE.to_error()),
             }
         }
     }

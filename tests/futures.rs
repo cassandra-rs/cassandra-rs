@@ -9,7 +9,6 @@ extern crate futures;
 mod help;
 
 use cassandra_cpp::*;
-use errors::*;
 use futures::Future;
 
 

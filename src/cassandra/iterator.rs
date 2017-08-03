@@ -7,8 +7,7 @@ use cassandra::schema::keyspace_meta::KeyspaceMeta;
 use cassandra::schema::table_meta::TableMeta;
 use cassandra::util::Protected;
 use cassandra::value::Value;
-
-use cassandra_sys::CASS_OK;
+use cassandra::error::*;
 
 // use cassandra_sys::CassIteratorType as _CassIteratorType;
 use cassandra_sys::CassIterator as _CassIterator;
@@ -160,17 +159,15 @@ impl Iterator for FieldIterator {
                 cass_true => {
                     let mut name = mem::zeroed();
                     let mut name_length = mem::zeroed();
-                    match cass_iterator_get_meta_field_name(self.0, &mut name, &mut name_length) {
-                        CASS_OK => {
+                    cass_iterator_get_meta_field_name(self.0, &mut name, &mut name_length).to_result(())
+                        .and_then(|_| {
                             let slice = slice::from_raw_parts(name as *const u8, name_length as usize);
-                            Some(Field {
-                                name: str::from_utf8(slice).expect("must be utf8").to_owned(),
-                                value: Value::build(cass_iterator_get_meta_field_value(self.0)),
-                            })
+                            let name = str::from_utf8(slice)?.to_owned();
+                            let value = Value::build(cass_iterator_get_meta_field_value(self.0));
+                            Ok(Some(Field { name, value }))
                         }
-                        err => panic!("FIXME: no error handling. Err {:?}", err),
-                    }
-                }
+                    )
+                }.expect("Cassandra error during iteration")
             }
         }
     }

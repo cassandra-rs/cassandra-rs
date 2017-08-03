@@ -1,11 +1,9 @@
-
-
 use cassandra::data_type::ConstDataType;
-use cassandra::error::CassError;
-
 use cassandra::iterator::FieldIterator;
 use cassandra::util::Protected;
 use cassandra::value::Value;
+use cassandra::error::*;
+
 use cassandra_sys::CASS_OK;
 use cassandra_sys::CassFunctionMeta as _CassFunctionMeta;
 use cassandra_sys::cass_function_meta_argument;
@@ -20,10 +18,10 @@ use cassandra_sys::cass_function_meta_name;
 use cassandra_sys::cass_function_meta_return_type;
 use cassandra_sys::cass_iterator_fields_from_function_meta;
 use cassandra_sys::cass_true;
-use errors::*;
 
 use std::{mem, slice, str};
 use std::ffi::CString;
+
 /// The metadata for a function
 #[derive(Debug)]
 pub struct FunctionMeta(*const _CassFunctionMeta);
@@ -108,10 +106,7 @@ impl FunctionMeta {
             let mut name_length = mem::zeroed();
             let mut data_type = mem::zeroed();
 
-            match cass_function_meta_argument(self.0, index, &mut name, &mut name_length, &mut data_type) {
-                CASS_OK => Ok(()),
-                err => err.to_result(()).chain_err(|| ""),
-            }
+            cass_function_meta_argument(self.0, index, &mut name, &mut name_length, &mut data_type).to_result(())
         }
     }
 

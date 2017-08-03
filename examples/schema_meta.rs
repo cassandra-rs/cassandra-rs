@@ -3,7 +3,6 @@ extern crate cassandra_cpp;
 extern crate futures;
 
 use cassandra_cpp::*;
-use errors::*;
 
 use futures::Future;
 

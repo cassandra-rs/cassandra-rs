@@ -1,7 +1,6 @@
-
-
-use cassandra::error::CassError;
 use cassandra::util::Protected;
+use cassandra::error::*;
+
 use cassandra_sys::CassSslVerifyFlags;
 use cassandra_sys::CassSsl as _Ssl;
 use cassandra_sys::cass_ssl_add_trusted_cert;
@@ -10,7 +9,7 @@ use cassandra_sys::cass_ssl_new;
 use cassandra_sys::cass_ssl_set_cert;
 use cassandra_sys::cass_ssl_set_private_key;
 use cassandra_sys::cass_ssl_set_verify_flags;
-use errors::*;
+
 use std::ffi::CString;
 
 /// The individual SSL verification levels.
@@ -64,9 +63,8 @@ impl Ssl {
     /// the peer's certificate.
     pub fn add_trusted_cert(&mut self, cert: &str) -> Result<&mut Self> {
         unsafe {
-            cass_ssl_add_trusted_cert(self.0, CString::new(cert).expect("must be utf8").as_ptr())
+            cass_ssl_add_trusted_cert(self.0, CString::new(cert)?.as_ptr())
                 .to_result(self)
-                .chain_err(|| "")
         }
     }
 
@@ -88,9 +86,8 @@ impl Ssl {
     /// Certificate chain starting with the certificate itself.
     pub fn set_cert(&mut self, cert: &str) -> Result<&mut Self> {
         unsafe {
-            cass_ssl_set_cert(self.0, CString::new(cert).expect("must be utf8").as_ptr())
+            cass_ssl_set_cert(self.0, CString::new(cert)?.as_ptr())
                 .to_result(self)
-                .chain_err(|| "")
         }
     }
 
@@ -99,10 +96,9 @@ impl Ssl {
     pub fn set_private_key(&mut self, key: &str, password: &str) -> Result<&mut Self> {
         unsafe {
             cass_ssl_set_private_key(self.0,
-                                     CString::new(key).expect("must be utf8").as_ptr(),
+                                     CString::new(key)?.as_ptr(),
                                      password.as_ptr() as *const i8)
                 .to_result(self)
-                .chain_err(|| "")
         }
     }
 }

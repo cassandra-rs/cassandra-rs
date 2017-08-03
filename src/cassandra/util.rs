@@ -24,7 +24,7 @@ pub(crate) trait Protected<T> {
 ///     (ThisVariant1, ThatVariant1, "StringName1"),
 ///     (ThisVariant2, ThatVariant2, "StringName2"),
 ///     ...
-/// });
+/// }, omit { ThatVariantOmit1, ThatVariantOmit2 });
 /// ```
 /// where
 ///
@@ -34,6 +34,8 @@ pub(crate) trait Protected<T> {
 ///   * `ThisVariant`i is the name of the variant.
 ///   * `ThatVariant`i is the name of the corresponding variant of `ThatEnum`.
 ///   * `StringName`i is the desired string representation of the enum for parsing and printing.
+/// * The `omit` section is optional; any variants of `ThatEnum` listed here
+///   cause `Protected::build` to panic.
 ///
 
 // We attempted to use the `macro-attr` crate to achieve this more naturally, but sadly
@@ -45,7 +47,9 @@ pub(crate) trait Protected<T> {
 // In the end the best approach is just the direct one, as exemplified here.
 
 macro_rules! enhance_nullary_enum {
-    ( $this_name:ident, $that_name: ident, { $( ($this:ident, $that:ident, $name:expr), )* } ) => {
+    ( $this_name:ident, $that_name: ident, {
+        $( ($this:ident, $that:ident, $name:expr), )*
+        } $( , omit { $( $not_that:ident ),* } )* ) => {
         impl ::std::fmt::Display for $this_name {
             fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::result::Result<(), ::std::fmt::Error> {
                 write!(f, "{}", match *self {
@@ -68,7 +72,8 @@ macro_rules! enhance_nullary_enum {
         impl $crate::cassandra::util::Protected<$that_name> for $this_name {
             fn build(inner: $that_name) -> Self {
                 match inner {
-                    $( $that_name::$that=> $this_name::$this ),*
+                    $( $that_name::$that => $this_name::$this, )*
+                    $($( $that_name::$not_that => panic!(stringify!(Unexpected variant $that_name::$not_that)), )*)*
                 }
             }
             fn inner(&self) -> $that_name {
@@ -88,5 +93,5 @@ macro_rules! enhance_nullary_enum {
                 &VARIANTS
             }
         }
-    }
+    };
 }

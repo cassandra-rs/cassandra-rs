@@ -1,6 +1,7 @@
 use cassandra::data_type::ConstDataType;
 use cassandra::statement::Statement;
 use cassandra::util::Protected;
+use cassandra::error::*;
 
 use cassandra_sys::CassPrepared as _PreparedStatement;
 use cassandra_sys::cass_prepared_bind;
@@ -40,12 +41,15 @@ impl PreparedStatement {
 
     /// Gets the name of a parameter at the specified index.
     #[allow(cast_possible_truncation)]
-    pub fn parameter_name(&self, index: usize) -> Result<&str, str::Utf8Error> {
+    pub fn parameter_name(&self, index: usize) -> Result<&str> {
         unsafe {
             let mut name = mem::zeroed();
             let mut name_length = mem::zeroed();
-            cass_prepared_parameter_name(self.0, index, &mut name, &mut name_length);
-            str::from_utf8(slice::from_raw_parts(name as *const u8, name_length as usize))
+            cass_prepared_parameter_name(self.0, index, &mut name, &mut name_length).to_result(())
+                .and_then(|_| {
+                    Ok(str::from_utf8(slice::from_raw_parts(name as *const u8, name_length as usize))?)
+                }
+            )
         }
     }
 

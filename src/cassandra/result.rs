@@ -3,13 +3,12 @@
 #![allow(missing_copy_implementations)]
 
 use cassandra::data_type::ConstDataType;
-use cassandra::error::CassError;
 use cassandra::row::Row;
 use cassandra::util::Protected;
-
 use cassandra::value::ValueType;
-use cassandra_sys::CassIterator as _CassIterator;
+use cassandra::error::*;
 
+use cassandra_sys::CassIterator as _CassIterator;
 use cassandra_sys::CassResult as _CassResult;
 use cassandra_sys::cass_false;
 use cassandra_sys::cass_iterator_free;
@@ -21,14 +20,12 @@ use cassandra_sys::cass_result_column_data_type;
 use cassandra_sys::cass_result_column_name;
 use cassandra_sys::cass_result_column_type;
 use cassandra_sys::cass_result_first_row;
-#[allow(unused_imports)]
 use cassandra_sys::cass_result_free;
 use cassandra_sys::cass_result_has_more_pages;
 use cassandra_sys::cass_result_paging_state_token;
 use cassandra_sys::cass_result_row_count;
-
 use cassandra_sys::cass_true;
-use errors::*;
+
 use std::ffi::CString;
 use std::fmt;
 use std::fmt::Debug;
@@ -85,13 +82,16 @@ impl CassResult {
     pub fn column_count(&self) -> u64 { unsafe { cass_result_column_count(self.0) as u64 } }
 
     /// Gets the column name at index for the specified result.
-    pub fn column_name(&self, index: usize) -> String {
+    pub fn column_name(&self, index: usize) -> Result<&str> {
         unsafe {
             let name = mem::zeroed();
             let name_length = mem::zeroed();
-            cass_result_column_name(self.0, index, name, name_length);
-            let slice = slice::from_raw_parts(name as *const u8, name_length as usize);
-            str::from_utf8(slice).expect("must be utf8").to_owned()
+            cass_result_column_name(self.0, index, name, name_length).to_result(())
+                .and_then(|_| {
+                    let slice = slice::from_raw_parts(name as *const u8, name_length as usize);
+                    Ok(str::from_utf8(slice)?)
+                }
+            )
         }
     }
 
@@ -126,11 +126,9 @@ impl CassResult {
     // used to gain access to other data.
     pub fn set_paging_state_token(&mut self, paging_state: &str) -> Result<&mut Self> {
         unsafe {
-            let state = CString::new(paging_state).expect("must be utf8");
-
+            let state = CString::new(paging_state)?;
             cass_result_paging_state_token(self.0, &mut state.as_ptr(), &mut (state.to_bytes().len()))
                 .to_result(self)
-                .chain_err(|| "")
         }
     }
 

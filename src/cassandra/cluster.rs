@@ -5,12 +5,13 @@ use cassandra::session::Session;
 use cassandra::ssl::Ssl;
 use cassandra::time::TimestampGen;
 use cassandra::util::Protected;
+use cassandra::error::*;
+
 use cassandra_sys::CassCluster as _Cluster;
 use cassandra_sys::cass_bool_t;
 use cassandra_sys::cass_cluster_free;
 use cassandra_sys::cass_cluster_new;
 use cassandra_sys::cass_cluster_set_connect_timeout;
-
 use cassandra_sys::cass_cluster_set_connection_heartbeat_interval;
 use cassandra_sys::cass_cluster_set_connection_idle_timeout;
 use cassandra_sys::cass_cluster_set_contact_points;
@@ -48,16 +49,14 @@ use cassandra_sys::cass_future_error_code;
 use cassandra_sys::cass_session_connect;
 use cassandra_sys::cass_session_new;
 use cassandra_sys::cass_true;
-use errors::*;
+
 // use ip::IpAddr;
-use errors::*;
 use std::ffi::{CString, CStr};
 use std::ffi::NulError;
 use std::fmt;
 use std::iter::Map;
 use std::net::AddrParseError;
 use std::net::Ipv4Addr;
-
 use std::result;
 use std::fmt::Display;
 use std::str::FromStr;
@@ -109,10 +108,9 @@ impl Cluster {
     ///
     pub fn set_contact_points(&mut self, contact_points: &str) -> Result<&mut Self> {
         unsafe {
-            let s = CString::new(contact_points.clone())
-                .chain_err(|| "Invalid contact_points string")?;
+            let s = CString::new(contact_points.clone())?;
             let err = cass_cluster_set_contact_points(self.0, s.as_ptr());
-            err.to_result(self).chain_err(|| "Could not set contact points")
+            err.to_result(self)
         }
     }
 
@@ -123,7 +121,7 @@ impl Cluster {
     /// Default: 9042
     ///
     pub fn set_port(&mut self, port: u16) -> Result<&mut Self> {
-        unsafe { cass_cluster_set_port(self.0, port as i32).to_result(self).chain_err(|| "Could not set port") }
+        unsafe { cass_cluster_set_port(self.0, port as i32).to_result(self) }
     }
 
 
@@ -140,7 +138,7 @@ impl Cluster {
         unsafe {
             let session = Session(cass_session_new());
             let connect_future = <CassFuture<()>>::build(cass_session_connect(session.0, self.0));
-            connect_future.wait().map(|_| session).chain_err(|| "Could not connect")
+            connect_future.wait().map(|_| session)
         }
     }
 
@@ -154,7 +152,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_protocol_version(self.0, protocol_version as i32)
                 .to_result(self)
-                .chain_err(|| "Couldn't set protocol version")
         }
     }
 
@@ -168,7 +165,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_num_threads_io(self.0, num_threads)
                 .to_result(self)
-                .chain_err(|| "couldn't set thread count")
         }
     }
 
@@ -181,7 +177,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_queue_size_io(self.0, queue_size)
                 .to_result(self)
-                .chain_err(|| "couldn't set io queue size")
         }
     }
 
@@ -194,7 +189,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_queue_size_event(self.0, queue_size)
                 .to_result(self)
-                .chain_err(|| "couldn't set event queue size")
         }
     }
 
@@ -208,7 +202,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_core_connections_per_host(self.0, num_connections)
                 .to_result(self)
-                .chain_err(|| "couldn't set connections per host")
         }
     }
 
@@ -222,7 +215,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_max_connections_per_host(self.0, num_connections)
                 .to_result(self)
-                .chain_err(|| "couldn't set max connections per host")
         }
     }
 
@@ -248,7 +240,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_max_concurrent_creation(self.0, num_connections)
                 .to_result(self)
-                .chain_err(|| "couldn't set max_concurrent_creation")
         }
     }
 
@@ -262,7 +253,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_max_concurrent_requests_threshold(self.0, num_requests)
                 .to_result(self)
-                .chain_err(|| "couldn't set max concurrend requests threshold")
         }
     }
 
@@ -275,7 +265,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_max_requests_per_flush(self.0, num_requests)
                 .to_result(self)
-                .chain_err(|| "couldn't set max requests per flush")
         }
     }
 
@@ -289,7 +278,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_write_bytes_high_water_mark(self.0, num_bytes)
                 .to_result(self)
-                .chain_err(|| "couldn't set write bytes high water mark")
         }
     }
 
@@ -303,7 +291,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_write_bytes_low_water_mark(self.0, num_bytes)
                 .to_result(self)
-                .chain_err(|| "couldn't set write bytes low water mark")
         }
     }
 
@@ -318,7 +305,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_pending_requests_high_water_mark(self.0, num_requests)
                 .to_result(self)
-                .chain_err(|| "couldn't set pending requests high water mark")
         }
     }
 
@@ -333,7 +319,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_pending_requests_low_water_mark(self.0, num_requests)
                 .to_result(self)
-                .chain_err(|| "couldn't set pending requests low water mark")
         }
     }
 
@@ -362,11 +347,11 @@ impl Cluster {
     }
 
     /// Sets credentials for plain text authentication.
-    pub fn set_credentials(&mut self, username: &str, password: &str) -> Result<&Self> {
+    pub fn set_credentials(&mut self, username: &str, password: &str) -> Result<&mut Self> {
         unsafe {
             cass_cluster_set_credentials(self.0,
-                                         CString::new(username).chain_err(|| "username not a valid CString")?.as_ptr(),
-                                         CString::new(password).chain_err(|| "password not a valid CString")?.as_ptr());
+                                         CString::new(username)?.as_ptr(),
+                                         CString::new(password)?.as_ptr());
         }
         Ok(self)
     }
@@ -398,14 +383,13 @@ impl Cluster {
                                         -> Result<&mut Self> {
         unsafe {
             {
-                    let local_dc = CString::new(local_dc).expect("must be utf8");
+                    let local_dc = CString::new(local_dc)?;
                     cass_cluster_set_load_balance_dc_aware(self.0,
                                                            local_dc.as_ptr(),
                                                            used_hosts_per_remote_dc,
                                                            allow_remote_dcs_for_local_cl)
                 }
                 .to_result(self)
-                .chain_err(|| "couldn't set dc aware load balancing policy")
         }
     }
 
@@ -485,7 +469,6 @@ impl Cluster {
     ///
     /// Examples: "127.0.0.1" "127.0.0.1,127.0.0.2", "server1.domain.com"
     pub fn set_whitelist_filtering(&mut self, hosts: Vec<String>) -> &Self {
-        // FIXME replace host strings with InetSomethings
         unsafe {
             cass_cluster_set_whitelist_filtering(self.0, hosts.join(",").as_ptr() as *const i8);
         }
