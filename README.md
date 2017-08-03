@@ -19,7 +19,7 @@ You can use this crate from cargo with
 
 ```toml
     [dependencies]
-    cassandra-cpp = "0.9"
+    cassandra-cpp = "0.10"
 ```
 
 For this crate to work, you must first have installed the datastax-cpp driver.
@@ -54,7 +54,8 @@ There are additional examples included with the project in [`tests`](tests/) and
 
 ## Migrating from version 0.8
 
-The API changed significantly in version 0.9. Here is a summary of the main changes.
+The API changed significantly in version 0.10. Here is a summary of the main changes.
+(Version 0.9 was skipped, for consistency with the `cassandra-cpp-sys` version number.)
 
 Errors:
 
