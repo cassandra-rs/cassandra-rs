@@ -25,7 +25,6 @@ extern crate error_chain;
 pub use cassandra::batch::{Batch, BatchType, CustomPayload};
 pub use cassandra::cluster::{Cluster, CqlProtocol};
 pub use cassandra::collection::{CassCollection, List, Map, Set};
-pub use cassandra::column::Column;
 pub use cassandra::consistency::Consistency;
 pub use cassandra::data_type::DataType;
 // pub use cassandra::write_type::*;
@@ -84,8 +83,6 @@ mod cassandra {
     pub mod schema;
     pub mod log;
     pub mod error;
-    pub mod helpers;
-    pub mod column;
     pub mod user_type;
     pub mod data_type;
     pub mod tuple;

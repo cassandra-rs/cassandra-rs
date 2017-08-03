@@ -48,11 +48,11 @@ fn select_from_basic(session: &Session, key: &str) -> Result<Option<Basic>> {
         None => Ok(None),
         Some(row) => {
             Ok(Some(Basic {
-                bln: row.get_col(1)?,
-                dbl: row.get_col(2)?,
-                flt: row.get_col(3)?,
-                i32: row.get_col(4)?,
-                i64: row.get_col(5)?,
+                bln: row.get(1)?,
+                dbl: row.get(2)?,
+                flt: row.get(3)?,
+                i32: row.get(4)?,
+                i64: row.get(5)?,
             }))
         }
     }
@@ -65,11 +65,11 @@ fn select_from_basic_prepared(session: &Session, prepared: &PreparedStatement, k
     let result = future.wait()?;
     println!("{:?}", result);
     for row in result.iter() {
-        basic.bln = row.get_col(1)?;
-        basic.dbl = row.get_col(2)?;
-        basic.flt = row.get_col(3)?;
-        basic.i32 = row.get_col(4)?;
-        basic.i64 = row.get_col(5)?;
+        basic.bln = row.get(1)?;
+        basic.dbl = row.get(2)?;
+        basic.flt = row.get(3)?;
+        basic.i32 = row.get(4)?;
+        basic.i64 = row.get(5)?;
     }
     Ok(())
 }
@@ -85,7 +85,7 @@ fn test_simple() {
     println!("{}", result);
     let mut names = vec![];
     for row in result.iter() {
-        let col: String = row.get_col_by_name(col_name).unwrap();
+        let col: String = row.get_by_name(col_name).unwrap();
         println!("ks name = {}", col);
         names.push(col);
     }
@@ -171,20 +171,20 @@ fn test_null_retrieval() {
     assert_eq!(1, result.row_count());
     let row = result.first_row().unwrap();
 
-    let v: String = row.get_col(0).unwrap();
+    let v: String = row.get(0).unwrap();
     assert_eq!(v, "vacant".to_string());
     assert!(!row.get_column(0).unwrap().is_null());
 
-    let v: bool = row.get_col(1).unwrap();
+    let v: bool = row.get(1).unwrap();
     assert_eq!(v, true);
     assert!(!row.get_column(1).unwrap().is_null());
 
-    let v: f32 = row.get_col(2).unwrap();
+    let v: f32 = row.get(2).unwrap();
     assert_eq!(v, 3.14f32);
     assert!(!row.get_column(2).unwrap().is_null());
 
     let c = row.get_column(3).expect("should be present");
-    c.get_double().expect_err("should be null");
+    c.get_f64().expect_err("should be null");
     assert!(c.is_null());
 
     let c = row.get_column(4).expect("should be present");
@@ -224,4 +224,95 @@ fn test_null_insertion() {
     assert!(!row.get_column(3).unwrap().is_null());
     assert!(row.get_column(4).unwrap().is_null());
     assert!(row.get_column(5).unwrap().is_null());
+}
+
+/// Check for a needle in a haystack, and fail if not present.
+fn assert_contains(haystack: String, needle: &str) {
+    assert!(haystack.contains(needle), "assert_contains: `{}` not found in `{}`", needle, &haystack);
+}
+
+#[test]
+fn test_rendering() {
+    let query = stmt!("SELECT * FROM system_schema.tables;");
+    let session = help::create_test_session();
+    let result = session.execute(&query).wait().unwrap();
+    println!("test_rendering: {}", result);
+
+    let row = result.iter().next().unwrap();
+    let compaction_col = row.get_column_by_name("compaction").unwrap();
+
+    // Check rendering of a column
+    let column_debug = format!("{:?}", compaction_col);
+    println!("Column debug: {}", &column_debug);
+    assert_contains(column_debug, r#"{"class" => "org.apache.cassandra.db.compaction"#);
+
+    let column_display = format!("{}", compaction_col);
+    println!("Column display: {}", &column_display);
+    assert_contains(column_display, r#"{class => org.apache.cassandra.db.compaction"#);
+
+    // Check retrieving a string and a str.
+    let keyspace_col = row.get_column_by_name("keyspace_name").unwrap();
+    let str: &str = keyspace_col.get_str().unwrap();
+    println!("Str is {}", str);
+    assert!(str.len() > 0, "empty str");
+    let str: String = keyspace_col.get_string().unwrap();
+    println!("String is {}", str);
+    assert!(str.len() > 0, "empty string");
+
+    // Check invalid retrieval type.
+    keyspace_col.get_map().expect_err("Should fail with invalid value type");
+}
+
+#[test]
+fn test_error_reporting() {
+    let session = help::create_test_session();
+
+    // Simple error.
+    let mut query = stmt!("SELECT * from system_schema.tables;");
+    query.set_consistency(Consistency::THREE).unwrap();  // assuming we only have one node, this must fail
+    let err = session.execute(&query).wait().expect_err("Should have failed!");
+    println!("Got error {} kind {:?}", err, err.kind());
+    match *err.kind() {
+        ErrorKind::CassError(CassErrorCode::LIB_NO_HOSTS_AVAILABLE, _) => (),
+        ref k => panic!("Unexpected error kind {}", k),
+    }
+
+    // Detailed error.
+    let query = stmt!("SELECT gibberish from system_schema.tables;");
+    let err = session.execute(&query).wait().expect_err("Should have failed!");
+    println!("Got error {} kind {:?}", err, err.kind());
+    match *err.kind() {
+        ErrorKind::CassErrorResult(CassErrorCode::SERVER_INVALID_QUERY, _, _, -1, -1, -1, _, _, _, _, _) => (),
+        ref k => panic!("Unexpected error kind {}", k),
+    }
+
+    // UTF-8 error
+    let query = stmt!("SELECT (blob)0xffff from system_schema.tables;");
+    let result = session.execute(&query).wait().unwrap();
+    let row = result.iter().next().unwrap();
+    let err = row.get_column(0).unwrap().get_string().expect_err("Should have failed");
+    println!("Got error {} kind {:?}", err, err.kind());
+    match *err.kind() {
+        ErrorKind::InvalidUtf8(_) => (),
+        ref k => panic!("Unexpected error kind {}", k),
+    }
+
+    // NUL error
+    let mut query = stmt!("SELECT ? from system_schema.tables;");
+    let err = query.bind(0, "safe\0nasty!").expect_err("Should have failed!");
+    println!("Got error {} kind {:?}", err, err.kind());
+    match *err.kind() {
+        ErrorKind::StringContainsNul(_) => (),
+        ref k => panic!("Unexpected error kind {}", k),
+    }
+}
+
+#[test]
+fn test_result() {
+    let query = stmt!("SELECT * FROM system_schema.tables;");
+    let session = help::create_test_session();
+    let result = session.execute(&query).wait().unwrap();
+
+    assert_eq!("keyspace_name", result.column_name(0).unwrap());
+    assert_eq!("table_name", result.column_name(1).unwrap());
 }

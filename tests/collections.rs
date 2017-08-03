@@ -28,7 +28,7 @@ fn select_from_collections(session: &Session, key: &str) -> Result<Vec<String>> 
     let mut res = vec![];
     for row in result.iter() {
         let column = row.get_column(0);
-        let items_iterator: SetIterator = column?.set_iter()?;
+        let items_iterator: SetIterator = column?.get_set()?;
         for item in items_iterator {
             println!("item: {:?}", item);
             res.push(item.get_string().expect("Should exist").to_string());

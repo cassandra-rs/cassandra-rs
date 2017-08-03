@@ -22,7 +22,7 @@ fn main() {
             let result = session.execute(&query).wait().unwrap();
             println!("{}", result);
             for row in result.iter() {
-                let col: String = row.get_col_by_name(col_name).unwrap();
+                let col: String = row.get_by_name(col_name).unwrap();
                 println!("ks name = {}", col);
             }
         }
