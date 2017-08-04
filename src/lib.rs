@@ -13,7 +13,6 @@ extern crate slog;
 extern crate decimal;
 extern crate chrono;
 extern crate time;
-extern crate ip;
 extern crate uuid;
 extern crate futures;
 extern crate cassandra_cpp_sys;
