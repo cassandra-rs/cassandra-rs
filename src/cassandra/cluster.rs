@@ -50,7 +50,6 @@ use cassandra_sys::cass_session_connect;
 use cassandra_sys::cass_session_new;
 use cassandra_sys::cass_true;
 
-// use ip::IpAddr;
 use std::ffi::{CString, CStr};
 use std::ffi::NulError;
 use std::fmt;
