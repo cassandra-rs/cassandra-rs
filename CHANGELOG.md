@@ -1,6 +1,8 @@
 ## 0.10.1
 
 * Remove unnecessary dependency on `ip` crate.
+* Add `Copy`, `Clone`, `Hash` impls for all nullary enums.
+* Specify correct `Send` and `Sync` markers for all C* types.
 
 
 ## 0.10.0
