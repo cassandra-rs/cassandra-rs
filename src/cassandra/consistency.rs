@@ -6,7 +6,7 @@ use cassandra_sys::cass_consistency_string;
 use std::ffi::CStr;
 
 /// A Cassandra consistency level.
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Hash)]
 #[allow(missing_docs)] // Meanings are defined in CQL documentation.
 #[allow(non_camel_case_types)] // Names are traditional.
 pub enum Consistency {

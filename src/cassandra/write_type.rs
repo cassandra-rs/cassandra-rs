@@ -2,7 +2,7 @@ use cassandra::util::Protected;
 use cassandra_sys::CassWriteType_;
 
 /// A Cassandra write type level.
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Hash)]
 #[allow(missing_docs)] // Meanings are defined in CQL documentation.
 #[allow(non_camel_case_types)] // Names are traditional.
 pub enum WriteType {
