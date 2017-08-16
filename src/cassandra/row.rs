@@ -21,8 +21,11 @@ use std::fmt::Formatter;
 use std::iter;
 use std::iter::IntoIterator;
 
-/// A collection of column values.
+/// A collection of column values. Read-only, so thread-safe.
 pub struct Row(*const _Row);
+
+unsafe impl Sync for Row {}
+unsafe impl Send for Row {}
 
 impl Protected<*const _Row> for Row {
     fn inner(&self) -> *const _Row { self.0 }
@@ -205,6 +208,9 @@ impl Row {
 #[derive(Debug)]
 pub struct RowIterator(pub *mut _CassIterator);
 
+// The underlying C type has no thread-local state, but does not support access
+// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+unsafe impl Send for RowIterator {}
 
 impl Drop for RowIterator {
     fn drop(&mut self) { unsafe { cass_iterator_free(self.0) } }

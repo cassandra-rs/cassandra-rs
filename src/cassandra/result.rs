@@ -37,7 +37,7 @@ use std::str;
 
 /// The result of a query.
 /// A result object is read-only and is thread-safe to read or iterate over
-/// concurrently.
+/// concurrently, since we do not bind any setters (e.g., `set_metadata`).
 pub struct CassResult(*const _CassResult);
 unsafe impl Sync for CassResult {}
 unsafe impl Send for CassResult {}
@@ -141,6 +141,10 @@ impl CassResult {
 /// An iterator over the results of a query
 #[derive(Debug)]
 pub struct ResultIterator(pub *mut _CassIterator);
+
+// The underlying C type has no thread-local state, but does not support access
+// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+unsafe impl Send for ResultIterator {}
 
 impl Drop for ResultIterator {
     fn drop(&mut self) { unsafe { cass_iterator_free(self.0) } }

@@ -80,6 +80,10 @@ pub type CqlProtocol = i32;
 #[derive(Debug)]
 pub struct Cluster(pub *mut _Cluster);
 
+// The underlying C type has no thread-local state, but does not support access
+// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+unsafe impl Send for Cluster {}
+
 impl Drop for Cluster {
     /// Frees a cluster instance.
     fn drop(&mut self) { unsafe { cass_cluster_free(self.0) } }

@@ -142,6 +142,11 @@ enhance_nullary_enum!(ValueType, CassValueType_, {
 /// A single primitive value or a collection of values.
 pub struct Value(*const _CassValue);
 
+// The underlying C type is read-only so thread-safe.
+unsafe impl Send for Value {}
+unsafe impl Sync for Value {}
+
+
 impl Protected<*const _CassValue> for Value {
     fn inner(&self) -> *const _CassValue { self.0 }
     fn build(inner: *const _CassValue) -> Self { Value(inner) }

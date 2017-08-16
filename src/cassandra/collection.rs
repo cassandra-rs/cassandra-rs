@@ -114,8 +114,10 @@ pub trait CassCollection {
 /// A cassandra list collection
 #[derive(Debug)]
 pub struct List(*mut _CassCollection);
+
+// The underlying C type has no thread-local state, but does not support access
+// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
 unsafe impl Send for List {}
-unsafe impl Sync for List {}
 
 impl Protected<*mut _CassCollection> for List {
     fn inner(&self) -> *mut _CassCollection { self.0 }
@@ -251,8 +253,10 @@ impl CassCollection for List {
 /// A Cassandra set
 #[derive(Debug)]
 pub struct Set(*mut _CassCollection);
+
+// The underlying C type has no thread-local state, but does not support access
+// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
 unsafe impl Send for Set {}
-unsafe impl Sync for Set {}
 
 impl Drop for Set {
     fn drop(&mut self) { unsafe { cass_collection_free(self.inner()) } }
@@ -376,8 +380,10 @@ impl CassCollection for Set {
 /// A Cassandra Map
 #[derive(Debug)]
 pub struct Map(*mut _CassCollection);
+
+// The underlying C type has no thread-local state, but does not support access
+// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
 unsafe impl Send for Map {}
-unsafe impl Sync for Map {}
 
 impl Drop for Map {
     fn drop(&mut self) { unsafe { cass_collection_free(self.0) } }

@@ -10,6 +10,10 @@ use cassandra_sys::cass_retry_policy_logging_new;
 #[derive(Debug)]
 pub struct RetryPolicy(*mut _RetryPolicy);
 
+// The underlying C type has no thread-local state, but does not support access
+// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+unsafe impl Send for RetryPolicy {}
+
 impl Protected<*mut _RetryPolicy> for RetryPolicy {
     fn inner(&self) -> *mut _RetryPolicy { self.0 }
     fn build(inner: *mut _RetryPolicy) -> Self { RetryPolicy(inner) }
