@@ -64,7 +64,7 @@ Other:
 
 ## 0.8.2
 
-First release of https://github.com/tupshin/cassandra-rs
+First release of https://github.com/Metaswitch/cassandra-rs
 
 * Fork package.
 * Move examples to examples directory, then make several into Rust tests.
