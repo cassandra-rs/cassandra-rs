@@ -37,8 +37,11 @@ use std::mem;
 /// Instances of the session object are thread-safe to execute queries.
 #[derive(Debug)]
 pub struct Session(pub *mut _Session);
-unsafe impl Sync for Session {}
+
+// The underlying C type has no thread-local state, and explicitly supports access
+// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
 unsafe impl Send for Session {}
+unsafe impl Sync for Session {}
 
 impl Protected<*mut _Session> for Session {
     fn inner(&self) -> *mut _Session { self.0 }

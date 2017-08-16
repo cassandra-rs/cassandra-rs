@@ -73,6 +73,10 @@ use std::ffi::CString;
 #[derive(Debug)]
 pub struct Statement(*mut _Statement);
 
+// The underlying C type has no thread-local state, but does not support access
+// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+unsafe impl Send for Statement {}
+
 impl Protected<*mut _Statement> for Statement {
     fn inner(&self) -> *mut _Statement { self.0 }
     fn build(inner: *mut _Statement) -> Self { Statement(inner) }

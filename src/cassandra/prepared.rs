@@ -17,7 +17,8 @@ use std::ffi::CString;
 #[derive(Debug)]
 pub struct PreparedStatement(*const _PreparedStatement);
 
-unsafe impl Sync for PreparedStatement {}
+// The underlying C type has no thread-local state, but does not support access
+// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
 unsafe impl Send for PreparedStatement {}
 
 impl Drop for PreparedStatement {

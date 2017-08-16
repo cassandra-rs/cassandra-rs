@@ -55,6 +55,10 @@ use std::ffi::CString;
 #[derive(Debug)]
 pub struct UserType(*mut _UserType);
 
+// The underlying C type has no thread-local state, but does not support access
+// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+unsafe impl Send for UserType {}
+
 impl Protected<*mut _UserType> for UserType {
     fn inner(&self) -> *mut _UserType { self.0 }
     fn build(inner: *mut _UserType) -> Self { UserType(inner) }

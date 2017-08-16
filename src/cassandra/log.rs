@@ -15,7 +15,7 @@ use std::borrow::Borrow;
 use slog;
 
 /// The possible logging levels that can be set.
-#[derive(Debug, Eq, PartialEq, PartialOrd, Ord)]
+#[derive(Debug, Eq, PartialEq, PartialOrd, Ord, Copy, Clone, Hash)]
 #[allow(missing_docs)] // Meanings are defined in CQL documentation.
 #[allow(non_camel_case_types)] // Names are traditional.
 pub enum LogLevel {

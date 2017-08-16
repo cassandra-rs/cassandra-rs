@@ -28,6 +28,10 @@ use std::ffi::NulError;
 #[derive(Debug)]
 pub struct Batch(*mut _Batch);
 
+// The underlying C type has no thread-local state, but does not support access
+// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+unsafe impl Send for Batch {}
+
 impl Protected<*mut _Batch> for Batch {
     fn inner(&self) -> *mut _Batch { self.0 }
     fn build(inner: *mut _Batch) -> Self { Batch(inner) }
@@ -61,16 +65,6 @@ impl CustomPayload {
 impl Drop for CustomPayload {
     fn drop(&mut self) { unsafe { cass_custom_payload_free(self.0) } }
 }
-
-// ///Type of Cassandra Batch operation to perform
-// pub enum BatchType {
-//    ///Logged batches have Atomicity guarantees
-//    LOGGED,
-//    ///Unlogged batches do not provide any atomicity guarantees
-//    UNLOGGED,
-//    ///Counter batches can only be used when writing counter types
-//    COUNTER,
-// }
 
 impl Drop for Batch {
     /// Frees a batch instance. Batches can be immediately freed after being
@@ -128,7 +122,7 @@ impl Batch {
 }
 
 /// A type of batch.
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Hash)]
 #[allow(missing_docs)] // Meanings are defined in CQL documentation.
 #[allow(non_camel_case_types)] // Names are traditional.
 pub enum BatchType {

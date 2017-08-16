@@ -44,6 +44,17 @@ pub struct CassFuture<T> {
     phantom: PhantomData<T>,
 }
 
+// The underlying C type has no thread-local state, and explicitly supports access
+// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+//
+// But it can be used to move a value of type `T`, so `T` needs to be `Send` if the
+// future is.
+//
+// The same is not true for `Sync`, because a future doesn't give multiple threads
+// concurrent access to the value (you can only poll a future once).
+unsafe impl<T> Sync for CassFuture<T> {}
+unsafe impl<T> Send for CassFuture<T> where T: Send {}
+
 impl<T> CassFuture<T> {
     /// Wrap a Cassandra driver future to make it a proper Rust future.
     ///

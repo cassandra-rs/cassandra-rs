@@ -39,6 +39,10 @@ use std::net::SocketAddr;
 #[derive(Debug)]
 pub struct Tuple(*mut _Tuple);
 
+// The underlying C type has no thread-local state, but does not support access
+// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+unsafe impl Send for Tuple {}
+
 impl Protected<*mut _Tuple> for Tuple {
     fn inner(&self) -> *mut _Tuple { self.0 }
     fn build(inner: *mut _Tuple) -> Self { Tuple(inner) }

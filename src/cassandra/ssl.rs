@@ -13,7 +13,7 @@ use cassandra_sys::cass_ssl_set_verify_flags;
 use std::ffi::CString;
 
 /// The individual SSL verification levels.
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Copy, Clone, Hash)]
 #[allow(missing_docs)] // Meanings are defined in CQL documentation.
 #[allow(non_camel_case_types)] // Names are traditional.
 pub enum SslVerifyFlag {
@@ -41,6 +41,10 @@ fn to_bitset(flags: &[SslVerifyFlag]) -> i32 {
 /// Describes the SSL configuration of a cluster.
 #[derive(Debug)]
 pub struct Ssl(*mut _Ssl);
+
+// The underlying C type has no thread-local state, but does not support access
+// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+unsafe impl Send for Ssl {}
 
 impl Protected<*mut _Ssl> for Ssl {
     fn inner(&self) -> *mut _Ssl { self.0 }

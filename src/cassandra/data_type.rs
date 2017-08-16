@@ -35,6 +35,11 @@ pub struct DataType(*mut _CassDataType);
 #[derive(Debug)]
 pub struct ConstDataType(pub *const _CassDataType);
 
+// The underlying C types have no thread-local state, but do not support access
+// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+unsafe impl Send for DataType {}
+unsafe impl Send for ConstDataType {}
+
 impl Protected<*mut _CassDataType> for DataType {
     fn inner(&self) -> *mut _CassDataType { self.0 }
     fn build(inner: *mut _CassDataType) -> Self { DataType(inner) }
