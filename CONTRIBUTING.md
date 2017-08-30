@@ -9,6 +9,11 @@ If you wish to contribute code to this project, you are welcome to do so
 using a github pull request, however you will need to sign each commit,
 see details below.
 
+Please also update CHANGELOG.md with a brief description of your change.
+
+Please consider updating the version in Cargo.toml to reflect the semver
+compatibiity of your change.
+
 ### Sign your work
 
 The sign-off is a simple line at the end of the explanation for the patch. Your
@@ -73,6 +78,6 @@ base.
 **Please make sure you change the base to this repository's master branch
 before submitting the pull request.**
 
-If you make a mistake, unfortunately it is not possible to delete an 
-erroneous pull request from GitHub. However you can change the name 
+If you make a mistake, unfortunately it is not possible to delete an
+erroneous pull request from GitHub. However you can change the name
 of the pull request to something like "(please ignore)" and close it.
