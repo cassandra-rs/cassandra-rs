@@ -14,7 +14,6 @@ use cassandra_sys::cass_error_desc;
 use cassandra_sys::cass_error_result_code;
 use cassandra_sys::cass_error_result_free;
 use cassandra_sys::{cass_true, cass_false};
-use cassandra_sys::size_t;
 use cassandra_sys::{cass_error_result_actual, cass_error_result_required,
                     cass_error_result_num_failures, cass_error_result_data_present,
                     cass_error_result_write_type, cass_error_result_keyspace,
@@ -291,7 +290,7 @@ enhance_nullary_enum!(CassErrorCode, CassError_, {
 
 /// Extract an optional C string lossily (i.e., using a replacement char for non-UTF-8 sequences).
 pub(crate) unsafe fn get_lossy_string<F>(get: F) -> Option<String>
-    where F: Fn(*mut *const ::std::os::raw::c_char, *mut size_t) -> CassError_
+    where F: Fn(*mut *const ::std::os::raw::c_char, *mut usize) -> CassError_
 {
     let mut msg = mem::zeroed();
     let mut msg_len = mem::zeroed();
