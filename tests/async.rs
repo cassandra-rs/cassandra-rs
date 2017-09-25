@@ -1,7 +1,6 @@
 #[macro_use(stmt)]
 extern crate cassandra_cpp;
 extern crate futures;
-extern crate num;
 
 mod help;
 
