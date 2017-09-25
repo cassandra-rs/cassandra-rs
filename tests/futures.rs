@@ -3,7 +3,6 @@
 
 #[macro_use(stmt)]
 extern crate cassandra_cpp;
-extern crate num;
 extern crate futures;
 
 mod help;

@@ -17,14 +17,10 @@ travis-ci = { repository = "Metaswitch/cassandra-rs" }
 
 [dependencies]
 clippy = {version = "0.0", optional = true}
-libc = "0.2"
-num = "0.1"
 slog = "2"
 cassandra-cpp-sys = "0.11"
-decimal = "0.2"
-chrono = "0.2"
+decimal = "1"
 time = "0.1"
-clap = "1"
-uuid = "0.1"
-error-chain="0.10"
+uuid = "0.5"
+error-chain = "0.11"
 futures = "0.1"

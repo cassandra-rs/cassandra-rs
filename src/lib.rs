@@ -7,11 +7,9 @@
 // `error_chain!` can recurse deeply
 #![recursion_limit = "1024"]
 
-extern crate libc;
 #[macro_use]
 extern crate slog;
 extern crate decimal;
-extern crate chrono;
 extern crate time;
 extern crate uuid;
 extern crate futures;
