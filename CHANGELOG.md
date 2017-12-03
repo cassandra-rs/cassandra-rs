@@ -1,3 +1,9 @@
+## 0.11.0 (unreleased)
+
+* Move to version 0.12 of `cassandra-cpp-sys`.  The underlying C++ driver version is
+  upgraded to 2.8.0.
+
+
 ## 0.10.2 (2017-09-11)
 
 * Move to latest (0.11) version of `cassandra-cpp-sys` crate.
