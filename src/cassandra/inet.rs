@@ -110,19 +110,9 @@ impl FromInet for Ipv4Addr {
 
 impl FromInet for Ipv6Addr {
     fn from_cass_inet(inet: Inet) -> Self {
-        let raw_addr: [u8; 16] = inet.0.address;
         match inet.0.address_length {
             4 => panic!("Cannot convert IPv4 address to IPv6"),
-            16 => {
-                Ipv6Addr::new((raw_addr[1] as u16) << (8 + raw_addr[0] as u16),
-                              (raw_addr[3] as u16) << (8 + raw_addr[2] as u16),
-                              (raw_addr[5] as u16) << (8 + raw_addr[4] as u16),
-                              (raw_addr[7] as u16) << (8 + raw_addr[6] as u16),
-                              (raw_addr[9] as u16) << (8 + raw_addr[8] as u16),
-                              (raw_addr[11] as u16) << (8 + raw_addr[10] as u16),
-                              (raw_addr[13] as u16) << (8 + raw_addr[12] as u16),
-                              (raw_addr[15] as u16) << (8 + raw_addr[14] as u16))
-            }
+            16 => Ipv6Addr::from(inet.0.address),
             unsupported => panic!("impossible inet type: {}", unsupported),
         }
     }
