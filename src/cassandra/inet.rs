@@ -12,7 +12,6 @@ use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::mem;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
-use std::net::SocketAddr;
 use std::str::FromStr;
 use std::string::ToString;
 
@@ -87,22 +86,15 @@ impl ToString for Inet {
     }
 }
 
-impl<'a> From<&'a Inet> for Ipv4Addr {
-    fn from(inet: &Inet) -> Self {
-        let raw_addr: [u8; 16] = inet.0.address;
-        match inet.0.address_length {
-            4 => Ipv4Addr::new(raw_addr[0], raw_addr[1], raw_addr[2], raw_addr[3]),
-            16 => panic!("Cannot convert IPv6 address to IPv4"),
-            unsupported => panic!("impossible inet type: {:?}", unsupported),
-        }
-    }
-}
-
-impl<'a> From<&'a Inet> for Ipv6Addr {
+impl<'a> From<&'a Inet> for IpAddr {
     fn from(inet: &Inet) -> Self {
         match inet.0.address_length {
-            4 => panic!("Cannot convert IPv4 address to IPv6"),
-            16 => Ipv6Addr::from(inet.0.address),
+            4 => {
+                let mut octets = [0u8; 4];
+                octets.copy_from_slice(&inet.0.address[0..4]);
+                IpAddr::from(octets)
+            },
+            16 => IpAddr::from(inet.0.address),
             unsupported => panic!("impossible inet type: {}", unsupported),
         }
     }
@@ -112,14 +104,14 @@ impl<'a> From<&'a Inet> for Ipv6Addr {
 fn ipv4_conversion() {
      let ipv4_in = Ipv4Addr::new(127, 0, 0, 1);
      let inet = Inet::cass_inet_init_v4(&ipv4_in);
-     let ipv4_out: Ipv4Addr = From::from(&inet);
-     assert_eq!(ipv4_in, ipv4_out);
+     let ip_out = IpAddr::from(&inet);
+     assert_eq!(IpAddr::V4(ipv4_in), ip_out);
 }
 
 #[test]
 fn ipv6_conversion() {
      let ipv6_in = Ipv6Addr::new(0x2001, 0x0db8, 0, 0, 0, 0, 0, 1);
      let inet = Inet::cass_inet_init_v6(&ipv6_in);
-     let ipv6_out: Ipv6Addr = From::from(&inet);
-     assert_eq!(ipv6_in, ipv6_out);
+     let ip_out = IpAddr::from(&inet);
+     assert_eq!(IpAddr::V6(ipv6_in), ip_out);
 }
