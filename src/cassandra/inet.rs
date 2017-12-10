@@ -1,5 +1,3 @@
-
-
 use cassandra::util::Protected;
 use cassandra::error::*;
 use cassandra_sys::CassInet as _Inet;
@@ -13,7 +11,7 @@ use std::ffi::CString;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::mem;
-use std::net::{Ipv4Addr, Ipv6Addr};
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::net::SocketAddr;
 use std::str::FromStr;
 use std::string::ToString;
@@ -36,26 +34,24 @@ impl Default for Inet {
     fn default() -> Inet { unsafe { ::std::mem::zeroed() } }
 }
 
-/// Lets various things get converted to a Inet
-pub trait AsInet {
-    /// Converts to a Cassandra Inet
-    fn as_cass_inet(&self) -> Inet;
+impl Inet {
+    /// Constructs an inet v4 object.
+    pub fn cass_inet_init_v4(address: &Ipv4Addr) -> Inet {
+        unsafe { Inet(cass_inet_init_v4(address.octets().as_ptr())) }
+    }
+
+    /// Constructs an inet v6 object.
+    pub fn cass_inet_init_v6(address: &Ipv6Addr) -> Inet {
+        unsafe { Inet(cass_inet_init_v6(address.octets().as_ptr())) }
+    }
 }
 
-impl AsInet for SocketAddr {
-    fn as_cass_inet(&self) -> Inet {
-        match *self {
-            SocketAddr::V4(ipv4_addr) => unsafe { Inet(cass_inet_init_v4(ipv4_addr.ip().octets().as_ptr())) },
-            SocketAddr::V6(ipv6_addr) => {
-                unsafe {
-                    let seg = ipv6_addr.ip().segments();
-                    // FIXME does this really work?
-                    Inet(cass_inet_init_v6(seg.as_ptr() as *const u8))
-                }
-            }
+impl<'a> From<&'a IpAddr> for Inet {
+    fn from(ip_addr: &IpAddr) -> Inet {
+        match *ip_addr {
+            IpAddr::V4(ref ipv4_addr) => Inet::cass_inet_init_v4(ipv4_addr),
+            IpAddr::V6(ref ipv6_addr) => Inet::cass_inet_init_v6(ipv6_addr),
         }
-        // ~ let foo:_Inet = Default::default();
-        // ~ Inet(foo)
     }
 }
 
@@ -91,14 +87,8 @@ impl ToString for Inet {
     }
 }
 
-/// Converts from an Cassandra Inet address
-pub trait FromInet {
-    /// Converts from an Cassandra Inet address
-    fn from_cass_inet(inet: Inet) -> Self;
-}
-
-impl FromInet for Ipv4Addr {
-    fn from_cass_inet(inet: Inet) -> Self {
+impl<'a> From<&'a Inet> for Ipv4Addr {
+    fn from(inet: &Inet) -> Self {
         let raw_addr: [u8; 16] = inet.0.address;
         match inet.0.address_length {
             4 => Ipv4Addr::new(raw_addr[0], raw_addr[1], raw_addr[2], raw_addr[3]),
@@ -108,8 +98,8 @@ impl FromInet for Ipv4Addr {
     }
 }
 
-impl FromInet for Ipv6Addr {
-    fn from_cass_inet(inet: Inet) -> Self {
+impl<'a> From<&'a Inet> for Ipv6Addr {
+    fn from(inet: &Inet) -> Self {
         match inet.0.address_length {
             4 => panic!("Cannot convert IPv4 address to IPv6"),
             16 => Ipv6Addr::from(inet.0.address),
@@ -118,14 +108,18 @@ impl FromInet for Ipv6Addr {
     }
 }
 
-impl Inet {
-    /// Constructs an inet v4 object.
-    pub fn cass_inet_init_v4(address: Ipv4Addr) -> Inet {
-        unsafe { Inet(cass_inet_init_v4(address.octets().as_ptr())) }
-    }
+#[test]
+fn ipv4_conversion() {
+     let ipv4_in = Ipv4Addr::new(127, 0, 0, 1);
+     let inet = Inet::cass_inet_init_v4(&ipv4_in);
+     let ipv4_out: Ipv4Addr = From::from(&inet);
+     assert_eq!(ipv4_in, ipv4_out);
+}
 
-    /// Constructs an inet v6 object.
-    pub fn cass_inet_init_v6(address: Ipv6Addr) -> Inet {
-        unsafe { Inet(cass_inet_init_v6(address.segments().as_ptr() as *const u8)) }
-    }
+#[test]
+fn ipv6_conversion() {
+     let ipv6_in = Ipv6Addr::new(0x2001, 0x0db8, 0, 0, 0, 0, 0, 1);
+     let inet = Inet::cass_inet_init_v6(&ipv6_in);
+     let ipv6_out: Ipv6Addr = From::from(&inet);
+     assert_eq!(ipv6_in, ipv6_out);
 }

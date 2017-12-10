@@ -1,3 +1,10 @@
+## 0.11.0 (unreleased)
+
+* Remove the `AsInet` and `FromInet` traits, replacing them with suitable implementations of `From`.
+* Fixed buggy IPv6 conversions.
+* `Inet::cass_inet_init_v4` and `Inet::cass_inet_init_v6` no longer consume their arguments.
+* `Tuple::set_inet()` now takes an `IpAddr` rather than a `SocketAddr`.
+
 ## 0.10.2 (2017-09-11)
 
 * Move to latest (0.11) version of `cassandra-cpp-sys` crate.
