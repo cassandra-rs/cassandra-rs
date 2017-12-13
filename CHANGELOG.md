@@ -2,7 +2,10 @@
 
 * Move to version 0.12 of `cassandra-cpp-sys`.  The underlying C++ driver version is
   upgraded to 2.8.0.
-
+* Remove the `AsInet` and `FromInet` traits, replacing them with suitable implementations of `From`.
+* Fixed buggy IPv6 conversions.
+* `Inet::cass_inet_init_v4` and `Inet::cass_inet_init_v6` no longer consume their arguments.
+* `Tuple::set_inet()` now takes an `IpAddr` rather than a `SocketAddr`.
 
 ## 0.10.2 (2017-09-11)
 
