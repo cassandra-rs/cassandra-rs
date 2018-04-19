@@ -4,6 +4,7 @@
 * Fixed buggy IPv6 conversions.
 * `Inet::cass_inet_init_v4` and `Inet::cass_inet_init_v6` no longer consume their arguments.
 * `Tuple::set_inet()` now takes an `IpAddr` rather than a `SocketAddr`.
+* Added wrapper for `cass_statement_set_request_timeout`.
 
 ## 0.10.2 (2017-09-11)
 

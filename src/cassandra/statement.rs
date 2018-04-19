@@ -61,9 +61,11 @@ use cassandra_sys::cass_statement_set_paging_state_token;
 use cassandra_sys::cass_statement_set_retry_policy;
 use cassandra_sys::cass_statement_set_serial_consistency;
 use cassandra_sys::cass_statement_set_timestamp;
+use cassandra_sys::cass_statement_set_request_timeout;
 use cassandra_sys::cass_true;
 
 use std::ffi::CString;
+use time::Duration;
 /// A statement object is an executable query. It represents either a regular
 /// (adhoc) statement or a prepared statement. It maintains the queries' parameter
 /// values along with query options (consistency level, paging state, etc.)
@@ -279,6 +281,14 @@ impl Statement {
     pub fn set_timestamp(&mut self, timestamp: i64) -> Result<&mut Self> {
         unsafe {
             cass_statement_set_timestamp(self.0, timestamp)
+                .to_result(self)
+        }
+    }
+
+    /// Sets the statement's timeout for waiting for a response from a node.
+    pub fn set_statement_request_timeout(&mut self, timeout: Duration) -> Result<&mut Self> {
+        unsafe {
+            cass_statement_set_request_timeout(self.0, timeout.num_milliseconds() as u64)
                 .to_result(self)
         }
     }
