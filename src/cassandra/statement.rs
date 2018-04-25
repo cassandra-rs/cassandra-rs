@@ -286,11 +286,11 @@ impl Statement {
     }
 
     /// Sets the statement's timeout for waiting for a response from a node.
-    pub fn set_statement_request_timeout(&mut self, timeout: Duration) -> Result<&mut Self> {
+    pub fn set_statement_request_timeout(&mut self, timeout: Duration) -> &Self {
         unsafe {
-            cass_statement_set_request_timeout(self.0, timeout.num_milliseconds() as u64)
-                .to_result(self)
+            cass_statement_set_request_timeout(self.0, timeout.num_milliseconds() as u64);
         }
+        self
     }
 
     /// Sets the statement's retry policy.
