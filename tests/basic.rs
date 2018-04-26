@@ -1,11 +1,13 @@
 #[macro_use(stmt)]
 extern crate cassandra_cpp;
 extern crate futures;
+extern crate time;
 
 mod help;
 
 use cassandra_cpp::*;
 use futures::Future;
+use time::Duration;
 
 
 #[derive(Debug,PartialEq,Clone,Copy)]
@@ -310,6 +312,19 @@ fn test_error_reporting() {
 #[test]
 fn test_result() {
     let query = stmt!("SELECT * FROM system_schema.tables;");
+    let session = help::create_test_session();
+    let result = session.execute(&query).wait().unwrap();
+
+    assert_eq!("keyspace_name", result.column_name(0).unwrap());
+    assert_eq!("table_name", result.column_name(1).unwrap());
+}
+
+#[test]
+fn test_statement_timeout() {
+    let mut query = stmt!("SELECT * FROM system_schema.tables;");
+    query.set_statement_request_timeout(Some(Duration::milliseconds(
+        30000 as i64,
+    )));
     let session = help::create_test_session();
     let result = session.execute(&query).wait().unwrap();
 

@@ -12,6 +12,7 @@ use cassandra::user_type::UserType;
 use cassandra::util::Protected;
 use cassandra::uuid::Uuid;
 use cassandra::error::*;
+use cassandra_sys::CASS_UINT64_MAX;
 
 use cassandra_sys::CassStatement as _Statement;
 use cassandra_sys::cass_false;
@@ -286,9 +287,13 @@ impl Statement {
     }
 
     /// Sets the statement's timeout for waiting for a response from a node.
-    pub fn set_statement_request_timeout(&mut self, timeout: Duration) -> &Self {
+    pub fn set_statement_request_timeout(&mut self, timeout: Option<Duration>) -> &mut Self {
         unsafe {
-            cass_statement_set_request_timeout(self.0, timeout.num_milliseconds() as u64);
+            let timeout_millis = match timeout {
+                None => CASS_UINT64_MAX as u64,
+                Some(time) => time.num_milliseconds() as u64,
+            };
+            cass_statement_set_request_timeout(self.0, timeout_millis);
         }
         self
     }
