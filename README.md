@@ -19,7 +19,7 @@ You can use this crate from cargo with
 
 ```toml
     [dependencies]
-    cassandra-cpp = "0.10"
+    cassandra-cpp = "0.11"
 ```
 
 For this crate to work, you must first have installed the datastax-cpp driver.
