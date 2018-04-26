@@ -287,6 +287,8 @@ impl Statement {
     }
 
     /// Sets the statement's timeout for waiting for a response from a node.
+    /// Some(Duration::milliseconds(0)) sets no timeout, and None disables it
+    /// (to use the cluster-level request timeout).
     pub fn set_statement_request_timeout(&mut self, timeout: Option<Duration>) -> &mut Self {
         unsafe {
             let timeout_millis = match timeout {
