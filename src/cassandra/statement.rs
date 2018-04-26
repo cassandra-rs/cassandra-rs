@@ -12,7 +12,6 @@ use cassandra::user_type::UserType;
 use cassandra::util::Protected;
 use cassandra::uuid::Uuid;
 use cassandra::error::*;
-use cassandra_sys::CASS_UINT64_MAX;
 
 use cassandra_sys::CassStatement as _Statement;
 use cassandra_sys::cass_false;
@@ -64,6 +63,7 @@ use cassandra_sys::cass_statement_set_serial_consistency;
 use cassandra_sys::cass_statement_set_timestamp;
 use cassandra_sys::cass_statement_set_request_timeout;
 use cassandra_sys::cass_true;
+use cassandra_sys::CASS_UINT64_MAX;
 
 use std::ffi::CString;
 use time::Duration;
