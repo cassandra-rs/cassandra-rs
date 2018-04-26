@@ -1,4 +1,4 @@
-## 0.11.0 (unreleased)
+## 0.11.0 (2018-04-26)
 
 * Remove the `AsInet` and `FromInet` traits, replacing them with suitable implementations of `From`.
 * Fixed buggy IPv6 conversions.
