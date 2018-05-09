@@ -15,6 +15,7 @@ use cassandra_sys::cass_cluster_set_connect_timeout;
 use cassandra_sys::cass_cluster_set_connection_heartbeat_interval;
 use cassandra_sys::cass_cluster_set_connection_idle_timeout;
 use cassandra_sys::cass_cluster_set_contact_points;
+use cassandra_sys::cass_cluster_set_local_address;
 use cassandra_sys::cass_cluster_set_core_connections_per_host;
 use cassandra_sys::cass_cluster_set_credentials;
 use cassandra_sys::cass_cluster_set_latency_aware_routing;
@@ -113,6 +114,18 @@ impl Cluster {
         unsafe {
             let s = CString::new(contact_points.clone())?;
             let err = cass_cluster_set_contact_points(self.0, s.as_ptr());
+            err.to_result(self)
+        }
+    }
+
+    /// Sets the local address to bind when connecting to the cluster,
+    /// if desired.
+    ///
+    /// Only numeric addresses are supported.
+    pub fn set_local_address(&mut self, name: &str) -> Result<&mut Self> {
+        unsafe {
+            let s = CString::new(name.clone())?;
+            let err = cass_cluster_set_local_address(self.0, s.as_ptr());
             err.to_result(self)
         }
     }
