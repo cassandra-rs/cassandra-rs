@@ -225,7 +225,7 @@ impl Statement {
     pub fn set_keyspace(&mut self, keyspace: String) -> Result<&mut Self> {
         unsafe {
             cass_statement_set_keyspace(self.0,
-                                        (CString::new(keyspace)?.as_ptr()))
+                                        CString::new(keyspace)?.as_ptr())
                 .to_result(self)
         }
     }

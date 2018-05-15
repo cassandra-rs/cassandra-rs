@@ -103,7 +103,7 @@ impl KeyspaceMeta {
             if agg.is_null() {
                 None
             } else {
-                Some(AggregateMeta::build((agg)))
+                Some(AggregateMeta::build(agg))
             }
         }
     }

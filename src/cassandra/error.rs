@@ -14,7 +14,7 @@ use cassandra_sys::cass_error_desc;
 use cassandra_sys::cass_error_result_code;
 use cassandra_sys::cass_error_result_free;
 use cassandra_sys::{cass_true, cass_false};
-use cassandra_sys::{cass_error_result_actual, cass_error_result_required,
+use cassandra_sys::{cass_error_result_responses_received, cass_error_result_responses_required,
                     cass_error_result_num_failures, cass_error_result_data_present,
                     cass_error_result_write_type, cass_error_result_keyspace,
                     cass_error_result_table, cass_error_result_function, cass_error_num_arg_types,
@@ -115,10 +115,10 @@ pub(crate) unsafe fn build_error_result(code: CassErrorCode,
     } else {
         // Get the extended error.
         let consistency = Consistency::build(cass_error_result_consistency(e));
-        let actual = cass_error_result_actual(e);
+        let actual = cass_error_result_responses_received(e);
         // See https://datastax-oss.atlassian.net/browse/CPP-502 for these names.
         // cassandra-sys uses the actual names and works around the header bug.
-        let required = cass_error_result_required(e);
+        let required = cass_error_result_responses_required(e);
         let num_failures = cass_error_result_num_failures(e);
         let data_present = cass_error_result_data_present(e) != cass_false;
         let write_type = WriteType::build(cass_error_result_write_type(e));
