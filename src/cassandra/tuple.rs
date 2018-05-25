@@ -137,9 +137,10 @@ impl Tuple {
     pub fn set_string<S>(&mut self, index: usize, value: S) -> Result<&mut Self>
         where S: Into<String> {
         unsafe {
+            let value_cstr = CString::new(value.into())?;
             cass_tuple_set_string(self.0,
                                   index,
-                                  CString::new(value.into())?.as_ptr())
+                                  value_cstr.as_ptr())
                 .to_result(self)
         }
     }
