@@ -191,7 +191,8 @@ impl Statement {
     /// Creates a new query statement.
     pub fn new(query: &str, parameter_count: usize) -> Self {
         unsafe {
-            Statement(cass_statement_new(CString::new(query).expect("must be utf8").as_ptr(),
+            let query_cstr = CString::new(query).expect("must be utf8");
+            Statement(cass_statement_new(query_cstr.as_ptr(),
                                          parameter_count))
         }
     }
@@ -224,8 +225,9 @@ impl Statement {
     /// is determined in the metadata processed in the prepare phase.
     pub fn set_keyspace(&mut self, keyspace: String) -> Result<&mut Self> {
         unsafe {
+            let keyspace_cstr = CString::new(keyspace)?;
             cass_statement_set_keyspace(self.0,
-                                        (CString::new(keyspace)?.as_ptr()))
+                                        keyspace_cstr.as_ptr())
                 .to_result(self)
         }
     }
@@ -330,7 +332,8 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_null_by_name(&mut self, name: &str) -> Result<&mut Self> {
         unsafe {
-            cass_statement_bind_null_by_name(self.0, CString::new(name)?.as_ptr())
+            let name_cstr = CString::new(name)?;
+            cass_statement_bind_null_by_name(self.0, name_cstr.as_ptr())
                 .to_result(self)
         }
     }
@@ -346,8 +349,9 @@ impl Statement {
     /// Binds a "tinyint" to all the values with the specified name.
     pub fn bind_int8_by_name(&mut self, name: &str, value: i8) -> Result<&mut Self> {
         unsafe {
+            let name_cstr = CString::new(name)?;
             cass_statement_bind_int8_by_name(self.0,
-                                             CString::new(name)?.as_ptr(),
+                                             name_cstr.as_ptr(),
                                              value)
                 .to_result(self)
         }
@@ -364,8 +368,9 @@ impl Statement {
     /// Binds a "smallint" to all the values with the specified name.
     pub fn bind_int16_by_name(&mut self, name: &str, value: i16) -> Result<&mut Self> {
         unsafe {
+            let name_cstr = CString::new(name)?;
             cass_statement_bind_int16_by_name(self.0,
-                                              CString::new(name)?.as_ptr(),
+                                              name_cstr.as_ptr(),
                                               value)
                 .to_result(self)
         }
@@ -382,8 +387,9 @@ impl Statement {
     /// Binds an "int" to all the values with the specified name.
     pub fn bind_int32_by_name(&mut self, name: &str, value: i32) -> Result<&mut Self> {
         unsafe {
+            let name_cstr = CString::new(name)?;
             cass_statement_bind_int32_by_name(self.0,
-                                              CString::new(name)?.as_ptr(),
+                                              name_cstr.as_ptr(),
                                               value)
                 .to_result(self)
         }
@@ -403,8 +409,9 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_uint32_by_name(&mut self, name: &str, value: u32) -> Result<&mut Self> {
         unsafe {
+            let name_cstr = CString::new(name)?;
             cass_statement_bind_uint32_by_name(self.0,
-                                               CString::new(name)?.as_ptr(),
+                                               name_cstr.as_ptr(),
                                                value)
                 .to_result(self)
         }
@@ -423,8 +430,9 @@ impl Statement {
     /// with the specified name.
     pub fn bind_int64_by_name(&mut self, name: &str, value: i64) -> Result<&mut Self> {
         unsafe {
+            let name_cstr = CString::new(name)?;
             cass_statement_bind_int64_by_name(self.0,
-                                              CString::new(name)?.as_ptr(),
+                                              name_cstr.as_ptr(),
                                               value)
                 .to_result(self)
         }
@@ -444,8 +452,9 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_float_by_name(&mut self, name: &str, value: f32) -> Result<&mut Self> {
         unsafe {
+            let name_cstr = CString::new(name)?;
             cass_statement_bind_float_by_name(self.0,
-                                              CString::new(name)?.as_ptr(),
+                                              name_cstr.as_ptr(),
                                               value)
                 .to_result(self)
         }
@@ -465,8 +474,9 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_double_by_name(&mut self, name: &str, value: f64) -> Result<&mut Self> {
         unsafe {
+            let name_cstr = CString::new(name)?;
             cass_statement_bind_double_by_name(self.0,
-                                               CString::new(name)?.as_ptr(),
+                                               name_cstr.as_ptr(),
                                                value)
                 .to_result(self)
         }
@@ -486,8 +496,9 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_bool_by_name(&mut self, name: &str, value: bool) -> Result<&mut Self> {
         unsafe {
+            let name_cstr = CString::new(name)?;
             cass_statement_bind_bool_by_name(self.0,
-                                             CString::new(name)?.as_ptr(),
+                                             name_cstr.as_ptr(),
                                              if value { cass_true } else { cass_false })
                 .to_result(self)
         }
@@ -497,9 +508,10 @@ impl Statement {
     /// at the specified index.
     pub fn bind_string(&mut self, index: usize, value: &str) -> Result<&mut Self> {
         unsafe {
+            let value_cstr = CString::new(value)?;
             cass_statement_bind_string(self.0,
                                        index,
-                                       CString::new(value)?.as_ptr())
+                                       value_cstr.as_ptr())
                 .to_result(self)
         }
     }
@@ -511,9 +523,11 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_string_by_name(&mut self, name: &str, value: &str) -> Result<&mut Self> {
         unsafe {
+            let name_cstr = CString::new(name)?;
+            let value_cstr = CString::new(value)?;
             cass_statement_bind_string_by_name(self.0,
-                                               CString::new(name)?.as_ptr(),
-                                               CString::new(value)?.as_ptr())
+                                               name_cstr.as_ptr(),
+                                               value_cstr.as_ptr())
                 .to_result(self)
 
         }
@@ -534,8 +548,9 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_bytes_by_name(&mut self, name: &str, mut value: Vec<u8>) -> Result<&mut Self> {
         unsafe {
+            let name_cstr = CString::new(name)?;
             cass_statement_bind_bytes_by_name(self.0,
-                                              CString::new(name)?.as_ptr(),
+                                              name_cstr.as_ptr(),
                                               value.as_mut_ptr(),
                                               value.len())
                 .to_result(self)
@@ -557,8 +572,9 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_uuid_by_name(&mut self, name: &str, value: Uuid) -> Result<&mut Self> {
         unsafe {
+            let name_cstr = CString::new(name)?;
             cass_statement_bind_uuid_by_name(self.0,
-                                             CString::new(name)?.as_ptr(),
+                                             name_cstr.as_ptr(),
                                              value.inner())
                 .to_result(self)
         }
@@ -575,8 +591,9 @@ impl Statement {
     /// Binds an "inet" to all the values with the specified name.
     pub fn bind_inet_by_name(&mut self, name: &str, value: Inet) -> Result<&mut Self> {
         unsafe {
+            let name_cstr = CString::new(name)?;
             cass_statement_bind_inet_by_name(self.0,
-                                             CString::new(name)?.as_ptr(),
+                                             name_cstr.as_ptr(),
                                              value.inner())
                 .to_result(self)
         }
@@ -634,8 +651,9 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_map_by_name(&mut self, name: &str, map: Map) -> Result<&mut Self> {
         unsafe {
+            let name_cstr = CString::new(name)?;
             cass_statement_bind_collection_by_name(self.0,
-                                                   CString::new(name)?.as_ptr(),
+                                                   name_cstr.as_ptr(),
                                                    map.inner())
                 .to_result(self)
         }
@@ -655,8 +673,9 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_set_by_name(&mut self, name: &str, collection: Set) -> Result<&mut Self> {
         unsafe {
+            let name_cstr = CString::new(name)?;
             cass_statement_bind_collection_by_name(self.0,
-                                                   CString::new(name)?.as_ptr(),
+                                                   name_cstr.as_ptr(),
                                                    collection.inner())
                 .to_result(self)
         }
@@ -677,8 +696,9 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_list_by_name(&mut self, name: &str, collection: List) -> Result<&mut Self> {
         unsafe {
+            let name_cstr = CString::new(name)?;
             cass_statement_bind_collection_by_name(self.0,
-                                                   CString::new(name)?.as_ptr(),
+                                                   name_cstr.as_ptr(),
                                                    collection.inner())
                 .to_result(self)
         }
@@ -698,8 +718,9 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_tuple_by_name(&mut self, name: &str, value: Tuple) -> Result<&mut Self> {
         unsafe {
+            let name_cstr = CString::new(name)?;
             cass_statement_bind_tuple_by_name(self.0,
-                                              CString::new(name)?.as_ptr(),
+                                              name_cstr.as_ptr(),
                                               value.inner())
                 .to_result(self)
         }
@@ -718,8 +739,9 @@ impl Statement {
     /// specified name.
     pub fn bind_user_type_by_name(&mut self, name: &str, value: &UserType) -> Result<&mut Self> {
         unsafe {
+            let name_cstr = CString::new(name)?;
             cass_statement_bind_user_type_by_name(self.0,
-                                                  CString::new(name)?.as_ptr(),
+                                                  name_cstr.as_ptr(),
                                                   value.inner())
                 .to_result(self)
         }

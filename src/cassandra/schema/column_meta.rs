@@ -54,7 +54,8 @@ impl ColumnMeta {
     /// access to the column data found in the underlying "columns" metadata table.
     pub fn field_by_name(&self, name: &str) -> Option<Value> {
         unsafe {
-            let field = cass_column_meta_field_by_name(self.0, CString::new(name).expect("must be utf8").as_ptr());
+            let name_cstr = CString::new(name).expect("must be utf8");
+            let field = cass_column_meta_field_by_name(self.0, name_cstr.as_ptr());
             if field.is_null() {
                 None
             } else {

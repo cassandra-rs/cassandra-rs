@@ -352,9 +352,11 @@ impl Cluster {
     /// Sets credentials for plain text authentication.
     pub fn set_credentials(&mut self, username: &str, password: &str) -> Result<&mut Self> {
         unsafe {
+            let username_cstr = CString::new(username)?;
+            let password_cstr = CString::new(password)?;
             cass_cluster_set_credentials(self.0,
-                                         CString::new(username)?.as_ptr(),
-                                         CString::new(password)?.as_ptr());
+                                         username_cstr.as_ptr(),
+                                         password_cstr.as_ptr());
         }
         Ok(self)
     }
