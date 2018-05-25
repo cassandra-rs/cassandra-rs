@@ -193,8 +193,9 @@ impl Row {
     pub fn get_column_by_name<S>(&self, name: S) -> Result<Value>
         where S: Into<String> {
         unsafe {
+            let name_cstr = CString::new(name.into())?;
             let col = cass_row_get_column_by_name(self.0,
-                                                  CString::new(name.into())?.as_ptr());
+                                                  name_cstr.as_ptr());
             if col.is_null() {
                 Err(CassErrorCode::LIB_INDEX_OUT_OF_BOUNDS.to_error())
             } else {
