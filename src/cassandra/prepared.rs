@@ -68,10 +68,9 @@ impl PreparedStatement {
     /// this reference as it is bound to the lifetime of the prepared.
     pub fn parameter_data_type_by_name(&self, name: &str) -> ConstDataType {
         unsafe {
+            let name_cstr = CString::new(name).expect("must be utf8");
             ConstDataType(cass_prepared_parameter_data_type_by_name(self.0,
-                                                                    CString::new(name)
-                                                                        .expect("must be utf8")
-                                                                        .as_ptr()))
+                                                                    name_cstr.as_ptr()))
         }
     }
 }

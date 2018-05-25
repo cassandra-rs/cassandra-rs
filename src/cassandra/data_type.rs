@@ -90,8 +90,9 @@ impl DataType {
     pub fn set_type_name<S>(data_type: DataType, type_name: S) -> Result<()>
         where S: Into<String> {
         unsafe {
+            let type_name_cstr = CString::new(type_name.into())?;
             cass_data_type_set_type_name(data_type.0,
-                                         CString::new(type_name.into())?.as_ptr())
+                                         type_name_cstr.as_ptr())
                 .to_result(())
         }
     }
@@ -117,8 +118,9 @@ impl DataType {
     pub fn set_keyspace<S>(data_type: DataType, keyspace: S) -> Result<()>
         where S: Into<String> {
         unsafe {
+            let keyspace_cstr = CString::new(keyspace.into())?;
             cass_data_type_set_keyspace(data_type.0,
-                                        CString::new(keyspace.into())?.as_ptr())
+                                        keyspace_cstr.as_ptr())
                 .to_result(())
 
         }
@@ -145,8 +147,9 @@ impl DataType {
     pub fn set_class_name<S>(&self, class_name: S) -> Result<()>
         where S: Into<String> {
         unsafe {
+            let class_name_cstr = CString::new(class_name.into())?;
             cass_data_type_set_class_name(self.0,
-                                          CString::new(class_name.into())?.as_ptr())
+                                          class_name_cstr.as_ptr())
                 .to_result(())
         }
     }
@@ -171,9 +174,9 @@ impl DataType {
     pub fn sub_data_type_by_name<S>(data_type: DataType, name: S) -> ConstDataType
         where S: Into<String> {
         unsafe {
+            let name_cstr = CString::new(name.into()).expect("must be utf8");
             ConstDataType(cass_data_type_sub_data_type_by_name(data_type.0,
-                                                               CString::new(name.into())
-                                                                   .expect("must be utf8")
+                                                               name_cstr
                                                                    .as_ptr()))
         }
     }
@@ -212,8 +215,9 @@ impl DataType {
     pub fn add_sub_type_by_name<S>(&mut self, name: S, sub_data_type: DataType) -> Result<()>
         where S: Into<String> {
         unsafe {
+            let sub_data_type_cstr = CString::new(name.into())?;
             cass_data_type_add_sub_type_by_name(self.0,
-                                                CString::new(name.into())?.as_ptr(),
+                                                sub_data_type_cstr.as_ptr(),
                                                 sub_data_type.0)
                 .to_result(())
 
@@ -238,8 +242,9 @@ impl DataType {
     pub fn add_sub_value_type_by_name<S>(&self, name: &str, typ: ValueType) -> Result<()>
         where S: Into<String> {
         unsafe {
+            let name_cstr = CString::new(name)?;
             cass_data_type_add_sub_value_type_by_name(self.0,
-                                                      CString::new(name)?.as_ptr(),
+                                                      name_cstr.as_ptr(),
                                                       typ.inner())
                 .to_result(())
         }
