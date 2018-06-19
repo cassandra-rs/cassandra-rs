@@ -1,7 +1,7 @@
 use cassandra::collection::Set;
 use cassandra::data_type::ConstDataType;
 use cassandra::data_type::DataType;
-use cassandra::inet::AsInet;
+use cassandra::inet::Inet;
 use cassandra::user_type::UserType;
 use cassandra::util::Protected;
 use cassandra::uuid::Uuid;
@@ -33,7 +33,7 @@ use cassandra_sys::cass_tuple_set_user_type;
 use cassandra_sys::cass_tuple_set_uuid;
 
 use std::ffi::CString;
-use std::net::SocketAddr;
+use std::net::IpAddr;
 
 /// A tuple of values.
 #[derive(Debug)]
@@ -137,9 +137,10 @@ impl Tuple {
     pub fn set_string<S>(&mut self, index: usize, value: S) -> Result<&mut Self>
         where S: Into<String> {
         unsafe {
+            let value_cstr = CString::new(value.into())?;
             cass_tuple_set_string(self.0,
                                   index,
-                                  CString::new(value.into())?.as_ptr())
+                                  value_cstr.as_ptr())
                 .to_result(self)
         }
     }
@@ -162,8 +163,8 @@ impl Tuple {
     }
 
     /// Sets an "inet" in a tuple at the specified index.
-    pub fn set_inet(&mut self, index: usize, value: SocketAddr) -> Result<&mut Self> {
-        let inet = AsInet::as_cass_inet(&value);
+    pub fn set_inet(&mut self, index: usize, value: IpAddr) -> Result<&mut Self> {
+        let inet = Inet::from(&value);
         unsafe {
             cass_tuple_set_inet(self.0, index, inet.inner())
                 .to_result(self)

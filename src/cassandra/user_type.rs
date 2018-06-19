@@ -91,8 +91,9 @@ impl UserType {
     pub fn set_null_by_name<S>(&mut self, name: S) -> Result<&mut Self>
         where S: Into<String> {
         unsafe {
+            let name_cstr = CString::new(name.into())?;
             cass_user_type_set_null_by_name(self.0,
-                                            CString::new(name.into())?.as_ptr())
+                                            name_cstr.as_ptr())
                 .to_result(self)
         }
     }

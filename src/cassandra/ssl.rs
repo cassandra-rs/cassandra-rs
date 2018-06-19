@@ -67,7 +67,8 @@ impl Ssl {
     /// the peer's certificate.
     pub fn add_trusted_cert(&mut self, cert: &str) -> Result<&mut Self> {
         unsafe {
-            cass_ssl_add_trusted_cert(self.0, CString::new(cert)?.as_ptr())
+            let cert_cstr = CString::new(cert)?;
+            cass_ssl_add_trusted_cert(self.0, cert_cstr.as_ptr())
                 .to_result(self)
         }
     }
@@ -90,7 +91,8 @@ impl Ssl {
     /// Certificate chain starting with the certificate itself.
     pub fn set_cert(&mut self, cert: &str) -> Result<&mut Self> {
         unsafe {
-            cass_ssl_set_cert(self.0, CString::new(cert)?.as_ptr())
+            let cert_cstr = CString::new(cert)?;
+            cass_ssl_set_cert(self.0, cert_cstr.as_ptr())
                 .to_result(self)
         }
     }
@@ -99,8 +101,9 @@ impl Ssl {
     /// the client on the server-side.
     pub fn set_private_key(&mut self, key: &str, password: &str) -> Result<&mut Self> {
         unsafe {
+            let key_cstr = CString::new(key)?;
             cass_ssl_set_private_key(self.0,
-                                     CString::new(key)?.as_ptr(),
+                                     key_cstr.as_ptr(),
                                      password.as_ptr() as *const i8)
                 .to_result(self)
         }

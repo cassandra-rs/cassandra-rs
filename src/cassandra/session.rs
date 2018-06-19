@@ -77,7 +77,9 @@ impl Session {
     /// Connects a session and sets the keyspace.
     pub fn connect_keyspace(&self, cluster: &Cluster, keyspace: &str) -> Result<CassFuture<()>> {
         unsafe {
-            Ok(<CassFuture<()>>::build(cass_session_connect_keyspace(self.0, cluster.inner(), CString::new(keyspace)?.as_ptr())))
+            let keyspace_cstr = CString::new(keyspace)?;
+            Ok(<CassFuture<()>>::build(
+                cass_session_connect_keyspace(self.0, cluster.inner(), keyspace_cstr.as_ptr())))
         }
     }
 
@@ -89,7 +91,9 @@ impl Session {
     /// Create a prepared statement.
     pub fn prepare(&self, query: &str) -> Result<CassFuture<PreparedStatement>> {
         unsafe {
-            Ok(<CassFuture<PreparedStatement>>::build(cass_session_prepare(self.0, CString::new(query)?.as_ptr())))
+            let query_cstr = CString::new(query)?;
+            Ok(<CassFuture<PreparedStatement>>::build(
+                cass_session_prepare(self.0, query_cstr.as_ptr())))
         }
     }
 

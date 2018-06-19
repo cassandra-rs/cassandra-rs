@@ -94,7 +94,8 @@ impl str::FromStr for Uuid {
     fn from_str(str: &str) -> Result<Uuid> {
         unsafe {
             let mut uuid = mem::zeroed();
-            cass_uuid_from_string(CString::new(str)?.as_ptr(), &mut uuid).to_result(())
+            let str_cstr = CString::new(str)?;
+            cass_uuid_from_string(str_cstr.as_ptr(), &mut uuid).to_result(())
                 .and_then(|_| Ok(Uuid(uuid)))
         }
     }
