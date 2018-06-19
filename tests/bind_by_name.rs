@@ -22,7 +22,7 @@ fn test_bind_by_name() {
     let schema_query = Statement::new(&query, 0);
     for _ in 0..1000 {
         let result = session.execute(&schema_query).wait().unwrap();
-        for row in result {
+        for row in &result {
             let name: String = row.get_by_name("column_name").unwrap();
             let ftype: String = row.get_by_name("type").unwrap();
             // Actual values are not important; we're checking it doesn't panic or fail to return info.
