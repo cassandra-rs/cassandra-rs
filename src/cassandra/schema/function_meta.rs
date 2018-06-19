@@ -113,10 +113,8 @@ impl FunctionMeta {
     /// Gets the function's argument and type for the provided name.
     pub fn argument_type_by_name(&self, name: &str) -> ConstDataType {
         unsafe {
-            ConstDataType(cass_function_meta_argument_type_by_name(self.0,
-                                                                   CString::new(name)
-                                                                       .expect("must be utf8")
-                                                                       .as_ptr()))
+            let name_cstr = CString::new(name).expect("must be utf8");
+            ConstDataType(cass_function_meta_argument_type_by_name(self.0, name_cstr.as_ptr()))
         }
     }
 
@@ -127,7 +125,8 @@ impl FunctionMeta {
     /// access to the column data found in the underlying "functions" metadata table.
     pub fn field_by_name(&self, name: &str) -> Value {
         unsafe {
-            Value::build(cass_function_meta_field_by_name(self.0, CString::new(name).expect("must be utf8").as_ptr()))
+            let name_cstr = CString::new(name).expect("must be utf8");
+            Value::build(cass_function_meta_field_by_name(self.0, name_cstr.as_ptr()))
         }
     }
 }
