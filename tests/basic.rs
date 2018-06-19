@@ -288,8 +288,13 @@ fn test_error_reporting() {
         ref k => panic!("Unexpected error kind {}", k),
     }
 
-    // UTF-8 error
-    let query = stmt!("SELECT (blob)0xffff from system_schema.tables;");
+    // UTF-8 error - return an invalid UTF-8 string
+    // Interpret -1 (0xFFFFFFFF) as a UTF-8 string, but 0xFF... is invalid UTF-8.
+    help::create_example_keyspace(&session);
+    create_basic_table(&session);
+    let s = stmt!("INSERT INTO examples.basic (key, i32) VALUES ('utf8', -1);");
+    session.execute(&s).wait().unwrap();
+    let query = stmt!("SELECT i32 FROM examples.basic WHERE key = 'utf8';");
     let result = session.execute(&query).wait().unwrap();
     let row = result.iter().next().unwrap();
     let err = row.get_column(0).unwrap().get_string().expect_err("Should have failed");
