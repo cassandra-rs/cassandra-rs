@@ -1,3 +1,7 @@
+## 0.11.1-pre (unreleased)
+
+* (tbd)
+
 ## 0.11.0 (2018-04-26)
 
 * Remove the `AsInet` and `FromInet` traits, replacing them with suitable implementations of `From`.
