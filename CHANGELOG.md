@@ -24,6 +24,7 @@ version number is tracked in the file `VERSION`.
 
 ## [0.10.2] - 2017-09-11
 - Move to latest (0.11) version of `cassandra-cpp-sys` crate.
+
   There should be no external impact.
 
 ## [0.10.1] - 2017-08-30
