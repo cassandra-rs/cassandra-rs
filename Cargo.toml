@@ -10,7 +10,6 @@ license = "Apache-2.0"
 name = "cassandra-cpp"
 version = "0.11.0"
 authors = ["Tupshin Harper <tupshin@tupshin.com>", "Keith Wansbrough <Keith.Wansbrough@metaswitch.com>"]
-build = "build.rs"
 
 [badges]
 travis-ci = { repository = "Metaswitch/cassandra-rs" }
