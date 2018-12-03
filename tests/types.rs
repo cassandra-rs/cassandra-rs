@@ -91,9 +91,8 @@ fn test_parsing_printing_ssl_verify_flags() {
 fn test_using_cql_protocol_version() {
     let mut cluster = Cluster::default();
     cluster.set_protocol_version(4).unwrap();
-    cluster.set_protocol_version(2).unwrap();
-
-    //cluster.set_protocol_version(5).unwrap();
+    // 3 is abritary //TODO // say in changelog that 2 is no longer supported
+    cluster.set_protocol_version(3).unwrap();
 }
 
 #[test]

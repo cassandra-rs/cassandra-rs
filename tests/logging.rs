@@ -53,12 +53,27 @@ fn test_logging() {
 
 #[test]
 fn test_metrics() {
-    let query = stmt!("SELECT keyspace_name FROM system_schema.keyspaces;");
+
+    let query = stmt!("CREATE KEYSPACE IF NOT EXISTS cycling WITH REPLICATION = {
+   'class' : 'SimpleStrategy',
+   'replication_factor' : 1
+  };");
+
+    let query2 = stmt!("CREATE TABLE IF NOT EXISTS cycling.cyclist_name (
+   id UUID PRIMARY KEY,
+   lastname text,
+   firstname text );"); //create table
+
+    let query3 = stmt!("INSERT INTO cycling.cyclist_name (id, lastname, firstname)
+  VALUES (6ab09bec-e68e-48d9-a5f8-97e6fb4c9b47, 'KRUIKSWIJK','Steven')
+  USING TTL 86400 AND TIMESTAMP 123456789;");
+
     let session = help::create_test_session();
     session.execute(&query).wait().unwrap();
-    let metrics = session.get_metrics();
+    session.execute(&query2).wait().unwrap();
+    session.execute(&query3).wait().unwrap();
 
-    thread::sleep(Duration::new(5, 0));
+    let metrics = session.get_metrics();
 
     assert_eq!(metrics.total_connections, 1);
     assert!(metrics.min_us > 0);
