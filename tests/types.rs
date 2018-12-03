@@ -92,6 +92,8 @@ fn test_using_cql_protocol_version() {
     let mut cluster = Cluster::default();
     cluster.set_protocol_version(4).unwrap();
     cluster.set_protocol_version(2).unwrap();
+
+    //cluster.set_protocol_version(5).unwrap();
 }
 
 #[test]

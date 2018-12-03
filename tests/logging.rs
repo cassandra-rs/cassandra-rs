@@ -11,7 +11,9 @@ use std::sync::Arc;
 use std::sync::Mutex;
 use slog::*;
 use futures::Future;
-
+use std::time::Duration;
+use std::thread;
+use std::thread::sleep;
 
 /// Simple drain which accumulates all messages written to it.
 #[derive(Clone)]
@@ -55,6 +57,9 @@ fn test_metrics() {
     let session = help::create_test_session();
     session.execute(&query).wait().unwrap();
     let metrics = session.get_metrics();
+
+    thread::sleep(Duration::new(5, 0));
+
     assert_eq!(metrics.total_connections, 1);
     assert!(metrics.min_us > 0);
 }
