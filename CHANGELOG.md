@@ -10,6 +10,7 @@ version number is tracked in the file `VERSION`.
 ### Fixed
 - No longer leaks all `CassResult`s.
 ### Changed
+- Upgraded cassandra-cpp-sys to 0.12
 - `ResultIterator` now has a lifetime parameter. The underlying `CassResult` must live for at
   least as long as the iterator.
 - `CassResult` is no longer `IntoIterator`; instead `&CassResult` is. You must change code

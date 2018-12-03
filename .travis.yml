@@ -16,13 +16,13 @@ addons:
 
 before_install:
 
-  - wget http://downloads.datastax.com/cpp-driver/ubuntu/14.04/cassandra/v2.5.0/cassandra-cpp-driver-dbg_2.5.0-1_amd64.deb
-  - wget http://downloads.datastax.com/cpp-driver/ubuntu/14.04/cassandra/v2.5.0/cassandra-cpp-driver-dev_2.5.0-1_amd64.deb
-  - wget http://downloads.datastax.com/cpp-driver/ubuntu/14.04/cassandra/v2.5.0/cassandra-cpp-driver_2.5.0-1_amd64.deb
-  - wget http://downloads.datastax.com/cpp-driver/ubuntu/14.04/dependencies/libuv/v1.8.0/libuv-dbg_1.8.0-1_amd64.deb
-  - wget http://downloads.datastax.com/cpp-driver/ubuntu/14.04/dependencies/libuv/v1.8.0/libuv-dev_1.8.0-1_amd64.deb
-  - wget http://downloads.datastax.com/cpp-driver/ubuntu/14.04/dependencies/libuv/v1.8.0/libuv_1.8.0-1_amd64.deb
-  - sudo dpkg -i libuv-dbg_1.8.0-1_amd64.deb libuv-dev_1.8.0-1_amd64.deb libuv_1.8.0-1_amd64.deb cassandra-cpp-driver_2.5.0-1_amd64.deb cassandra-cpp-driver-dbg_2.5.0-1_amd64.deb cassandra-cpp-driver-dev_2.5.0-1_amd64.deb
+  - wget http://downloads.datastax.com/cpp-driver/ubuntu/14.04/cassandra/v2.10.0/cassandra-cpp-driver-dbg_2.10.0-1_amd64.deb
+  - wget http://downloads.datastax.com/cpp-driver/ubuntu/14.04/cassandra/v2.10.0/cassandra-cpp-driver-dev_2.10.0-1_amd64.deb
+  - wget http://downloads.datastax.com/cpp-driver/ubuntu/14.04/cassandra/v2.10.0/cassandra-cpp-driver_2.10.0-1_amd64.deb
+  - wget http://downloads.datastax.com/cpp-driver/ubuntu/14.04/dependencies/libuv/v1.23.0/libuv1-dbg_1.23.0-1_amd64.deb
+  - wget http://downloads.datastax.com/cpp-driver/ubuntu/14.04/dependencies/libuv/v1.23.0/libuv1-dev_1.23.0-1_amd64.deb
+  - wget http://downloads.datastax.com/cpp-driver/ubuntu/14.04/dependencies/libuv/v1.23.0/libuv1_1.23.0-1_amd64.deb
+  - sudo dpkg -i libuv1-dbg_1.23.0-1_amd64.deb libuv1-dev_1.23.0-1_amd64.deb libuv1_1.23.0-1_amd64.deb cassandra-cpp-driver_2.10.0-1_amd64.deb cassandra-cpp-driver-dbg_2.10.0-1_amd64.deb cassandra-cpp-driver-dev_2.10.0-1_amd64.deb
   - sudo docker pull cassandra
   - sudo docker run -d --net=host cassandra
 
