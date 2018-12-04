@@ -37,12 +37,13 @@ fn retrieve_batch(session: &Session) -> Vec<Pair> {
     let select_query = stmt!("SELECT * from examples.pairs");
 
     let result = session.execute(&select_query).wait().unwrap();
-    result.iter().map(|r| {
+    let v: Vec<Pair> = result.iter().map(|r| {
         Pair {
             key: r.get(0).expect("Key"),
             value: r.get(1).expect("Value"),
         }
-    }).collect()
+    }).collect();
+    v
 }
 
 #[test]
