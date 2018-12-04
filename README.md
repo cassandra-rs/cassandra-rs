@@ -15,13 +15,6 @@ It is a wrapper around the raw driver binding crate [cassandra-cpp-sys](https://
 
 ## Getting started
 
-You can use this crate from cargo with
-
-```toml
-    [dependencies]
-    cassandra-cpp = "0.11"
-```
-
 For this crate to work, you must first have installed the datastax-cpp driver.
 Follow the steps in the
 [cpp driver docs](https://github.com/datastax/cpp-driver/tree/master/topics#installation)
