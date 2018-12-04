@@ -6,11 +6,12 @@ This file's format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/). The
 version number is tracked in the file `VERSION`.
 
-## [Unreleased]
+## [0.12.0]
 ### Fixed
 - No longer leaks all `CassResult`s.
 ### Changed
 - Upgraded cassandra-cpp-sys to 0.12.
+- cql protocol version 2 is no longer supported.
 - `ResultIterator` now has a lifetime parameter. The underlying `CassResult` must live for at
   least as long as the iterator.
 - `CassResult` is no longer `IntoIterator`; instead `&CassResult` is. You must change code
@@ -101,7 +102,8 @@ First release of https://github.com/Metaswitch/cassandra-rs
 ## [0.8.1] - 2016-12-13
 Last release of https://github.com/tupshin/cassandra-rs
 
-[Unreleased]: https://github.com/Metaswitch/cassandra-rs/compare/0.11.0...HEAD
+[Unreleased]: https://github.com/Metaswitch/cassandra-rs/compare/0.12.0...HEAD
+[0.12.0]: https://github.com/Metaswitch/cassandra-rs/compare/0.11.0...0.12.0
 [0.11.0]: https://github.com/Metaswitch/cassandra-rs/compare/0.10.2...0.11.0
 [0.10.2]: https://github.com/Metaswitch/cassandra-rs/compare/0.10.1...0.10.2
 [0.10.1]: https://github.com/Metaswitch/cassandra-rs/compare/0.10.0...0.10.1

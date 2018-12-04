@@ -11,9 +11,7 @@ use std::sync::Arc;
 use std::sync::Mutex;
 use slog::*;
 use futures::Future;
-use std::time::Duration;
-use std::thread;
-use std::thread::sleep;
+
 
 /// Simple drain which accumulates all messages written to it.
 #[derive(Clone)]
@@ -53,28 +51,29 @@ fn test_logging() {
 
 #[test]
 fn test_metrics() {
-
-    let query = stmt!("CREATE KEYSPACE IF NOT EXISTS cycling WITH REPLICATION = {
-   'class' : 'SimpleStrategy',
-   'replication_factor' : 1
-  };");
-
+    // This is just a check that metrics work and actually notice requests.
+    // Need to send a cassandra query that will produce a positive number for the min_us metric
+    // (minimum time to respond to a request in microseconds), i.e. a request that make cassandra
+    // take more than 1 microsecond to respond to. Do a couple of setup queries, with IF NOT EXISTS
+    // so that that don't fail if this test is repeated.
+    let query1 = stmt!("CREATE KEYSPACE IF NOT EXISTS cycling WITH REPLICATION = {
+                      'class' : 'SimpleStrategy',
+                      'replication_factor' : 1
+                      };");
     let query2 = stmt!("CREATE TABLE IF NOT EXISTS cycling.cyclist_name (
-   id UUID PRIMARY KEY,
-   lastname text,
-   firstname text );"); //create table
-
+                       id UUID PRIMARY KEY,
+                       lastname text,
+                       firstname text );"); //create table
     let query3 = stmt!("INSERT INTO cycling.cyclist_name (id, lastname, firstname)
-  VALUES (6ab09bec-e68e-48d9-a5f8-97e6fb4c9b47, 'KRUIKSWIJK','Steven')
-  USING TTL 86400 AND TIMESTAMP 123456789;");
+                       VALUES (6ab09bec-e68e-48d9-a5f8-97e6fb4c9b47, 'KRUIKSWIJK','Steven')
+                       USING TTL 86400 AND TIMESTAMP 123456789;");
 
     let session = help::create_test_session();
-    session.execute(&query).wait().unwrap();
+    session.execute(&query1).wait().unwrap();
     session.execute(&query2).wait().unwrap();
     session.execute(&query3).wait().unwrap();
 
     let metrics = session.get_metrics();
-
     assert_eq!(metrics.total_connections, 1);
     assert!(metrics.min_us > 0);
 }
