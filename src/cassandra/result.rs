@@ -31,6 +31,7 @@ use std::fmt;
 use std::fmt::Debug;
 use std::fmt::Display;
 use std::fmt::Formatter;
+use std::marker::PhantomData;
 use std::mem;
 use std::slice;
 use std::str;
@@ -67,12 +68,11 @@ impl Display for CassResult {
     }
 }
 
-// FIXME Understand why this drop results in double freeing when binding by name
-// impl Drop for CassResult {
-//    fn drop(&mut self) {
-//        unsafe { cass_result_free(self.0) }
-//    }
-// }
+ impl Drop for CassResult {
+    fn drop(&mut self) {
+        unsafe { cass_result_free(self.0) }
+    }
+ }
 
 impl CassResult {
     /// Gets the number of rows for the specified result.
@@ -135,22 +135,23 @@ impl CassResult {
 
     /// Creates a new iterator for the specified result. This can be
     /// used to iterate over rows in the result.
-    pub fn iter(&self) -> ResultIterator { unsafe { ResultIterator(cass_iterator_from_result(self.0)) } }
+    pub fn iter(&self) -> ResultIterator { unsafe { ResultIterator(cass_iterator_from_result(self.0), PhantomData) } }
 }
 
-/// An iterator over the results of a query
+/// An iterator over the results of a query.
+/// The result holds the data, so it must last for at least the lifetime of the iterator.
 #[derive(Debug)]
-pub struct ResultIterator(pub *mut _CassIterator);
+pub struct ResultIterator<'a>(pub *mut _CassIterator, PhantomData<&'a CassResult>);
 
 // The underlying C type has no thread-local state, but does not support access
 // from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
-unsafe impl Send for ResultIterator {}
+unsafe impl<'a> Send for ResultIterator<'a> {}
 
-impl Drop for ResultIterator {
+impl<'a> Drop for ResultIterator<'a> {
     fn drop(&mut self) { unsafe { cass_iterator_free(self.0) } }
 }
 
-impl Iterator for ResultIterator {
+impl<'a> Iterator for ResultIterator<'a> {
     type Item = Row;
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
@@ -162,23 +163,14 @@ impl Iterator for ResultIterator {
     }
 }
 
-impl ResultIterator {
+impl<'a> ResultIterator<'a> {
     /// Gets the next row in the result set
     pub fn get_row(&mut self) -> Row { unsafe { Row::build(cass_iterator_get_row(self.0)) } }
 }
 
-impl IntoIterator for CassResult {
+impl<'a> IntoIterator for &'a CassResult {
     type Item = Row;
-    type IntoIter = ResultIterator;
+    type IntoIter = ResultIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter { self.iter() }
 }
-
-// impl<'a> IntoIterator for &'a CassandraResult {
-//    type Item = Row;
-//    type IntoIter = ResultIterator;
-//
-//    fn into_iter(self) -> Self::IntoIter {unsafe{
-//        ResultIterator(cass_iterator_from_result(self.0))
-//    }}
-// }
