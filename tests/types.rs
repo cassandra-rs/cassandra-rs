@@ -90,8 +90,9 @@ fn test_parsing_printing_ssl_verify_flags() {
 #[test]
 fn test_using_cql_protocol_version() {
     let mut cluster = Cluster::default();
+    // Test that switching protocols works, the choice of version 3 and 4 is arbitrary.
     cluster.set_protocol_version(4).unwrap();
-    cluster.set_protocol_version(2).unwrap();
+    cluster.set_protocol_version(3).unwrap();
 }
 
 #[test]

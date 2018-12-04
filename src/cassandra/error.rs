@@ -14,7 +14,7 @@ use cassandra_sys::cass_error_desc;
 use cassandra_sys::cass_error_result_code;
 use cassandra_sys::cass_error_result_free;
 use cassandra_sys::{cass_true, cass_false};
-use cassandra_sys::{cass_error_result_actual, cass_error_result_required,
+use cassandra_sys::{cass_error_result_responses_received, cass_error_result_responses_required,
                     cass_error_result_num_failures, cass_error_result_data_present,
                     cass_error_result_write_type, cass_error_result_keyspace,
                     cass_error_result_table, cass_error_result_function, cass_error_num_arg_types,
@@ -115,10 +115,10 @@ pub(crate) unsafe fn build_error_result(code: CassErrorCode,
     } else {
         // Get the extended error.
         let consistency = Consistency::build(cass_error_result_consistency(e));
-        let actual = cass_error_result_actual(e);
+        let actual = cass_error_result_responses_received(e);
         // See https://datastax-oss.atlassian.net/browse/CPP-502 for these names.
         // cassandra-sys uses the actual names and works around the header bug.
-        let required = cass_error_result_required(e);
+        let required = cass_error_result_responses_required(e);
         let num_failures = cass_error_result_num_failures(e);
         let data_present = cass_error_result_data_present(e) != cass_false;
         let write_type = WriteType::build(cass_error_result_write_type(e));
@@ -201,6 +201,7 @@ pub enum CassErrorCode {
     LIB_NOT_ENOUGH_DATA,
     LIB_INVALID_STATE,
     LIB_NO_CUSTOM_PAYLOAD,
+    LIB_EXECUTION_PROFILE_INVALID,
     SERVER_SERVER_ERROR,
     SERVER_PROTOCOL_ERROR,
     SERVER_BAD_CREDENTIALS,
@@ -262,6 +263,7 @@ enhance_nullary_enum!(CassErrorCode, CassError_, {
     (LIB_NOT_ENOUGH_DATA, CASS_ERROR_LIB_NOT_ENOUGH_DATA, "LIB_NOT_ENOUGH_DATA"),
     (LIB_INVALID_STATE, CASS_ERROR_LIB_INVALID_STATE, "LIB_INVALID_STATE"),
     (LIB_NO_CUSTOM_PAYLOAD, CASS_ERROR_LIB_NO_CUSTOM_PAYLOAD, "LIB_NO_CUSTOM_PAYLOAD"),
+    (LIB_EXECUTION_PROFILE_INVALID, CASS_ERROR_LIB_EXECUTION_PROFILE_INVALID, "LIB_EXECUTION_PROFILE_INVALID"),
     (SERVER_SERVER_ERROR, CASS_ERROR_SERVER_SERVER_ERROR, "SERVER_SERVER_ERROR"),
     (SERVER_PROTOCOL_ERROR, CASS_ERROR_SERVER_PROTOCOL_ERROR, "SERVER_PROTOCOL_ERROR"),
     (SERVER_BAD_CREDENTIALS, CASS_ERROR_SERVER_BAD_CREDENTIALS, "SERVER_BAD_CREDENTIALS"),
