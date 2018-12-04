@@ -32,6 +32,7 @@ use cassandra_sys::CASS_VALUE_TYPE_TIME;
 use cassandra_sys::CASS_VALUE_TYPE_TIMESTAMP;
 use cassandra_sys::CASS_VALUE_TYPE_TIMEUUID;
 use cassandra_sys::CASS_VALUE_TYPE_TINY_INT;
+use cassandra_sys::CASS_VALUE_TYPE_DURATION;
 use cassandra_sys::CASS_VALUE_TYPE_TUPLE;
 use cassandra_sys::CASS_VALUE_TYPE_UDT;
 use cassandra_sys::CASS_VALUE_TYPE_UNKNOWN;
