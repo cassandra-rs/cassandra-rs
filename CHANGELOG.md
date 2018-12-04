@@ -13,6 +13,9 @@ version number is tracked in the file `VERSION`.
 - Updated cassandra-cpp-sys to 0.12.
 - Updated cassandra-cpp-driver to 2.10.0
 - cql protocol version 2 is no longer supported.
+- Breaking changes: The Cassandra WriteType UKNOWN is now called UNKNOWN
+                    There is a new Cassandra error code LIB_EXECUTION_PROFILE_INVALID
+                    There is a new Cassandra value type: DURATION
 - `ResultIterator` now has a lifetime parameter. The underlying `CassResult` must live for at
   least as long as the iterator.
 - `CassResult` is no longer `IntoIterator`; instead `&CassResult` is. You must change code
