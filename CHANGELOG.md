@@ -6,6 +6,10 @@ This file's format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/). The
 version number is tracked in the file `VERSION`.
 
+## [0.13.0] - 2018-12-04
+- Added new set_local_address function using the function Datastax added in
+  cassandra-cpp-driver version 2.10.0
+
 ## [0.12.0] - 2018-12-04
 ### Fixed
 - No longer leaks all `CassResult`s.
@@ -106,7 +110,8 @@ First release of https://github.com/Metaswitch/cassandra-rs
 ## [0.8.1] - 2016-12-13
 Last release of https://github.com/tupshin/cassandra-rs
 
-[Unreleased]: https://github.com/Metaswitch/cassandra-rs/compare/0.12.0...HEAD
+[Unreleased]: https://github.com/Metaswitch/cassandra-rs/compare/0.13.0...HEAD
+[0.13.0]: https://github.com/Metaswitch/cassandra-rs/compare/0.12.0...0.13.0
 [0.12.0]: https://github.com/Metaswitch/cassandra-rs/compare/0.11.0...0.12.0
 [0.11.0]: https://github.com/Metaswitch/cassandra-rs/compare/0.10.2...0.11.0
 [0.10.2]: https://github.com/Metaswitch/cassandra-rs/compare/0.10.1...0.10.2
