@@ -6,11 +6,12 @@ This file's format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/). The
 version number is tracked in the file `VERSION`.
 
-## [0.12.0]
+## [0.12.0] - 2018-12-04
 ### Fixed
 - No longer leaks all `CassResult`s.
 ### Changed
-- Upgraded cassandra-cpp-sys to 0.12.
+- Updated cassandra-cpp-sys to 0.12.
+- Updated cassandra-cpp-driver to 2.10.0
 - cql protocol version 2 is no longer supported.
 - `ResultIterator` now has a lifetime parameter. The underlying `CassResult` must live for at
   least as long as the iterator.

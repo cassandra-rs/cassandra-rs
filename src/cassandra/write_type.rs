@@ -6,7 +6,7 @@ use cassandra_sys::CassWriteType_;
 #[allow(missing_docs)] // Meanings are defined in CQL documentation.
 #[allow(non_camel_case_types)] // Names are traditional.
 pub enum WriteType {
-    UNKNOWN /* [sic] */,
+    UNKNOWN,
     SIMPLE,
     BATCH,
     UNLOGGED_BATCH,

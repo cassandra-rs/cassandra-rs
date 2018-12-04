@@ -55,7 +55,7 @@ fn test_metrics() {
     // Need to send a cassandra query that will produce a positive number for the min_us metric
     // (minimum time to respond to a request in microseconds), i.e. a request that make cassandra
     // take more than 1 microsecond to respond to. Do a couple of setup queries, with IF NOT EXISTS
-    // so that that don't fail if this test is repeated.
+    // so that they don't fail if this test is repeated.
     let query1 = stmt!("CREATE KEYSPACE IF NOT EXISTS cycling WITH REPLICATION = {
                       'class' : 'SimpleStrategy',
                       'replication_factor' : 1
