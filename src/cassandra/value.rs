@@ -214,11 +214,7 @@ impl Debug for Value {
                 ValueType::INT => write_value(f, self.get_i32(), |f, v| write!(f, "{:?}", v)),
                 ValueType::SMALL_INT => write_value(f, self.get_i16(), |f, v| write!(f, "{:?}", v)),
                 ValueType::TINY_INT => write_value(f, self.get_i8(), |f, v| write!(f, "{:?}", v)),
-<<<<<<< HEAD
                 ValueType::DURATION => write_value(f, self.get_i32(), |f, v| write!(f, "{:?}", v)),
-=======
-                ValueType::DURATION => write_value(f, self.get_i64(), |f, v | write!(f, "{:?}", v)),
->>>>>>> Update to pick up 2.8.1 of C++ driver
                 ValueType::INET => write_value(f, self.get_inet(), |f, v| write!(f, "{:?}", v)),
                 ValueType::TIMESTAMP => write_value(f, self.get_i64(), |f, v| write!(f, "{:?}", v)),
                 ValueType::TIMEUUID => write_value(f, self.get_uuid(), |f, v| write!(f, "TIMEUUID: {}", v)),
