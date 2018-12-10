@@ -6,6 +6,9 @@ This file's format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/). The
 version number is tracked in the file `VERSION`.
 
+## [0.13.1] - ???
+- Fix `stmt!()` not working if `Statement` was not imported.
+
 ## [0.13.0] - 2018-12-04
 - Added new set_local_address function using the function Datastax added in
   cassandra-cpp-driver version 2.10.0
