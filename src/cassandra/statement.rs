@@ -90,9 +90,9 @@ macro_rules! stmt {
     ( $( $x:expr ),*) => {
         {
             $(
-        	let query = $x;
-        	let param_count = query.matches("?").count();
-        	let statement = Statement::new(query, param_count);
+            let query = $x;
+            let param_count = query.matches("?").count();
+            let statement = $crate::Statement::new(query, param_count);
             )*
             statement
         }
@@ -100,12 +100,12 @@ macro_rules! stmt {
 }
 
 // statement,
-// 	key,
-// 	i % 2 == 0,
-// 	i as f32 / 2.0f32,
-// 	i as f64 / 200.0,
-// 	i as i32 * 10,
-// 	i as i64 * 100);
+//  key,
+//  i % 2 == 0,
+//  i as f32 / 2.0f32,
+//  i as f64 / 200.0,
+//  i as i32 * 10,
+//  i as i64 * 100);
 
 
 impl Drop for Statement {
@@ -600,7 +600,7 @@ impl Statement {
     }
 
 
-    // 	///Bind a "decimal" to a query or bound statement at the specified index.
+    //  ///Bind a "decimal" to a query or bound statement at the specified index.
     //    pub fn bind_decimal(&self,
     //                                index: i32,
     //                                value: d128)
