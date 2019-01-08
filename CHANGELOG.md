@@ -6,7 +6,7 @@ This file's format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/). The
 version number is tracked in the file `VERSION`.
 
-## [0.13.1] - ???
+## [0.13.1] - 2019-01-08
 - Fix `stmt!()` not working if `Statement` was not imported.
 
 ## [0.13.0] - 2018-12-04
