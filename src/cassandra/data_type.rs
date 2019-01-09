@@ -57,8 +57,8 @@ impl DataType {
     pub fn new(value_type: ValueType) -> Self { unsafe { DataType(cass_data_type_new(value_type.inner())) } }
 
     /// Creates a new data type from an existing data type.
+    // TODO: can return NULL
     pub fn new_user_type(&self) -> UserType { unsafe { UserType::build(cass_user_type_new_from_data_type(self.0)) } }
-
 
     /// Creates a new data type from an existing data type.
     pub fn new_from_existing(&self) -> Self { unsafe { DataType(cass_data_type_new_from_existing(self.0)) } }
@@ -165,6 +165,7 @@ impl DataType {
     ///
     /// <b>Note:</b> Only valid for UDT, tuple and collection data types.
     pub fn sub_data_type(&self, index: usize) -> ConstDataType {
+        // TODO: can return NULL
         unsafe { ConstDataType(cass_data_type_sub_data_type(self.0, index)) }
     }
 
@@ -175,6 +176,7 @@ impl DataType {
         where S: Into<String> {
         unsafe {
             let name_cstr = CString::new(name.into()).expect("must be utf8");
+            // TODO: can return NULL
             ConstDataType(cass_data_type_sub_data_type_by_name(data_type.0,
                                                                name_cstr
                                                                    .as_ptr()))
@@ -281,6 +283,7 @@ impl DataType {
     //    {
     //        unsafe {
     //            let name = CString::new(name.into()).unwrap();
+    //            // TODO: can return NULL
     //            ConstDataType(cass_data_type_sub_data_type_by_name_n(data_type.0,
     //                                                                 name.as_ptr(),
     //                                                                 name.as_bytes().len() as u64))

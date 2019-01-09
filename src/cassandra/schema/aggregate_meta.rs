@@ -63,6 +63,7 @@ impl AggregateMeta {
 
     /// Gets the aggregate's argument type for the provided index.
     pub fn argument_type(&self, index: usize) -> ConstDataType {
+        // TODO: can return NULL
         unsafe { ConstDataType(cass_aggregate_meta_argument_type(self.0, index)) }
     }
 

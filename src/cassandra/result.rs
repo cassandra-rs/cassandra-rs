@@ -102,6 +102,7 @@ impl CassResult {
 
     /// Gets the column datatype at index for the specified result.
     pub fn column_data_type(&self, index: usize) -> ConstDataType {
+        // TODO: can return NULL
         unsafe { ConstDataType(cass_result_column_data_type(self.0, index)) }
     }
 

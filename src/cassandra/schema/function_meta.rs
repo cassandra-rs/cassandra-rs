@@ -114,6 +114,7 @@ impl FunctionMeta {
     pub fn argument_type_by_name(&self, name: &str) -> ConstDataType {
         unsafe {
             let name_cstr = CString::new(name).expect("must be utf8");
+            // TODO: can return NULL
             ConstDataType(cass_function_meta_argument_type_by_name(self.0, name_cstr.as_ptr()))
         }
     }
@@ -126,6 +127,7 @@ impl FunctionMeta {
     pub fn field_by_name(&self, name: &str) -> Value {
         unsafe {
             let name_cstr = CString::new(name).expect("must be utf8");
+            // TODO: can return NULL
             Value::build(cass_function_meta_field_by_name(self.0, name_cstr.as_ptr()))
         }
     }

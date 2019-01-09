@@ -31,6 +31,7 @@ impl SchemaMeta {
 
     /// Gets the keyspace metadata for the provided keyspace name.
     pub fn get_keyspace_by_name(&self, keyspace: &str) -> KeyspaceMeta {
+        // TODO: can return NULL
         unsafe { KeyspaceMeta::build(cass_schema_meta_keyspace_by_name(self.0, keyspace.as_ptr() as *const i8)) }
     }
 

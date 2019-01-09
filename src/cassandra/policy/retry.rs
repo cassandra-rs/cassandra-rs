@@ -33,6 +33,7 @@ impl RetryPolicy {
 
     /// The a logging retry policy
     pub fn logging_new(child_retry_policy: RetryPolicy) -> Self {
+        // TODO: can return NULL
         unsafe { RetryPolicy(cass_retry_policy_logging_new(child_retry_policy.0)) }
     }
 }
