@@ -20,6 +20,12 @@ fn insert_into_collections(session: &Session, key: &str, items: &Vec<String>) ->
     session.execute(&statement).wait()
 }
 
+fn insert_null_into_collections(session: &Session, key: &str) -> Result<CassResult> {
+    let mut statement = stmt!("INSERT INTO examples.collections (key) VALUES (?);");
+    statement.bind(0, key)?;
+    session.execute(&statement).wait()
+}
+
 fn select_from_collections(session: &Session, key: &str) -> Result<Vec<String>> {
     let mut statement = stmt!("SELECT items FROM examples.collections WHERE key = ?");
     statement.bind(0, key)?;
@@ -54,4 +60,7 @@ fn test_collections() {
     let set0: HashSet<_> = items.iter().collect();
     let set1: HashSet<_> = result.iter().collect();
     assert_eq!(set0, set1, "expected {:?} but got {:?}", &items, &result);
+
+    insert_null_into_collections(&session, "empty").unwrap();
+    select_from_collections(&session, "empty").expect_err("Should fail cleanly");
 }

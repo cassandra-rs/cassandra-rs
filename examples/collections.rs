@@ -40,13 +40,17 @@ fn do_work(session: &Session) -> Result<()> {
         println!("Row: {}", row);
 
         let first_name: String = row.get_by_name("first_name")?;
-        let addresses_iter: MapIterator = row.get_by_name("addresses")?;
-
-        // This collect fails with a segfault.
-        let addresses: HashMap<String, String> = addresses_iter
-            .map(|(k, v)| Ok((k.get_string()?, v.get_string()?)))
-            .collect::<Result<_>>()?;
-
+        let addresses: HashMap<String, String> = {
+            let maybe_iter: Result<MapIterator> = row.get_by_name("addresses");
+            match maybe_iter {
+                Err(_) => HashMap::new(),
+                Ok(addresses_iter) => {
+                    addresses_iter
+                        .map(|(k, v)| Ok((k.get_string()?, v.get_string()?)))
+                        .collect::<Result<_>>()?
+                }
+            }
+        };
         let emails_iter: SetIterator = row.get_by_name("email")?;
         let emails: Vec<String> = emails_iter.map(|v| Ok(v.get_string()?)).collect::<Result<_>>()?;
         let last_name: String = row.get_by_name("last_name")?;
