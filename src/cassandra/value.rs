@@ -10,6 +10,7 @@ use cassandra::uuid::Uuid;
 use cassandra::error::*;
 
 use cassandra_sys::CASS_ERROR_LIB_INVALID_VALUE_TYPE;
+use cassandra_sys::CASS_ERROR_LIB_NULL_VALUE;
 use cassandra_sys::CASS_VALUE_TYPE_ASCII;
 use cassandra_sys::CASS_VALUE_TYPE_BIGINT;
 use cassandra_sys::CASS_VALUE_TYPE_BLOB;
@@ -321,7 +322,15 @@ impl Value {
     pub fn get_set(&self) -> Result<SetIterator> {
         unsafe {
             match self.get_type() {
-                ValueType::SET => Ok(SetIterator::build(cass_iterator_from_collection(self.0))),
+                ValueType::SET => {
+                    let iter = cass_iterator_from_collection(self.0);
+                    if iter.is_null() {
+                        // No iterator, probably because this set is_null. Complain.
+                        Err(CASS_ERROR_LIB_NULL_VALUE.to_error())
+                    } else {
+                        Ok(SetIterator::build(iter))
+                    }
+                }
                 _ => Err(CASS_ERROR_LIB_INVALID_VALUE_TYPE.to_error()),
             }
         }
@@ -331,7 +340,15 @@ impl Value {
     pub fn get_map(&self) -> Result<MapIterator> {
         unsafe {
             match self.get_type() {
-                ValueType::MAP => Ok(MapIterator::build(cass_iterator_from_map(self.0))),
+                ValueType::MAP => {
+                    let iter = cass_iterator_from_map(self.0);
+                    if iter.is_null() {
+                        // No iterator, probably because this map is_null. Complain.
+                        Err(CASS_ERROR_LIB_NULL_VALUE.to_error())
+                    } else {
+                        Ok(MapIterator::build(iter))
+                    }
+                },
                 _ => Err(CASS_ERROR_LIB_INVALID_VALUE_TYPE.to_error()),
             }
         }
@@ -341,7 +358,15 @@ impl Value {
     pub fn get_user_type(&self) -> Result<UserTypeIterator> {
         unsafe {
             match self.get_type() {
-                ValueType::UDT => Ok(UserTypeIterator::build(cass_iterator_fields_from_user_type(self.0))),
+                ValueType::UDT => {
+                    let iter = cass_iterator_fields_from_user_type(self.0);
+                    if iter.is_null() {
+                        // No iterator, probably because this user_type field is null. Complain.
+                        Err(CASS_ERROR_LIB_NULL_VALUE.to_error())
+                    } else {
+                        Ok(UserTypeIterator::build(iter))
+                    }
+                },
                 _ => Err(CASS_ERROR_LIB_INVALID_VALUE_TYPE.to_error()),
             }
         }
