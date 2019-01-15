@@ -48,7 +48,7 @@ unsafe impl Send for Ssl {}
 
 impl Protected<*mut _Ssl> for Ssl {
     fn inner(&self) -> *mut _Ssl { self.0 }
-    fn build(inner: *mut _Ssl) -> Self { Ssl(inner) }
+    fn build(inner: *mut _Ssl) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; Ssl(inner) }
 }
 
 

@@ -16,12 +16,12 @@ unsafe impl Send for RetryPolicy {}
 
 impl Protected<*mut _RetryPolicy> for RetryPolicy {
     fn inner(&self) -> *mut _RetryPolicy { self.0 }
-    fn build(inner: *mut _RetryPolicy) -> Self { RetryPolicy(inner) }
+    fn build(inner: *mut _RetryPolicy) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; RetryPolicy(inner) }
 }
 
 impl RetryPolicy {
     /// The default retry policy
-    pub fn default_new() -> Self { unsafe { RetryPolicy(cass_retry_policy_default_new()) } }
+    pub fn default_new() -> Self { unsafe { RetryPolicy::build(cass_retry_policy_default_new()) } }
 
     /// An auto-CL-downgrading consistency level
     pub fn downgrading_consistency_new() -> Self {
@@ -33,7 +33,8 @@ impl RetryPolicy {
 
     /// The a logging retry policy
     pub fn logging_new(child_retry_policy: RetryPolicy) -> Self {
-        unsafe { RetryPolicy(cass_retry_policy_logging_new(child_retry_policy.0)) }
+        // TODO: can return NULL
+        unsafe { RetryPolicy::build(cass_retry_policy_logging_new(child_retry_policy.0)) }
     }
 }
 

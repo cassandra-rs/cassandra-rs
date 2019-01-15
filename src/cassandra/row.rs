@@ -29,7 +29,7 @@ unsafe impl Send for Row {}
 
 impl Protected<*const _Row> for Row {
     fn inner(&self) -> *const _Row { self.0 }
-    fn build(inner: *const _Row) -> Self { Row(inner) }
+    fn build(inner: *const _Row) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; Row(inner) }
 }
 
 impl Debug for Row {

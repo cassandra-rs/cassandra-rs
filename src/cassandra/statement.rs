@@ -82,7 +82,7 @@ unsafe impl Send for Statement {}
 
 impl Protected<*mut _Statement> for Statement {
     fn inner(&self) -> *mut _Statement { self.0 }
-    fn build(inner: *mut _Statement) -> Self { Statement(inner) }
+    fn build(inner: *mut _Statement) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; Statement(inner) }
 }
 
 #[macro_export]
@@ -167,6 +167,12 @@ impl BindRustType<Set> for Statement {
     fn bind(&mut self, index: usize, value: Set) -> Result<&mut Self> { self.bind_set(index, value) }
 
     fn bind_by_name(&mut self, col: &str, value: Set) -> Result<&mut Self> { self.bind_set_by_name(col, value) }
+}
+
+impl BindRustType<List> for Statement {
+    fn bind(&mut self, index: usize, value: List) -> Result<&mut Self> { self.bind_list(index, value) }
+
+    fn bind_by_name(&mut self, col: &str, value: List) -> Result<&mut Self> { self.bind_list_by_name(col, value) }
 }
 
 impl BindRustType<Uuid> for Statement {

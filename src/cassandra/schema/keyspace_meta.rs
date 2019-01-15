@@ -34,7 +34,7 @@ pub struct KeyspaceMeta(*const _CassKeyspaceMeta);
 
 impl Protected<*const _CassKeyspaceMeta> for KeyspaceMeta {
     fn inner(&self) -> *const _CassKeyspaceMeta { self.0 }
-    fn build(inner: *const _CassKeyspaceMeta) -> Self { KeyspaceMeta(inner) }
+    fn build(inner: *const _CassKeyspaceMeta) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; KeyspaceMeta(inner) }
 }
 
 #[derive(Debug)]
@@ -72,7 +72,7 @@ impl KeyspaceMeta {
             if value.is_null() {
                 None
             } else {
-                Some(ConstDataType(value))
+                Some(ConstDataType::build(value))
             }
         }
     }

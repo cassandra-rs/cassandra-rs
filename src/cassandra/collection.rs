@@ -121,17 +121,17 @@ unsafe impl Send for List {}
 
 impl Protected<*mut _CassCollection> for List {
     fn inner(&self) -> *mut _CassCollection { self.0 }
-    fn build(inner: *mut _CassCollection) -> Self { List(inner) }
+    fn build(inner: *mut _CassCollection) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; List(inner) }
 }
 
 impl Protected<*mut _CassCollection> for Map {
     fn inner(&self) -> *mut _CassCollection { self.0 }
-    fn build(inner: *mut _CassCollection) -> Self { Map(inner) }
+    fn build(inner: *mut _CassCollection) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; Map(inner) }
 }
 
 impl Protected<*mut _CassCollection> for Set {
     fn inner(&self) -> *mut _CassCollection { self.0 }
-    fn build(inner: *mut _CassCollection) -> Self { Set(inner) }
+    fn build(inner: *mut _CassCollection) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; Set(inner) }
 }
 
 
@@ -143,14 +143,14 @@ impl CassCollection for List {
     type Value = _CassCollection;
 
     /// create a new list
-    fn new(item_count: usize) -> Self { unsafe { List(cass_collection_new(CASS_COLLECTION_TYPE_LIST, item_count)) } }
+    fn new(item_count: usize) -> Self { unsafe { List::build(cass_collection_new(CASS_COLLECTION_TYPE_LIST, item_count)) } }
 
     fn new_from_data_type(value: DataType, item_count: usize) -> Self {
         unsafe { List(cass_collection_new_from_data_type(value.inner(), item_count)) }
     }
 
     /// Gets the data type of a collection.
-    fn data_type(&self) -> ConstDataType { unsafe { ConstDataType(cass_collection_data_type(self.inner())) } }
+    fn data_type(&self) -> ConstDataType { unsafe { ConstDataType::build(cass_collection_data_type(self.inner())) } }
 
 
     /// Appends a "tinyint" to the collection.
@@ -276,7 +276,7 @@ impl CassCollection for Set {
         unsafe { Set(cass_collection_new_from_data_type(value.inner(), item_count)) }
     }
     /// Gets the data type of a collection.
-    fn data_type(&self) -> ConstDataType { unsafe { ConstDataType(cass_collection_data_type(self.inner())) } }
+    fn data_type(&self) -> ConstDataType { unsafe { ConstDataType::build(cass_collection_data_type(self.inner())) } }
 
 
     /// Appends a "tinyint" to the collection.
@@ -399,7 +399,7 @@ impl CassCollection for Map {
     }
 
     /// Gets the data type of a collection.
-    fn data_type(&self) -> ConstDataType { unsafe { ConstDataType(cass_collection_data_type(self.inner())) } }
+    fn data_type(&self) -> ConstDataType { unsafe { ConstDataType::build(cass_collection_data_type(self.inner())) } }
 
 
     /// Appends a "tinyint" to the collection.

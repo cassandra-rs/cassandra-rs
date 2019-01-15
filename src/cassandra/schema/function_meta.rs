@@ -28,7 +28,7 @@ pub struct FunctionMeta(*const _CassFunctionMeta);
 
 impl Protected<*const _CassFunctionMeta> for FunctionMeta {
     fn inner(&self) -> *const _CassFunctionMeta { self.0 }
-    fn build(inner: *const _CassFunctionMeta) -> Self { FunctionMeta(inner) }
+    fn build(inner: *const _CassFunctionMeta) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; FunctionMeta(inner) }
 }
 
 impl FunctionMeta {
@@ -114,18 +114,20 @@ impl FunctionMeta {
     pub fn argument_type_by_name(&self, name: &str) -> ConstDataType {
         unsafe {
             let name_cstr = CString::new(name).expect("must be utf8");
-            ConstDataType(cass_function_meta_argument_type_by_name(self.0, name_cstr.as_ptr()))
+            // TODO: can return NULL
+            ConstDataType::build(cass_function_meta_argument_type_by_name(self.0, name_cstr.as_ptr()))
         }
     }
 
     /// Gets the return type of the function.
-    pub fn return_type(&self) -> ConstDataType { unsafe { ConstDataType(cass_function_meta_return_type(self.0)) } }
+    pub fn return_type(&self) -> ConstDataType { unsafe { ConstDataType::build(cass_function_meta_return_type(self.0)) } }
 
     /// Gets a metadata field for the provided name. Metadata fields allow direct
     /// access to the column data found in the underlying "functions" metadata table.
     pub fn field_by_name(&self, name: &str) -> Value {
         unsafe {
             let name_cstr = CString::new(name).expect("must be utf8");
+            // TODO: can return NULL
             Value::build(cass_function_meta_field_by_name(self.0, name_cstr.as_ptr()))
         }
     }

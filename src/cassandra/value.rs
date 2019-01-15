@@ -10,6 +10,7 @@ use cassandra::uuid::Uuid;
 use cassandra::error::*;
 
 use cassandra_sys::CASS_ERROR_LIB_INVALID_VALUE_TYPE;
+use cassandra_sys::CASS_ERROR_LIB_NULL_VALUE;
 use cassandra_sys::CASS_VALUE_TYPE_ASCII;
 use cassandra_sys::CASS_VALUE_TYPE_BIGINT;
 use cassandra_sys::CASS_VALUE_TYPE_BLOB;
@@ -152,7 +153,7 @@ unsafe impl Sync for Value {}
 
 impl Protected<*const _CassValue> for Value {
     fn inner(&self) -> *const _CassValue { self.0 }
-    fn build(inner: *const _CassValue) -> Self { Value(inner) }
+    fn build(inner: *const _CassValue) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; Value(inner) }
 }
 
 /// Write a set iterator to a formatter.
@@ -292,7 +293,7 @@ impl Value {
     pub fn get_type(&self) -> ValueType { unsafe { ValueType::build(cass_value_type(self.0)) } }
 
     /// Get the data type of this Cassandra value
-    pub fn data_type(&self) -> ConstDataType { unsafe { ConstDataType(cass_value_data_type(self.0)) } }
+    pub fn data_type(&self) -> ConstDataType { unsafe { ConstDataType::build(cass_value_data_type(self.0)) } }
 
     /// Returns true if a specified value is null.
     pub fn is_null(&self) -> bool { unsafe { cass_value_is_null(self.0) == cass_true } }
@@ -321,7 +322,15 @@ impl Value {
     pub fn get_set(&self) -> Result<SetIterator> {
         unsafe {
             match self.get_type() {
-                ValueType::SET => Ok(SetIterator::build(cass_iterator_from_collection(self.0))),
+                ValueType::SET | ValueType::LIST | ValueType::TUPLE => {
+                    let iter = cass_iterator_from_collection(self.0);
+                    if iter.is_null() {
+                        // No iterator, probably because this set is_null. Complain.
+                        Err(CASS_ERROR_LIB_NULL_VALUE.to_error())
+                    } else {
+                        Ok(SetIterator::build(iter))
+                    }
+                }
                 _ => Err(CASS_ERROR_LIB_INVALID_VALUE_TYPE.to_error()),
             }
         }
@@ -331,7 +340,15 @@ impl Value {
     pub fn get_map(&self) -> Result<MapIterator> {
         unsafe {
             match self.get_type() {
-                ValueType::MAP => Ok(MapIterator::build(cass_iterator_from_map(self.0))),
+                ValueType::MAP => {
+                    let iter = cass_iterator_from_map(self.0);
+                    if iter.is_null() {
+                        // No iterator, probably because this map is_null. Complain.
+                        Err(CASS_ERROR_LIB_NULL_VALUE.to_error())
+                    } else {
+                        Ok(MapIterator::build(iter))
+                    }
+                },
                 _ => Err(CASS_ERROR_LIB_INVALID_VALUE_TYPE.to_error()),
             }
         }
@@ -341,7 +358,15 @@ impl Value {
     pub fn get_user_type(&self) -> Result<UserTypeIterator> {
         unsafe {
             match self.get_type() {
-                ValueType::UDT => Ok(UserTypeIterator::build(cass_iterator_fields_from_user_type(self.0))),
+                ValueType::UDT => {
+                    let iter = cass_iterator_fields_from_user_type(self.0);
+                    if iter.is_null() {
+                        // No iterator, probably because this user_type field is null. Complain.
+                        Err(CASS_ERROR_LIB_NULL_VALUE.to_error())
+                    } else {
+                        Ok(UserTypeIterator::build(iter))
+                    }
+                },
                 _ => Err(CASS_ERROR_LIB_INVALID_VALUE_TYPE.to_error()),
             }
         }

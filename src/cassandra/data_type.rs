@@ -33,7 +33,7 @@ use std::ffi::CString;
 #[derive(Debug)]
 pub struct DataType(*mut _CassDataType);
 #[derive(Debug)]
-pub struct ConstDataType(pub *const _CassDataType);
+pub struct ConstDataType(*const _CassDataType);
 
 // The underlying C types have no thread-local state, but do not support access
 // from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
@@ -42,7 +42,12 @@ unsafe impl Send for ConstDataType {}
 
 impl Protected<*mut _CassDataType> for DataType {
     fn inner(&self) -> *mut _CassDataType { self.0 }
-    fn build(inner: *mut _CassDataType) -> Self { DataType(inner) }
+    fn build(inner: *mut _CassDataType) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; DataType(inner) }
+}
+
+impl Protected<*const _CassDataType> for ConstDataType {
+    fn inner(&self) -> *const _CassDataType { self.0 }
+    fn build(inner: *const _CassDataType) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; ConstDataType(inner) }
 }
 
 impl Drop for DataType {
@@ -57,8 +62,8 @@ impl DataType {
     pub fn new(value_type: ValueType) -> Self { unsafe { DataType(cass_data_type_new(value_type.inner())) } }
 
     /// Creates a new data type from an existing data type.
+    // TODO: can return NULL
     pub fn new_user_type(&self) -> UserType { unsafe { UserType::build(cass_user_type_new_from_data_type(self.0)) } }
-
 
     /// Creates a new data type from an existing data type.
     pub fn new_from_existing(&self) -> Self { unsafe { DataType(cass_data_type_new_from_existing(self.0)) } }
@@ -165,7 +170,8 @@ impl DataType {
     ///
     /// <b>Note:</b> Only valid for UDT, tuple and collection data types.
     pub fn sub_data_type(&self, index: usize) -> ConstDataType {
-        unsafe { ConstDataType(cass_data_type_sub_data_type(self.0, index)) }
+        // TODO: can return NULL
+        unsafe { ConstDataType::build(cass_data_type_sub_data_type(self.0, index)) }
     }
 
     /// Gets the sub-data type of a UDT (user defined type) at the specified index.
@@ -175,7 +181,8 @@ impl DataType {
         where S: Into<String> {
         unsafe {
             let name_cstr = CString::new(name.into()).expect("must be utf8");
-            ConstDataType(cass_data_type_sub_data_type_by_name(data_type.0,
+            // TODO: can return NULL
+            ConstDataType::build(cass_data_type_sub_data_type_by_name(data_type.0,
                                                                name_cstr
                                                                    .as_ptr()))
         }
@@ -281,7 +288,8 @@ impl DataType {
     //    {
     //        unsafe {
     //            let name = CString::new(name.into()).unwrap();
-    //            ConstDataType(cass_data_type_sub_data_type_by_name_n(data_type.0,
+    //            // TODO: can return NULL
+    //            ConstDataType::build(cass_data_type_sub_data_type_by_name_n(data_type.0,
     //                                                                 name.as_ptr(),
     //                                                                 name.as_bytes().len() as u64))
     //        }

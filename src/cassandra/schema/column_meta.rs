@@ -22,7 +22,7 @@ use std::str;
 
 impl Protected<*const _CassColumnMeta> for ColumnMeta {
     fn inner(&self) -> *const _CassColumnMeta { self.0 }
-    fn build(inner: *const _CassColumnMeta) -> Self { ColumnMeta(inner) }
+    fn build(inner: *const _CassColumnMeta) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; ColumnMeta(inner) }
 }
 
 
@@ -48,7 +48,7 @@ impl ColumnMeta {
     pub fn get_type(&self) -> _CassColumnType { unsafe { cass_column_meta_type(self.0) } }
 
     /// Gets the data type of the column.
-    pub fn data_type(&self) -> ConstDataType { unsafe { ConstDataType(cass_column_meta_data_type(self.0)) } }
+    pub fn data_type(&self) -> ConstDataType { unsafe { ConstDataType::build(cass_column_meta_data_type(self.0)) } }
 
     /// Gets a metadata field for the provided name. Metadata fields allow direct
     /// access to the column data found in the underlying "columns" metadata table.

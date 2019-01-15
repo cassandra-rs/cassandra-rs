@@ -45,7 +45,7 @@ unsafe impl Send for Tuple {}
 
 impl Protected<*mut _Tuple> for Tuple {
     fn inner(&self) -> *mut _Tuple { self.0 }
-    fn build(inner: *mut _Tuple) -> Self { Tuple(inner) }
+    fn build(inner: *mut _Tuple) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; Tuple(inner) }
 }
 
 impl Tuple {
@@ -58,7 +58,7 @@ impl Tuple {
     }
 
     /// Gets the data type of a tuple.
-    pub fn data_type(&mut self) -> ConstDataType { unsafe { ConstDataType(cass_tuple_data_type(self.0)) } }
+    pub fn data_type(&mut self) -> ConstDataType { unsafe { ConstDataType::build(cass_tuple_data_type(self.0)) } }
 
     /// Sets an null in a tuple at the specified index.
     pub fn set_null(&mut self, index: usize) -> Result<&mut Self> {

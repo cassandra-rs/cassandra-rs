@@ -27,7 +27,7 @@ pub struct TableMeta(*const _CassTableMeta);
 
 impl Protected<*const _CassTableMeta> for TableMeta {
     fn inner(&self) -> *const _CassTableMeta { self.0 }
-    fn build(inner: *const _CassTableMeta) -> Self { TableMeta(inner) }
+    fn build(inner: *const _CassTableMeta) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; TableMeta(inner) }
 }
 
 impl TableMeta {
@@ -43,6 +43,7 @@ impl TableMeta {
 
     /// Gets the column metadata for the provided column name.
     pub fn column_by_name(&self, name: &str) -> ColumnMeta {
+        // TODO: can return NULL
         unsafe { ColumnMeta::build(cass_table_meta_column_by_name(self.0, name.as_ptr() as *const i8)) }
     }
 
@@ -64,6 +65,7 @@ impl TableMeta {
 
     /// Gets the column metadata for the provided index.
     pub fn column(&self, index: usize) -> ColumnMeta {
+        // TODO: can return NULL
         unsafe { ColumnMeta::build(cass_table_meta_column(self.0, index)) }
     }
 
