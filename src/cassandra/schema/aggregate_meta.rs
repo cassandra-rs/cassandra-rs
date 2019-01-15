@@ -28,7 +28,7 @@ pub struct AggregateMeta(*const _CassAggregateMeta);
 
 impl Protected<*const _CassAggregateMeta> for AggregateMeta {
     fn inner(&self) -> *const _CassAggregateMeta { self.0 }
-    fn build(inner: *const _CassAggregateMeta) -> Self { AggregateMeta(inner) }
+    fn build(inner: *const _CassAggregateMeta) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; AggregateMeta(inner) }
 }
 
 impl AggregateMeta {
@@ -64,14 +64,14 @@ impl AggregateMeta {
     /// Gets the aggregate's argument type for the provided index.
     pub fn argument_type(&self, index: usize) -> ConstDataType {
         // TODO: can return NULL
-        unsafe { ConstDataType(cass_aggregate_meta_argument_type(self.0, index)) }
+        unsafe { ConstDataType::build(cass_aggregate_meta_argument_type(self.0, index)) }
     }
 
     /// Gets the aggregate's argument return type.
-    pub fn return_type(&self) -> ConstDataType { unsafe { ConstDataType(cass_aggregate_meta_return_type(self.0)) } }
+    pub fn return_type(&self) -> ConstDataType { unsafe { ConstDataType::build(cass_aggregate_meta_return_type(self.0)) } }
 
     /// Gets the aggregate's argument state type.
-    pub fn state_type(&self) -> ConstDataType { unsafe { ConstDataType(cass_aggregate_meta_state_type(self.0)) } }
+    pub fn state_type(&self) -> ConstDataType { unsafe { ConstDataType::build(cass_aggregate_meta_state_type(self.0)) } }
 
     /// Gets the function metadata for the aggregate's state function.
     pub fn state_func(&self) -> FunctionMeta { unsafe { FunctionMeta::build(cass_aggregate_meta_state_func(self.0)) } }

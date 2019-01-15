@@ -92,7 +92,7 @@ impl Drop for Cluster {
 
 impl Protected<*mut _Cluster> for Cluster {
     fn inner(&self) -> *mut _Cluster { self.0 }
-    fn build(inner: *mut _Cluster) -> Self { Cluster(inner) }
+    fn build(inner: *mut _Cluster) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; Cluster(inner) }
 }
 
 impl Default for Cluster {

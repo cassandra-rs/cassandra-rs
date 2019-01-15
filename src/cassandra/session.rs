@@ -45,7 +45,7 @@ unsafe impl Sync for Session {}
 
 impl Protected<*mut _Session> for Session {
     fn inner(&self) -> *mut _Session { self.0 }
-    fn build(inner: *mut _Session) -> Self { Session(inner) }
+    fn build(inner: *mut _Session) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; Session(inner) }
 }
 
 impl Drop for Session {

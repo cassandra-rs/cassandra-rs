@@ -33,7 +33,7 @@ use std::ffi::CString;
 #[derive(Debug)]
 pub struct DataType(*mut _CassDataType);
 #[derive(Debug)]
-pub struct ConstDataType(pub *const _CassDataType);
+pub struct ConstDataType(*const _CassDataType);
 
 // The underlying C types have no thread-local state, but do not support access
 // from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
@@ -42,7 +42,12 @@ unsafe impl Send for ConstDataType {}
 
 impl Protected<*mut _CassDataType> for DataType {
     fn inner(&self) -> *mut _CassDataType { self.0 }
-    fn build(inner: *mut _CassDataType) -> Self { DataType(inner) }
+    fn build(inner: *mut _CassDataType) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; DataType(inner) }
+}
+
+impl Protected<*const _CassDataType> for ConstDataType {
+    fn inner(&self) -> *const _CassDataType { self.0 }
+    fn build(inner: *const _CassDataType) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; ConstDataType(inner) }
 }
 
 impl Drop for DataType {
@@ -166,7 +171,7 @@ impl DataType {
     /// <b>Note:</b> Only valid for UDT, tuple and collection data types.
     pub fn sub_data_type(&self, index: usize) -> ConstDataType {
         // TODO: can return NULL
-        unsafe { ConstDataType(cass_data_type_sub_data_type(self.0, index)) }
+        unsafe { ConstDataType::build(cass_data_type_sub_data_type(self.0, index)) }
     }
 
     /// Gets the sub-data type of a UDT (user defined type) at the specified index.
@@ -177,7 +182,7 @@ impl DataType {
         unsafe {
             let name_cstr = CString::new(name.into()).expect("must be utf8");
             // TODO: can return NULL
-            ConstDataType(cass_data_type_sub_data_type_by_name(data_type.0,
+            ConstDataType::build(cass_data_type_sub_data_type_by_name(data_type.0,
                                                                name_cstr
                                                                    .as_ptr()))
         }
@@ -284,7 +289,7 @@ impl DataType {
     //        unsafe {
     //            let name = CString::new(name.into()).unwrap();
     //            // TODO: can return NULL
-    //            ConstDataType(cass_data_type_sub_data_type_by_name_n(data_type.0,
+    //            ConstDataType::build(cass_data_type_sub_data_type_by_name_n(data_type.0,
     //                                                                 name.as_ptr(),
     //                                                                 name.as_bytes().len() as u64))
     //        }

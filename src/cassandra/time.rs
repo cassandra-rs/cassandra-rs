@@ -18,7 +18,7 @@ unsafe impl Sync for TimestampGen {}
 
 impl Protected<*mut _TimestampGen> for TimestampGen {
     fn inner(&self) -> *mut _TimestampGen { self.0 }
-    fn build(inner: *mut _TimestampGen) -> Self { TimestampGen(inner) }
+    fn build(inner: *mut _TimestampGen) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; TimestampGen(inner) }
 }
 
 

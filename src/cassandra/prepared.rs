@@ -33,7 +33,7 @@ impl Drop for PreparedStatement {
 
 impl Protected<*const _PreparedStatement> for PreparedStatement {
     fn inner(&self) -> *const _PreparedStatement { self.0 }
-    fn build(inner: *const _PreparedStatement) -> Self { PreparedStatement(inner) }
+    fn build(inner: *const _PreparedStatement) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; PreparedStatement(inner) }
 }
 
 impl PreparedStatement {
@@ -59,7 +59,7 @@ impl PreparedStatement {
     /// Returns a reference to the data type of the parameter. Do not free
     /// this reference as it is bound to the lifetime of the prepared.
     pub fn parameter_data_type(&self, index: usize) -> ConstDataType {
-        unsafe { ConstDataType(cass_prepared_parameter_data_type(self.0, index)) }
+        unsafe { ConstDataType::build(cass_prepared_parameter_data_type(self.0, index)) }
     }
 
     /// Gets the data type of a parameter for the specified name.
@@ -69,7 +69,7 @@ impl PreparedStatement {
     pub fn parameter_data_type_by_name(&self, name: &str) -> ConstDataType {
         unsafe {
             let name_cstr = CString::new(name).expect("must be utf8");
-            ConstDataType(cass_prepared_parameter_data_type_by_name(self.0,
+            ConstDataType::build(cass_prepared_parameter_data_type_by_name(self.0,
                                                                     name_cstr.as_ptr()))
         }
     }

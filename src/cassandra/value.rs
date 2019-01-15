@@ -153,7 +153,7 @@ unsafe impl Sync for Value {}
 
 impl Protected<*const _CassValue> for Value {
     fn inner(&self) -> *const _CassValue { self.0 }
-    fn build(inner: *const _CassValue) -> Self { Value(inner) }
+    fn build(inner: *const _CassValue) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; Value(inner) }
 }
 
 /// Write a set iterator to a formatter.
@@ -293,7 +293,7 @@ impl Value {
     pub fn get_type(&self) -> ValueType { unsafe { ValueType::build(cass_value_type(self.0)) } }
 
     /// Get the data type of this Cassandra value
-    pub fn data_type(&self) -> ConstDataType { unsafe { ConstDataType(cass_value_data_type(self.0)) } }
+    pub fn data_type(&self) -> ConstDataType { unsafe { ConstDataType::build(cass_value_data_type(self.0)) } }
 
     /// Returns true if a specified value is null.
     pub fn is_null(&self) -> bool { unsafe { cass_value_is_null(self.0) == cass_true } }

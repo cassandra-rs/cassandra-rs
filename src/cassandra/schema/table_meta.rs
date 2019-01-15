@@ -27,7 +27,7 @@ pub struct TableMeta(*const _CassTableMeta);
 
 impl Protected<*const _CassTableMeta> for TableMeta {
     fn inner(&self) -> *const _CassTableMeta { self.0 }
-    fn build(inner: *const _CassTableMeta) -> Self { TableMeta(inner) }
+    fn build(inner: *const _CassTableMeta) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; TableMeta(inner) }
 }
 
 impl TableMeta {

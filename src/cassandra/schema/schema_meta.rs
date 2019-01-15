@@ -22,7 +22,7 @@ impl Drop for SchemaMeta {
 
 impl Protected<*const _CassSchemaMeta> for SchemaMeta {
     fn inner(&self) -> *const _CassSchemaMeta { self.0 }
-    fn build(inner: *const _CassSchemaMeta) -> Self { SchemaMeta(inner) }
+    fn build(inner: *const _CassSchemaMeta) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; SchemaMeta(inner) }
 }
 
 impl SchemaMeta {

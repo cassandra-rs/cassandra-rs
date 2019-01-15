@@ -82,7 +82,7 @@ unsafe impl Send for Statement {}
 
 impl Protected<*mut _Statement> for Statement {
     fn inner(&self) -> *mut _Statement { self.0 }
-    fn build(inner: *mut _Statement) -> Self { Statement(inner) }
+    fn build(inner: *mut _Statement) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; Statement(inner) }
 }
 
 #[macro_export]

@@ -61,7 +61,7 @@ unsafe impl Send for UserType {}
 
 impl Protected<*mut _UserType> for UserType {
     fn inner(&self) -> *mut _UserType { self.0 }
-    fn build(inner: *mut _UserType) -> Self { UserType(inner) }
+    fn build(inner: *mut _UserType) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; UserType(inner) }
 }
 
 
@@ -77,7 +77,7 @@ impl Drop for UserType {
 
 impl UserType {
     /// Gets the data type of a user defined type.
-    pub fn data_type(&self) -> ConstDataType { unsafe { ConstDataType(cass_user_type_data_type(self.0)) } }
+    pub fn data_type(&self) -> ConstDataType { unsafe { ConstDataType::build(cass_user_type_data_type(self.0)) } }
 
     /// Sets a null in a user defined type at the specified index.
     pub fn set_null(&mut self, index: usize) -> Result<&mut Self> {

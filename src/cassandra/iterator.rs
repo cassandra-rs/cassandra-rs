@@ -74,7 +74,7 @@ impl Iterator for UserTypeIterator {
         unsafe {
             match cass_iterator_next(self.0) {
                 cass_false => None,
-                cass_true => Some(ConstDataType(cass_iterator_get_user_type(self.0))),
+                cass_true => Some(ConstDataType::build(cass_iterator_get_user_type(self.0))),
             }
         }
     }
@@ -219,47 +219,47 @@ impl Iterator for FieldIterator {
 
 impl Protected<*mut _CassIterator> for UserTypeIterator {
     fn inner(&self) -> *mut _CassIterator { self.0 }
-    fn build(inner: *mut _CassIterator) -> Self { UserTypeIterator(inner) }
+    fn build(inner: *mut _CassIterator) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; UserTypeIterator(inner) }
 }
 
 impl Protected<*mut _CassIterator> for AggregateIterator {
     fn inner(&self) -> *mut _CassIterator { self.0 }
-    fn build(inner: *mut _CassIterator) -> Self { AggregateIterator(inner) }
+    fn build(inner: *mut _CassIterator) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; AggregateIterator(inner) }
 }
 
 impl Protected<*mut _CassIterator> for FunctionIterator {
     fn inner(&self) -> *mut _CassIterator { self.0 }
-    fn build(inner: *mut _CassIterator) -> Self { FunctionIterator(inner) }
+    fn build(inner: *mut _CassIterator) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; FunctionIterator(inner) }
 }
 
 impl Protected<*mut _CassIterator> for KeyspaceIterator {
     fn inner(&self) -> *mut _CassIterator { self.0 }
-    fn build(inner: *mut _CassIterator) -> Self { KeyspaceIterator(inner) }
+    fn build(inner: *mut _CassIterator) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; KeyspaceIterator(inner) }
 }
 
 impl Protected<*mut _CassIterator> for FieldIterator {
     fn inner(&self) -> *mut _CassIterator { self.0 }
-    fn build(inner: *mut _CassIterator) -> Self { FieldIterator(inner) }
+    fn build(inner: *mut _CassIterator) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; FieldIterator(inner) }
 }
 
 impl Protected<*mut _CassIterator> for ColumnIterator {
     fn inner(&self) -> *mut _CassIterator { self.0 }
-    fn build(inner: *mut _CassIterator) -> Self { ColumnIterator(inner) }
+    fn build(inner: *mut _CassIterator) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; ColumnIterator(inner) }
 }
 
 impl Protected<*mut _CassIterator> for TableIterator {
     fn inner(&self) -> *mut _CassIterator { self.0 }
-    fn build(inner: *mut _CassIterator) -> Self { TableIterator(inner) }
+    fn build(inner: *mut _CassIterator) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; TableIterator(inner) }
 }
 
 impl Protected<*mut _CassIterator> for MapIterator {
     fn inner(&self) -> *mut _CassIterator { self.0 }
-    fn build(inner: *mut _CassIterator) -> Self { MapIterator(inner) }
+    fn build(inner: *mut _CassIterator) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; MapIterator(inner) }
 }
 
 impl Protected<*mut _CassIterator> for SetIterator {
     fn inner(&self) -> *mut _CassIterator { self.0 }
-    fn build(inner: *mut _CassIterator) -> Self { SetIterator(inner) }
+    fn build(inner: *mut _CassIterator) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; SetIterator(inner) }
 }
 
 

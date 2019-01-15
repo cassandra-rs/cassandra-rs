@@ -34,7 +34,7 @@ unsafe impl Send for Batch {}
 
 impl Protected<*mut _Batch> for Batch {
     fn inner(&self) -> *mut _Batch { self.0 }
-    fn build(inner: *mut _Batch) -> Self { Batch(inner) }
+    fn build(inner: *mut _Batch) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; Batch(inner) }
 }
 
 /// Custom payloads not fully supported yet
@@ -43,7 +43,7 @@ pub struct CustomPayload(*mut _CassCustomPayload);
 
 impl Protected<*mut _CassCustomPayload> for CustomPayload {
     fn inner(&self) -> *mut _CassCustomPayload { self.0 }
-    fn build(inner: *mut _CassCustomPayload) -> Self { CustomPayload(inner) }
+    fn build(inner: *mut _CassCustomPayload) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; CustomPayload(inner) }
 }
 
 impl Default for CustomPayload {

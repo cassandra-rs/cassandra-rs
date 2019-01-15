@@ -45,7 +45,7 @@ unsafe impl Send for CassResult {}
 
 impl Protected<*const _CassResult> for CassResult {
     fn inner(&self) -> *const _CassResult { self.0 }
-    fn build(inner: *const _CassResult) -> Self { CassResult(inner) }
+    fn build(inner: *const _CassResult) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; CassResult(inner) }
 }
 
 impl Debug for CassResult {
@@ -103,7 +103,7 @@ impl CassResult {
     /// Gets the column datatype at index for the specified result.
     pub fn column_data_type(&self, index: usize) -> ConstDataType {
         // TODO: can return NULL
-        unsafe { ConstDataType(cass_result_column_data_type(self.0, index)) }
+        unsafe { ConstDataType::build(cass_result_column_data_type(self.0, index)) }
     }
 
     /// Gets the first row of the result.
