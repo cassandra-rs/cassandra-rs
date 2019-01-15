@@ -10,6 +10,7 @@ version number is tracked in the file `VERSION`.
 - Avoid possible segfaults, by returning `None` where possible, otherwise
   panicking. In particular, a collection field set to NULL now returns `None`
   rather than faulting.
+- Make `SchemaMeta::get_keyspace_by_name` work (fix string handling bug).
 
 ## [0.13.1] - 2019-01-08
 - Fix `stmt!()` not working if `Statement` was not imported.

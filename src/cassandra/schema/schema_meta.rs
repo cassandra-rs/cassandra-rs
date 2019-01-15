@@ -7,6 +7,7 @@ use cassandra_sys::cass_iterator_keyspaces_from_schema_meta;
 use cassandra_sys::cass_schema_meta_free;
 use cassandra_sys::cass_schema_meta_keyspace_by_name;
 use cassandra_sys::cass_schema_meta_snapshot_version;
+use std::ffi::CString;
 
 /// A snapshot of the schema's metadata
 #[derive(Debug)]
@@ -32,7 +33,10 @@ impl SchemaMeta {
     /// Gets the keyspace metadata for the provided keyspace name.
     pub fn get_keyspace_by_name(&self, keyspace: &str) -> KeyspaceMeta {
         // TODO: can return NULL
-        unsafe { KeyspaceMeta::build(cass_schema_meta_keyspace_by_name(self.0, keyspace.as_ptr() as *const i8)) }
+        unsafe {
+            let keyspace_cstr = CString::new(keyspace).expect("Unable to convert string to bytes");
+            KeyspaceMeta::build(cass_schema_meta_keyspace_by_name(self.0, keyspace_cstr.as_ptr()))
+        }
     }
 
     /// Returns an iterator over the keyspaces in this schema
