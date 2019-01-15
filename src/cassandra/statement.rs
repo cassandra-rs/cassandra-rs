@@ -169,6 +169,12 @@ impl BindRustType<Set> for Statement {
     fn bind_by_name(&mut self, col: &str, value: Set) -> Result<&mut Self> { self.bind_set_by_name(col, value) }
 }
 
+impl BindRustType<List> for Statement {
+    fn bind(&mut self, index: usize, value: List) -> Result<&mut Self> { self.bind_list(index, value) }
+
+    fn bind_by_name(&mut self, col: &str, value: List) -> Result<&mut Self> { self.bind_list_by_name(col, value) }
+}
+
 impl BindRustType<Uuid> for Statement {
     fn bind(&mut self, index: usize, value: Uuid) -> Result<&mut Self> { self.bind_uuid(index, value) }
 

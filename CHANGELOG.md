@@ -13,6 +13,7 @@ version number is tracked in the file `VERSION`.
 - Make `SchemaMeta::get_keyspace_by_name` work (fix string handling bug).
 - Allow using the `SetIterator` for lists and tuples. Previously these
   could not be enumerated at all!
+- For convenience, support `bind()` for `List`s.
 
 ## [0.13.1] - 2019-01-08
 - Fix `stmt!()` not working if `Statement` was not imported.
