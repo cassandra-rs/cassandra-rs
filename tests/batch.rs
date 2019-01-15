@@ -22,8 +22,8 @@ fn insert_into_batch_with_prepared(session: &Session, pairs: &Vec<Pair>) -> Resu
     batch.set_consistency(Consistency::ONE)?;
     for pair in pairs {
         let mut statement = prepared.bind();
-        statement.bind(0, pair.key.as_ref())?;
-        statement.bind(1, pair.value.as_ref())?;
+        statement.bind(0, pair.key.as_ref() as &str)?;
+        statement.bind(1, pair.value.as_ref() as &str)?;
         match batch.add_statement(&statement) {
             Ok(_) => {}
             Err(err) => panic!("{:?}", err),
