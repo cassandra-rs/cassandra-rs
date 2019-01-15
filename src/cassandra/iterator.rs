@@ -1,4 +1,4 @@
-use cassandra::data_type::ConstDataType;
+use cassandra::data_type::DataType;
 use cassandra::field::Field;
 use cassandra::schema::aggregate_meta::AggregateMeta;
 use cassandra::schema::column_meta::ColumnMeta;
@@ -23,7 +23,8 @@ use cassandra_sys::cass_iterator_get_map_value;
 use cassandra_sys::cass_iterator_get_meta_field_name;
 use cassandra_sys::cass_iterator_get_meta_field_value;
 use cassandra_sys::cass_iterator_get_table_meta;
-use cassandra_sys::cass_iterator_get_user_type;
+use cassandra_sys::cass_iterator_get_user_type_field_name;
+use cassandra_sys::cass_iterator_get_user_type_field_value;
 use cassandra_sys::cass_iterator_get_value;
 use cassandra_sys::cass_iterator_next;
 use cassandra_sys::cass_true;
@@ -69,22 +70,31 @@ impl Drop for UserTypeIterator {
 }
 
 impl Iterator for UserTypeIterator {
-    type Item = ConstDataType;
+    type Item = (String, Value);
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
                 cass_false => None,
-                cass_true => Some(ConstDataType::build(cass_iterator_get_user_type(self.0))),
+                cass_true => Some((self.get_field_name(), self.get_field_value())),
             }
         }
     }
 }
 
 impl UserTypeIterator {
-    //    pub fn get_field_name(&mut self)-> Value {unsafe{
-    //
-    //        Value::new(cass_iterator_get_user_type_field_name(self.0))
-    //    }}
+    fn get_field_name(&mut self)-> String {
+        unsafe {
+            let mut name = mem::zeroed();
+            let mut name_length = mem::zeroed();
+            cass_iterator_get_user_type_field_name(self.0, &mut name, &mut name_length).to_result(())
+                .and_then(|_| {
+                    let slice = slice::from_raw_parts(name as *const u8, name_length as usize);
+                    let name = str::from_utf8(slice)?.to_owned();
+                    Ok(name)
+                }).expect("Cassandra error during iteration")
+        }
+    }
+    fn get_field_value(&mut self)-> Value { unsafe { Value::build(cass_iterator_get_user_type_field_value(self.0)) } }
 }
 
 
