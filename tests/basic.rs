@@ -8,38 +8,72 @@ mod help;
 use cassandra_cpp::*;
 use futures::Future;
 use time::Duration;
+use std::time::SystemTime;
 
+#[derive(Debug,PartialEq,Copy,Clone,Default)]
+struct Udt {
+    dt: u32,
+    tm: i64,
+}
 
-#[derive(Debug,PartialEq,Clone,Copy)]
+#[derive(Debug,PartialEq,Copy,Clone,Default)]
 struct Basic {
     bln: bool,
     flt: f32,
     dbl: f64,
+    i8: i8,
+    i16: i16,
     i32: i32,
     i64: i64,
+    ts: i64,
+    addr: Inet,
+    tu: Uuid,
+    id: Uuid,
+    ct: Udt,
 }
 
 /// Create the table for basic testing.
 fn create_basic_table(session: &Session) {
+    let type_statement = &stmt!("CREATE TYPE IF NOT EXISTS examples.udt (dt date, tm time);");
+    session.execute(type_statement).wait().unwrap();
     let table_statement = &stmt!("CREATE TABLE IF NOT EXISTS examples.basic (key text, bln boolean, flt \
-                                  float, dbl double, i32 int, i64 bigint, PRIMARY KEY (key));");
+                                  float, dbl double, i8 tinyint, i16 smallint, i32 int, i64 bigint, \
+                                  ts timestamp, addr inet, tu timeuuid, id uuid, ct udt, PRIMARY KEY (key));");
     session.execute(table_statement).wait().unwrap();
     let truncate_statement = &stmt!("TRUNCATE examples.basic;");
     session.execute(truncate_statement).wait().unwrap();
 }
 
 fn insert_into_basic(session: &Session, key: &str, basic: &Basic) -> Result<CassResult> {
-    let mut statement = stmt!("INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, ?);");
+    let mut statement = stmt!("INSERT INTO examples.basic (key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct) \
+                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+
+    let ct_type = DataType::new_udt(2);
+    ct_type.add_sub_value_type_by_name::<&str>("dt", ValueType::DATE)?;
+    ct_type.add_sub_value_type_by_name::<&str>("tm", ValueType::TIME)?;
+    let mut ct_udt = ct_type.new_user_type();
+    ct_udt.set_uint32_by_name("dt", basic.ct.dt)?;
+    ct_udt.set_int64_by_name("tm", basic.ct.tm)?;
+
     statement.bind(0, key)?;
     statement.bind(1, basic.bln)?;
     statement.bind(2, basic.flt)?;
     statement.bind(3, basic.dbl)?;
-    statement.bind(4, basic.i32)?;
-    statement.bind(5, basic.i64)?;
+    statement.bind(4, basic.i8)?;
+    statement.bind(5, basic.i16)?;
+    statement.bind(6, basic.i32)?;
+    statement.bind(7, basic.i64)?;
+    statement.bind(8, basic.ts)?;
+    statement.bind(9, basic.addr)?;
+    statement.bind(10, basic.tu)?;
+    statement.bind(11, basic.id)?;
+    statement.bind(12, &ct_udt)?;
+
     session.execute(&statement).wait()
 }
 
-const SELECT_QUERY: &str = "SELECT * FROM examples.basic WHERE key = ?";
+const SELECT_QUERY: &str = "SELECT key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct \
+                            FROM examples.basic WHERE key = ?";
 
 fn select_from_basic(session: &Session, key: &str) -> Result<Option<Basic>> {
     let mut statement = stmt!(SELECT_QUERY);
@@ -49,12 +83,33 @@ fn select_from_basic(session: &Session, key: &str) -> Result<Option<Basic>> {
     match result.first_row() {
         None => Ok(None),
         Some(row) => {
+            let fields_iter: UserTypeIterator = row.get(12)?;
+            let mut dt: u32 = 0;
+            let mut tm: i64 = 0;
+            for field in fields_iter {
+                match field.0.as_ref() {
+                    "dt" => dt = field.1.get_u32()?,
+                    "tm" => tm = field.1.get_i64()?,
+                    _ => panic!("Unexpected field: {:?}", field),
+                }
+            }
+
             Ok(Some(Basic {
                 bln: row.get(1)?,
-                dbl: row.get(2)?,
-                flt: row.get(3)?,
-                i32: row.get(4)?,
-                i64: row.get(5)?,
+                flt: row.get(2)?,
+                dbl: row.get(3)?,
+                i8: row.get(4)?,
+                i16: row.get(5)?,
+                i32: row.get(6)?,
+                i64: row.get(7)?,
+                ts: row.get(8)?,
+                addr: row.get(9)?,
+                tu: row.get(10)?,
+                id: row.get(11)?,
+                ct: Udt{
+                    dt: dt,
+                    tm: tm,
+                },
             }))
         }
     }
@@ -68,10 +123,33 @@ fn select_from_basic_prepared(session: &Session, prepared: &PreparedStatement, k
     println!("{:?}", result);
     for row in result.iter() {
         basic.bln = row.get(1)?;
-        basic.dbl = row.get(2)?;
-        basic.flt = row.get(3)?;
-        basic.i32 = row.get(4)?;
-        basic.i64 = row.get(5)?;
+        basic.flt = row.get(2)?;
+        basic.dbl = row.get(3)?;
+        basic.i8 = row.get(4)?;
+        basic.i16 = row.get(5)?;
+        basic.i32 = row.get(6)?;
+        basic.i64 = row.get(7)?;
+        basic.ts = row.get(8)?;
+        basic.addr = row.get(9)?;
+        basic.tu = row.get(10)?;
+        basic.id = row.get(11)?;
+
+        let fields_iter: UserTypeIterator = row.get(12)?;
+        let mut dt: u32 = 0;
+        let mut tm: i64 = 0;
+
+        for field in fields_iter {
+            match field.0.as_ref() {
+                "dt" => dt = field.1.get_u32()?,
+                "tm" => tm = field.1.get_i64()?,
+                _ => panic!("Unexpected field: {:?}", field),
+            }
+        }
+
+        basic.ct = Udt{
+            dt: dt,
+            tm: tm,
+        };
     }
     Ok(())
 }
@@ -108,13 +186,25 @@ fn test_basic_round_trip() {
     let session = help::create_test_session();
     help::create_example_keyspace(&session);
     create_basic_table(&session);
+    let uuid_gen = UuidGen::default();
 
+    let ts = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs() * 1_000;
     let input = Basic {
         bln: true,
         flt: 0.001f32,
         dbl: 0.0002f64,
-        i32: 1,
-        i64: 2,
+        i8: 1,
+        i16: 2,
+        i32: 3,
+        i64: 4,
+        ts: ts as i64,
+        addr: "127.0.0.1".parse().unwrap(),
+        tu: uuid_gen.gen_time(),
+        id: uuid_gen.gen_random(),
+        ct: Udt {
+            dt: ts as u32,
+            tm: ts as i64,
+        },
     };
 
     insert_into_basic(&session, "test", &input).unwrap();
@@ -131,21 +221,27 @@ fn test_prepared_round_trip() {
     let session = help::create_test_session();
     help::create_example_keyspace(&session);
     create_basic_table(&session);
+    let uuid_gen = UuidGen::default();
 
+    let ts = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs() * 1_000;
     let input = Basic {
         bln: true,
         flt: 0.001f32,
         dbl: 0.0002f64,
-        i32: 1,
-        i64: 2,
+        i8: 1,
+        i16: 2,
+        i32: 3,
+        i64: 4,
+        ts: ts as i64,
+        addr: "127.0.0.1".parse().unwrap(),
+        tu: uuid_gen.gen_time(),
+        id: uuid_gen.gen_random(),
+        ct: Udt {
+            dt: ts as u32,
+            tm: ts as i64,
+        },
     };
-    let mut output = Basic {
-        bln: false,
-        flt: 0f32,
-        dbl: 0f64,
-        i32: 0,
-        i64: 0,
-    };
+    let mut output = Basic::default();
 
     println!("Basic insertions");
     insert_into_basic(&session, "prepared_test", &input).unwrap();
@@ -166,7 +262,8 @@ fn test_null_retrieval() {
     session.execute(&partial).wait().expect("insert");
 
     // Read the whole row.
-    let query = stmt!("SELECT key, bln, flt, dbl, i32, i64 FROM examples.basic WHERE key = 'vacant';");
+    let query = stmt!("SELECT key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct \
+                       FROM examples.basic WHERE key = 'vacant';");
     let result = session.execute(&query).wait().expect("select");
 
     // Check response is as expected.
@@ -190,11 +287,39 @@ fn test_null_retrieval() {
     assert!(c.is_null());
 
     let c = row.get_column(4).expect("should be present");
-    c.get_i32().expect_err("should be null");
+    c.get_i8().expect_err("should be null");
     assert!(c.is_null());
 
     let c = row.get_column(5).expect("should be present");
+    c.get_i16().expect_err("should be null");
+    assert!(c.is_null());
+
+    let c = row.get_column(6).expect("should be present");
+    c.get_i32().expect_err("should be null");
+    assert!(c.is_null());
+
+    let c = row.get_column(7).expect("should be present");
     c.get_i64().expect_err("should be null");
+    assert!(c.is_null());
+
+    let c = row.get_column(8).expect("should be present");
+    c.get_u32().expect_err("should be null");
+    assert!(c.is_null());
+
+    let c = row.get_column(9).expect("should be present");
+    c.get_inet().expect_err("should be null");
+    assert!(c.is_null());
+
+    let c = row.get_column(10).expect("should be present");
+    c.get_uuid().expect_err("should be null");
+    assert!(c.is_null());
+
+    let c = row.get_column(11).expect("should be present");
+    c.get_uuid().expect_err("should be null");
+    assert!(c.is_null());
+
+    let c = row.get_column(12).expect("should be present");
+    c.get_user_type().expect_err("should be null");
     assert!(c.is_null());
 }
 
@@ -205,17 +330,26 @@ fn test_null_insertion() {
     create_basic_table(&session);
 
     // Insert some explicit nulls.
-    let mut s = stmt!("INSERT INTO examples.basic (key, bln, flt, dbl, i32, i64) VALUES (?, ?, ?, ?, ?, ?);");
+    let mut s = stmt!("INSERT INTO examples.basic (key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct) \
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
     s.bind(0, "shrdlu").unwrap();
     s.bind(1, false).unwrap();
     s.bind_null(2).unwrap();
     s.bind(3, 2.72f64).unwrap();
     // deliberately omit 4 - this should be equivalent to binding null
     s.bind_null(5).unwrap();
+    s.bind_null(6).unwrap();
+    s.bind_null(7).unwrap();
+    s.bind_null(8).unwrap();
+    s.bind_null(9).unwrap();
+    s.bind_null(10).unwrap();
+    s.bind_null(11).unwrap();
+    s.bind_null(12).unwrap();
     session.execute(&s).wait().unwrap();
 
     // Read them back.
-    let s = stmt!("SELECT key, bln, flt, dbl, i32, i64 FROM examples.basic WHERE key = 'shrdlu';");
+    let s = stmt!("SELECT key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct \
+                   FROM examples.basic WHERE key = 'shrdlu';");
     let result = session.execute(&s).wait().expect("select");
     assert_eq!(1, result.row_count());
     let row = result.first_row().unwrap();
@@ -226,6 +360,13 @@ fn test_null_insertion() {
     assert!(!row.get_column(3).unwrap().is_null());
     assert!(row.get_column(4).unwrap().is_null());
     assert!(row.get_column(5).unwrap().is_null());
+    assert!(row.get_column(6).unwrap().is_null());
+    assert!(row.get_column(7).unwrap().is_null());
+    assert!(row.get_column(8).unwrap().is_null());
+    assert!(row.get_column(9).unwrap().is_null());
+    assert!(row.get_column(10).unwrap().is_null());
+    assert!(row.get_column(11).unwrap().is_null());
+    assert!(row.get_column(12).unwrap().is_null());
 }
 
 /// Check for a needle in a haystack, and fail if not present.
