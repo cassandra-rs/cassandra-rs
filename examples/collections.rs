@@ -34,7 +34,6 @@ fn do_work(session: &Session) -> Result<()> {
 
     let result = session.execute(&query).wait()?;
 
-    // This result, and the row, both show `[<error>]` for the list of phone numbers.
     println!("Overall result: {}", result);
     for row in result.iter() {
         println!("Row: {}", row);

@@ -322,7 +322,7 @@ impl Value {
     pub fn get_set(&self) -> Result<SetIterator> {
         unsafe {
             match self.get_type() {
-                ValueType::SET => {
+                ValueType::SET | ValueType::LIST | ValueType::TUPLE => {
                     let iter = cass_iterator_from_collection(self.0);
                     if iter.is_null() {
                         // No iterator, probably because this set is_null. Complain.
