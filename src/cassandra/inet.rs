@@ -17,11 +17,21 @@ use std::string::ToString;
 
 #[repr(C)]
 /// Cassandra's version of an IP address
-
+#[derive(Copy,Clone)]
 pub struct Inet(_Inet);
 
 impl Debug for Inet {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result { write!(f, "can't format an inet") }
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result { write!(f, "{}", self.to_string()) }
+}
+
+impl PartialEq for Inet {
+    fn eq(&self, other: &Inet) -> bool {
+        if self.0.address_length != other.0.address_length {
+            return false;
+        }
+        let length = self.0.address_length as usize;
+        self.0.address[0..length] == other.0.address[0..length]
+    }
 }
 
 impl Protected<_Inet> for Inet {

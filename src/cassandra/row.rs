@@ -1,8 +1,10 @@
 use cassandra::error::*;
 
-use cassandra::iterator::{MapIterator, SetIterator};
+use cassandra::iterator::{MapIterator, SetIterator, UserTypeIterator};
 use cassandra::util::Protected;
 use cassandra::value::Value;
+use cassandra::inet::Inet;
+use cassandra::uuid::Uuid;
 use cassandra_sys::CassIterator as _CassIterator;
 use cassandra_sys::CassRow as _Row;
 use cassandra_sys::cass_false;
@@ -137,6 +139,58 @@ impl AsRustType<i32> for Row {
     }
 }
 
+impl AsRustType<i16> for Row {
+    fn get(&self, index: usize) -> Result<i16> {
+        let col = self.get_column(index)?;
+        col.get_i16()
+    }
+
+    fn get_by_name<S>(&self, name: S) -> Result<i16>
+        where S: Into<String> {
+        let col = self.get_column_by_name(name)?;
+        col.get_i16()
+    }
+}
+
+impl AsRustType<i8> for Row {
+    fn get(&self, index: usize) -> Result<i8> {
+        let col = self.get_column(index)?;
+        col.get_i8()
+    }
+
+    fn get_by_name<S>(&self, name: S) -> Result<i8>
+        where S: Into<String> {
+        let col = self.get_column_by_name(name)?;
+        col.get_i8()
+    }
+}
+
+impl AsRustType<u32> for Row {
+    fn get(&self, index: usize) -> Result<u32> {
+        let col = self.get_column(index)?;
+        col.get_u32()
+    }
+
+    fn get_by_name<S>(&self, name: S) -> Result<u32>
+        where S: Into<String> {
+        let col = self.get_column_by_name(name)?;
+        col.get_u32()
+    }
+}
+
+impl AsRustType<Inet> for Row {
+    fn get(&self, index: usize) -> Result<Inet> {
+        let col = self.get_column(index)?;
+        col.get_inet()
+    }
+
+    fn get_by_name<S>(&self, name: S) -> Result<Inet>
+        where S: Into<String> {
+        let col = self.get_column_by_name(name)?;
+        col.get_inet()
+    }
+}
+
 impl AsRustType<SetIterator> for Row {
     fn get(&self, index: usize) -> Result<SetIterator> {
         let col = self.get_column(index)?;
@@ -160,6 +214,32 @@ impl AsRustType<MapIterator> for Row {
         where S: Into<String> {
         let col = self.get_column_by_name(name)?;
         col.get_map()
+    }
+}
+
+impl AsRustType<UserTypeIterator> for Row {
+    fn get(&self, index: usize) -> Result<UserTypeIterator> {
+        let col = self.get_column(index)?;
+        col.get_user_type()
+    }
+
+    fn get_by_name<S>(&self, name: S) -> Result<UserTypeIterator>
+        where S: Into<String> {
+        let col = self.get_column_by_name(name)?;
+        col.get_user_type()
+    }
+}
+
+impl AsRustType<Uuid> for Row {
+    fn get(&self, index: usize) -> Result<Uuid> {
+        let col = self.get_column(index)?;
+        col.get_uuid()
+    }
+
+    fn get_by_name<S>(&self, name: S) -> Result<Uuid>
+        where S: Into<String> {
+        let col = self.get_column_by_name(name)?;
+        col.get_uuid()
     }
 }
 

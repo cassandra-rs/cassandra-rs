@@ -394,9 +394,9 @@ impl Value {
     /// Get this value as an Inet
     pub fn get_inet(&self) -> Result<Inet> {
         unsafe {
-            let output: Inet = mem::zeroed();
-            cass_value_get_inet(self.0, &mut Inet::inner(&output))
-                .to_result(output)
+            let mut inet = mem::zeroed();
+            cass_value_get_inet(self.0, &mut inet)
+                .to_result(Inet::build(inet))
         }
     }
 

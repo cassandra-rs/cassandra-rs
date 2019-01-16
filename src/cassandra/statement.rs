@@ -145,6 +145,18 @@ impl BindRustType<f64> for Statement {
     fn bind_by_name(&mut self, col: &str, value: f64) -> Result<&mut Self> { self.bind_double_by_name(col, value) }
 }
 
+impl BindRustType<i8> for Statement {
+    fn bind(&mut self, index: usize, value: i8) -> Result<&mut Self> { self.bind_int8(index, value) }
+
+    fn bind_by_name(&mut self, col: &str, value: i8) -> Result<&mut Self> { self.bind_int8_by_name(col, value) }
+}
+
+impl BindRustType<i16> for Statement {
+    fn bind(&mut self, index: usize, value: i16) -> Result<&mut Self> { self.bind_int16(index, value) }
+
+    fn bind_by_name(&mut self, col: &str, value: i16) -> Result<&mut Self> { self.bind_int16_by_name(col, value) }
+}
+
 impl BindRustType<i32> for Statement {
     fn bind(&mut self, index: usize, value: i32) -> Result<&mut Self> { self.bind_int32(index, value) }
 
@@ -155,6 +167,12 @@ impl BindRustType<i64> for Statement {
     fn bind(&mut self, index: usize, value: i64) -> Result<&mut Self> { self.bind_int64(index, value) }
 
     fn bind_by_name(&mut self, col: &str, value: i64) -> Result<&mut Self> { self.bind_int64_by_name(col, value) }
+}
+
+impl BindRustType<u32> for Statement {
+    fn bind(&mut self, index: usize, value: u32) -> Result<&mut Self> { self.bind_uint32(index, value) }
+
+    fn bind_by_name(&mut self, col: &str, value: u32) -> Result<&mut Self> { self.bind_uint32_by_name(col, value) }
 }
 
 impl<'a> BindRustType<&'a str> for Statement {
@@ -181,10 +199,28 @@ impl BindRustType<Uuid> for Statement {
     fn bind_by_name(&mut self, col: &str, value: Uuid) -> Result<&mut Self> { self.bind_uuid_by_name(col, value) }
 }
 
+impl BindRustType<Inet> for Statement {
+    fn bind(&mut self, index: usize, value: Inet) -> Result<&mut Self> { self.bind_inet(index, value) }
+
+    fn bind_by_name(&mut self, col: &str, value: Inet) -> Result<&mut Self> { self.bind_inet_by_name(col, value) }
+}
+
 impl BindRustType<Map> for Statement {
     fn bind(&mut self, index: usize, value: Map) -> Result<&mut Self> { self.bind_map(index, value) }
 
     fn bind_by_name(&mut self, col: &str, value: Map) -> Result<&mut Self> { self.bind_map_by_name(col, value) }
+}
+
+impl BindRustType<Tuple> for Statement {
+    fn bind(&mut self, index: usize, value: Tuple) -> Result<&mut Self> { self.bind_tuple(index, value) }
+
+    fn bind_by_name(&mut self, col: &str, value: Tuple) -> Result<&mut Self> { self.bind_tuple_by_name(col, value) }
+}
+
+impl BindRustType<&UserType> for Statement {
+    fn bind(&mut self, index: usize, value: &UserType) -> Result<&mut Self> { self.bind_user_type(index, value) }
+
+    fn bind_by_name(&mut self, col: &str, value: &UserType) -> Result<&mut Self> { self.bind_user_type_by_name(col, value) }
 }
 
 impl BindRustType<Vec<u8>> for Statement {

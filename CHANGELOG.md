@@ -6,6 +6,18 @@ This file's format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/). The
 version number is tracked in the file `VERSION`.
 
+## [Unreleased]
+### Added
+- `Clone`, `Copy` and `PartialEq` traits in `Inet`
+- Fields name and value support for `UserTypeIterator` (support for UDT)
+- Extra bindings for `Row::get_by_name` and `Statement::bind_by_name`
+
+### Changed
+- `Debug` implementation for `Inet` now uses its `ToString` implementation
+
+### Fixed
+- `Value::get_inet` which would always return a zeroed `Inet`
+
 ## [0.13.2] - 2019-01-15
 - Avoid possible segfaults, by returning `None` where possible, otherwise
   panicking. In particular, a collection field set to NULL now returns `None`
