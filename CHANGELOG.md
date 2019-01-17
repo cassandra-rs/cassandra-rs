@@ -8,6 +8,11 @@ version number is tracked in the file `VERSION`.
 
 ## [Unreleased]
 ### Added
+### Changed
+### Fixed
+
+## [0.14.0] - 2019-01-18
+### Added
 - `Clone`, `Copy` and `PartialEq` traits in `Inet`
 - Fields name and value support for `UserTypeIterator` (support for UDT)
 - Extra bindings for `Row::get_by_name` and `Statement::bind_by_name`
@@ -136,7 +141,10 @@ First release of https://github.com/Metaswitch/cassandra-rs
 ## [0.8.1] - 2016-12-13
 Last release of https://github.com/tupshin/cassandra-rs
 
-[Unreleased]: https://github.com/Metaswitch/cassandra-rs/compare/0.13.0...HEAD
+[Unreleased]: https://github.com/Metaswitch/cassandra-rs/compare/0.14.0...HEAD
+[0.14.0]: https://github.com/Metaswitch/cassandra-rs/compare/0.13.2...0.14.0
+[0.13.2]: https://github.com/Metaswitch/cassandra-rs/compare/0.13.1...0.13.2
+[0.13.1]: https://github.com/Metaswitch/cassandra-rs/compare/0.13.0...0.13.1
 [0.13.0]: https://github.com/Metaswitch/cassandra-rs/compare/0.12.0...0.13.0
 [0.12.0]: https://github.com/Metaswitch/cassandra-rs/compare/0.11.0...0.12.0
 [0.11.0]: https://github.com/Metaswitch/cassandra-rs/compare/0.10.2...0.11.0
