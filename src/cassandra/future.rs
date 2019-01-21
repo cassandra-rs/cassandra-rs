@@ -238,8 +238,10 @@ enum FutureState {
 unsafe extern "C" fn notify_task(_c_future: *mut _Future, data: *mut ::std::os::raw::c_void) {
     let future_target: &FutureTarget = &*(data as *const FutureTarget);
     // The future is now ready, so transition to the appropriate state.
-    let mut lock = future_target.inner.lock().expect("notify_task");
-    let state = mem::replace(&mut *lock, FutureState::Ready);
+    let state = {
+        let mut lock = future_target.inner.lock().expect("notify_task");
+        mem::replace(&mut *lock, FutureState::Ready)
+    };
     if let FutureState::Awaiting { ref task, .. } = state {
         task.notify();
     } else {
