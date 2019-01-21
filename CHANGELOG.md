@@ -17,6 +17,8 @@ version number is tracked in the file `VERSION`.
 
 ### Fixed
 - `Value::get_inet` which would always return a zeroed `Inet`
+- Dropping futures early could cause a segfault when using the system
+  allocator (in Rust 1.32.0 or later).
 
 ## [0.13.2] - 2019-01-15
 - Avoid possible segfaults, by returning `None` where possible, otherwise
