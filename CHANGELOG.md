@@ -11,7 +11,7 @@ version number is tracked in the file `VERSION`.
 ### Changed
 ### Fixed
 
-## [0.14.0] - 2019-01-18
+## [0.14.0] - 2019-01-22
 ### Added
 - `Clone`, `Copy` and `PartialEq` traits in `Inet`
 - Fields name and value support for `UserTypeIterator` (support for UDT)
