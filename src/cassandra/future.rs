@@ -245,7 +245,7 @@ unsafe extern "C" fn notify_task(_c_future: *mut _Future, data: *mut ::std::os::
     if let FutureState::Awaiting { ref task, .. } = state {
         task.notify();
     } else {
-        /// This can never happen.
+        // This can never happen.
         panic!("Callback invoked before callback set");
     }
 }

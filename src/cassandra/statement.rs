@@ -86,6 +86,8 @@ impl Protected<*mut _Statement> for Statement {
 }
 
 #[macro_export]
+/// Create a Statement from a query string, automatically counting `?`
+/// characters to determine the number of parameters.
 macro_rules! stmt {
     ( $( $x:expr ),*) => {
         {

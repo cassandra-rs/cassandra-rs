@@ -29,7 +29,7 @@ use std::ffi::{CStr, CString};
 use std::fmt::{Debug, Display, Formatter};
 use std::os::raw::c_char;
 
-/// Define the errors that may be returned by this driver.
+// Define the errors that may be returned by this driver.
 error_chain! {
     foreign_links {
         StringContainsNul(::std::ffi::NulError)
