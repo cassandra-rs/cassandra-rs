@@ -9,6 +9,8 @@ version number is tracked in the file `VERSION`.
 ## [Unreleased]
 ### Added
 ### Changed
+- Add code example for SSL.
+
 ### Fixed
 
 ## [0.14.0] - 2019-01-22
