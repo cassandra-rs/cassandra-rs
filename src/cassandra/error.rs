@@ -1,6 +1,3 @@
-#![macro_use]
-// use cassandra_sys;
-
 use cassandra::consistency::Consistency;
 use cassandra::util::Protected;
 use cassandra::write_type::WriteType;
