@@ -1,6 +1,5 @@
 //! Simple example demonstrating the use of set/map/list values in both
 //! bindings and results.
-#[macro_use(stmt)]
 extern crate cassandra_cpp;
 extern crate futures;
 

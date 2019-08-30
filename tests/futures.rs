@@ -1,7 +1,6 @@
 //! Test use of Rust futures (not ResultFuture etc).
 //! Based on `async`.
 
-#[macro_use(stmt)]
 extern crate cassandra_cpp;
 extern crate futures;
 

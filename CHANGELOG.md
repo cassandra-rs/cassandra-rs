@@ -9,7 +9,11 @@ version number is tracked in the file `VERSION`.
 ## [Unreleased]
 ### Added
 ### Changed
+- Add code example for SSL.
+- Updated error-chain to 0.12.1 to avoid `Error` deprecation warnings.
+
 ### Fixed
+- Provide missing doc comment, fix unused doc comment warnings.
 
 ## [0.14.0] - 2019-01-22
 ### Added

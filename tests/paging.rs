@@ -1,4 +1,3 @@
-#[macro_use(stmt)]
 extern crate cassandra_cpp;
 extern crate futures;
 
