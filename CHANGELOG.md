@@ -14,6 +14,7 @@ version number is tracked in the file `VERSION`.
 
 ### Fixed
 - Provide missing doc comment, fix unused doc comment warnings.
+- Fix type signature on `set_load_balance_dc_aware` so it can be used.
 
 ## [0.14.0] - 2019-01-22
 ### Added

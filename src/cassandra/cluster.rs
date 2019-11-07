@@ -8,7 +8,6 @@ use cassandra::util::Protected;
 use cassandra::error::*;
 
 use cassandra_sys::CassCluster as _Cluster;
-use cassandra_sys::cass_bool_t;
 use cassandra_sys::cass_cluster_free;
 use cassandra_sys::cass_cluster_new;
 use cassandra_sys::cass_cluster_set_connect_timeout;
@@ -397,7 +396,7 @@ impl Cluster {
     /// query plans. If relying on this mechanism, be sure to use only contact
     /// points from the local DC.
     pub fn set_load_balance_dc_aware<S>(&mut self, local_dc: &str, used_hosts_per_remote_dc: u32,
-        allow_remote_dcs_for_local_cl: cass_bool_t)
+        allow_remote_dcs_for_local_cl: bool)
                                         -> Result<&mut Self> {
         unsafe {
             {
@@ -405,7 +404,7 @@ impl Cluster {
                     cass_cluster_set_load_balance_dc_aware(self.0,
                                                            local_dc.as_ptr(),
                                                            used_hosts_per_remote_dc,
-                                                           allow_remote_dcs_for_local_cl)
+                                                           if allow_remote_dcs_for_local_cl { cass_true } else { cass_false })
                 }
                 .to_result(self)
         }
