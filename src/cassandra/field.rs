@@ -1,57 +1,57 @@
-use cassandra::inet::Inet;
-use cassandra::iterator::MapIterator;
-use cassandra::iterator::SetIterator;
+use crate::cassandra::inet::Inet;
+use crate::cassandra::iterator::MapIterator;
+use crate::cassandra::iterator::SetIterator;
 // use decimal::d128;
-use cassandra::util::Protected;
-use cassandra::uuid::Uuid;
-use cassandra::value::{Value, ValueType, write_set, write_map};
-use cassandra::error::*;
+use crate::cassandra::error::*;
+use crate::cassandra::util::Protected;
+use crate::cassandra::uuid::Uuid;
+use crate::cassandra::value::{write_map, write_set, Value, ValueType};
 
-use cassandra_sys::CASS_ERROR_LIB_INVALID_VALUE_TYPE;
-use cassandra_sys::CASS_VALUE_TYPE_ASCII;
-use cassandra_sys::CASS_VALUE_TYPE_BIGINT;
-use cassandra_sys::CASS_VALUE_TYPE_BLOB;
-use cassandra_sys::CASS_VALUE_TYPE_BOOLEAN;
-use cassandra_sys::CASS_VALUE_TYPE_COUNTER;
-use cassandra_sys::CASS_VALUE_TYPE_CUSTOM;
-use cassandra_sys::CASS_VALUE_TYPE_DATE;
-use cassandra_sys::CASS_VALUE_TYPE_DECIMAL;
-use cassandra_sys::CASS_VALUE_TYPE_DOUBLE;
-use cassandra_sys::CASS_VALUE_TYPE_FLOAT;
-use cassandra_sys::CASS_VALUE_TYPE_INET;
-use cassandra_sys::CASS_VALUE_TYPE_INT;
-use cassandra_sys::CASS_VALUE_TYPE_LAST_ENTRY;
-use cassandra_sys::CASS_VALUE_TYPE_LIST;
-use cassandra_sys::CASS_VALUE_TYPE_MAP;
-use cassandra_sys::CASS_VALUE_TYPE_SET;
-use cassandra_sys::CASS_VALUE_TYPE_SMALL_INT;
-use cassandra_sys::CASS_VALUE_TYPE_TEXT;
-use cassandra_sys::CASS_VALUE_TYPE_TIME;
-use cassandra_sys::CASS_VALUE_TYPE_TIMESTAMP;
-use cassandra_sys::CASS_VALUE_TYPE_TIMEUUID;
-use cassandra_sys::CASS_VALUE_TYPE_TINY_INT;
-use cassandra_sys::CASS_VALUE_TYPE_TUPLE;
-use cassandra_sys::CASS_VALUE_TYPE_UDT;
-use cassandra_sys::CASS_VALUE_TYPE_UNKNOWN;
-use cassandra_sys::CASS_VALUE_TYPE_UUID;
-use cassandra_sys::CASS_VALUE_TYPE_VARCHAR;
-use cassandra_sys::CASS_VALUE_TYPE_VARINT;
-use cassandra_sys::cass_iterator_from_collection;
-use cassandra_sys::cass_iterator_from_map;
-use cassandra_sys::cass_true;
-use cassandra_sys::cass_value_get_bool;
-use cassandra_sys::cass_value_get_decimal;
-use cassandra_sys::cass_value_get_double;
-use cassandra_sys::cass_value_get_float;
-use cassandra_sys::cass_value_get_inet;
-use cassandra_sys::cass_value_get_int16;
-use cassandra_sys::cass_value_get_int32;
-use cassandra_sys::cass_value_get_int64;
-use cassandra_sys::cass_value_get_int8;
-use cassandra_sys::cass_value_get_string;
-use cassandra_sys::cass_value_get_uint32;
-use cassandra_sys::cass_value_get_uuid;
-use cassandra_sys::cass_value_type;
+use crate::cassandra_sys::cass_iterator_from_collection;
+use crate::cassandra_sys::cass_iterator_from_map;
+use crate::cassandra_sys::cass_true;
+use crate::cassandra_sys::cass_value_get_bool;
+use crate::cassandra_sys::cass_value_get_decimal;
+use crate::cassandra_sys::cass_value_get_double;
+use crate::cassandra_sys::cass_value_get_float;
+use crate::cassandra_sys::cass_value_get_inet;
+use crate::cassandra_sys::cass_value_get_int16;
+use crate::cassandra_sys::cass_value_get_int32;
+use crate::cassandra_sys::cass_value_get_int64;
+use crate::cassandra_sys::cass_value_get_int8;
+use crate::cassandra_sys::cass_value_get_string;
+use crate::cassandra_sys::cass_value_get_uint32;
+use crate::cassandra_sys::cass_value_get_uuid;
+use crate::cassandra_sys::cass_value_type;
+use crate::cassandra_sys::CASS_ERROR_LIB_INVALID_VALUE_TYPE;
+use crate::cassandra_sys::CASS_VALUE_TYPE_ASCII;
+use crate::cassandra_sys::CASS_VALUE_TYPE_BIGINT;
+use crate::cassandra_sys::CASS_VALUE_TYPE_BLOB;
+use crate::cassandra_sys::CASS_VALUE_TYPE_BOOLEAN;
+use crate::cassandra_sys::CASS_VALUE_TYPE_COUNTER;
+use crate::cassandra_sys::CASS_VALUE_TYPE_CUSTOM;
+use crate::cassandra_sys::CASS_VALUE_TYPE_DATE;
+use crate::cassandra_sys::CASS_VALUE_TYPE_DECIMAL;
+use crate::cassandra_sys::CASS_VALUE_TYPE_DOUBLE;
+use crate::cassandra_sys::CASS_VALUE_TYPE_FLOAT;
+use crate::cassandra_sys::CASS_VALUE_TYPE_INET;
+use crate::cassandra_sys::CASS_VALUE_TYPE_INT;
+use crate::cassandra_sys::CASS_VALUE_TYPE_LAST_ENTRY;
+use crate::cassandra_sys::CASS_VALUE_TYPE_LIST;
+use crate::cassandra_sys::CASS_VALUE_TYPE_MAP;
+use crate::cassandra_sys::CASS_VALUE_TYPE_SET;
+use crate::cassandra_sys::CASS_VALUE_TYPE_SMALL_INT;
+use crate::cassandra_sys::CASS_VALUE_TYPE_TEXT;
+use crate::cassandra_sys::CASS_VALUE_TYPE_TIME;
+use crate::cassandra_sys::CASS_VALUE_TYPE_TIMESTAMP;
+use crate::cassandra_sys::CASS_VALUE_TYPE_TIMEUUID;
+use crate::cassandra_sys::CASS_VALUE_TYPE_TINY_INT;
+use crate::cassandra_sys::CASS_VALUE_TYPE_TUPLE;
+use crate::cassandra_sys::CASS_VALUE_TYPE_UDT;
+use crate::cassandra_sys::CASS_VALUE_TYPE_UNKNOWN;
+use crate::cassandra_sys::CASS_VALUE_TYPE_UUID;
+use crate::cassandra_sys::CASS_VALUE_TYPE_VARCHAR;
+use crate::cassandra_sys::CASS_VALUE_TYPE_VARINT;
 
 use std::fmt;
 use std::fmt::Debug;
@@ -60,7 +60,6 @@ use std::fmt::Formatter;
 use std::mem;
 use std::slice;
 use std::str;
-
 
 // #[repr(C)]
 // #[derive(Copy,Debug,Clone)]
@@ -110,11 +109,17 @@ impl Display for Field {
 
 impl Field {
     /// Gets the name of this field
-    pub fn get_name(&self) -> String { self.name.clone() }
+    pub fn get_name(&self) -> String {
+        self.name.clone()
+    }
 
     /// Gets the type of this field
-    pub fn get_type(&self) -> ValueType { self.value.get_type() }
+    pub fn get_type(&self) -> ValueType {
+        self.value.get_type()
+    }
 
     /// Gets the value of this field
-    pub fn get_value(&self) -> &Value { &self.value }
+    pub fn get_value(&self) -> &Value {
+        &self.value
+    }
 }

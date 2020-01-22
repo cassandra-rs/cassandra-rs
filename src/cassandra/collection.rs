@@ -1,38 +1,38 @@
-use cassandra::data_type::ConstDataType;
-use cassandra::data_type::DataType;
-use cassandra::inet::Inet;
-use cassandra::tuple::Tuple;
-use cassandra::user_type::UserType;
-use cassandra::util::Protected;
-use cassandra::uuid::Uuid;
-use cassandra::error::*;
+use crate::cassandra::data_type::ConstDataType;
+use crate::cassandra::data_type::DataType;
+use crate::cassandra::error::*;
+use crate::cassandra::inet::Inet;
+use crate::cassandra::tuple::Tuple;
+use crate::cassandra::user_type::UserType;
+use crate::cassandra::util::Protected;
+use crate::cassandra::uuid::Uuid;
 
-use cassandra_sys::CASS_COLLECTION_TYPE_LIST;
-use cassandra_sys::CASS_COLLECTION_TYPE_MAP;
-use cassandra_sys::CASS_COLLECTION_TYPE_SET;
-use cassandra_sys::CassCollection as _CassCollection;
-use cassandra_sys::cass_collection_append_bool;
-use cassandra_sys::cass_collection_append_bytes;
-use cassandra_sys::cass_collection_append_collection;
-use cassandra_sys::cass_collection_append_decimal;
-use cassandra_sys::cass_collection_append_double;
-use cassandra_sys::cass_collection_append_float;
-use cassandra_sys::cass_collection_append_inet;
-use cassandra_sys::cass_collection_append_int16;
-use cassandra_sys::cass_collection_append_int32;
-use cassandra_sys::cass_collection_append_int64;
-use cassandra_sys::cass_collection_append_int8;
-use cassandra_sys::cass_collection_append_string;
-use cassandra_sys::cass_collection_append_tuple;
-use cassandra_sys::cass_collection_append_uint32;
-use cassandra_sys::cass_collection_append_user_type;
-use cassandra_sys::cass_collection_append_uuid;
-use cassandra_sys::cass_collection_data_type;
-use cassandra_sys::cass_collection_free;
-use cassandra_sys::cass_collection_new;
-use cassandra_sys::cass_collection_new_from_data_type;
-use cassandra_sys::cass_false;
-use cassandra_sys::cass_true;
+use crate::cassandra_sys::cass_collection_append_bool;
+use crate::cassandra_sys::cass_collection_append_bytes;
+use crate::cassandra_sys::cass_collection_append_collection;
+use crate::cassandra_sys::cass_collection_append_decimal;
+use crate::cassandra_sys::cass_collection_append_double;
+use crate::cassandra_sys::cass_collection_append_float;
+use crate::cassandra_sys::cass_collection_append_inet;
+use crate::cassandra_sys::cass_collection_append_int16;
+use crate::cassandra_sys::cass_collection_append_int32;
+use crate::cassandra_sys::cass_collection_append_int64;
+use crate::cassandra_sys::cass_collection_append_int8;
+use crate::cassandra_sys::cass_collection_append_string;
+use crate::cassandra_sys::cass_collection_append_tuple;
+use crate::cassandra_sys::cass_collection_append_uint32;
+use crate::cassandra_sys::cass_collection_append_user_type;
+use crate::cassandra_sys::cass_collection_append_uuid;
+use crate::cassandra_sys::cass_collection_data_type;
+use crate::cassandra_sys::cass_collection_free;
+use crate::cassandra_sys::cass_collection_new;
+use crate::cassandra_sys::cass_collection_new_from_data_type;
+use crate::cassandra_sys::cass_false;
+use crate::cassandra_sys::cass_true;
+use crate::cassandra_sys::CassCollection as _CassCollection;
+use crate::cassandra_sys::CASS_COLLECTION_TYPE_LIST;
+use crate::cassandra_sys::CASS_COLLECTION_TYPE_MAP;
+use crate::cassandra_sys::CASS_COLLECTION_TYPE_SET;
 
 use std::ffi::CString;
 
@@ -120,38 +120,68 @@ pub struct List(*mut _CassCollection);
 unsafe impl Send for List {}
 
 impl Protected<*mut _CassCollection> for List {
-    fn inner(&self) -> *mut _CassCollection { self.0 }
-    fn build(inner: *mut _CassCollection) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; List(inner) }
+    fn inner(&self) -> *mut _CassCollection {
+        self.0
+    }
+    fn build(inner: *mut _CassCollection) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        List(inner)
+    }
 }
 
 impl Protected<*mut _CassCollection> for Map {
-    fn inner(&self) -> *mut _CassCollection { self.0 }
-    fn build(inner: *mut _CassCollection) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; Map(inner) }
+    fn inner(&self) -> *mut _CassCollection {
+        self.0
+    }
+    fn build(inner: *mut _CassCollection) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        Map(inner)
+    }
 }
 
 impl Protected<*mut _CassCollection> for Set {
-    fn inner(&self) -> *mut _CassCollection { self.0 }
-    fn build(inner: *mut _CassCollection) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; Set(inner) }
+    fn inner(&self) -> *mut _CassCollection {
+        self.0
+    }
+    fn build(inner: *mut _CassCollection) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        Set(inner)
+    }
 }
 
-
 impl Drop for List {
-    fn drop(&mut self) { unsafe { cass_collection_free(self.0) } }
+    fn drop(&mut self) {
+        unsafe { cass_collection_free(self.0) }
+    }
 }
 
 impl CassCollection for List {
     type Value = _CassCollection;
 
     /// create a new list
-    fn new(item_count: usize) -> Self { unsafe { List::build(cass_collection_new(CASS_COLLECTION_TYPE_LIST, item_count)) } }
+    fn new(item_count: usize) -> Self {
+        unsafe { List::build(cass_collection_new(CASS_COLLECTION_TYPE_LIST, item_count)) }
+    }
 
     fn new_from_data_type(value: DataType, item_count: usize) -> Self {
-        unsafe { List(cass_collection_new_from_data_type(value.inner(), item_count)) }
+        unsafe {
+            List(cass_collection_new_from_data_type(
+                value.inner(),
+                item_count,
+            ))
+        }
     }
 
     /// Gets the data type of a collection.
-    fn data_type(&self) -> ConstDataType { unsafe { ConstDataType::build(cass_collection_data_type(self.inner())) } }
-
+    fn data_type(&self) -> ConstDataType {
+        unsafe { ConstDataType::build(cass_collection_data_type(self.inner())) }
+    }
 
     /// Appends a "tinyint" to the collection.
     fn append_int8(&mut self, value: i8) -> Result<&mut Self> {
@@ -259,7 +289,9 @@ pub struct Set(*mut _CassCollection);
 unsafe impl Send for Set {}
 
 impl Drop for Set {
-    fn drop(&mut self) { unsafe { cass_collection_free(self.inner()) } }
+    fn drop(&mut self) {
+        unsafe { cass_collection_free(self.inner()) }
+    }
 }
 
 // impl CassIterator for Set{
@@ -270,14 +302,22 @@ impl CassCollection for Set {
     type Value = _CassCollection;
 
     /// create a new list
-    fn new(item_count: usize) -> Self { unsafe { Set(cass_collection_new(CASS_COLLECTION_TYPE_SET, item_count)) } }
+    fn new(item_count: usize) -> Self {
+        unsafe { Set(cass_collection_new(CASS_COLLECTION_TYPE_SET, item_count)) }
+    }
 
     fn new_from_data_type(value: DataType, item_count: usize) -> Self {
-        unsafe { Set(cass_collection_new_from_data_type(value.inner(), item_count)) }
+        unsafe {
+            Set(cass_collection_new_from_data_type(
+                value.inner(),
+                item_count,
+            ))
+        }
     }
     /// Gets the data type of a collection.
-    fn data_type(&self) -> ConstDataType { unsafe { ConstDataType::build(cass_collection_data_type(self.inner())) } }
-
+    fn data_type(&self) -> ConstDataType {
+        unsafe { ConstDataType::build(cass_collection_data_type(self.inner())) }
+    }
 
     /// Appends a "tinyint" to the collection.
     fn append_int8(&mut self, value: i8) -> Result<&mut Self> {
@@ -376,7 +416,6 @@ impl CassCollection for Set {
     }
 }
 
-
 /// A Cassandra Map
 #[derive(Debug)]
 pub struct Map(*mut _CassCollection);
@@ -386,21 +425,31 @@ pub struct Map(*mut _CassCollection);
 unsafe impl Send for Map {}
 
 impl Drop for Map {
-    fn drop(&mut self) { unsafe { cass_collection_free(self.0) } }
+    fn drop(&mut self) {
+        unsafe { cass_collection_free(self.0) }
+    }
 }
 
 impl CassCollection for Map {
     type Value = _CassCollection;
     /// create a new list
-    fn new(item_count: usize) -> Self { unsafe { Map(cass_collection_new(CASS_COLLECTION_TYPE_MAP, item_count)) } }
+    fn new(item_count: usize) -> Self {
+        unsafe { Map(cass_collection_new(CASS_COLLECTION_TYPE_MAP, item_count)) }
+    }
 
     fn new_from_data_type(value: DataType, item_count: usize) -> Self {
-        unsafe { Map(cass_collection_new_from_data_type(value.inner(), item_count)) }
+        unsafe {
+            Map(cass_collection_new_from_data_type(
+                value.inner(),
+                item_count,
+            ))
+        }
     }
 
     /// Gets the data type of a collection.
-    fn data_type(&self) -> ConstDataType { unsafe { ConstDataType::build(cass_collection_data_type(self.inner())) } }
-
+    fn data_type(&self) -> ConstDataType {
+        unsafe { ConstDataType::build(cass_collection_data_type(self.inner())) }
+    }
 
     /// Appends a "tinyint" to the collection.
     fn append_int8(&mut self, value: i8) -> Result<&mut Self> {

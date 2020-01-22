@@ -2,28 +2,28 @@
 #![allow(dead_code)]
 #![allow(missing_copy_implementations)]
 
-use cassandra::batch::Batch;
-use cassandra::cluster::Cluster;
-use cassandra::result::CassResult;
-use cassandra::future::CassFuture;
-use cassandra::metrics::SessionMetrics;
-use cassandra::schema::schema_meta::SchemaMeta;
-use cassandra::statement::Statement;
-use cassandra::prepared::PreparedStatement;
-use cassandra::util::Protected;
-use cassandra::error::*;
+use crate::cassandra::batch::Batch;
+use crate::cassandra::cluster::Cluster;
+use crate::cassandra::error::*;
+use crate::cassandra::future::CassFuture;
+use crate::cassandra::metrics::SessionMetrics;
+use crate::cassandra::prepared::PreparedStatement;
+use crate::cassandra::result::CassResult;
+use crate::cassandra::schema::schema_meta::SchemaMeta;
+use crate::cassandra::statement::Statement;
+use crate::cassandra::util::Protected;
 
-use cassandra_sys::CassSession as _Session;
-use cassandra_sys::cass_session_close;
-use cassandra_sys::cass_session_connect;
-use cassandra_sys::cass_session_connect_keyspace;
-use cassandra_sys::cass_session_execute;
-use cassandra_sys::cass_session_execute_batch;
-use cassandra_sys::cass_session_free;
-use cassandra_sys::cass_session_get_metrics;
-use cassandra_sys::cass_session_get_schema_meta;
-use cassandra_sys::cass_session_new;
-use cassandra_sys::cass_session_prepare;
+use crate::cassandra_sys::cass_session_close;
+use crate::cassandra_sys::cass_session_connect;
+use crate::cassandra_sys::cass_session_connect_keyspace;
+use crate::cassandra_sys::cass_session_execute;
+use crate::cassandra_sys::cass_session_execute_batch;
+use crate::cassandra_sys::cass_session_free;
+use crate::cassandra_sys::cass_session_get_metrics;
+use crate::cassandra_sys::cass_session_get_schema_meta;
+use crate::cassandra_sys::cass_session_new;
+use crate::cassandra_sys::cass_session_prepare;
+use crate::cassandra_sys::CassSession as _Session;
 
 use std::ffi::CString;
 use std::ffi::NulError;
@@ -44,8 +44,15 @@ unsafe impl Send for Session {}
 unsafe impl Sync for Session {}
 
 impl Protected<*mut _Session> for Session {
-    fn inner(&self) -> *mut _Session { self.0 }
-    fn build(inner: *mut _Session) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; Session(inner) }
+    fn inner(&self) -> *mut _Session {
+        self.0
+    }
+    fn build(inner: *mut _Session) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        Session(inner)
+    }
 }
 
 impl Drop for Session {
@@ -57,13 +64,17 @@ impl Drop for Session {
 }
 
 impl Default for Session {
-    fn default() -> Session { Session::new() }
+    fn default() -> Session {
+        Session::new()
+    }
 }
 
 impl Session {
     /// Create a new Cassanda session.
     /// It's recommended to use Cluster.connect() instead
-    pub fn new() -> Session { unsafe { Session(cass_session_new()) } }
+    pub fn new() -> Session {
+        unsafe { Session(cass_session_new()) }
+    }
 
     //    pub fn new2() -> *mut _Session {
     //        unsafe { cass_session_new() }
@@ -78,22 +89,28 @@ impl Session {
     pub fn connect_keyspace(&self, cluster: &Cluster, keyspace: &str) -> Result<CassFuture<()>> {
         unsafe {
             let keyspace_cstr = CString::new(keyspace)?;
-            Ok(<CassFuture<()>>::build(
-                cass_session_connect_keyspace(self.0, cluster.inner(), keyspace_cstr.as_ptr())))
+            Ok(<CassFuture<()>>::build(cass_session_connect_keyspace(
+                self.0,
+                cluster.inner(),
+                keyspace_cstr.as_ptr(),
+            )))
         }
     }
 
     /// Closes the session instance, outputs a close future which can
     /// be used to determine when the session has been terminated. This allows
     /// in-flight requests to finish.
-    pub fn close(self) -> CassFuture<()> { unsafe { <CassFuture<()>>::build(cass_session_close(self.0)) } }
+    pub fn close(self) -> CassFuture<()> {
+        unsafe { <CassFuture<()>>::build(cass_session_close(self.0)) }
+    }
 
     /// Create a prepared statement.
     pub fn prepare(&self, query: &str) -> Result<CassFuture<PreparedStatement>> {
         unsafe {
             let query_cstr = CString::new(query)?;
             Ok(<CassFuture<PreparedStatement>>::build(
-                cass_session_prepare(self.0, query_cstr.as_ptr())))
+                cass_session_prepare(self.0, query_cstr.as_ptr()),
+            ))
         }
     }
 
@@ -107,7 +124,9 @@ impl Session {
 
     /// Execute a batch statement.
     pub fn execute_batch(&self, batch: Batch) -> CassFuture<CassResult> {
-        <CassFuture<CassResult>>::build(unsafe { cass_session_execute_batch(self.0, batch.inner()) })
+        <CassFuture<CassResult>>::build(unsafe {
+            cass_session_execute_batch(self.0, batch.inner())
+        })
     }
 
     /// Execute a statement.
@@ -119,7 +138,9 @@ impl Session {
     /// snapshot of the schema metadata is not updated. This function
     /// must be called again to retrieve any schema changes since the
     /// previous call.
-    pub fn get_schema_meta(&self) -> SchemaMeta { unsafe { SchemaMeta::build(cass_session_get_schema_meta(self.0)) } }
+    pub fn get_schema_meta(&self) -> SchemaMeta {
+        unsafe { SchemaMeta::build(cass_session_get_schema_meta(self.0)) }
+    }
 
     /// Gets a copy of this session's performance/diagnostic metrics.
     pub fn get_metrics(&self) -> SessionMetrics {

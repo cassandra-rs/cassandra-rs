@@ -1,30 +1,31 @@
-use cassandra::consistency::Consistency;
-use cassandra::util::Protected;
-use cassandra::write_type::WriteType;
-use cassandra::value::ValueType;
+use crate::cassandra::consistency::Consistency;
+use crate::cassandra::util::Protected;
+use crate::cassandra::value::ValueType;
+use crate::cassandra::write_type::WriteType;
 
-use cassandra_sys::CASS_OK;
-use cassandra_sys::CassError_;
-use cassandra_sys::CassErrorResult as CassErrorResult_;
-use cassandra_sys::CassFuture as _Future;
-use cassandra_sys::cass_error_desc;
-use cassandra_sys::cass_error_result_code;
-use cassandra_sys::cass_error_result_free;
-use cassandra_sys::{cass_true, cass_false};
-use cassandra_sys::{cass_error_result_responses_received, cass_error_result_responses_required,
-                    cass_error_result_num_failures, cass_error_result_data_present,
-                    cass_error_result_write_type, cass_error_result_keyspace,
-                    cass_error_result_table, cass_error_result_function, cass_error_num_arg_types,
-                    cass_error_result_arg_type, cass_error_result_consistency};
-use cassandra_sys::cass_future_error_code;
-use cassandra_sys::cass_future_error_message;
-use cassandra_sys::cass_future_get_error_result;
+use crate::cassandra_sys::cass_error_desc;
+use crate::cassandra_sys::cass_error_result_code;
+use crate::cassandra_sys::cass_error_result_free;
+use crate::cassandra_sys::cass_future_error_code;
+use crate::cassandra_sys::cass_future_error_message;
+use crate::cassandra_sys::cass_future_get_error_result;
+use crate::cassandra_sys::CassErrorResult as CassErrorResult_;
+use crate::cassandra_sys::CassError_;
+use crate::cassandra_sys::CassFuture as _Future;
+use crate::cassandra_sys::CASS_OK;
+use crate::cassandra_sys::{
+    cass_error_num_arg_types, cass_error_result_arg_type, cass_error_result_consistency,
+    cass_error_result_data_present, cass_error_result_function, cass_error_result_keyspace,
+    cass_error_result_num_failures, cass_error_result_responses_received,
+    cass_error_result_responses_required, cass_error_result_table, cass_error_result_write_type,
+};
+use crate::cassandra_sys::{cass_false, cass_true};
 
-use std::{fmt, mem, slice, str};
 use std::error::Error as IError;
 use std::ffi::{CStr, CString};
 use std::fmt::{Debug, Display, Formatter};
 use std::os::raw::c_char;
+use std::{fmt, mem, slice, str};
 
 // Define the errors that may be returned by this driver.
 error_chain! {
@@ -80,32 +81,45 @@ pub(crate) trait CassErrorExt {
 }
 
 impl CassErrorExt for CassError_ {
-    fn to_result<T>(&self, default: T) -> Result<T> { unsafe {
-        match *self {
-            CASS_OK => Ok(default),
-            _ => {
-                let message = CStr::from_ptr(cass_error_desc(*self)).to_string_lossy().into_owned();
-                Err(ErrorKind::CassError(CassErrorCode::build(*self), message).into())
-            },
+    fn to_result<T>(&self, default: T) -> Result<T> {
+        unsafe {
+            match *self {
+                CASS_OK => Ok(default),
+                _ => {
+                    let message = CStr::from_ptr(cass_error_desc(*self))
+                        .to_string_lossy()
+                        .into_owned();
+                    Err(ErrorKind::CassError(CassErrorCode::build(*self), message).into())
+                }
+            }
         }
-    }}
+    }
 
-    fn to_error(&self) -> Error { unsafe {
-        let message = CStr::from_ptr(cass_error_desc(*self)).to_string_lossy().into_owned();
-        ErrorKind::CassError(CassErrorCode::build(*self), message).into()
-    }}
+    fn to_error(&self) -> Error {
+        unsafe {
+            let message = CStr::from_ptr(cass_error_desc(*self))
+                .to_string_lossy()
+                .into_owned();
+            ErrorKind::CassError(CassErrorCode::build(*self), message).into()
+        }
+    }
 }
 
 impl CassErrorExt for CassErrorCode {
-    fn to_result<T>(&self, default: T) -> Result<T> { self.inner().to_result(default) }
-    fn to_error(&self) -> Error { self.inner().to_error() }
+    fn to_result<T>(&self, default: T) -> Result<T> {
+        self.inner().to_result(default)
+    }
+    fn to_error(&self) -> Error {
+        self.inner().to_error()
+    }
 }
 
-
 /// Build an error from the code, message, and optional `CassErrorResult_`.
-pub(crate) unsafe fn build_error_result(code: CassErrorCode,
-                             message: String,
-                             e: *const CassErrorResult_) -> Error {
+pub(crate) unsafe fn build_error_result(
+    code: CassErrorCode,
+    message: String,
+    e: *const CassErrorResult_,
+) -> Error {
     if e.is_null() {
         // No extended error available; just take the basic one.
         ErrorKind::CassError(code, message).into()
@@ -144,8 +158,9 @@ pub(crate) unsafe fn build_error_result(code: CassErrorCode,
             write_type,
             keyspace,
             table,
-            function_call
-        ).into()
+            function_call,
+        )
+        .into()
     }
 }
 
@@ -155,7 +170,8 @@ pub(crate) unsafe fn get_cass_future_error(rc: CassError_, inner: *mut _Future) 
     let message = get_lossy_string(|s, s_len| {
         cass_future_error_message(inner, s, s_len);
         CASS_OK
-    }).unwrap(); // always OK so cannot fail
+    })
+    .unwrap(); // always OK so cannot fail
     build_error_result(code, message, cass_future_get_error_result(inner))
 }
 
@@ -289,7 +305,8 @@ enhance_nullary_enum!(CassErrorCode, CassError_, {
 
 /// Extract an optional C string lossily (i.e., using a replacement char for non-UTF-8 sequences).
 pub(crate) unsafe fn get_lossy_string<F>(get: F) -> Option<String>
-    where F: Fn(*mut *const ::std::os::raw::c_char, *mut usize) -> CassError_
+where
+    F: Fn(*mut *const ::std::os::raw::c_char, *mut usize) -> CassError_,
 {
     let mut msg = mem::zeroed();
     let mut msg_len = mem::zeroed();
@@ -307,10 +324,13 @@ mod tests {
 
     #[test]
     pub fn test_conversion() {
-        assert_eq!(CassErrorCode::build(CassError_::CASS_ERROR_SERVER_PROTOCOL_ERROR), CassErrorCode::SERVER_PROTOCOL_ERROR);
+        assert_eq!(
+            CassErrorCode::build(CassError_::CASS_ERROR_SERVER_PROTOCOL_ERROR),
+            CassErrorCode::SERVER_PROTOCOL_ERROR
+        );
         match CassErrorCode::LIB_INVALID_DATA.inner() {
             CassError_::CASS_ERROR_LIB_INVALID_DATA => (),
-            e => panic!("Unexpected return value {:?}", e)
+            e => panic!("Unexpected return value {:?}", e),
         }
     }
 

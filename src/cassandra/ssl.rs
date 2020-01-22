@@ -1,14 +1,14 @@
-use cassandra::util::Protected;
-use cassandra::error::*;
+use crate::cassandra::error::*;
+use crate::cassandra::util::Protected;
 
-use cassandra_sys::CassSslVerifyFlags;
-use cassandra_sys::CassSsl as _Ssl;
-use cassandra_sys::cass_ssl_add_trusted_cert;
-use cassandra_sys::cass_ssl_free;
-use cassandra_sys::cass_ssl_new;
-use cassandra_sys::cass_ssl_set_cert;
-use cassandra_sys::cass_ssl_set_private_key;
-use cassandra_sys::cass_ssl_set_verify_flags;
+use crate::cassandra_sys::cass_ssl_add_trusted_cert;
+use crate::cassandra_sys::cass_ssl_free;
+use crate::cassandra_sys::cass_ssl_new;
+use crate::cassandra_sys::cass_ssl_set_cert;
+use crate::cassandra_sys::cass_ssl_set_private_key;
+use crate::cassandra_sys::cass_ssl_set_verify_flags;
+use crate::cassandra_sys::CassSsl as _Ssl;
+use crate::cassandra_sys::CassSslVerifyFlags;
 
 use std::ffi::CString;
 
@@ -47,19 +47,29 @@ pub struct Ssl(*mut _Ssl);
 unsafe impl Send for Ssl {}
 
 impl Protected<*mut _Ssl> for Ssl {
-    fn inner(&self) -> *mut _Ssl { self.0 }
-    fn build(inner: *mut _Ssl) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; Ssl(inner) }
+    fn inner(&self) -> *mut _Ssl {
+        self.0
+    }
+    fn build(inner: *mut _Ssl) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        Ssl(inner)
+    }
 }
-
 
 impl Drop for Ssl {
     /// Frees a SSL context instance.
-    fn drop(&mut self) { unsafe { cass_ssl_free(self.0) } }
+    fn drop(&mut self) {
+        unsafe { cass_ssl_free(self.0) }
+    }
 }
 
 impl Default for Ssl {
     /// Creates a new SSL context.
-    fn default() -> Ssl { unsafe { Ssl(cass_ssl_new()) } }
+    fn default() -> Ssl {
+        unsafe { Ssl(cass_ssl_new()) }
+    }
 }
 
 impl Ssl {
@@ -68,8 +78,7 @@ impl Ssl {
     pub fn add_trusted_cert(&mut self, cert: &str) -> Result<&mut Self> {
         unsafe {
             let cert_cstr = CString::new(cert)?;
-            cass_ssl_add_trusted_cert(self.0, cert_cstr.as_ptr())
-                .to_result(self)
+            cass_ssl_add_trusted_cert(self.0, cert_cstr.as_ptr()).to_result(self)
         }
     }
 
@@ -84,7 +93,9 @@ impl Ssl {
     /// certificate is also present.
     ///
     /// <b>Default:</b> CASS_SSL_VERIFY_PEER_CERT
-    pub fn set_verify_flags(&mut self, flags: &[SslVerifyFlag]) { unsafe { cass_ssl_set_verify_flags(self.0, to_bitset(flags)) } }
+    pub fn set_verify_flags(&mut self, flags: &[SslVerifyFlag]) {
+        unsafe { cass_ssl_set_verify_flags(self.0, to_bitset(flags)) }
+    }
 
     /// Set client-side certificate chain. This is used to authenticate
     /// the client on the server-side. This should contain the entire
@@ -92,8 +103,7 @@ impl Ssl {
     pub fn set_cert(&mut self, cert: &str) -> Result<&mut Self> {
         unsafe {
             let cert_cstr = CString::new(cert)?;
-            cass_ssl_set_cert(self.0, cert_cstr.as_ptr())
-                .to_result(self)
+            cass_ssl_set_cert(self.0, cert_cstr.as_ptr()).to_result(self)
         }
     }
 
@@ -102,9 +112,7 @@ impl Ssl {
     pub fn set_private_key(&mut self, key: &str, password: &str) -> Result<&mut Self> {
         unsafe {
             let key_cstr = CString::new(key)?;
-            cass_ssl_set_private_key(self.0,
-                                     key_cstr.as_ptr(),
-                                     password.as_ptr() as *const i8)
+            cass_ssl_set_private_key(self.0, key_cstr.as_ptr(), password.as_ptr() as *const i8)
                 .to_result(self)
         }
     }

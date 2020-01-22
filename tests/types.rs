@@ -1,10 +1,6 @@
-extern crate cassandra_cpp;
-extern crate futures;
-
 mod help;
 
 use cassandra_cpp::*;
-
 
 #[test]
 fn test_using_consistency() {
@@ -15,7 +11,9 @@ fn test_using_consistency() {
     let mut batch = Batch::new(BatchType::LOGGED);
     batch.add_statement(&s).unwrap();
     batch.set_consistency(Consistency::TWO).unwrap();
-    batch.set_serial_consistency(Consistency::LOCAL_SERIAL).unwrap();
+    batch
+        .set_serial_consistency(Consistency::LOCAL_SERIAL)
+        .unwrap();
 }
 
 #[test]
@@ -33,7 +31,9 @@ fn test_parsing_printing_consistency() {
     assert_eq!(Consistency::LOCAL_QUORUM.to_string(), "LOCAL_QUORUM");
     assert_eq!(format!("{}", Consistency::LOCAL_QUORUM), "LOCAL_QUORUM");
     assert_eq!("THREE".parse::<Consistency>().unwrap(), Consistency::THREE);
-    let _ = "INVALID".parse::<Consistency>().expect_err("Should have failed to parse");
+    let _ = "INVALID"
+        .parse::<Consistency>()
+        .expect_err("Should have failed to parse");
 }
 
 #[test]
@@ -58,7 +58,9 @@ fn test_parsing_printing_loglevel() {
     assert_eq!(LogLevel::INFO.to_string(), "INFO");
     assert_eq!(format!("{}", LogLevel::WARN), "WARN");
     assert_eq!("ERROR".parse::<LogLevel>().unwrap(), LogLevel::ERROR);
-    let _ = "INVALID".parse::<LogLevel>().expect_err("Should have failed to parse");
+    let _ = "INVALID"
+        .parse::<LogLevel>()
+        .expect_err("Should have failed to parse");
 }
 
 #[test]
@@ -67,7 +69,10 @@ fn test_using_ssl_verify_flags() {
     ssl.set_verify_flags(&vec![]);
     ssl.set_verify_flags(&vec![SslVerifyFlag::NONE]);
     ssl.set_verify_flags(&vec![SslVerifyFlag::PEER_CERT]);
-    ssl.set_verify_flags(&vec![SslVerifyFlag::PEER_IDENTITY_DNS, SslVerifyFlag::PEER_CERT]);
+    ssl.set_verify_flags(&vec![
+        SslVerifyFlag::PEER_IDENTITY_DNS,
+        SslVerifyFlag::PEER_CERT,
+    ]);
 }
 
 #[test]
@@ -80,10 +85,18 @@ fn test_parsing_printing_ssl_verify_flags() {
 
     // Just a few spot checks to confirm the formatting hasn't regressed
     // or changed unexpectedly.
-    assert_eq!(SslVerifyFlag::PEER_IDENTITY_DNS.to_string(), "PEER_IDENTITY_DNS");
+    assert_eq!(
+        SslVerifyFlag::PEER_IDENTITY_DNS.to_string(),
+        "PEER_IDENTITY_DNS"
+    );
     assert_eq!(format!("{}", SslVerifyFlag::PEER_CERT), "PEER_CERT");
-    assert_eq!("NONE".parse::<SslVerifyFlag>().unwrap(), SslVerifyFlag::NONE);
-    let _ = "INVALID".parse::<SslVerifyFlag>().expect_err("Should have failed to parse");
+    assert_eq!(
+        "NONE".parse::<SslVerifyFlag>().unwrap(),
+        SslVerifyFlag::NONE
+    );
+    let _ = "INVALID"
+        .parse::<SslVerifyFlag>()
+        .expect_err("Should have failed to parse");
 }
 
 #[test]
@@ -107,5 +120,7 @@ fn test_parsing_printing_batch_type() {
     assert_eq!(BatchType::LOGGED.to_string(), "LOGGED");
     assert_eq!(format!("{}", BatchType::UNLOGGED), "UNLOGGED");
     assert_eq!("COUNTER".parse::<BatchType>().unwrap(), BatchType::COUNTER);
-    let _ = "INVALID".parse::<BatchType>().expect_err("Should have failed to parse");
+    let _ = "INVALID"
+        .parse::<BatchType>()
+        .expect_err("Should have failed to parse");
 }

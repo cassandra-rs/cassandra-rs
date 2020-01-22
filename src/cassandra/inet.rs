@@ -1,10 +1,10 @@
-use cassandra::util::Protected;
-use cassandra::error::*;
-use cassandra_sys::CassInet as _Inet;
-use cassandra_sys::cass_inet_from_string;
-use cassandra_sys::cass_inet_init_v4;
-use cassandra_sys::cass_inet_init_v6;
-use cassandra_sys::cass_inet_string;
+use crate::cassandra::error::*;
+use crate::cassandra::util::Protected;
+use crate::cassandra_sys::cass_inet_from_string;
+use crate::cassandra_sys::cass_inet_init_v4;
+use crate::cassandra_sys::cass_inet_init_v6;
+use crate::cassandra_sys::cass_inet_string;
+use crate::cassandra_sys::CassInet as _Inet;
 use std::default::Default;
 use std::ffi::CStr;
 use std::ffi::CString;
@@ -17,11 +17,13 @@ use std::string::ToString;
 
 #[repr(C)]
 /// Cassandra's version of an IP address
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone)]
 pub struct Inet(_Inet);
 
 impl Debug for Inet {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result { write!(f, "{}", self.to_string()) }
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "{}", self.to_string())
+    }
 }
 
 impl PartialEq for Inet {
@@ -35,12 +37,18 @@ impl PartialEq for Inet {
 }
 
 impl Protected<_Inet> for Inet {
-    fn inner(&self) -> _Inet { self.0 }
-    fn build(inner: _Inet) -> Self { Inet(inner) }
+    fn inner(&self) -> _Inet {
+        self.0
+    }
+    fn build(inner: _Inet) -> Self {
+        Inet(inner)
+    }
 }
 
 impl Default for Inet {
-    fn default() -> Inet { unsafe { ::std::mem::zeroed() } }
+    fn default() -> Inet {
+        unsafe { ::std::mem::zeroed() }
+    }
 }
 
 impl Inet {
@@ -80,7 +88,8 @@ impl FromStr for Inet {
             let mut inet = mem::zeroed();
 
             let str = CString::new(s)?;
-            cass_inet_from_string(str.as_ptr(), &mut inet).to_result(())
+            cass_inet_from_string(str.as_ptr(), &mut inet)
+                .to_result(())
                 .and_then(|_| Ok(Inet(inet)))
         }
     }
@@ -103,7 +112,7 @@ impl<'a> From<&'a Inet> for IpAddr {
                 let mut octets = [0u8; 4];
                 octets.copy_from_slice(&inet.0.address[0..4]);
                 IpAddr::from(octets)
-            },
+            }
             16 => IpAddr::from(inet.0.address),
             unsupported => panic!("impossible inet type: {}", unsupported),
         }
@@ -112,16 +121,16 @@ impl<'a> From<&'a Inet> for IpAddr {
 
 #[test]
 fn ipv4_conversion() {
-     let ipv4_in = Ipv4Addr::new(127, 0, 0, 1);
-     let inet = Inet::cass_inet_init_v4(&ipv4_in);
-     let ip_out = IpAddr::from(&inet);
-     assert_eq!(IpAddr::V4(ipv4_in), ip_out);
+    let ipv4_in = Ipv4Addr::new(127, 0, 0, 1);
+    let inet = Inet::cass_inet_init_v4(&ipv4_in);
+    let ip_out = IpAddr::from(&inet);
+    assert_eq!(IpAddr::V4(ipv4_in), ip_out);
 }
 
 #[test]
 fn ipv6_conversion() {
-     let ipv6_in = Ipv6Addr::new(0x2001, 0x0db8, 0, 0, 0, 0, 0, 1);
-     let inet = Inet::cass_inet_init_v6(&ipv6_in);
-     let ip_out = IpAddr::from(&inet);
-     assert_eq!(IpAddr::V6(ipv6_in), ip_out);
+    let ipv6_in = Ipv6Addr::new(0x2001, 0x0db8, 0, 0, 0, 0, 0, 1);
+    let inet = Inet::cass_inet_init_v6(&ipv6_in);
+    let ip_out = IpAddr::from(&inet);
+    assert_eq!(IpAddr::V6(ipv6_in), ip_out);
 }

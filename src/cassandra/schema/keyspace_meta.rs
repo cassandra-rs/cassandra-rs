@@ -1,30 +1,30 @@
-use cassandra::data_type::ConstDataType;
-use cassandra::iterator::AggregateIterator;
-use cassandra::iterator::FieldIterator;
-use cassandra::iterator::FunctionIterator;
-use cassandra::iterator::TableIterator;
-use cassandra::iterator::UserTypeIterator;
-use cassandra::schema::aggregate_meta::AggregateMeta;
+use crate::cassandra::data_type::ConstDataType;
+use crate::cassandra::iterator::AggregateIterator;
+use crate::cassandra::iterator::FieldIterator;
+use crate::cassandra::iterator::FunctionIterator;
+use crate::cassandra::iterator::TableIterator;
+use crate::cassandra::iterator::UserTypeIterator;
+use crate::cassandra::schema::aggregate_meta::AggregateMeta;
 
-use cassandra::schema::function_meta::FunctionMeta;
-use cassandra::schema::table_meta::TableMeta;
-use cassandra::util::Protected;
+use crate::cassandra::schema::function_meta::FunctionMeta;
+use crate::cassandra::schema::table_meta::TableMeta;
+use crate::cassandra::util::Protected;
 
-use cassandra_sys::CassKeyspaceMeta as _CassKeyspaceMeta;
-use cassandra_sys::CassValue as _CassValue;
-use cassandra_sys::cass_iterator_aggregates_from_keyspace_meta;
-use cassandra_sys::cass_iterator_fields_from_keyspace_meta;
-use cassandra_sys::cass_iterator_functions_from_keyspace_meta;
+use crate::cassandra_sys::cass_iterator_aggregates_from_keyspace_meta;
+use crate::cassandra_sys::cass_iterator_fields_from_keyspace_meta;
+use crate::cassandra_sys::cass_iterator_functions_from_keyspace_meta;
+use crate::cassandra_sys::CassKeyspaceMeta as _CassKeyspaceMeta;
+use crate::cassandra_sys::CassValue as _CassValue;
 
-use cassandra_sys::cass_iterator_tables_from_keyspace_meta;
-use cassandra_sys::cass_iterator_user_types_from_keyspace_meta;
-use cassandra_sys::cass_keyspace_meta_aggregate_by_name;
-use cassandra_sys::cass_keyspace_meta_field_by_name;
-use cassandra_sys::cass_keyspace_meta_function_by_name;
-use cassandra_sys::cass_keyspace_meta_name;
-use cassandra_sys::cass_keyspace_meta_table_by_name;
-use cassandra_sys::cass_keyspace_meta_user_type_by_name;
-use cassandra_sys::raw2utf8;
+use crate::cassandra_sys::cass_iterator_tables_from_keyspace_meta;
+use crate::cassandra_sys::cass_iterator_user_types_from_keyspace_meta;
+use crate::cassandra_sys::cass_keyspace_meta_aggregate_by_name;
+use crate::cassandra_sys::cass_keyspace_meta_field_by_name;
+use crate::cassandra_sys::cass_keyspace_meta_function_by_name;
+use crate::cassandra_sys::cass_keyspace_meta_name;
+use crate::cassandra_sys::cass_keyspace_meta_table_by_name;
+use crate::cassandra_sys::cass_keyspace_meta_user_type_by_name;
+use crate::cassandra_sys::raw2utf8;
 use std::ffi::CString;
 use std::mem;
 
@@ -33,8 +33,15 @@ use std::mem;
 pub struct KeyspaceMeta(*const _CassKeyspaceMeta);
 
 impl Protected<*const _CassKeyspaceMeta> for KeyspaceMeta {
-    fn inner(&self) -> *const _CassKeyspaceMeta { self.0 }
-    fn build(inner: *const _CassKeyspaceMeta) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; KeyspaceMeta(inner) }
+    fn inner(&self) -> *const _CassKeyspaceMeta {
+        self.0
+    }
+    fn build(inner: *const _CassKeyspaceMeta) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        KeyspaceMeta(inner)
+    }
 }
 
 #[derive(Debug)]
@@ -81,11 +88,12 @@ impl KeyspaceMeta {
     pub fn get_function_by_name(&self, name: &str, arguments: Vec<&str>) -> Option<FunctionMeta> {
         unsafe {
             let name_cstr = CString::new(name).expect("must be utf8");
-            let arguments_cstr = CString::new(arguments.join(","))
-                .expect("must be utf8");
-            let value = cass_keyspace_meta_function_by_name(self.0,
-                                                            name_cstr.as_ptr(),
-                                                            arguments_cstr.as_ptr());
+            let arguments_cstr = CString::new(arguments.join(",")).expect("must be utf8");
+            let value = cass_keyspace_meta_function_by_name(
+                self.0,
+                name_cstr.as_ptr(),
+                arguments_cstr.as_ptr(),
+            );
             if value.is_null() {
                 None
             } else {
@@ -99,9 +107,11 @@ impl KeyspaceMeta {
         unsafe {
             let name_cstr = CString::new(name).expect("must be utf8");
             let arguments_cstr = CString::new(arguments.join(",")).expect("must be utf8");
-            let agg = cass_keyspace_meta_aggregate_by_name(self.0,
-                                                           name_cstr.as_ptr(),
-                                                           arguments_cstr.as_ptr());
+            let agg = cass_keyspace_meta_aggregate_by_name(
+                self.0,
+                name_cstr.as_ptr(),
+                arguments_cstr.as_ptr(),
+            );
             if agg.is_null() {
                 None
             } else {
