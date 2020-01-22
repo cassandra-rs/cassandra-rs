@@ -1,7 +1,6 @@
 mod help;
 
 use cassandra_cpp::*;
-use futures::Future;
 
 static TRUNCATE_QUERY: &'static str = "TRUNCATE examples.log;";
 static INSERT_QUERY: &'static str = "INSERT INTO examples.log (key, time, entry) VALUES (?, ?, ?);";

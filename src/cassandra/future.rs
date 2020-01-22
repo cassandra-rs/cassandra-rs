@@ -17,12 +17,14 @@ use crate::cassandra_sys::CassFuture as _Future;
 use crate::cassandra_sys::CASS_OK;
 use crate::cassandra_sys::{cass_false, cass_true};
 
-use futures;
+use std::future::Future;
 use std::marker::PhantomData;
 use std::mem;
+use std::pin::Pin;
 use std::slice;
 use std::str;
 use std::sync::{Arc, Mutex};
+use std::task::{Context, Poll, Waker};
 
 /// A future representing the result of a Cassandra driver operation.
 ///
@@ -120,11 +122,10 @@ impl Completable for PreparedStatement {
 }
 
 /// A Cassandra future is a normal Rust future.
-impl<T: Completable> futures::Future for CassFuture<T> {
-    type Item = T;
-    type Error = Error;
+impl<T: Completable> Future for CassFuture<T> {
+    type Output = Result<T>;
 
-    fn poll(&mut self) -> futures::Poll<Self::Item, Self::Error> {
+    fn poll(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
         unsafe {
             let mut install_callback = false;
             let ret = {
@@ -148,29 +149,31 @@ impl<T: Completable> futures::Future for CassFuture<T> {
                         // already, complete now without scheduling a callback.
                         if cass_future_ready(self.inner) == cass_true {
                             // Future is ready; wrap success in `Ok(Ready)` or report failure as `Err`.
-                            get_completion(self.inner).map(futures::Async::Ready)
+                            Poll::Ready(get_completion(self.inner))
                         } else {
                             // Future is not ready; park this task and arrange to be called back when
                             // it is.
                             *state = FutureState::Awaiting {
-                                task: futures::task::current(),
+                                waker: cx.waker().clone(),
                                 keep_alive: self.state.clone(),
                             };
                             install_callback = true;
-                            Ok(futures::Async::NotReady)
+                            Poll::Pending
                         }
                     }
-                    FutureState::Awaiting { ref mut task, .. } => {
+                    FutureState::Awaiting { ref mut waker, .. } => {
                         // Callback already scheduled; don't set it again (C doesn't support it anyway),
                         // but be sure to swizzle the new task into place. No need to check for
                         // readiness here; we have to wait for the callback anyway so we might as well
                         // do all the work in one place.
-                        *task = futures::task::current();
-                        Ok(futures::Async::NotReady)
+                        if !waker.will_wake(cx.waker()) {
+                            *waker = cx.waker().clone();
+                        }
+                        Poll::Pending
                     }
                     FutureState::Ready => {
                         // Future has been marked ready by callback. Safe to return now.
-                        get_completion(self.inner).map(futures::Async::Ready)
+                        Poll::Ready(get_completion(self.inner))
                     }
                 }
             };
@@ -179,12 +182,19 @@ impl<T: Completable> futures::Future for CassFuture<T> {
                 // Install the callback. If callback cannot be sent, report immediate `Err`.
                 let data =
                     (self.state.as_ref() as *const FutureTarget) as *mut ::std::os::raw::c_void;
-                cass_future_set_callback(self.inner, Some(notify_task), data).to_result(())
-            } else {
-                Ok(())
+                cass_future_set_callback(self.inner, Some(notify_task), data).to_result(())?;
             }
-            .and_then(move |_| ret)
+
+            ret
         }
+    }
+}
+
+impl<T: Completable> CassFuture<T> {
+    /// Synchronously executes the CassFuture, blocking until it
+    /// completes.
+    pub fn wait(self) -> Result<T> {
+        unsafe { get_completion(self.inner) }
     }
 }
 
@@ -238,7 +248,7 @@ enum FutureState {
     /// pointer held by the C++ Cassandra driver future as the callback target. This prevents
     /// it from being freed early.
     Awaiting {
-        task: futures::task::Task,
+        waker: Waker,
         keep_alive: Arc<FutureTarget>,
     },
 
@@ -256,8 +266,8 @@ unsafe extern "C" fn notify_task(_c_future: *mut _Future, data: *mut ::std::os::
         let mut lock = future_target.inner.lock().expect("notify_task");
         mem::replace(&mut *lock, FutureState::Ready)
     };
-    if let FutureState::Awaiting { ref task, .. } = state {
-        task.notify();
+    if let FutureState::Awaiting { ref waker, .. } = state {
+        waker.wake_by_ref();
     } else {
         // This can never happen.
         panic!("Callback invoked before callback set");

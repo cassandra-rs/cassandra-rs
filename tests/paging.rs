@@ -1,7 +1,6 @@
 mod help;
 
 use cassandra_cpp::*;
-use futures::Future;
 
 static NUM_CONCURRENT_REQUESTS: usize = 100;
 const PAGE_SIZE: i32 = 10;

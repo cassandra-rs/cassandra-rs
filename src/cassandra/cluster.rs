@@ -49,7 +49,6 @@ use crate::cassandra_sys::cass_session_new;
 use crate::cassandra_sys::cass_true;
 use crate::cassandra_sys::CassCluster as _Cluster;
 
-use futures::Future;
 use std::ffi::NulError;
 use std::ffi::{CStr, CString};
 use std::fmt;
@@ -161,7 +160,18 @@ impl Cluster {
         unsafe {
             let session = Session(cass_session_new());
             let connect_future = <CassFuture<()>>::build(cass_session_connect(session.0, self.0));
-            connect_future.wait().map(|_| session)
+            connect_future.wait()?;
+            Ok(session)
+        }
+    }
+
+    /// Asynchronously connects to the cassandra cluster
+    pub async fn connect_async(&mut self) -> Result<Session> {
+        unsafe {
+            let session = Session(cass_session_new());
+            let connect_future = <CassFuture<()>>::build(cass_session_connect(session.0, self.0));
+            connect_future.await?;
+            Ok(session)
         }
     }
 

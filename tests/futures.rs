@@ -4,7 +4,6 @@
 mod help;
 
 use cassandra_cpp::*;
-use futures::Future;
 
 static NUM_CONCURRENT_REQUESTS: usize = 1000;
 
@@ -36,55 +35,57 @@ fn insert_into_async(
 }
 
 /// Smoke-test the implementation of Rust futures.
-#[test]
-pub fn test_rust_futures() {
+#[tokio::test]
+pub async fn test_rust_futures() {
     let session = help::create_test_session();
     help::create_example_keyspace(&session);
 
-    let create_table = session.execute(&stmt!(
-        "CREATE TABLE IF NOT EXISTS examples.async(key text, bln boolean, flt float, dbl \
-         double, i32 int, i64 bigint, PRIMARY KEY (key));"
-    ));
-    let use_examples = session.execute(&stmt!("USE examples"));
+    session
+        .execute(&stmt!(
+            "CREATE TABLE IF NOT EXISTS examples.async(key text, bln boolean, flt float, dbl \
+             double, i32 int, i64 bigint, PRIMARY KEY (key));"
+        ))
+        .await
+        .unwrap();
+
+    session.execute(&stmt!("USE examples")).await.unwrap();
     let inserts = insert_into_async(&session, "test".to_owned(), NUM_CONCURRENT_REQUESTS).unwrap();
 
-    create_table
-        .and_then(move |_| use_examples)
-        .and_then(move |_| futures::future::join_all(inserts))
-        .wait()
+    futures::future::try_join_all(inserts)
+        .await
         .expect("Should succeed");
 }
 
 /// Test early drops of Rust futures (a buggy implementation would lead to SIGSEGV, SIGILL,
 /// SIGABRT and friends).
-#[test]
-pub fn test_early_drop_rust_futures() {
+#[tokio::test]
+pub async fn test_early_drop_rust_futures() {
     let session = help::create_test_session();
     help::create_example_keyspace(&session);
 
-    let big_future = {
-        let create_table = session.execute(&stmt!(
-            "CREATE TABLE IF NOT EXISTS examples.async(key text, bln boolean, flt float, dbl \
-             double, i32 int, i64 bigint, PRIMARY KEY (key));"
-        ));
-        let use_examples = session.execute(&stmt!("USE examples"));
+    let big_future = async {
+        session
+            .execute(&stmt!(
+                "CREATE TABLE IF NOT EXISTS examples.async(key text, bln boolean, flt float, dbl \
+                 double, i32 int, i64 bigint, PRIMARY KEY (key));"
+            ))
+            .await?;
+        session.execute(&stmt!("USE examples")).await?;
         let mut inserts =
             insert_into_async(&session, "test".to_owned(), NUM_CONCURRENT_REQUESTS).unwrap();
         // Put in reverse, so we poll the later ones (which won't be ready) before the earlier ones
         // (which will be immediately ready)
         inserts.reverse();
-
-        create_table
-            .and_then(move |_| use_examples)
-            .and_then(move |_| futures::future::select_all(inserts).map_err(|(e, _, _)| e))
+        futures::future::try_join_all(inserts).await
         // Wait for one of them to complete, and drop all the other in-flight ones.
     };
-    big_future.wait().expect("Should succeed");
+
+    big_future.await.expect("Should succeed");
 
     let more_inserts =
         insert_into_async(&session, "test".to_owned(), NUM_CONCURRENT_REQUESTS).unwrap();
 
-    futures::future::join_all(more_inserts)
-        .wait()
+    futures::future::try_join_all(more_inserts)
+        .await
         .expect("Should succeed");
 }

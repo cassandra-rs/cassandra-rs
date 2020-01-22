@@ -1,8 +1,6 @@
 //! Simple example demonstrating the use of set/map/list values in both
 //! bindings and results.
-
 use cassandra_cpp::*;
-use futures::Future;
 use std::collections::hash_map::HashMap;
 
 fn do_work(session: &Session) -> Result<()> {

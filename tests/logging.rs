@@ -2,7 +2,6 @@ mod help;
 
 use cassandra_cpp::*;
 
-use futures::Future;
 use slog::*;
 use std::sync::Arc;
 use std::sync::Mutex;

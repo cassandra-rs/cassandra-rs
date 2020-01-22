@@ -24,4 +24,7 @@ decimal = "1"
 time = "0.1"
 uuid = "0.5"
 error-chain = "0.12.1"
-futures = "0.1"
+
+[dev-dependencies]
+tokio = { version = "0.2", features = ["rt-core", "macros", "test-util"] }
+futures = "0.3.1"

@@ -1,7 +1,6 @@
 mod help;
 
 use cassandra_cpp::*;
-use futures::Future;
 use std::collections::HashSet;
 
 fn insert_into_collections(

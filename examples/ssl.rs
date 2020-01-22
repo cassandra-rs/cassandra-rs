@@ -1,5 +1,4 @@
 use cassandra_cpp::*;
-use futures::Future;
 use std::fs;
 
 fn main() {

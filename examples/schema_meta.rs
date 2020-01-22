@@ -1,7 +1,5 @@
 use cassandra_cpp::*;
 
-use futures::Future;
-
 fn print_function(
     session: &Session,
     keyspace: &str,
