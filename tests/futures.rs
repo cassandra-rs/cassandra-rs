@@ -76,8 +76,9 @@ pub async fn test_early_drop_rust_futures() {
         // Put in reverse, so we poll the later ones (which won't be ready) before the earlier ones
         // (which will be immediately ready)
         inserts.reverse();
-        futures::future::try_join_all(inserts).await
         // Wait for one of them to complete, and drop all the other in-flight ones.
+        let (first_result, _, _) = futures::future::select_all(inserts).await;
+        first_result
     };
 
     big_future.await.expect("Should succeed");

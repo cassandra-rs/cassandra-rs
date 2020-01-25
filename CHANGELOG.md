@@ -11,6 +11,19 @@ version number is tracked in the file `VERSION`.
 ### Changed
 ### Fixed
 
+## [0.15.0] - 2020-01-??
+### Changed
+- Drops support for futures 0.1, and implements `std::future` instead, allowing
+  you to use this this library inside `async` functions, allowing anything that
+  returns a `CassFuture` to be `await`ed.  This is a breaking change, and will
+  require you to update your call-sites to either use `std::future`, or wrap
+  them with a compatibility shim.
+
+### Added
+- Adds a new method, `Cluster.connect_async` that returns a future, allowing
+  you to connect to the cluster without blocking the event loop.
+
+
 ## [0.14.1] - 2019-11-07
 ### Changed
 - Add code example for SSL.

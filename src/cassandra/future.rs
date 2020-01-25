@@ -126,67 +126,65 @@ impl<T: Completable> Future for CassFuture<T> {
     type Output = Result<T>;
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
-        unsafe {
-            let mut install_callback = false;
-            let ret = {
-                // Perform the following computations under the lock, and then release it.
-                //
-                // We must take care to avoid deadlock. The lock hierarchy is: take the Rust lock
-                // (self.state.inner) first, then take the C++ lock (internal to the C++
-                // implementation of futures).
-                //
-                // Poll is always called by the Rust event loop, never from within C++ code or
-                // from notify_task. `self.ready()` and `self.get_completion()` take an internal
-                // mutex within C++ code, but they never call back to Rust and so cannot violate
-                // the lock hierarchy. However `self.set_callback()` calls into Rust code
-                // (`notify_task`) if the future is already complete, so we must avoid holding the
-                // Rust lock while calling it. We achieve this by using a boolean flag to request
-                // the callback be set outside the lock region.
-                let mut lock = self.state.as_ref().inner.lock().expect("poll");
-                match *lock {
-                    ref mut state @ FutureState::Created => {
-                        // No task yet - schedule a callback. But as an optimization, if it's ready
-                        // already, complete now without scheduling a callback.
-                        if cass_future_ready(self.inner) == cass_true {
-                            // Future is ready; wrap success in `Ok(Ready)` or report failure as `Err`.
-                            Poll::Ready(get_completion(self.inner))
-                        } else {
-                            // Future is not ready; park this task and arrange to be called back when
-                            // it is.
-                            *state = FutureState::Awaiting {
-                                waker: cx.waker().clone(),
-                                keep_alive: self.state.clone(),
-                            };
-                            install_callback = true;
-                            Poll::Pending
-                        }
-                    }
-                    FutureState::Awaiting { ref mut waker, .. } => {
-                        // Callback already scheduled; don't set it again (C doesn't support it anyway),
-                        // but be sure to swizzle the new task into place. No need to check for
-                        // readiness here; we have to wait for the callback anyway so we might as well
-                        // do all the work in one place.
-                        if !waker.will_wake(cx.waker()) {
-                            *waker = cx.waker().clone();
-                        }
+        let mut install_callback = false;
+        let ret = {
+            // Perform the following computations under the lock, and then release it.
+            //
+            // We must take care to avoid deadlock. The lock hierarchy is: take the Rust lock
+            // (self.state.inner) first, then take the C++ lock (internal to the C++
+            // implementation of futures).
+            //
+            // Poll is always called by the Rust event loop, never from within C++ code or
+            // from notify_task. `self.ready()` and `self.get_completion()` take an internal
+            // mutex within C++ code, but they never call back to Rust and so cannot violate
+            // the lock hierarchy. However `self.set_callback()` calls into Rust code
+            // (`notify_task`) if the future is already complete, so we must avoid holding the
+            // Rust lock while calling it. We achieve this by using a boolean flag to request
+            // the callback be set outside the lock region.
+            let mut lock = self.state.as_ref().inner.lock().expect("poll");
+            match *lock {
+                ref mut state @ FutureState::Created => {
+                    // No task yet - schedule a callback. But as an optimization, if it's ready
+                    // already, complete now without scheduling a callback.
+                    if unsafe { cass_future_ready(self.inner) } == cass_true {
+                        // Future is ready; wrap success in `Ok(Ready)` or report failure as `Err`.
+                        Poll::Ready(unsafe { get_completion(self.inner) })
+                    } else {
+                        // Future is not ready; park this task and arrange to be called back when
+                        // it is.
+                        *state = FutureState::Awaiting {
+                            waker: cx.waker().clone(),
+                            keep_alive: self.state.clone(),
+                        };
+                        install_callback = true;
                         Poll::Pending
                     }
-                    FutureState::Ready => {
-                        // Future has been marked ready by callback. Safe to return now.
-                        Poll::Ready(get_completion(self.inner))
-                    }
                 }
-            };
-
-            if install_callback {
-                // Install the callback. If callback cannot be sent, report immediate `Err`.
-                let data =
-                    (self.state.as_ref() as *const FutureTarget) as *mut ::std::os::raw::c_void;
-                cass_future_set_callback(self.inner, Some(notify_task), data).to_result(())?;
+                FutureState::Awaiting { ref mut waker, .. } => {
+                    // Callback already scheduled; don't set it again (C doesn't support it anyway),
+                    // but be sure to swizzle the new task into place. No need to check for
+                    // readiness here; we have to wait for the callback anyway so we might as well
+                    // do all the work in one place.
+                    if !waker.will_wake(cx.waker()) {
+                        *waker = cx.waker().clone();
+                    }
+                    Poll::Pending
+                }
+                FutureState::Ready => {
+                    // Future has been marked ready by callback. Safe to return now.
+                    Poll::Ready(unsafe { get_completion(self.inner) })
+                }
             }
+        };
 
-            ret
+        if install_callback {
+            // Install the callback. If callback cannot be sent, report immediate `Err`.
+            let data = (self.state.as_ref() as *const FutureTarget) as *mut ::std::os::raw::c_void;
+            unsafe { cass_future_set_callback(self.inner, Some(notify_task), data) }
+                .to_result(())?;
         }
+
+        ret
     }
 }
 
@@ -198,9 +196,15 @@ impl<T: Completable> CassFuture<T> {
     }
 }
 
-/// Extract success or failure from a completed future.
+/// Extract success or failure from a future.
+///
+/// This function will block if the future is not yet ready. In order to ensure that this
+/// function will not block, you can check if the future is ready prior to calling this using
+/// `cass_future_ready`. If the future is ready, this function will not block, otherwise
+/// it will block on waiting for the future to become ready.
 unsafe fn get_completion<T: Completable>(inner: *mut _Future) -> Result<T> {
-    // Future is ready; wrap success in `Ok(Ready)` or report failure as `Err`.
+    // Wrap success in `Ok(Ready)` or report failure as `Err`.
+    // This will block if the future is not yet ready.
     let rc = cass_future_error_code(inner);
     match rc {
         CASS_OK => match Completable::get(inner) {
