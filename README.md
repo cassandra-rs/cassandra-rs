@@ -44,6 +44,16 @@ There are additional examples included with the project in [`tests`](tests/) and
 [`examples`](examples/).
 
 
+## Futures (version 0.15)
+
+Since version 0.15, this crate uses `std::future`, allowing your code to
+use `futures:0.3`, `async/await`, etc.
+
+Previous versions (up to 0.14) used `futures:0.1`. You can either remain on
+the 0.14 stream, update your code to use `std::future`, or use a compatibility
+shim (e.g., `futures::compat`).
+
+
 ## Migrating from version 0.8
 
 The API changed significantly in version 0.10.
