@@ -1,20 +1,20 @@
-use cassandra::error::*;
+use crate::cassandra::error::*;
 
-use cassandra::iterator::{MapIterator, SetIterator, UserTypeIterator};
-use cassandra::util::Protected;
-use cassandra::value::Value;
-use cassandra::inet::Inet;
-use cassandra::uuid::Uuid;
-use cassandra_sys::CassIterator as _CassIterator;
-use cassandra_sys::CassRow as _Row;
-use cassandra_sys::cass_false;
-use cassandra_sys::cass_iterator_free;
-use cassandra_sys::cass_iterator_from_row;
-use cassandra_sys::cass_iterator_get_column;
-use cassandra_sys::cass_iterator_next;
-use cassandra_sys::cass_row_get_column;
-use cassandra_sys::cass_row_get_column_by_name;
-use cassandra_sys::cass_true;
+use crate::cassandra::inet::Inet;
+use crate::cassandra::iterator::{MapIterator, SetIterator, UserTypeIterator};
+use crate::cassandra::util::Protected;
+use crate::cassandra::uuid::Uuid;
+use crate::cassandra::value::Value;
+use crate::cassandra_sys::cass_false;
+use crate::cassandra_sys::cass_iterator_free;
+use crate::cassandra_sys::cass_iterator_from_row;
+use crate::cassandra_sys::cass_iterator_get_column;
+use crate::cassandra_sys::cass_iterator_next;
+use crate::cassandra_sys::cass_row_get_column;
+use crate::cassandra_sys::cass_row_get_column_by_name;
+use crate::cassandra_sys::cass_true;
+use crate::cassandra_sys::CassIterator as _CassIterator;
+use crate::cassandra_sys::CassRow as _Row;
 use std::ffi::CString;
 use std::fmt;
 use std::fmt::Debug;
@@ -30,8 +30,15 @@ unsafe impl Sync for Row {}
 unsafe impl Send for Row {}
 
 impl Protected<*const _Row> for Row {
-    fn inner(&self) -> *const _Row { self.0 }
-    fn build(inner: *const _Row) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; Row(inner) }
+    fn inner(&self) -> *const _Row {
+        self.0
+    }
+    fn build(inner: *const _Row) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        Row(inner)
+    }
 }
 
 impl Debug for Row {
@@ -59,7 +66,8 @@ pub trait AsRustType<T> {
 
     /// convert while reading cassandra columns by name
     fn get_by_name<S>(&self, name: S) -> Result<T>
-        where S: Into<String>;
+    where
+        S: Into<String>;
 }
 
 impl AsRustType<bool> for Row {
@@ -69,7 +77,9 @@ impl AsRustType<bool> for Row {
     }
 
     fn get_by_name<S>(&self, name: S) -> Result<bool>
-        where S: Into<String> {
+    where
+        S: Into<String>,
+    {
         self.get_column_by_name(name)?.get_bool()
     }
 }
@@ -81,7 +91,9 @@ impl AsRustType<String> for Row {
     }
 
     fn get_by_name<S>(&self, name: S) -> Result<String>
-        where S: Into<String> {
+    where
+        S: Into<String>,
+    {
         let col = self.get_column_by_name(name)?;
         col.get_string()
     }
@@ -94,7 +106,9 @@ impl AsRustType<f64> for Row {
     }
 
     fn get_by_name<S>(&self, name: S) -> Result<f64>
-        where S: Into<String> {
+    where
+        S: Into<String>,
+    {
         let col = self.get_column_by_name(name)?;
         col.get_f64()
     }
@@ -107,7 +121,9 @@ impl AsRustType<f32> for Row {
     }
 
     fn get_by_name<S>(&self, name: S) -> Result<f32>
-        where S: Into<String> {
+    where
+        S: Into<String>,
+    {
         let col = self.get_column_by_name(name)?;
         col.get_f32()
     }
@@ -120,7 +136,9 @@ impl AsRustType<i64> for Row {
     }
 
     fn get_by_name<S>(&self, name: S) -> Result<i64>
-        where S: Into<String> {
+    where
+        S: Into<String>,
+    {
         let col = self.get_column_by_name(name)?;
         col.get_i64()
     }
@@ -133,7 +151,9 @@ impl AsRustType<i32> for Row {
     }
 
     fn get_by_name<S>(&self, name: S) -> Result<i32>
-        where S: Into<String> {
+    where
+        S: Into<String>,
+    {
         let col = self.get_column_by_name(name)?;
         col.get_i32()
     }
@@ -146,7 +166,9 @@ impl AsRustType<i16> for Row {
     }
 
     fn get_by_name<S>(&self, name: S) -> Result<i16>
-        where S: Into<String> {
+    where
+        S: Into<String>,
+    {
         let col = self.get_column_by_name(name)?;
         col.get_i16()
     }
@@ -159,7 +181,9 @@ impl AsRustType<i8> for Row {
     }
 
     fn get_by_name<S>(&self, name: S) -> Result<i8>
-        where S: Into<String> {
+    where
+        S: Into<String>,
+    {
         let col = self.get_column_by_name(name)?;
         col.get_i8()
     }
@@ -172,7 +196,9 @@ impl AsRustType<u32> for Row {
     }
 
     fn get_by_name<S>(&self, name: S) -> Result<u32>
-        where S: Into<String> {
+    where
+        S: Into<String>,
+    {
         let col = self.get_column_by_name(name)?;
         col.get_u32()
     }
@@ -185,7 +211,9 @@ impl AsRustType<Inet> for Row {
     }
 
     fn get_by_name<S>(&self, name: S) -> Result<Inet>
-        where S: Into<String> {
+    where
+        S: Into<String>,
+    {
         let col = self.get_column_by_name(name)?;
         col.get_inet()
     }
@@ -198,7 +226,9 @@ impl AsRustType<SetIterator> for Row {
     }
 
     fn get_by_name<S>(&self, name: S) -> Result<SetIterator>
-        where S: Into<String> {
+    where
+        S: Into<String>,
+    {
         let col = self.get_column_by_name(name)?;
         col.get_set()
     }
@@ -211,7 +241,9 @@ impl AsRustType<MapIterator> for Row {
     }
 
     fn get_by_name<S>(&self, name: S) -> Result<MapIterator>
-        where S: Into<String> {
+    where
+        S: Into<String>,
+    {
         let col = self.get_column_by_name(name)?;
         col.get_map()
     }
@@ -224,7 +256,9 @@ impl AsRustType<UserTypeIterator> for Row {
     }
 
     fn get_by_name<S>(&self, name: S) -> Result<UserTypeIterator>
-        where S: Into<String> {
+    where
+        S: Into<String>,
+    {
         let col = self.get_column_by_name(name)?;
         col.get_user_type()
     }
@@ -237,7 +271,9 @@ impl AsRustType<Uuid> for Row {
     }
 
     fn get_by_name<S>(&self, name: S) -> Result<Uuid>
-        where S: Into<String> {
+    where
+        S: Into<String>,
+    {
         let col = self.get_column_by_name(name)?;
         col.get_uuid()
     }
@@ -250,7 +286,9 @@ impl AsRustType<Vec<u8>> for Row {
     }
 
     fn get_by_name<S>(&self, name: S) -> Result<Vec<u8>>
-        where S: Into<String> {
+    where
+        S: Into<String>,
+    {
         let col = self.get_column_by_name(name)?;
         col.get_bytes().map(|b| b.to_vec())
     }
@@ -271,11 +309,12 @@ impl Row {
 
     /// Get a particular column by name
     pub fn get_column_by_name<S>(&self, name: S) -> Result<Value>
-        where S: Into<String> {
+    where
+        S: Into<String>,
+    {
         unsafe {
             let name_cstr = CString::new(name.into())?;
-            let col = cass_row_get_column_by_name(self.0,
-                                                  name_cstr.as_ptr());
+            let col = cass_row_get_column_by_name(self.0, name_cstr.as_ptr());
             if col.is_null() {
                 Err(CassErrorCode::LIB_INDEX_OUT_OF_BOUNDS.to_error())
             } else {
@@ -294,7 +333,9 @@ pub struct RowIterator(pub *mut _CassIterator);
 unsafe impl Send for RowIterator {}
 
 impl Drop for RowIterator {
-    fn drop(&mut self) { unsafe { cass_iterator_free(self.0) } }
+    fn drop(&mut self) {
+        unsafe { cass_iterator_free(self.0) }
+    }
 }
 
 impl iter::Iterator for RowIterator {
@@ -338,11 +379,15 @@ impl IntoIterator for Row {
 
     /// Creates a new iterator for the specified row. This can be
     /// used to iterate over columns in a row.
-    fn into_iter(self) -> Self::IntoIter { unsafe { RowIterator(cass_iterator_from_row(self.0)) } }
+    fn into_iter(self) -> Self::IntoIter {
+        unsafe { RowIterator(cass_iterator_from_row(self.0)) }
+    }
 }
 
 impl<'a> IntoIterator for &'a Row {
     type Item = Value;
     type IntoIter = RowIterator;
-    fn into_iter(self) -> Self::IntoIter { unsafe { RowIterator(cass_iterator_from_row(self.0)) } }
+    fn into_iter(self) -> Self::IntoIter {
+        unsafe { RowIterator(cass_iterator_from_row(self.0)) }
+    }
 }

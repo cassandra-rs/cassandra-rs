@@ -1,24 +1,19 @@
-extern crate cassandra_cpp;
-extern crate futures;
-
 mod help;
 
 use cassandra_cpp::*;
-use futures::Future;
-
 
 #[test]
 fn test_bind_by_name() {
-
     let keyspace = "system_schema";
     let table = "tables";
 
     let session = help::create_test_session();
 
-    let query = format!("select column_name, type from system_schema.columns where keyspace_name = '{}' and \
-                         table_name = '{}'",
-                        keyspace,
-                        table);
+    let query = format!(
+        "select column_name, type from system_schema.columns where keyspace_name = '{}' and \
+         table_name = '{}'",
+        keyspace, table
+    );
     let schema_query = Statement::new(&query, 0);
     for _ in 0..1000 {
         let result = session.execute(&schema_query).wait().unwrap();

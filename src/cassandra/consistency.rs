@@ -1,7 +1,7 @@
-use cassandra::util::Protected;
-use cassandra_sys::CassConsistency_;
+use crate::cassandra::util::Protected;
+use crate::cassandra_sys::CassConsistency_;
 
-use cassandra_sys::cass_consistency_string;
+use crate::cassandra_sys::cass_consistency_string;
 
 use std::ffi::CStr;
 

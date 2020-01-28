@@ -1,5 +1,5 @@
-use cassandra::util::Protected;
-use cassandra_sys::CassMetrics as _CassMetrics;
+use crate::cassandra::util::Protected;
+use crate::cassandra_sys::CassMetrics as _CassMetrics;
 
 /// Metrics about the current session.
 #[allow(missing_docs)] // See DataStax docs

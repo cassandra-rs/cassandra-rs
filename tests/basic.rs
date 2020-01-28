@@ -1,21 +1,16 @@
-extern crate cassandra_cpp;
-extern crate futures;
-extern crate time;
-
 mod help;
 
 use cassandra_cpp::*;
-use futures::Future;
-use time::Duration;
 use std::time::SystemTime;
+use time::Duration;
 
-#[derive(Debug,PartialEq,Copy,Clone,Default)]
+#[derive(Debug, PartialEq, Copy, Clone, Default)]
 struct Udt {
     dt: u32,
     tm: i64,
 }
 
-#[derive(Debug,PartialEq,Copy,Clone,Default)]
+#[derive(Debug, PartialEq, Copy, Clone, Default)]
 struct Basic {
     bln: bool,
     flt: f32,
@@ -35,17 +30,21 @@ struct Basic {
 fn create_basic_table(session: &Session) {
     let type_statement = &stmt!("CREATE TYPE IF NOT EXISTS examples.udt (dt date, tm time);");
     session.execute(type_statement).wait().unwrap();
-    let table_statement = &stmt!("CREATE TABLE IF NOT EXISTS examples.basic (key text, bln boolean, flt \
-                                  float, dbl double, i8 tinyint, i16 smallint, i32 int, i64 bigint, \
-                                  ts timestamp, addr inet, tu timeuuid, id uuid, ct udt, PRIMARY KEY (key));");
+    let table_statement = &stmt!(
+        "CREATE TABLE IF NOT EXISTS examples.basic (key text, bln boolean, flt \
+         float, dbl double, i8 tinyint, i16 smallint, i32 int, i64 bigint, \
+         ts timestamp, addr inet, tu timeuuid, id uuid, ct udt, PRIMARY KEY (key));"
+    );
     session.execute(table_statement).wait().unwrap();
     let truncate_statement = &stmt!("TRUNCATE examples.basic;");
     session.execute(truncate_statement).wait().unwrap();
 }
 
 fn insert_into_basic(session: &Session, key: &str, basic: &Basic) -> Result<CassResult> {
-    let mut statement = stmt!("INSERT INTO examples.basic (key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct) \
-                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+    let mut statement = stmt!(
+        "INSERT INTO examples.basic (key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct) \
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+    );
 
     let ct_type = DataType::new_udt(2);
     ct_type.add_sub_value_type_by_name::<&str>("dt", ValueType::DATE)?;
@@ -105,16 +104,18 @@ fn select_from_basic(session: &Session, key: &str) -> Result<Option<Basic>> {
                 addr: row.get(9)?,
                 tu: row.get(10)?,
                 id: row.get(11)?,
-                ct: Udt{
-                    dt: dt,
-                    tm: tm,
-                },
+                ct: Udt { dt: dt, tm: tm },
             }))
         }
     }
 }
 
-fn select_from_basic_prepared(session: &Session, prepared: &PreparedStatement, key: &str, basic: &mut Basic) -> Result<()> {
+fn select_from_basic_prepared(
+    session: &Session,
+    prepared: &PreparedStatement,
+    key: &str,
+    basic: &mut Basic,
+) -> Result<()> {
     let mut statement = prepared.bind();
     statement.bind_string(0, key)?;
     let future = session.execute(&statement);
@@ -145,10 +146,7 @@ fn select_from_basic_prepared(session: &Session, prepared: &PreparedStatement, k
             }
         }
 
-        basic.ct = Udt{
-            dt: dt,
-            tm: tm,
-        };
+        basic.ct = Udt { dt: dt, tm: tm };
     }
     Ok(())
 }
@@ -177,7 +175,10 @@ fn test_simple() {
 fn test_basic_error() {
     let session = help::create_test_session();
     let s = stmt!("CREATE GOBBLEDEGOOK;");
-    session.execute(&s).wait().expect_err("Should cleanly return an error");
+    session
+        .execute(&s)
+        .wait()
+        .expect_err("Should cleanly return an error");
 }
 
 #[test]
@@ -187,7 +188,11 @@ fn test_basic_round_trip() {
     create_basic_table(&session);
     let uuid_gen = UuidGen::default();
 
-    let ts = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs() * 1_000;
+    let ts = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap()
+        .as_secs()
+        * 1_000;
     let input = Basic {
         bln: true,
         flt: 0.001f32,
@@ -207,7 +212,9 @@ fn test_basic_round_trip() {
     };
 
     insert_into_basic(&session, "test", &input).unwrap();
-    let output = select_from_basic(&session, "test").unwrap().expect("no output from select");
+    let output = select_from_basic(&session, "test")
+        .unwrap()
+        .expect("no output from select");
 
     println!("{:?}", input);
     println!("{:?}", output);
@@ -222,7 +229,11 @@ fn test_prepared_round_trip() {
     create_basic_table(&session);
     let uuid_gen = UuidGen::default();
 
-    let ts = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs() * 1_000;
+    let ts = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap()
+        .as_secs()
+        * 1_000;
     let input = Basic {
         bln: true,
         flt: 0.001f32,
@@ -245,7 +256,11 @@ fn test_prepared_round_trip() {
     println!("Basic insertions");
     insert_into_basic(&session, "prepared_test", &input).unwrap();
     println!("Preparing");
-    let prepared = session.prepare(SELECT_QUERY).unwrap().wait().expect("prepared");
+    let prepared = session
+        .prepare(SELECT_QUERY)
+        .unwrap()
+        .wait()
+        .expect("prepared");
     select_from_basic_prepared(&session, &prepared, "prepared_test", &mut output).unwrap();
     assert_eq!(input, output, "Input:  {:?}\noutput: {:?}", &input, &output);
 }
@@ -257,12 +272,15 @@ fn test_null_retrieval() {
     create_basic_table(&session);
 
     // Insert a partial row.
-    let partial = stmt!("INSERT INTO examples.basic (key, bln, flt) VALUES ('vacant', true, 3.14);");
+    let partial =
+        stmt!("INSERT INTO examples.basic (key, bln, flt) VALUES ('vacant', true, 3.14);");
     session.execute(&partial).wait().expect("insert");
 
     // Read the whole row.
-    let query = stmt!("SELECT key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct \
-                       FROM examples.basic WHERE key = 'vacant';");
+    let query = stmt!(
+        "SELECT key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct \
+         FROM examples.basic WHERE key = 'vacant';"
+    );
     let result = session.execute(&query).wait().expect("select");
 
     // Check response is as expected.
@@ -329,8 +347,10 @@ fn test_null_insertion() {
     create_basic_table(&session);
 
     // Insert some explicit nulls.
-    let mut s = stmt!("INSERT INTO examples.basic (key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct) \
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+    let mut s = stmt!(
+        "INSERT INTO examples.basic (key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct) \
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+    );
     s.bind(0, "shrdlu").unwrap();
     s.bind(1, false).unwrap();
     s.bind_null(2).unwrap();
@@ -347,8 +367,10 @@ fn test_null_insertion() {
     session.execute(&s).wait().unwrap();
 
     // Read them back.
-    let s = stmt!("SELECT key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct \
-                   FROM examples.basic WHERE key = 'shrdlu';");
+    let s = stmt!(
+        "SELECT key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct \
+         FROM examples.basic WHERE key = 'shrdlu';"
+    );
     let result = session.execute(&s).wait().expect("select");
     assert_eq!(1, result.row_count());
     let row = result.first_row().unwrap();
@@ -370,7 +392,12 @@ fn test_null_insertion() {
 
 /// Check for a needle in a haystack, and fail if not present.
 fn assert_contains(haystack: String, needle: &str) {
-    assert!(haystack.contains(needle), "assert_contains: `{}` not found in `{}`", needle, &haystack);
+    assert!(
+        haystack.contains(needle),
+        "assert_contains: `{}` not found in `{}`",
+        needle,
+        &haystack
+    );
 }
 
 #[test]
@@ -386,11 +413,17 @@ fn test_rendering() {
     // Check rendering of a column
     let column_debug = format!("{:?}", compaction_col);
     println!("Column debug: {}", &column_debug);
-    assert_contains(column_debug, r#"{"class" => "org.apache.cassandra.db.compaction"#);
+    assert_contains(
+        column_debug,
+        r#"{"class" => "org.apache.cassandra.db.compaction"#,
+    );
 
     let column_display = format!("{}", compaction_col);
     println!("Column display: {}", &column_display);
-    assert_contains(column_display, r#"{class => org.apache.cassandra.db.compaction"#);
+    assert_contains(
+        column_display,
+        r#"{class => org.apache.cassandra.db.compaction"#,
+    );
 
     // Check retrieving a string and a str.
     let keyspace_col = row.get_column_by_name("keyspace_name").unwrap();
@@ -402,7 +435,9 @@ fn test_rendering() {
     assert!(str.len() > 0, "empty string");
 
     // Check invalid retrieval type.
-    keyspace_col.get_map().expect_err("Should fail with invalid value type");
+    keyspace_col
+        .get_map()
+        .expect_err("Should fail with invalid value type");
 }
 
 #[test]
@@ -411,8 +446,11 @@ fn test_error_reporting() {
 
     // Simple error.
     let mut query = stmt!("SELECT * from system_schema.tables;");
-    query.set_consistency(Consistency::THREE).unwrap();  // assuming we only have one node, this must fail
-    let err = session.execute(&query).wait().expect_err("Should have failed!");
+    query.set_consistency(Consistency::THREE).unwrap(); // assuming we only have one node, this must fail
+    let err = session
+        .execute(&query)
+        .wait()
+        .expect_err("Should have failed!");
     println!("Got error {} kind {:?}", err, err.kind());
     match *err.kind() {
         ErrorKind::CassError(CassErrorCode::LIB_NO_HOSTS_AVAILABLE, _) => (),
@@ -421,10 +459,25 @@ fn test_error_reporting() {
 
     // Detailed error.
     let query = stmt!("SELECT gibberish from system_schema.tables;");
-    let err = session.execute(&query).wait().expect_err("Should have failed!");
+    let err = session
+        .execute(&query)
+        .wait()
+        .expect_err("Should have failed!");
     println!("Got error {} kind {:?}", err, err.kind());
     match *err.kind() {
-        ErrorKind::CassErrorResult(CassErrorCode::SERVER_INVALID_QUERY, _, _, -1, -1, -1, _, _, _, _, _) => (),
+        ErrorKind::CassErrorResult(
+            CassErrorCode::SERVER_INVALID_QUERY,
+            _,
+            _,
+            -1,
+            -1,
+            -1,
+            _,
+            _,
+            _,
+            _,
+            _,
+        ) => (),
         ref k => panic!("Unexpected error kind {}", k),
     }
 
@@ -437,7 +490,11 @@ fn test_error_reporting() {
     let query = stmt!("SELECT i32 FROM examples.basic WHERE key = 'utf8';");
     let result = session.execute(&query).wait().unwrap();
     let row = result.iter().next().unwrap();
-    let err = row.get_column(0).unwrap().get_string().expect_err("Should have failed");
+    let err = row
+        .get_column(0)
+        .unwrap()
+        .get_string()
+        .expect_err("Should have failed");
     println!("Got error {} kind {:?}", err, err.kind());
     match *err.kind() {
         ErrorKind::InvalidUtf8(_) => (),
@@ -446,7 +503,9 @@ fn test_error_reporting() {
 
     // NUL error
     let mut query = stmt!("SELECT ? from system_schema.tables;");
-    let err = query.bind(0, "safe\0nasty!").expect_err("Should have failed!");
+    let err = query
+        .bind(0, "safe\0nasty!")
+        .expect_err("Should have failed!");
     println!("Got error {} kind {:?}", err, err.kind());
     match *err.kind() {
         ErrorKind::StringContainsNul(_) => (),
@@ -467,9 +526,7 @@ fn test_result() {
 #[test]
 fn test_statement_timeout() {
     let mut query = stmt!("SELECT * FROM system_schema.tables;");
-    query.set_statement_request_timeout(Some(Duration::milliseconds(
-        30000 as i64,
-    )));
+    query.set_statement_request_timeout(Some(Duration::milliseconds(30000 as i64)));
     let session = help::create_test_session();
     let result = session.execute(&query).wait().unwrap();
 

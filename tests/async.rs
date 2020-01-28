@@ -1,11 +1,6 @@
-extern crate cassandra_cpp;
-extern crate futures;
-
 mod help;
 
 use cassandra_cpp::*;
-use futures::Future;
-
 
 static NUM_CONCURRENT_REQUESTS: usize = 1000;
 
@@ -13,9 +8,11 @@ fn insert_into_async(session: &Session, key: String) -> Result<Vec<CassFuture<Ca
     let mut futures = Vec::<CassFuture<CassResult>>::new();
     for i in 0..NUM_CONCURRENT_REQUESTS {
         let key: &str = &(key.clone() + &i.to_string());
-        let mut statement = stmt!("INSERT INTO examples.async (key, bln, flt, dbl, i32, i64)
+        let mut statement = stmt!(
+            "INSERT INTO examples.async (key, bln, flt, dbl, i32, i64)
         	VALUES (?, ?, \
-                                   ?, ?, ?, ?);");
+                                   ?, ?, ?, ?);"
+        );
 
         statement.bind(0, key)?;
         statement.bind(1, i % 2 == 0)?;
@@ -35,8 +32,11 @@ pub fn test_async() {
     let session = help::create_test_session();
     help::create_example_keyspace(&session);
 
-    session.execute(&stmt!("CREATE TABLE IF NOT EXISTS examples.async(key text, bln boolean, flt float, dbl \
-                         double, i32 int, i64 bigint, PRIMARY KEY (key));"))
+    session
+        .execute(&stmt!(
+            "CREATE TABLE IF NOT EXISTS examples.async(key text, bln boolean, flt float, dbl \
+             double, i32 int, i64 bigint, PRIMARY KEY (key));"
+        ))
         .wait()
         .unwrap();
     session.execute(&stmt!("USE examples")).wait().unwrap();

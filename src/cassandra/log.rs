@@ -1,18 +1,18 @@
-use cassandra_sys::CassLogLevel_;
-use cassandra_sys::CassLogMessage;
+use crate::cassandra_sys::CassLogLevel_;
+use crate::cassandra_sys::CassLogMessage;
 // use cassandra_sys::cass_log_cleanup; @deprecated
-use cassandra_sys::CassLogCallback;
-use cassandra_sys::cass_log_set_callback;
-use cassandra_sys::cass_log_set_level;
-use cassandra::util::Protected;
+use crate::cassandra::util::Protected;
+use crate::cassandra_sys::cass_log_set_callback;
+use crate::cassandra_sys::cass_log_set_level;
+use crate::cassandra_sys::CassLogCallback;
 // use cassandra_sys::cass_log_set_queue_size; @deprecated
 
+use slog;
+use std::borrow::Borrow;
+use std::boxed::Box;
 use std::ffi::CStr;
 use std::os::raw;
 use std::ptr;
-use std::boxed::Box;
-use std::borrow::Borrow;
-use slog;
 
 /// The possible logging levels that can be set.
 #[derive(Debug, Eq, PartialEq, PartialOrd, Ord, Copy, Clone, Hash)]
@@ -45,7 +45,9 @@ enhance_nullary_enum!(LogLevel, CassLogLevel_, {
 /// <b>Note:</b> This needs to be done before any call that might log, such as
 /// any of the cass_cluster_*() or cass_ssl_*() functions.
 /// <b>Default:</b> WARN
-pub fn set_level(level: LogLevel) { unsafe { cass_log_set_level(level.inner()) } }
+pub fn set_level(level: LogLevel) {
+    unsafe { cass_log_set_level(level.inner()) }
+}
 
 /// Called by Cassandra for every log if logging is enabled. Passes the log to the configured
 /// slog logger.
@@ -69,14 +71,16 @@ unsafe extern "C" fn logger_callback(log: *const CassLogMessage, data: *mut raw:
     // it's fundamental to slog that the log level is statically known for a given invocation.
     // We can't do that in this case, so we have to use this tedious workaround.
     match log.severity {
-        CassLogLevel_::CASS_LOG_DISABLED |
-        CassLogLevel_::CASS_LOG_CRITICAL => crit!(logger, "{}", message; kv),
+        CassLogLevel_::CASS_LOG_DISABLED | CassLogLevel_::CASS_LOG_CRITICAL => {
+            crit!(logger, "{}", message; kv)
+        }
         CassLogLevel_::CASS_LOG_ERROR => error!(logger, "{}", message; kv),
         CassLogLevel_::CASS_LOG_WARN => warn!(logger, "{}", message; kv),
         CassLogLevel_::CASS_LOG_INFO => info!(logger, "{}", message; kv),
         CassLogLevel_::CASS_LOG_DEBUG => debug!(logger, "{}", message; kv),
-        CassLogLevel_::CASS_LOG_TRACE |
-        CassLogLevel_::CASS_LOG_LAST_ENTRY => trace!(logger, "{}", message; kv),
+        CassLogLevel_::CASS_LOG_TRACE | CassLogLevel_::CASS_LOG_LAST_ENTRY => {
+            trace!(logger, "{}", message; kv)
+        }
     };
 }
 
@@ -89,10 +93,8 @@ pub fn set_logger(logger: Option<slog::Logger>) {
                 // We don't expect this to be called many times, so we're not worried.
                 let data = Box::new(logger);
                 cass_log_set_callback(Some(logger_callback), Box::into_raw(data) as _)
-            },
-            None => {
-                cass_log_set_callback(None, ptr::null_mut())
-            },
+            }
+            None => cass_log_set_callback(None, ptr::null_mut()),
         }
     }
 }

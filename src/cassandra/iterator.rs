@@ -1,33 +1,33 @@
-use cassandra::data_type::DataType;
-use cassandra::field::Field;
-use cassandra::schema::aggregate_meta::AggregateMeta;
-use cassandra::schema::column_meta::ColumnMeta;
-use cassandra::schema::function_meta::FunctionMeta;
-use cassandra::schema::keyspace_meta::KeyspaceMeta;
-use cassandra::schema::table_meta::TableMeta;
-use cassandra::util::Protected;
-use cassandra::value::Value;
-use cassandra::error::*;
+use crate::cassandra::data_type::DataType;
+use crate::cassandra::error::*;
+use crate::cassandra::field::Field;
+use crate::cassandra::schema::aggregate_meta::AggregateMeta;
+use crate::cassandra::schema::column_meta::ColumnMeta;
+use crate::cassandra::schema::function_meta::FunctionMeta;
+use crate::cassandra::schema::keyspace_meta::KeyspaceMeta;
+use crate::cassandra::schema::table_meta::TableMeta;
+use crate::cassandra::util::Protected;
+use crate::cassandra::value::Value;
 
 // use cassandra_sys::CassIteratorType as _CassIteratorType;
-use cassandra_sys::CassIterator as _CassIterator;
-use cassandra_sys::cass_false;
+use crate::cassandra_sys::cass_false;
+use crate::cassandra_sys::CassIterator as _CassIterator;
 // use cassandra_sys::cass_iterator_type;
-use cassandra_sys::cass_iterator_free;
-use cassandra_sys::cass_iterator_get_aggregate_meta;
-use cassandra_sys::cass_iterator_get_column_meta;
-use cassandra_sys::cass_iterator_get_function_meta;
-use cassandra_sys::cass_iterator_get_keyspace_meta;
-use cassandra_sys::cass_iterator_get_map_key;
-use cassandra_sys::cass_iterator_get_map_value;
-use cassandra_sys::cass_iterator_get_meta_field_name;
-use cassandra_sys::cass_iterator_get_meta_field_value;
-use cassandra_sys::cass_iterator_get_table_meta;
-use cassandra_sys::cass_iterator_get_user_type_field_name;
-use cassandra_sys::cass_iterator_get_user_type_field_value;
-use cassandra_sys::cass_iterator_get_value;
-use cassandra_sys::cass_iterator_next;
-use cassandra_sys::cass_true;
+use crate::cassandra_sys::cass_iterator_free;
+use crate::cassandra_sys::cass_iterator_get_aggregate_meta;
+use crate::cassandra_sys::cass_iterator_get_column_meta;
+use crate::cassandra_sys::cass_iterator_get_function_meta;
+use crate::cassandra_sys::cass_iterator_get_keyspace_meta;
+use crate::cassandra_sys::cass_iterator_get_map_key;
+use crate::cassandra_sys::cass_iterator_get_map_value;
+use crate::cassandra_sys::cass_iterator_get_meta_field_name;
+use crate::cassandra_sys::cass_iterator_get_meta_field_value;
+use crate::cassandra_sys::cass_iterator_get_table_meta;
+use crate::cassandra_sys::cass_iterator_get_user_type_field_name;
+use crate::cassandra_sys::cass_iterator_get_user_type_field_value;
+use crate::cassandra_sys::cass_iterator_get_value;
+use crate::cassandra_sys::cass_iterator_next;
+use crate::cassandra_sys::cass_true;
 use std::{mem, slice, str};
 
 /// Iterates over the  aggregate metadata entries(??)
@@ -39,7 +39,9 @@ pub struct AggregateIterator(*mut _CassIterator);
 unsafe impl Send for AggregateIterator {}
 
 impl Drop for AggregateIterator {
-    fn drop(&mut self) { unsafe { cass_iterator_free(self.0) } }
+    fn drop(&mut self) {
+        unsafe { cass_iterator_free(self.0) }
+    }
 }
 
 impl Iterator for AggregateIterator {
@@ -66,7 +68,9 @@ pub struct UserTypeIterator(*mut _CassIterator);
 unsafe impl Send for UserTypeIterator {}
 
 impl Drop for UserTypeIterator {
-    fn drop(&mut self) { unsafe { cass_iterator_free(self.0) } }
+    fn drop(&mut self) {
+        unsafe { cass_iterator_free(self.0) }
+    }
 }
 
 impl Iterator for UserTypeIterator {
@@ -82,21 +86,24 @@ impl Iterator for UserTypeIterator {
 }
 
 impl UserTypeIterator {
-    fn get_field_name(&mut self)-> String {
+    fn get_field_name(&mut self) -> String {
         unsafe {
             let mut name = mem::zeroed();
             let mut name_length = mem::zeroed();
-            cass_iterator_get_user_type_field_name(self.0, &mut name, &mut name_length).to_result(())
+            cass_iterator_get_user_type_field_name(self.0, &mut name, &mut name_length)
+                .to_result(())
                 .and_then(|_| {
                     let slice = slice::from_raw_parts(name as *const u8, name_length as usize);
                     let name = str::from_utf8(slice)?.to_owned();
                     Ok(name)
-                }).expect("Cassandra error during iteration")
+                })
+                .expect("Cassandra error during iteration")
         }
     }
-    fn get_field_value(&mut self)-> Value { unsafe { Value::build(cass_iterator_get_user_type_field_value(self.0)) } }
+    fn get_field_value(&mut self) -> Value {
+        unsafe { Value::build(cass_iterator_get_user_type_field_value(self.0)) }
+    }
 }
-
 
 /// Iterater over the  function metadata entries(??)
 #[derive(Debug)]
@@ -117,7 +124,6 @@ impl Iterator for FunctionIterator {
         }
     }
 }
-
 
 /// Iterater over the table's metadata entries(??)
 #[derive(Debug)]
@@ -197,20 +203,21 @@ impl Iterator for FieldIterator {
                 cass_true => {
                     let mut name = mem::zeroed();
                     let mut name_length = mem::zeroed();
-                    cass_iterator_get_meta_field_name(self.0, &mut name, &mut name_length).to_result(())
+                    cass_iterator_get_meta_field_name(self.0, &mut name, &mut name_length)
+                        .to_result(())
                         .and_then(|_| {
-                            let slice = slice::from_raw_parts(name as *const u8, name_length as usize);
+                            let slice =
+                                slice::from_raw_parts(name as *const u8, name_length as usize);
                             let name = str::from_utf8(slice)?.to_owned();
                             let value = Value::build(cass_iterator_get_meta_field_value(self.0));
                             Ok(Some(Field { name, value }))
-                        }
-                    )
-                }.expect("Cassandra error during iteration")
+                        })
+                }
+                .expect("Cassandra error during iteration"),
             }
         }
     }
 }
-
 
 // pub struct CassIteratorType(_CassIteratorType);
 
@@ -228,50 +235,112 @@ impl Iterator for FieldIterator {
 // }
 
 impl Protected<*mut _CassIterator> for UserTypeIterator {
-    fn inner(&self) -> *mut _CassIterator { self.0 }
-    fn build(inner: *mut _CassIterator) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; UserTypeIterator(inner) }
+    fn inner(&self) -> *mut _CassIterator {
+        self.0
+    }
+    fn build(inner: *mut _CassIterator) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        UserTypeIterator(inner)
+    }
 }
 
 impl Protected<*mut _CassIterator> for AggregateIterator {
-    fn inner(&self) -> *mut _CassIterator { self.0 }
-    fn build(inner: *mut _CassIterator) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; AggregateIterator(inner) }
+    fn inner(&self) -> *mut _CassIterator {
+        self.0
+    }
+    fn build(inner: *mut _CassIterator) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        AggregateIterator(inner)
+    }
 }
 
 impl Protected<*mut _CassIterator> for FunctionIterator {
-    fn inner(&self) -> *mut _CassIterator { self.0 }
-    fn build(inner: *mut _CassIterator) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; FunctionIterator(inner) }
+    fn inner(&self) -> *mut _CassIterator {
+        self.0
+    }
+    fn build(inner: *mut _CassIterator) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        FunctionIterator(inner)
+    }
 }
 
 impl Protected<*mut _CassIterator> for KeyspaceIterator {
-    fn inner(&self) -> *mut _CassIterator { self.0 }
-    fn build(inner: *mut _CassIterator) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; KeyspaceIterator(inner) }
+    fn inner(&self) -> *mut _CassIterator {
+        self.0
+    }
+    fn build(inner: *mut _CassIterator) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        KeyspaceIterator(inner)
+    }
 }
 
 impl Protected<*mut _CassIterator> for FieldIterator {
-    fn inner(&self) -> *mut _CassIterator { self.0 }
-    fn build(inner: *mut _CassIterator) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; FieldIterator(inner) }
+    fn inner(&self) -> *mut _CassIterator {
+        self.0
+    }
+    fn build(inner: *mut _CassIterator) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        FieldIterator(inner)
+    }
 }
 
 impl Protected<*mut _CassIterator> for ColumnIterator {
-    fn inner(&self) -> *mut _CassIterator { self.0 }
-    fn build(inner: *mut _CassIterator) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; ColumnIterator(inner) }
+    fn inner(&self) -> *mut _CassIterator {
+        self.0
+    }
+    fn build(inner: *mut _CassIterator) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        ColumnIterator(inner)
+    }
 }
 
 impl Protected<*mut _CassIterator> for TableIterator {
-    fn inner(&self) -> *mut _CassIterator { self.0 }
-    fn build(inner: *mut _CassIterator) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; TableIterator(inner) }
+    fn inner(&self) -> *mut _CassIterator {
+        self.0
+    }
+    fn build(inner: *mut _CassIterator) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        TableIterator(inner)
+    }
 }
 
 impl Protected<*mut _CassIterator> for MapIterator {
-    fn inner(&self) -> *mut _CassIterator { self.0 }
-    fn build(inner: *mut _CassIterator) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; MapIterator(inner) }
+    fn inner(&self) -> *mut _CassIterator {
+        self.0
+    }
+    fn build(inner: *mut _CassIterator) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        MapIterator(inner)
+    }
 }
 
 impl Protected<*mut _CassIterator> for SetIterator {
-    fn inner(&self) -> *mut _CassIterator { self.0 }
-    fn build(inner: *mut _CassIterator) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; SetIterator(inner) }
+    fn inner(&self) -> *mut _CassIterator {
+        self.0
+    }
+    fn build(inner: *mut _CassIterator) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        SetIterator(inner)
+    }
 }
-
 
 /// Iterater over the set's metadata entries(??)
 #[derive(Debug)]
@@ -291,9 +360,10 @@ unsafe impl Send for SetIterator {}
 // }
 
 impl Drop for SetIterator {
-    fn drop(&mut self) { unsafe { cass_iterator_free(self.0) } }
+    fn drop(&mut self) {
+        unsafe { cass_iterator_free(self.0) }
+    }
 }
-
 
 impl Iterator for SetIterator {
     type Item = Value;
@@ -309,7 +379,9 @@ impl Iterator for SetIterator {
 }
 
 impl SetIterator {
-    fn get_value(&mut self) -> Value { unsafe { Value::build(cass_iterator_get_value(self.0)) } }
+    fn get_value(&mut self) -> Value {
+        unsafe { Value::build(cass_iterator_get_value(self.0)) }
+    }
 }
 
 /// An iterator over the k/v pair in the map
@@ -321,11 +393,17 @@ pub struct MapIterator(*mut _CassIterator);
 unsafe impl Send for MapIterator {}
 
 impl MapIterator {
-    fn get_key(&mut self) -> Value { unsafe { Value::build(cass_iterator_get_map_key(self.0)) } }
-    fn get_value(&mut self) -> Value { unsafe { Value::build(cass_iterator_get_map_value(self.0)) } }
+    fn get_key(&mut self) -> Value {
+        unsafe { Value::build(cass_iterator_get_map_key(self.0)) }
+    }
+    fn get_value(&mut self) -> Value {
+        unsafe { Value::build(cass_iterator_get_map_value(self.0)) }
+    }
 
     /// Gets the next k/v pair in the map
-    pub fn get_pair(&mut self) -> (Value, Value) { (self.get_key(), self.get_value()) }
+    pub fn get_pair(&mut self) -> (Value, Value) {
+        (self.get_key(), self.get_value())
+    }
 }
 
 /// An iterator over the elements of a Cassandra tuple
@@ -337,7 +415,9 @@ pub struct TupleIterator(pub *mut _CassIterator);
 unsafe impl Send for TupleIterator {}
 
 impl Drop for TupleIterator {
-    fn drop(&mut self) { unsafe { cass_iterator_free(self.0) } }
+    fn drop(&mut self) {
+        unsafe { cass_iterator_free(self.0) }
+    }
 }
 
 impl Iterator for TupleIterator {
@@ -353,13 +433,15 @@ impl Iterator for TupleIterator {
 }
 
 impl TupleIterator {
-    fn get_value(&mut self) -> Value { unsafe { Value::build(cass_iterator_get_value(self.0)) } }
+    fn get_value(&mut self) -> Value {
+        unsafe { Value::build(cass_iterator_get_value(self.0)) }
+    }
 }
 
-
-
 impl Drop for MapIterator {
-    fn drop(&mut self) { unsafe { cass_iterator_free(self.0) } }
+    fn drop(&mut self) {
+        unsafe { cass_iterator_free(self.0) }
+    }
 }
 
 impl Iterator for MapIterator {
@@ -373,4 +455,3 @@ impl Iterator for MapIterator {
         }
     }
 }
-

@@ -8,9 +8,10 @@ keywords = [ "Cassandra", "binding", "CQL", "client", "database" ]
 categories = [ "api-bindings", "database", "external-ffi-bindings", "asynchronous" ]
 license = "Apache-2.0"
 name = "cassandra-cpp"
-version = "0.14.1"
+version = "0.15.0"
 authors = ["Tupshin Harper <tupshin@tupshin.com>", "Keith Wansbrough <Keith.Wansbrough@metaswitch.com>"]
 build = "build.rs"
+edition = "2018"
 
 [badges]
 travis-ci = { repository = "Metaswitch/cassandra-rs" }
@@ -23,4 +24,7 @@ decimal = "1"
 time = "0.1"
 uuid = "0.5"
 error-chain = "0.12.1"
-futures = "0.1"
+
+[dev-dependencies]
+tokio = { version = "0.2", features = ["rt-core", "macros", "test-util"] }
+futures = "0.3.1"

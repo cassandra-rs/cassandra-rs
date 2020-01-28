@@ -1,10 +1,10 @@
-use cassandra::util::Protected;
+use crate::cassandra::util::Protected;
 
-use cassandra_sys::CassTimestampGen as _TimestampGen;
-use cassandra_sys::cass_time_from_epoch;
-use cassandra_sys::cass_timestamp_gen_free;
-use cassandra_sys::cass_timestamp_gen_monotonic_new;
-use cassandra_sys::cass_timestamp_gen_server_side_new;
+use crate::cassandra_sys::cass_time_from_epoch;
+use crate::cassandra_sys::cass_timestamp_gen_free;
+use crate::cassandra_sys::cass_timestamp_gen_monotonic_new;
+use crate::cassandra_sys::cass_timestamp_gen_server_side_new;
+use crate::cassandra_sys::CassTimestampGen as _TimestampGen;
 // use cassandra_sys::cass_date_from_epoch;
 // use cassandra_sys::cass_date_time_to_epoch;
 use time::Duration;
@@ -17,10 +17,16 @@ unsafe impl Send for TimestampGen {}
 unsafe impl Sync for TimestampGen {}
 
 impl Protected<*mut _TimestampGen> for TimestampGen {
-    fn inner(&self) -> *mut _TimestampGen { self.0 }
-    fn build(inner: *mut _TimestampGen) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; TimestampGen(inner) }
+    fn inner(&self) -> *mut _TimestampGen {
+        self.0
+    }
+    fn build(inner: *mut _TimestampGen) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        TimestampGen(inner)
+    }
 }
-
 
 // ///Cassandra representation of the number of days since epoch
 // pub struct Date(u32);
@@ -29,7 +35,6 @@ impl Protected<*mut _TimestampGen> for TimestampGen {
 /// represents the number of nanoseconds since midnight (range 0 to 86399999999999).
 #[derive(Debug)]
 pub struct Time(i64);
-
 
 impl TimestampGen {
     /// Converts a unix timestamp (in seconds) to the Cassandra "time" type. The "time" type
@@ -44,13 +49,17 @@ impl TimestampGen {
     /// for a given clock tick even if shared by multiple session objects. If that rate is
     /// exceeded then a warning is logged and timestamps stop incrementing until the next
     /// clock tick.
-    pub fn gen_monotonic_new() -> Self { unsafe { TimestampGen(cass_timestamp_gen_monotonic_new()) } }
+    pub fn gen_monotonic_new() -> Self {
+        unsafe { TimestampGen(cass_timestamp_gen_monotonic_new()) }
+    }
 
     /// Creates a new server-side timestamp generator. This generator allows Cassandra
     /// to assign timestamps server-side.
     ///
     /// <b>Note:</b> This is the default timestamp generator.
-    pub fn gen_server_side_new() -> Self { unsafe { TimestampGen(cass_timestamp_gen_server_side_new()) } }
+    pub fn gen_server_side_new() -> Self {
+        unsafe { TimestampGen(cass_timestamp_gen_server_side_new()) }
+    }
 
     //    pub fn from_epoch() -> Self {
     //        unsafe { TimestampGen(cass_timestamp_gen_monotonic_new()) }
@@ -70,5 +79,7 @@ impl TimestampGen {
 // }
 
 impl Drop for TimestampGen {
-    fn drop(&mut self) { unsafe { cass_timestamp_gen_free(self.0) } }
+    fn drop(&mut self) {
+        unsafe { cass_timestamp_gen_free(self.0) }
+    }
 }

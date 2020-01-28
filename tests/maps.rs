@@ -1,21 +1,17 @@
-extern crate cassandra_cpp;
-extern crate futures;
-
 mod help;
 
 use cassandra_cpp::*;
 use std::collections::HashSet;
-use futures::Future;
 
-
-#[derive(Debug,Eq,PartialEq,Hash)]
+#[derive(Debug, Eq, PartialEq, Hash)]
 struct Pair {
     key: String,
     value: i32,
 }
 
-static CREATE_TABLE: &'static str = "CREATE TABLE IF NOT EXISTS examples.maps (key text, items map<text, int>, \
-                                     PRIMARY KEY (key))";
+static CREATE_TABLE: &'static str =
+    "CREATE TABLE IF NOT EXISTS examples.maps (key text, items map<text, int>, \
+     PRIMARY KEY (key))";
 static SELECT_QUERY: &'static str = "SELECT items FROM examples.maps WHERE key = ?";
 
 fn insert_into_maps(session: &Session, key: &str, items: &Vec<Pair>) -> Result<()> {
@@ -57,22 +53,24 @@ fn test_maps() {
     let session = help::create_test_session();
     help::create_example_keyspace(&session);
 
-    let items: Vec<Pair> = vec![Pair {
-                                    key: "apple".to_string(),
-                                    value: 1,
-                                },
-                                Pair {
-                                    key: "orange".to_string(),
-                                    value: 2,
-                                },
-                                Pair {
-                                    key: "banana".to_string(),
-                                    value: 3,
-                                },
-                                Pair {
-                                    key: "mango".to_string(),
-                                    value: 4,
-                                }];
+    let items: Vec<Pair> = vec![
+        Pair {
+            key: "apple".to_string(),
+            value: 1,
+        },
+        Pair {
+            key: "orange".to_string(),
+            value: 2,
+        },
+        Pair {
+            key: "banana".to_string(),
+            value: 3,
+        },
+        Pair {
+            key: "mango".to_string(),
+            value: 4,
+        },
+    ];
 
     session.execute(&stmt!(CREATE_TABLE)).wait().unwrap();
     insert_into_maps(&session, "test", &items).unwrap();

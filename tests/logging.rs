@@ -1,16 +1,10 @@
-extern crate cassandra_cpp;
-extern crate slog;
-extern crate futures;
-
 mod help;
 
 use cassandra_cpp::*;
 
+use slog::*;
 use std::sync::Arc;
 use std::sync::Mutex;
-use slog::*;
-use futures::Future;
-
 
 /// Simple drain which accumulates all messages written to it.
 #[derive(Clone)]
@@ -26,8 +20,15 @@ impl Drain for MyDrain {
     type Ok = ();
     type Err = ();
 
-    fn log(&self, record: &Record, _values: &OwnedKVList) -> ::std::result::Result<Self::Ok, Self::Err> {
-        self.0.lock().unwrap().push_str(&format!("{}", record.msg()));
+    fn log(
+        &self,
+        record: &Record,
+        _values: &OwnedKVList,
+    ) -> ::std::result::Result<Self::Ok, Self::Err> {
+        self.0
+            .lock()
+            .unwrap()
+            .push_str(&format!("{}", record.msg()));
         Ok(())
     }
 }
@@ -41,11 +42,16 @@ fn test_logging() {
     set_logger(Some(logger));
 
     let mut cluster = Cluster::default();
-    cluster.set_contact_points("absolute-gibberish.invalid").unwrap();
+    cluster
+        .set_contact_points("absolute-gibberish.invalid")
+        .unwrap();
     cluster.connect().expect_err("Should fail to connect");
 
     let log_output: String = drain.0.lock().unwrap().clone();
-    assert!(log_output.contains("Unable to resolve address for absolute-gibberish.invalid"), log_output);
+    assert!(
+        log_output.contains("Unable to resolve address for absolute-gibberish.invalid"),
+        log_output
+    );
 }
 
 #[test]
@@ -55,17 +61,23 @@ fn test_metrics() {
     // (minimum time to respond to a request in microseconds), i.e. a request that make cassandra
     // take more than 1 microsecond to respond to. Do a couple of setup queries, with IF NOT EXISTS
     // so that they don't fail if this test is repeated.
-    let query1 = stmt!("CREATE KEYSPACE IF NOT EXISTS cycling WITH REPLICATION = {
+    let query1 = stmt!(
+        "CREATE KEYSPACE IF NOT EXISTS cycling WITH REPLICATION = {
                       'class' : 'SimpleStrategy',
                       'replication_factor' : 1
-                      };");
-    let query2 = stmt!("CREATE TABLE IF NOT EXISTS cycling.cyclist_name (
+                      };"
+    );
+    let query2 = stmt!(
+        "CREATE TABLE IF NOT EXISTS cycling.cyclist_name (
                        id UUID PRIMARY KEY,
                        lastname text,
-                       firstname text );"); //create table
-    let query3 = stmt!("INSERT INTO cycling.cyclist_name (id, lastname, firstname)
+                       firstname text );"
+    ); //create table
+    let query3 = stmt!(
+        "INSERT INTO cycling.cyclist_name (id, lastname, firstname)
                        VALUES (6ab09bec-e68e-48d9-a5f8-97e6fb4c9b47, 'KRUIKSWIJK','Steven')
-                       USING TTL 86400 AND TIMESTAMP 123456789;");
+                       USING TTL 86400 AND TIMESTAMP 123456789;"
+    );
 
     let session = help::create_test_session();
     session.execute(&query1).wait().unwrap();

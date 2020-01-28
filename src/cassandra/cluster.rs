@@ -1,66 +1,64 @@
+use crate::cassandra::error::*;
+use crate::cassandra::future::CassFuture;
+use crate::cassandra::policy::retry::RetryPolicy;
+use crate::cassandra::session::Session;
+use crate::cassandra::ssl::Ssl;
+use crate::cassandra::time::TimestampGen;
+use crate::cassandra::util::Protected;
 
-use cassandra::future::CassFuture;
-use cassandra::policy::retry::RetryPolicy;
-use cassandra::session::Session;
-use cassandra::ssl::Ssl;
-use cassandra::time::TimestampGen;
-use cassandra::util::Protected;
-use cassandra::error::*;
+use crate::cassandra_sys::cass_cluster_free;
+use crate::cassandra_sys::cass_cluster_new;
+use crate::cassandra_sys::cass_cluster_set_connect_timeout;
+use crate::cassandra_sys::cass_cluster_set_connection_heartbeat_interval;
+use crate::cassandra_sys::cass_cluster_set_connection_idle_timeout;
+use crate::cassandra_sys::cass_cluster_set_contact_points;
+use crate::cassandra_sys::cass_cluster_set_core_connections_per_host;
+use crate::cassandra_sys::cass_cluster_set_credentials;
+use crate::cassandra_sys::cass_cluster_set_latency_aware_routing;
+use crate::cassandra_sys::cass_cluster_set_latency_aware_routing_settings;
+use crate::cassandra_sys::cass_cluster_set_load_balance_dc_aware;
+use crate::cassandra_sys::cass_cluster_set_load_balance_round_robin;
+use crate::cassandra_sys::cass_cluster_set_local_address;
+use crate::cassandra_sys::cass_cluster_set_max_concurrent_creation;
+use crate::cassandra_sys::cass_cluster_set_max_concurrent_requests_threshold;
+use crate::cassandra_sys::cass_cluster_set_max_connections_per_host;
+use crate::cassandra_sys::cass_cluster_set_max_requests_per_flush;
+use crate::cassandra_sys::cass_cluster_set_num_threads_io;
+use crate::cassandra_sys::cass_cluster_set_pending_requests_high_water_mark;
+use crate::cassandra_sys::cass_cluster_set_pending_requests_low_water_mark;
+use crate::cassandra_sys::cass_cluster_set_port;
+use crate::cassandra_sys::cass_cluster_set_protocol_version;
+use crate::cassandra_sys::cass_cluster_set_queue_size_event;
+use crate::cassandra_sys::cass_cluster_set_queue_size_io;
+use crate::cassandra_sys::cass_cluster_set_reconnect_wait_time;
+use crate::cassandra_sys::cass_cluster_set_request_timeout;
+use crate::cassandra_sys::cass_cluster_set_retry_policy;
+use crate::cassandra_sys::cass_cluster_set_ssl;
+use crate::cassandra_sys::cass_cluster_set_tcp_keepalive;
+use crate::cassandra_sys::cass_cluster_set_tcp_nodelay;
+use crate::cassandra_sys::cass_cluster_set_timestamp_gen;
+use crate::cassandra_sys::cass_cluster_set_token_aware_routing;
+use crate::cassandra_sys::cass_cluster_set_use_schema;
+use crate::cassandra_sys::cass_cluster_set_whitelist_filtering;
+use crate::cassandra_sys::cass_cluster_set_write_bytes_high_water_mark;
+use crate::cassandra_sys::cass_cluster_set_write_bytes_low_water_mark;
+use crate::cassandra_sys::cass_false;
+use crate::cassandra_sys::cass_future_error_code;
+use crate::cassandra_sys::cass_session_connect;
+use crate::cassandra_sys::cass_session_new;
+use crate::cassandra_sys::cass_true;
+use crate::cassandra_sys::CassCluster as _Cluster;
 
-use cassandra_sys::CassCluster as _Cluster;
-use cassandra_sys::cass_cluster_free;
-use cassandra_sys::cass_cluster_new;
-use cassandra_sys::cass_cluster_set_connect_timeout;
-use cassandra_sys::cass_cluster_set_connection_heartbeat_interval;
-use cassandra_sys::cass_cluster_set_connection_idle_timeout;
-use cassandra_sys::cass_cluster_set_contact_points;
-use cassandra_sys::cass_cluster_set_local_address;
-use cassandra_sys::cass_cluster_set_core_connections_per_host;
-use cassandra_sys::cass_cluster_set_credentials;
-use cassandra_sys::cass_cluster_set_latency_aware_routing;
-use cassandra_sys::cass_cluster_set_latency_aware_routing_settings;
-use cassandra_sys::cass_cluster_set_load_balance_dc_aware;
-use cassandra_sys::cass_cluster_set_load_balance_round_robin;
-use cassandra_sys::cass_cluster_set_max_concurrent_creation;
-use cassandra_sys::cass_cluster_set_max_concurrent_requests_threshold;
-use cassandra_sys::cass_cluster_set_max_connections_per_host;
-use cassandra_sys::cass_cluster_set_max_requests_per_flush;
-use cassandra_sys::cass_cluster_set_num_threads_io;
-use cassandra_sys::cass_cluster_set_pending_requests_high_water_mark;
-use cassandra_sys::cass_cluster_set_pending_requests_low_water_mark;
-use cassandra_sys::cass_cluster_set_port;
-use cassandra_sys::cass_cluster_set_protocol_version;
-use cassandra_sys::cass_cluster_set_queue_size_event;
-use cassandra_sys::cass_cluster_set_queue_size_io;
-use cassandra_sys::cass_cluster_set_reconnect_wait_time;
-use cassandra_sys::cass_cluster_set_request_timeout;
-use cassandra_sys::cass_cluster_set_retry_policy;
-use cassandra_sys::cass_cluster_set_ssl;
-use cassandra_sys::cass_cluster_set_tcp_keepalive;
-use cassandra_sys::cass_cluster_set_tcp_nodelay;
-use cassandra_sys::cass_cluster_set_timestamp_gen;
-use cassandra_sys::cass_cluster_set_token_aware_routing;
-use cassandra_sys::cass_cluster_set_use_schema;
-use cassandra_sys::cass_cluster_set_whitelist_filtering;
-use cassandra_sys::cass_cluster_set_write_bytes_high_water_mark;
-use cassandra_sys::cass_cluster_set_write_bytes_low_water_mark;
-use cassandra_sys::cass_false;
-use cassandra_sys::cass_future_error_code;
-use cassandra_sys::cass_session_connect;
-use cassandra_sys::cass_session_new;
-use cassandra_sys::cass_true;
-
-use std::ffi::{CString, CStr};
 use std::ffi::NulError;
+use std::ffi::{CStr, CString};
 use std::fmt;
+use std::fmt::Display;
 use std::iter::Map;
 use std::net::AddrParseError;
 use std::net::Ipv4Addr;
 use std::result;
-use std::fmt::Display;
 use std::str::FromStr;
 use time::Duration;
-use futures::Future;
 
 /// A CQL protocol version is just an integer.
 pub type CqlProtocol = i32;
@@ -86,17 +84,28 @@ unsafe impl Send for Cluster {}
 
 impl Drop for Cluster {
     /// Frees a cluster instance.
-    fn drop(&mut self) { unsafe { cass_cluster_free(self.0) } }
+    fn drop(&mut self) {
+        unsafe { cass_cluster_free(self.0) }
+    }
 }
 
 impl Protected<*mut _Cluster> for Cluster {
-    fn inner(&self) -> *mut _Cluster { self.0 }
-    fn build(inner: *mut _Cluster) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; Cluster(inner) }
+    fn inner(&self) -> *mut _Cluster {
+        self.0
+    }
+    fn build(inner: *mut _Cluster) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        Cluster(inner)
+    }
 }
 
 impl Default for Cluster {
     /// Creates a new cluster
-    fn default() -> Cluster { unsafe { Cluster(cass_cluster_new()) } }
+    fn default() -> Cluster {
+        unsafe { Cluster(cass_cluster_new()) }
+    }
 }
 
 impl Cluster {
@@ -129,7 +138,6 @@ impl Cluster {
         }
     }
 
-
     /// Sets the port
     ///
     ///
@@ -138,7 +146,6 @@ impl Cluster {
     pub fn set_port(&mut self, port: u16) -> Result<&mut Self> {
         unsafe { cass_cluster_set_port(self.0, port as i32).to_result(self) }
     }
-
 
     /// Sets the SSL context and enables SSL
     pub fn set_ssl(&mut self, ssl: &mut Ssl) -> &Self {
@@ -153,7 +160,18 @@ impl Cluster {
         unsafe {
             let session = Session(cass_session_new());
             let connect_future = <CassFuture<()>>::build(cass_session_connect(session.0, self.0));
-            connect_future.wait().map(|_| session)
+            connect_future.wait()?;
+            Ok(session)
+        }
+    }
+
+    /// Asynchronously connects to the cassandra cluster
+    pub async fn connect_async(&mut self) -> Result<Session> {
+        unsafe {
+            let session = Session(cass_session_new());
+            let connect_future = <CassFuture<()>>::build(cass_session_connect(session.0, self.0));
+            connect_future.await?;
+            Ok(session)
         }
     }
 
@@ -165,8 +183,7 @@ impl Cluster {
     ///
     pub fn set_protocol_version(&mut self, protocol_version: CqlProtocol) -> Result<&mut Self> {
         unsafe {
-            cass_cluster_set_protocol_version(self.0, protocol_version as i32)
-                .to_result(self)
+            cass_cluster_set_protocol_version(self.0, protocol_version as i32).to_result(self)
         }
     }
 
@@ -177,10 +194,7 @@ impl Cluster {
     /// Default: 1
     ///
     pub fn set_num_threads_io(&mut self, num_threads: u32) -> Result<&mut Self> {
-        unsafe {
-            cass_cluster_set_num_threads_io(self.0, num_threads)
-                .to_result(self)
-        }
+        unsafe { cass_cluster_set_num_threads_io(self.0, num_threads).to_result(self) }
     }
 
     /// Sets the size of the fixed size queue that stores pending requests.
@@ -189,10 +203,7 @@ impl Cluster {
     /// Default: 8192
     ///
     pub fn set_queue_size_io(&mut self, queue_size: u32) -> Result<&mut Self> {
-        unsafe {
-            cass_cluster_set_queue_size_io(self.0, queue_size)
-                .to_result(self)
-        }
+        unsafe { cass_cluster_set_queue_size_io(self.0, queue_size).to_result(self) }
     }
 
     /// Sets the size of the fixed size queue that stores events.
@@ -201,10 +212,7 @@ impl Cluster {
     /// Default: 8192
     ///
     pub fn set_queue_size_event(&mut self, queue_size: u32) -> Result<&mut Self> {
-        unsafe {
-            cass_cluster_set_queue_size_event(self.0, queue_size)
-                .to_result(self)
-        }
+        unsafe { cass_cluster_set_queue_size_event(self.0, queue_size).to_result(self) }
     }
 
     /// Sets the number of connections made to each server in each
@@ -215,8 +223,7 @@ impl Cluster {
     ///
     pub fn set_core_connections_per_host(&mut self, num_connections: u32) -> Result<&mut Self> {
         unsafe {
-            cass_cluster_set_core_connections_per_host(self.0, num_connections)
-                .to_result(self)
+            cass_cluster_set_core_connections_per_host(self.0, num_connections).to_result(self)
         }
     }
 
@@ -228,8 +235,7 @@ impl Cluster {
     ///
     pub fn set_max_connections_per_host(&mut self, num_connections: u32) -> Result<&mut Self> {
         unsafe {
-            cass_cluster_set_max_connections_per_host(self.0, num_connections)
-                .to_result(self)
+            cass_cluster_set_max_connections_per_host(self.0, num_connections).to_result(self)
         }
     }
 
@@ -252,10 +258,7 @@ impl Cluster {
     ///
     /// Default: 1
     pub fn set_max_concurrent_creation(&mut self, num_connections: u32) -> Result<&mut Self> {
-        unsafe {
-            cass_cluster_set_max_concurrent_creation(self.0, num_connections)
-                .to_result(self)
-        }
+        unsafe { cass_cluster_set_max_concurrent_creation(self.0, num_connections).to_result(self) }
     }
 
     /// Sets the threshold for the maximum number of concurrent requests in-flight
@@ -264,10 +267,12 @@ impl Cluster {
     ///
     ///
     /// Default: 100
-    pub fn set_max_concurrent_requests_threshold(&mut self, num_requests: u32) -> Result<&mut Self> {
+    pub fn set_max_concurrent_requests_threshold(
+        &mut self,
+        num_requests: u32,
+    ) -> Result<&mut Self> {
         unsafe {
-            cass_cluster_set_max_concurrent_requests_threshold(self.0, num_requests)
-                .to_result(self)
+            cass_cluster_set_max_concurrent_requests_threshold(self.0, num_requests).to_result(self)
         }
     }
 
@@ -277,10 +282,7 @@ impl Cluster {
     ///
     /// Default: 128
     pub fn set_max_requests_per_flush(&mut self, num_requests: u32) -> Result<&mut Self> {
-        unsafe {
-            cass_cluster_set_max_requests_per_flush(self.0, num_requests)
-                .to_result(self)
-        }
+        unsafe { cass_cluster_set_max_requests_per_flush(self.0, num_requests).to_result(self) }
     }
 
     /// Sets the high water mark for the number of bytes outstanding
@@ -290,10 +292,7 @@ impl Cluster {
     ///
     /// Default: 64KB
     pub fn set_write_bytes_high_water_mark(&mut self, num_bytes: u32) -> Result<&mut Self> {
-        unsafe {
-            cass_cluster_set_write_bytes_high_water_mark(self.0, num_bytes)
-                .to_result(self)
-        }
+        unsafe { cass_cluster_set_write_bytes_high_water_mark(self.0, num_bytes).to_result(self) }
     }
 
     /// Sets the low water mark for the number of bytes outstanding
@@ -303,10 +302,7 @@ impl Cluster {
     ///
     /// Default: 32KB
     pub fn set_write_bytes_low_water_mark(&mut self, num_bytes: u32) -> Result<&mut Self> {
-        unsafe {
-            cass_cluster_set_write_bytes_low_water_mark(self.0, num_bytes)
-                .to_result(self)
-        }
+        unsafe { cass_cluster_set_write_bytes_low_water_mark(self.0, num_bytes).to_result(self) }
     }
 
     /// Sets the high water mark for the number of requests queued waiting
@@ -318,8 +314,7 @@ impl Cluster {
     /// Default: 256
     pub fn set_pending_requests_high_water_mark(&mut self, num_requests: u32) -> Result<&mut Self> {
         unsafe {
-            cass_cluster_set_pending_requests_high_water_mark(self.0, num_requests)
-                .to_result(self)
+            cass_cluster_set_pending_requests_high_water_mark(self.0, num_requests).to_result(self)
         }
     }
 
@@ -332,8 +327,7 @@ impl Cluster {
     /// Default: 128
     pub fn set_pending_requests_low_water_mark(&mut self, num_requests: u32) -> Result<&mut Self> {
         unsafe {
-            cass_cluster_set_pending_requests_low_water_mark(self.0, num_requests)
-                .to_result(self)
+            cass_cluster_set_pending_requests_low_water_mark(self.0, num_requests).to_result(self)
         }
     }
 
@@ -341,7 +335,7 @@ impl Cluster {
     ///
     ///
     /// Default: 5000ms
-    #[allow(cast_possible_truncation,cast_sign_loss)]
+    #[allow(cast_possible_truncation, cast_sign_loss)]
     pub fn set_connect_timeout(&mut self, timeout: Duration) -> &Self {
         unsafe {
             cass_cluster_set_connect_timeout(self.0, timeout.num_milliseconds() as u32);
@@ -353,7 +347,7 @@ impl Cluster {
     ///
     ///
     /// Default: 12000ms
-    #[allow(cast_possible_truncation,cast_sign_loss)]
+    #[allow(cast_possible_truncation, cast_sign_loss)]
     pub fn set_request_timeout(&mut self, timeout: Duration) -> &Self {
         unsafe {
             cass_cluster_set_request_timeout(self.0, timeout.num_milliseconds() as u32);
@@ -366,9 +360,7 @@ impl Cluster {
         unsafe {
             let username_cstr = CString::new(username)?;
             let password_cstr = CString::new(password)?;
-            cass_cluster_set_credentials(self.0,
-                                         username_cstr.as_ptr(),
-                                         password_cstr.as_ptr());
+            cass_cluster_set_credentials(self.0, username_cstr.as_ptr(), password_cstr.as_ptr());
         }
         Ok(self)
     }
@@ -381,7 +373,6 @@ impl Cluster {
         unsafe {
             cass_cluster_set_load_balance_round_robin(self.0);
             self
-
         }
     }
 
@@ -395,18 +386,27 @@ impl Cluster {
     /// first connected contact point, and no remote hosts are considered in
     /// query plans. If relying on this mechanism, be sure to use only contact
     /// points from the local DC.
-    pub fn set_load_balance_dc_aware<S>(&mut self, local_dc: &str, used_hosts_per_remote_dc: u32,
-        allow_remote_dcs_for_local_cl: bool)
-                                        -> Result<&mut Self> {
+    pub fn set_load_balance_dc_aware<S>(
+        &mut self,
+        local_dc: &str,
+        used_hosts_per_remote_dc: u32,
+        allow_remote_dcs_for_local_cl: bool,
+    ) -> Result<&mut Self> {
         unsafe {
             {
-                    let local_dc = CString::new(local_dc)?;
-                    cass_cluster_set_load_balance_dc_aware(self.0,
-                                                           local_dc.as_ptr(),
-                                                           used_hosts_per_remote_dc,
-                                                           if allow_remote_dcs_for_local_cl { cass_true } else { cass_false })
-                }
-                .to_result(self)
+                let local_dc = CString::new(local_dc)?;
+                cass_cluster_set_load_balance_dc_aware(
+                    self.0,
+                    local_dc.as_ptr(),
+                    used_hosts_per_remote_dc,
+                    if allow_remote_dcs_for_local_cl {
+                        cass_true
+                    } else {
+                        cass_false
+                    },
+                )
+            }
+            .to_result(self)
         }
     }
 
@@ -425,7 +425,10 @@ impl Cluster {
     /// the base load balancing policy.
     pub fn set_token_aware_routing(&mut self, enabled: bool) -> &Self {
         unsafe {
-            cass_cluster_set_token_aware_routing(self.0, if enabled { cass_true } else { cass_false });
+            cass_cluster_set_token_aware_routing(
+                self.0,
+                if enabled { cass_true } else { cass_false },
+            );
         }
         self
     }
@@ -441,11 +444,13 @@ impl Cluster {
     /// placement (token-aware) before considering the latency.
     pub fn set_latency_aware_routing(&mut self, enabled: bool) -> &Self {
         unsafe {
-            cass_cluster_set_latency_aware_routing(self.0, if enabled { cass_true } else { cass_false });
+            cass_cluster_set_latency_aware_routing(
+                self.0,
+                if enabled { cass_true } else { cass_false },
+            );
         }
         self
     }
-
 
     /// Configures the settings for latency-aware request routing.
     ///
@@ -460,16 +465,23 @@ impl Cluster {
     ///  <li>min_measured: 50</li>
     /// </ul>
     #[allow(cast_sign_loss)]
-    pub fn set_latency_aware_routing_settings(&mut self, exclusion_threshold: f64, scale: Duration,
-        retry_period: Duration, update_rate: Duration, min_measured: u64)
-                                              -> &Self {
+    pub fn set_latency_aware_routing_settings(
+        &mut self,
+        exclusion_threshold: f64,
+        scale: Duration,
+        retry_period: Duration,
+        update_rate: Duration,
+        min_measured: u64,
+    ) -> &Self {
         unsafe {
-            cass_cluster_set_latency_aware_routing_settings(self.0,
-                                                            exclusion_threshold,
-                                                            scale.num_milliseconds() as u64,
-                                                            retry_period.num_milliseconds() as u64,
-                                                            update_rate.num_milliseconds() as u64,
-                                                            min_measured);
+            cass_cluster_set_latency_aware_routing_settings(
+                self.0,
+                exclusion_threshold,
+                scale.num_milliseconds() as u64,
+                retry_period.num_milliseconds() as u64,
+                update_rate.num_milliseconds() as u64,
+                min_measured,
+            );
         }
         self
     }
@@ -507,12 +519,14 @@ impl Cluster {
     ///
     ///
     /// Default: false (disabled).
-    #[allow(cast_possible_truncation,cast_sign_loss)]
+    #[allow(cast_possible_truncation, cast_sign_loss)]
     pub fn set_tcp_keepalive(&mut self, enable: bool, delay: Duration) -> &Self {
         unsafe {
-            cass_cluster_set_tcp_keepalive(self.0,
-                                           if enable { cass_true } else { cass_false },
-                                           delay.num_seconds() as u32);
+            cass_cluster_set_tcp_keepalive(
+                self.0,
+                if enable { cass_true } else { cass_false },
+                delay.num_seconds() as u32,
+            );
         }
         self
     }
@@ -536,7 +550,7 @@ impl Cluster {
     ///
     ///
     /// Default: 30 seconds
-    #[allow(cast_possible_truncation,cast_sign_loss)]
+    #[allow(cast_possible_truncation, cast_sign_loss)]
     pub fn set_connection_heartbeat_interval(&mut self, hearbeat: Duration) -> &mut Self {
         unsafe {
             cass_cluster_set_connection_heartbeat_interval(self.0, hearbeat.num_seconds() as u32);
@@ -549,7 +563,7 @@ impl Cluster {
     ///
     ///
     /// Default: 60 seconds
-    #[allow(cast_possible_truncation,cast_sign_loss)]
+    #[allow(cast_possible_truncation, cast_sign_loss)]
     pub fn set_connection_idle_timeout(&mut self, timeout: Duration) -> &mut Self {
         unsafe {
             cass_cluster_set_connection_idle_timeout(self.0, timeout.num_seconds() as u32);

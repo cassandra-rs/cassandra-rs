@@ -1,8 +1,4 @@
-extern crate cassandra_cpp;
-extern crate futures;
-
 use cassandra_cpp::*;
-use futures::Future;
 use std::fs;
 
 fn main() {

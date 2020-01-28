@@ -1,20 +1,18 @@
-extern crate cassandra_cpp;
-extern crate futures;
-
 mod help;
 
 use cassandra_cpp::*;
 use std::collections::HashSet;
-use futures::Future;
 
-
-#[derive(Debug,Eq,PartialEq,Hash)]
+#[derive(Debug, Eq, PartialEq, Hash)]
 struct Pair {
     key: String,
     value: String,
 }
 
-fn insert_into_batch_with_prepared(session: &Session, pairs: &Vec<Pair>) -> Result<PreparedStatement> {
+fn insert_into_batch_with_prepared(
+    session: &Session,
+    pairs: &Vec<Pair>,
+) -> Result<PreparedStatement> {
     let insert_query = "INSERT INTO examples.pairs (key, value) VALUES (?, ?)";
     let prepared = session.prepare(insert_query).unwrap().wait().unwrap();
     let mut batch = Batch::new(BatchType::LOGGED);
@@ -36,25 +34,39 @@ fn retrieve_batch(session: &Session) -> Vec<Pair> {
     let select_query = stmt!("SELECT * from examples.pairs");
 
     let result = session.execute(&select_query).wait().unwrap();
-    let v: Vec<Pair> = result.iter().map(|r| {
-        Pair {
+    let v: Vec<Pair> = result
+        .iter()
+        .map(|r| Pair {
             key: r.get(0).expect("Key"),
             value: r.get(1).expect("Value"),
-        }
-    }).collect();
+        })
+        .collect();
     v
 }
 
 #[test]
 fn test_batch() {
-    let create_table = "CREATE TABLE IF NOT EXISTS examples.pairs (key text, value text, PRIMARY KEY (key));";
+    let create_table =
+        "CREATE TABLE IF NOT EXISTS examples.pairs (key text, value text, PRIMARY KEY (key));";
 
-    let pairs = vec!(
-        Pair{key:"a".to_string(), value:"1".to_string()},
-        Pair{key:"b".to_string(), value:"2".to_string()},
-        Pair{key:"c".to_string(), value:"3".to_string()},
-        Pair{key:"d".to_string(), value:"4".to_string()},
-    );
+    let pairs = vec![
+        Pair {
+            key: "a".to_string(),
+            value: "1".to_string(),
+        },
+        Pair {
+            key: "b".to_string(),
+            value: "2".to_string(),
+        },
+        Pair {
+            key: "c".to_string(),
+            value: "3".to_string(),
+        },
+        Pair {
+            key: "d".to_string(),
+            value: "4".to_string(),
+        },
+    ];
 
     let session = help::create_test_session();
     help::create_example_keyspace(&session);

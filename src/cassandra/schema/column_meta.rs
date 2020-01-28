@@ -1,15 +1,15 @@
-use cassandra::data_type::ConstDataType;
+use crate::cassandra::data_type::ConstDataType;
 
-use cassandra::iterator::FieldIterator;
-use cassandra::util::Protected;
-use cassandra::value::Value;
-use cassandra_sys::CassColumnMeta as _CassColumnMeta;
-use cassandra_sys::CassColumnType as _CassColumnType;
-use cassandra_sys::cass_column_meta_data_type;
-use cassandra_sys::cass_column_meta_field_by_name;
-use cassandra_sys::cass_column_meta_name;
-use cassandra_sys::cass_column_meta_type;
-use cassandra_sys::cass_iterator_fields_from_column_meta;
+use crate::cassandra::iterator::FieldIterator;
+use crate::cassandra::util::Protected;
+use crate::cassandra::value::Value;
+use crate::cassandra_sys::cass_column_meta_data_type;
+use crate::cassandra_sys::cass_column_meta_field_by_name;
+use crate::cassandra_sys::cass_column_meta_name;
+use crate::cassandra_sys::cass_column_meta_type;
+use crate::cassandra_sys::cass_iterator_fields_from_column_meta;
+use crate::cassandra_sys::CassColumnMeta as _CassColumnMeta;
+use crate::cassandra_sys::CassColumnType as _CassColumnType;
 
 /// Column metadata
 #[derive(Debug)]
@@ -21,10 +21,16 @@ use std::slice;
 use std::str;
 
 impl Protected<*const _CassColumnMeta> for ColumnMeta {
-    fn inner(&self) -> *const _CassColumnMeta { self.0 }
-    fn build(inner: *const _CassColumnMeta) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; ColumnMeta(inner) }
+    fn inner(&self) -> *const _CassColumnMeta {
+        self.0
+    }
+    fn build(inner: *const _CassColumnMeta) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        ColumnMeta(inner)
+    }
 }
-
 
 impl ColumnMeta {
     /// returns an iterator over the fields of this column
@@ -45,10 +51,14 @@ impl ColumnMeta {
     }
 
     /// Gets the type of the column.
-    pub fn get_type(&self) -> _CassColumnType { unsafe { cass_column_meta_type(self.0) } }
+    pub fn get_type(&self) -> _CassColumnType {
+        unsafe { cass_column_meta_type(self.0) }
+    }
 
     /// Gets the data type of the column.
-    pub fn data_type(&self) -> ConstDataType { unsafe { ConstDataType::build(cass_column_meta_data_type(self.0)) } }
+    pub fn data_type(&self) -> ConstDataType {
+        unsafe { ConstDataType::build(cass_column_meta_data_type(self.0)) }
+    }
 
     /// Gets a metadata field for the provided name. Metadata fields allow direct
     /// access to the column data found in the underlying "columns" metadata table.

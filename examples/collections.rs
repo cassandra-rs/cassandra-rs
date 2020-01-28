@@ -1,10 +1,6 @@
 //! Simple example demonstrating the use of set/map/list values in both
 //! bindings and results.
-extern crate cassandra_cpp;
-extern crate futures;
-
 use cassandra_cpp::*;
-use futures::Future;
 use std::collections::hash_map::HashMap;
 
 fn do_work(session: &Session) -> Result<()> {
@@ -42,18 +38,20 @@ fn do_work(session: &Session) -> Result<()> {
             let maybe_iter: Result<MapIterator> = row.get_by_name("addresses");
             match maybe_iter {
                 Err(_) => HashMap::new(),
-                Ok(addresses_iter) => {
-                    addresses_iter
-                        .map(|(k, v)| Ok((k.get_string()?, v.get_string()?)))
-                        .collect::<Result<_>>()?
-                }
+                Ok(addresses_iter) => addresses_iter
+                    .map(|(k, v)| Ok((k.get_string()?, v.get_string()?)))
+                    .collect::<Result<_>>()?,
             }
         };
         let emails_iter: SetIterator = row.get_by_name("email")?;
-        let emails: Vec<String> = emails_iter.map(|v| Ok(v.get_string()?)).collect::<Result<_>>()?;
+        let emails: Vec<String> = emails_iter
+            .map(|v| Ok(v.get_string()?))
+            .collect::<Result<_>>()?;
         let last_name: String = row.get_by_name("last_name")?;
         let phone_numbers_iter: SetIterator = row.get_by_name("phone_numbers")?;
-        let phone_numbers: Vec<String> = phone_numbers_iter.map(|v| Ok(v.get_string()?)).collect::<Result<_>>()?;
+        let phone_numbers: Vec<String> = phone_numbers_iter
+            .map(|v| Ok(v.get_string()?))
+            .collect::<Result<_>>()?;
         let title: i32 = row.get_by_name("title")?;
         println!(
             " == {} {:?} {:?} {} {:?} {}",

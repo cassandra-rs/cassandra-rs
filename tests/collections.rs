@@ -1,14 +1,13 @@
-extern crate cassandra_cpp;
-extern crate futures;
-
 mod help;
 
 use cassandra_cpp::*;
 use std::collections::HashSet;
-use futures::Future;
 
-
-fn insert_into_collections(session: &Session, key: &str, items: &Vec<String>) -> Result<CassResult> {
+fn insert_into_collections(
+    session: &Session,
+    key: &str,
+    items: &Vec<String>,
+) -> Result<CassResult> {
     let mut statement = stmt!("INSERT INTO examples.collections (key, items) VALUES (?, ?);");
     statement.bind(0, key)?;
     let mut set = Set::new(2);
@@ -44,10 +43,17 @@ fn select_from_collections(session: &Session, key: &str) -> Result<Vec<String>> 
 
 #[test]
 fn test_collections() {
-    let create_table = stmt!("CREATE TABLE IF NOT EXISTS examples.collections (key text, items set<text>, PRIMARY \
-                              KEY (key))");
+    let create_table = stmt!(
+        "CREATE TABLE IF NOT EXISTS examples.collections (key text, items set<text>, PRIMARY \
+         KEY (key))"
+    );
 
-    let items = vec!["apple".to_string(), "orange".to_string(), "banana".to_string(), "mango".to_string()];
+    let items = vec![
+        "apple".to_string(),
+        "orange".to_string(),
+        "banana".to_string(),
+        "mango".to_string(),
+    ];
 
     let session = help::create_test_session();
     help::create_example_keyspace(&session);

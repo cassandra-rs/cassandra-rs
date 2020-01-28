@@ -1,14 +1,11 @@
-#![allow(unstable)]
-extern crate cql_ffi;
+use cassandra::*;
 use std::ffi::CString;
 use std::slice;
-use cassandra::*;
 
 //~ uv_mutex_t mutex;
 //~ uv_cond_t cond;
 //~ Future* close_future = NULL;
 //~ UuidGen* uuid_gen = NULL;
-
 
 fn wait_exit() {
     uv_mutex_lock(&mutex);
@@ -46,7 +43,6 @@ unsafe fn create_cluster() -> *mut Cluster {
     cluster
 }
 
-
 fn connect_session(session: Session, cluster: &Cluster, callback: FutureCallback) {
     let future = cass_session_connect_keyspace(session, cluster, "examples");
     cass_future_set_callback(future, callback, session);
@@ -69,10 +65,12 @@ fn on_session_connect(future: Future, data: void) {
         uv_cond_signal(&cond);
         return;
     }
-    execute_query(session,
-                  "CREATE KEYSPACE examples WITH replication = {\'class\': \'SimpleStrategy\', \
-                   \'replication_factor\': \'3\' };",
-                  on_create_keyspace);
+    execute_query(
+        session,
+        "CREATE KEYSPACE examples WITH replication = {\'class\': \'SimpleStrategy\', \
+         \'replication_factor\': \'3\' };",
+        on_create_keyspace,
+    );
 }
 
 fn on_create_keyspace(future: Future, data: void) {
@@ -80,9 +78,11 @@ fn on_create_keyspace(future: Future, data: void) {
     if (code != CASS_OK) {
         print_error(future);
     }
-    execute_query(data,
-                  "CREATE TABLE callbacks (key timeuuid PRIMARY KEY, value bigint)",
-                  on_create_table);
+    execute_query(
+        data,
+        "CREATE TABLE callbacks (key timeuuid PRIMARY KEY, value bigint)",
+        on_create_table,
+    );
 }
 
 fn on_create_table(future: Future, data: Session) {
@@ -146,7 +146,7 @@ fn main() {
     uv_mutex_init(&mutex);
     uv_cond_init(&cond);
     connect_session(session, cluster, on_session_connect);
-/* Code running in parallel with queries */
+    /* Code running in parallel with queries */
     wait_exit();
     uv_cond_destroy(&cond);
     uv_mutex_destroy(&mutex);

@@ -1,16 +1,17 @@
-extern crate cassandra_cpp;
-extern crate futures;
-
 use cassandra_cpp::*;
 
-use futures::Future;
-
-
-fn print_function(session: &Session, keyspace: &str, function: &str, arguments: Vec<&str>) -> Result<()> {
+fn print_function(
+    session: &Session,
+    keyspace: &str,
+    function: &str,
+    arguments: Vec<&str>,
+) -> Result<()> {
     let schema_meta = session.get_schema_meta();
     let keyspace_meta: KeyspaceMeta = schema_meta.get_keyspace_by_name(keyspace);
 
-    let function_meta = keyspace_meta.get_function_by_name(function, arguments).unwrap();
+    let function_meta = keyspace_meta
+        .get_function_by_name(function, arguments)
+        .unwrap();
     print_function_meta(function_meta, 0);
     Ok(())
 }
@@ -66,7 +67,6 @@ fn print_meta_fields(iterator: FieldIterator, indent: i32) {
         println!("{}: ", item.name);
         print_schema_value(item.value);
         println!("");
-
     }
 }
 
@@ -95,7 +95,6 @@ fn print_schema_value(value: Value) {
         _ => "<unhandled type>".to_owned(),
     };
     print!("{}", value);
-
 }
 
 // fn print_schema_bytes(bytes: &[u8]) {
@@ -115,22 +114,31 @@ fn cass() -> Result<()> {
     cluster.set_contact_points("127.0.0.1").unwrap();
     cluster.set_load_balance_round_robin();
 
-    let create_ks = stmt!("CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
-                           \'SimpleStrategy\', \'replication_factor\': \'1\' };");
-    let create_table = stmt!("CREATE TABLE IF NOT EXISTS examples.schema_meta (key text, value bigint, PRIMARY KEY \
-                              (key));");
+    let create_ks = stmt!(
+        "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
+         \'SimpleStrategy\', \'replication_factor\': \'1\' };"
+    );
+    let create_table = stmt!(
+        "CREATE TABLE IF NOT EXISTS examples.schema_meta (key text, value bigint, PRIMARY KEY \
+         (key));"
+    );
 
-    let create_func1 = stmt!("CREATE FUNCTION IF NOT EXISTS examples.avg_state(state tuple<int, bigint>, val int) \
-                              CALLED ON NULL INPUT RETURNS tuple<int, bigint> LANGUAGE java AS 'if (val != null) { \
-                              state.setInt(0, state.getInt(0) + 1); state.setLong(1, state.getLong(1) + \
-                              val.intValue()); } return state;';");
-    let create_func2 = stmt!("CREATE FUNCTION IF NOT EXISTS examples.avg_final (state tuple<int, bigint>) CALLED ON \
-                              NULL INPUT RETURNS double LANGUAGE java AS 'double r = 0; if (state.getInt(0) == 0) \
-                              return null; r = state.getLong(1); r /= state.getInt(0); return Double.valueOf(r);';");
+    let create_func1 = stmt!(
+        "CREATE FUNCTION IF NOT EXISTS examples.avg_state(state tuple<int, bigint>, val int) \
+         CALLED ON NULL INPUT RETURNS tuple<int, bigint> LANGUAGE java AS 'if (val != null) { \
+         state.setInt(0, state.getInt(0) + 1); state.setLong(1, state.getLong(1) + \
+         val.intValue()); } return state;';"
+    );
+    let create_func2 = stmt!(
+        "CREATE FUNCTION IF NOT EXISTS examples.avg_final (state tuple<int, bigint>) CALLED ON \
+         NULL INPUT RETURNS double LANGUAGE java AS 'double r = 0; if (state.getInt(0) == 0) \
+         return null; r = state.getLong(1); r /= state.getInt(0); return Double.valueOf(r);';"
+    );
 
-    let create_aggregate = stmt!("CREATE AGGREGATE examples.average(int) SFUNC avg_state STYPE tuple<int, bigint> \
-                                  FINALFUNC avg_final INITCOND(0, 0);");
-
+    let create_aggregate = stmt!(
+        "CREATE AGGREGATE examples.average(int) SFUNC avg_state STYPE tuple<int, bigint> \
+         FINALFUNC avg_final INITCOND(0, 0);"
+    );
 
     match cluster.connect() {
         Ok(ref mut session) => {
@@ -144,10 +152,12 @@ fn cass() -> Result<()> {
             let keyspace = schema.get_keyspace_by_name("examples");
             let mut table = keyspace.table_by_name("schema_meta").unwrap();
             print_table_meta(&mut table, 0);
-            print_function(session,
-                           "examples",
-                           "avg_state",
-                           vec!["tuple<int,bigint>", "int"])?;
+            print_function(
+                session,
+                "examples",
+                "avg_state",
+                vec!["tuple<int,bigint>", "int"],
+            )?;
             print_function(session, "examples", "avg_final", vec!["tuple<int,bigint>"])?;
             print_aggregate(session, "examples", "average", vec!["int"])?;
             Ok(())
@@ -156,12 +166,18 @@ fn cass() -> Result<()> {
     }
 }
 
-
-fn print_aggregate(session: &Session, keyspace: &str, aggregate: &str, arguments: Vec<&str>) -> Result<()> {
+fn print_aggregate(
+    session: &Session,
+    keyspace: &str,
+    aggregate: &str,
+    arguments: Vec<&str>,
+) -> Result<()> {
     let schema_meta = session.get_schema_meta();
     let keyspace_meta = schema_meta.get_keyspace_by_name(keyspace);
 
-    let aggregate_meta = keyspace_meta.aggregate_by_name(aggregate, arguments).unwrap();
+    let aggregate_meta = keyspace_meta
+        .aggregate_by_name(aggregate, arguments)
+        .unwrap();
     print_aggregate_meta(aggregate_meta, 0);
     Ok(())
     //    } else {
@@ -215,7 +231,6 @@ fn print_keyspace_meta(keyspace_meta: &mut KeyspaceMeta, indent: i32) {
 
     print_meta_fields(keyspace_meta.fields_iter(), indent + 1);
     println!("");
-
 
     for mut table_meta in keyspace_meta.table_iter() {
         print_table_meta(&mut table_meta, indent + 1);

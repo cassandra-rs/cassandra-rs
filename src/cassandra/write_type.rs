@@ -1,5 +1,5 @@
-use cassandra::util::Protected;
-use cassandra_sys::CassWriteType_;
+use crate::cassandra::util::Protected;
+use crate::cassandra_sys::CassWriteType_;
 
 /// A Cassandra write type level.
 #[derive(Debug, Eq, PartialEq, Copy, Clone, Hash)]

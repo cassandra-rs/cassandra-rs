@@ -2,29 +2,29 @@
 #![allow(dead_code)]
 #![allow(missing_copy_implementations)]
 
-use cassandra::data_type::ConstDataType;
-use cassandra::row::Row;
-use cassandra::util::Protected;
-use cassandra::value::ValueType;
-use cassandra::error::*;
+use crate::cassandra::data_type::ConstDataType;
+use crate::cassandra::error::*;
+use crate::cassandra::row::Row;
+use crate::cassandra::util::Protected;
+use crate::cassandra::value::ValueType;
 
-use cassandra_sys::CassIterator as _CassIterator;
-use cassandra_sys::CassResult as _CassResult;
-use cassandra_sys::cass_false;
-use cassandra_sys::cass_iterator_free;
-use cassandra_sys::cass_iterator_from_result;
-use cassandra_sys::cass_iterator_get_row;
-use cassandra_sys::cass_iterator_next;
-use cassandra_sys::cass_result_column_count;
-use cassandra_sys::cass_result_column_data_type;
-use cassandra_sys::cass_result_column_name;
-use cassandra_sys::cass_result_column_type;
-use cassandra_sys::cass_result_first_row;
-use cassandra_sys::cass_result_free;
-use cassandra_sys::cass_result_has_more_pages;
-use cassandra_sys::cass_result_paging_state_token;
-use cassandra_sys::cass_result_row_count;
-use cassandra_sys::cass_true;
+use crate::cassandra_sys::cass_false;
+use crate::cassandra_sys::cass_iterator_free;
+use crate::cassandra_sys::cass_iterator_from_result;
+use crate::cassandra_sys::cass_iterator_get_row;
+use crate::cassandra_sys::cass_iterator_next;
+use crate::cassandra_sys::cass_result_column_count;
+use crate::cassandra_sys::cass_result_column_data_type;
+use crate::cassandra_sys::cass_result_column_name;
+use crate::cassandra_sys::cass_result_column_type;
+use crate::cassandra_sys::cass_result_first_row;
+use crate::cassandra_sys::cass_result_free;
+use crate::cassandra_sys::cass_result_has_more_pages;
+use crate::cassandra_sys::cass_result_paging_state_token;
+use crate::cassandra_sys::cass_result_row_count;
+use crate::cassandra_sys::cass_true;
+use crate::cassandra_sys::CassIterator as _CassIterator;
+use crate::cassandra_sys::CassResult as _CassResult;
 
 use std::ffi::CString;
 use std::fmt;
@@ -44,8 +44,15 @@ unsafe impl Sync for CassResult {}
 unsafe impl Send for CassResult {}
 
 impl Protected<*const _CassResult> for CassResult {
-    fn inner(&self) -> *const _CassResult { self.0 }
-    fn build(inner: *const _CassResult) -> Self { if inner.is_null() { panic!("Unexpected null pointer") }; CassResult(inner) }
+    fn inner(&self) -> *const _CassResult {
+        self.0
+    }
+    fn build(inner: *const _CassResult) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        CassResult(inner)
+    }
 }
 
 impl Debug for CassResult {
@@ -68,30 +75,34 @@ impl Display for CassResult {
     }
 }
 
- impl Drop for CassResult {
+impl Drop for CassResult {
     fn drop(&mut self) {
         unsafe { cass_result_free(self.0) }
     }
- }
+}
 
 impl CassResult {
     /// Gets the number of rows for the specified result.
-    pub fn row_count(&self) -> u64 { unsafe { cass_result_row_count(self.0) as u64 } }
+    pub fn row_count(&self) -> u64 {
+        unsafe { cass_result_row_count(self.0) as u64 }
+    }
 
     /// Gets the number of columns per row for the specified result.
-    pub fn column_count(&self) -> u64 { unsafe { cass_result_column_count(self.0) as u64 } }
+    pub fn column_count(&self) -> u64 {
+        unsafe { cass_result_column_count(self.0) as u64 }
+    }
 
     /// Gets the column name at index for the specified result.
     pub fn column_name(&self, index: usize) -> Result<&str> {
         unsafe {
             let mut name = mem::zeroed();
             let mut name_length = mem::zeroed();
-            cass_result_column_name(self.0, index, &mut name, &mut name_length).to_result(())
+            cass_result_column_name(self.0, index, &mut name, &mut name_length)
+                .to_result(())
                 .and_then(|_| {
                     let slice = slice::from_raw_parts(name as *const u8, name_length as usize);
                     Ok(str::from_utf8(slice)?)
-                }
-            )
+                })
         }
     }
 
@@ -117,7 +128,9 @@ impl CassResult {
     }
 
     /// Returns true if there are more pages.
-    pub fn has_more_pages(&self) -> bool { unsafe { cass_result_has_more_pages(self.0) == cass_true } }
+    pub fn has_more_pages(&self) -> bool {
+        unsafe { cass_result_has_more_pages(self.0) == cass_true }
+    }
 
     /// Sets the statement's paging state. This can be used to get the next page of
     /// data in a multi-page query.
@@ -128,15 +141,20 @@ impl CassResult {
     pub fn set_paging_state_token(&mut self, paging_state: &str) -> Result<&mut Self> {
         unsafe {
             let state = CString::new(paging_state)?;
-            cass_result_paging_state_token(self.0, &mut state.as_ptr(), &mut (state.to_bytes().len()))
-                .to_result(self)
+            cass_result_paging_state_token(
+                self.0,
+                &mut state.as_ptr(),
+                &mut (state.to_bytes().len()),
+            )
+            .to_result(self)
         }
     }
 
-
     /// Creates a new iterator for the specified result. This can be
     /// used to iterate over rows in the result.
-    pub fn iter(&self) -> ResultIterator { unsafe { ResultIterator(cass_iterator_from_result(self.0), PhantomData) } }
+    pub fn iter(&self) -> ResultIterator {
+        unsafe { ResultIterator(cass_iterator_from_result(self.0), PhantomData) }
+    }
 }
 
 /// An iterator over the results of a query.
@@ -149,7 +167,9 @@ pub struct ResultIterator<'a>(pub *mut _CassIterator, PhantomData<&'a CassResult
 unsafe impl<'a> Send for ResultIterator<'a> {}
 
 impl<'a> Drop for ResultIterator<'a> {
-    fn drop(&mut self) { unsafe { cass_iterator_free(self.0) } }
+    fn drop(&mut self) {
+        unsafe { cass_iterator_free(self.0) }
+    }
 }
 
 impl<'a> Iterator for ResultIterator<'a> {
@@ -166,12 +186,16 @@ impl<'a> Iterator for ResultIterator<'a> {
 
 impl<'a> ResultIterator<'a> {
     /// Gets the next row in the result set
-    pub fn get_row(&mut self) -> Row { unsafe { Row::build(cass_iterator_get_row(self.0)) } }
+    pub fn get_row(&mut self) -> Row {
+        unsafe { Row::build(cass_iterator_get_row(self.0)) }
+    }
 }
 
 impl<'a> IntoIterator for &'a CassResult {
     type Item = Row;
     type IntoIter = ResultIterator<'a>;
 
-    fn into_iter(self) -> Self::IntoIter { self.iter() }
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
 }
