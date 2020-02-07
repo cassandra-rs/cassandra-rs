@@ -7,6 +7,7 @@
 This is a maintained Rust project that
 exposes the DataStax cpp driver at https://github.com/datastax/cpp-driver/
 in a somewhat-sane crate.
+It was originally a fork of https://github.com/tupshin/cassandra-rs but that is no longer maintained.
 
 It is a wrapper around the raw driver binding crate [cassandra-cpp-sys](https://github.com/Metaswitch/cassandra-sys-rs).
 
