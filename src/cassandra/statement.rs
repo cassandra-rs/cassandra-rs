@@ -745,7 +745,7 @@ impl Statement {
                 name.len(),
                 collection.inner(),
             )
-                .to_result(self)
+            .to_result(self)
         }
     }
 
@@ -768,7 +768,7 @@ impl Statement {
                 name.len(),
                 collection.inner(),
             )
-                .to_result(self)
+            .to_result(self)
         }
     }
 

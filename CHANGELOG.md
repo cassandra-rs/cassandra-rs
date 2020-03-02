@@ -8,6 +8,9 @@ version number is tracked in the file `VERSION`.
 
 ## [Unreleased]
 ### Added
+- Exposes separate setters for collection types on `Tuple` and `UserType`. As such, the respective
+  `set_collection` and `set_collection_by_name` on both types have been removed. `set_collection`
+  becomes `set_set` and `set_collection_by_name` becomes `set_set_by_name`.
 
 ### Changed
 - Change various functions to avoid the extra overhead using an intermidiate

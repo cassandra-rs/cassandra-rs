@@ -72,7 +72,8 @@ fn insert_into_basic(session: &Session, key: &str, basic: &Basic) -> Result<Cass
     session.execute(&statement).wait()
 }
 
-const SELECT_QUERY: &str = "SELECT key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct, txt \
+const SELECT_QUERY: &str =
+    "SELECT key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct, txt \
                             FROM examples.basic WHERE key = ?";
 
 fn select_from_basic(session: &Session, key: &str) -> Result<Option<Basic>> {

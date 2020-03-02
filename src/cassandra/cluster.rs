@@ -49,8 +49,8 @@ use crate::cassandra_sys::cass_session_new;
 use crate::cassandra_sys::cass_true;
 use crate::cassandra_sys::CassCluster as _Cluster;
 
-use std::ffi::NulError;
 use std::ffi::CStr;
+use std::ffi::NulError;
 use std::fmt;
 use std::fmt::Display;
 use std::iter::Map;
