@@ -71,6 +71,13 @@ impl Drop for DataType {
     }
 }
 
+impl ConstDataType {
+    /// Creates a new user defined type from existing data type.
+    pub fn new_user_type(&self) -> UserType {
+        unsafe { UserType::build(cass_user_type_new_from_data_type(self.0)) }
+    }
+}
+
 impl DataType {
     /// Creates a new data type with value type.
     pub fn new(value_type: ValueType) -> Self {
