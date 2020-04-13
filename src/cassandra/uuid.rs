@@ -106,32 +106,35 @@ impl Uuid {
 
 impl From<uuid::Uuid> for Uuid {
     fn from(id: uuid::Uuid) -> Uuid {
-        // implementation taken from serializetion.hpp
-        unsafe {
-            let input = id.as_bytes();
-            let mut uuid: _Uuid = mem::zeroed();
-            uuid.time_and_version = input[3] as u64;
-            uuid.time_and_version |= (input[2] as u64) << 8;
-            uuid.time_and_version |= (input[1] as u64) << 16;
-            uuid.time_and_version |= (input[0] as u64) << 24;
+        // implementation taken from serializetion.hpp encode_uuid()
+        let input = id.as_bytes();
 
-            uuid.time_and_version |= (input[5] as u64) << 32;
-            uuid.time_and_version |= (input[4] as u64) << 40;
+        let mut time_and_version = 0u64;
+        time_and_version |= input[3] as u64;
+        time_and_version |= (input[2] as u64) << 8;
+        time_and_version |= (input[1] as u64) << 16;
+        time_and_version |= (input[0] as u64) << 24;
 
-            uuid.time_and_version |= (input[7] as u64) << 48;
-            uuid.time_and_version |= (input[6] as u64) << 56;
+        time_and_version |= (input[5] as u64) << 32;
+        time_and_version |= (input[4] as u64) << 40;
 
-            for i in 0..8 {
-                uuid.clock_seq_and_node |= (input[15 - i] as u64) << (8 * i);
-            }
-            Uuid(uuid)
+        time_and_version |= (input[7] as u64) << 48;
+        time_and_version |= (input[6] as u64) << 56;
+
+        let mut clock_seq_and_node = 0u64;
+        for i in 0..8 {
+            clock_seq_and_node |= (input[15 - i] as u64) << (8 * i);
         }
+        Uuid(_Uuid {
+            time_and_version,
+            clock_seq_and_node,
+        })
     }
 }
 
 impl Into<uuid::Uuid> for Uuid {
     fn into(self) -> uuid::Uuid {
-        // implementation taken from serializetion.hpp
+        // implementation taken from serializetion.hpp decode_uuid()
         let mut output = [0u8; 16];
         output[3] = self.0.time_and_version as u8;
         output[2] = (self.0.time_and_version >> 8) as u8;
