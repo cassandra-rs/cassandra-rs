@@ -104,6 +104,53 @@ impl Uuid {
     }
 }
 
+impl From<uuid::Uuid> for Uuid {
+    fn from(id: uuid::Uuid) -> Uuid {
+        // implementation taken from serializetion.hpp
+        unsafe {
+            let input = id.as_bytes();
+            let mut uuid: _Uuid = mem::zeroed();
+            uuid.time_and_version = input[3] as u64;
+            uuid.time_and_version |= (input[2] as u64) << 8;
+            uuid.time_and_version |= (input[1] as u64) << 16;
+            uuid.time_and_version |= (input[0] as u64) << 24;
+
+            uuid.time_and_version |= (input[5] as u64) << 32;
+            uuid.time_and_version |= (input[4] as u64) << 40;
+
+            uuid.time_and_version |= (input[7] as u64) << 48;
+            uuid.time_and_version |= (input[6] as u64) << 56;
+
+            for i in 0..8 {
+                uuid.clock_seq_and_node |= (input[15 - i] as u64) << (8 * i);
+            }
+            Uuid(uuid)
+        }
+    }
+}
+
+impl Into<uuid::Uuid> for Uuid {
+    fn into(self) -> uuid::Uuid {
+        // implementation taken from serializetion.hpp
+        let mut output = [0u8; 16];
+        output[3] = self.0.time_and_version as u8;
+        output[2] = (self.0.time_and_version >> 8) as u8;
+        output[1] = (self.0.time_and_version >> 16) as u8;
+        output[0] = (self.0.time_and_version >> 24) as u8;
+
+        output[5] = (self.0.time_and_version >> 32) as u8;
+        output[4] = (self.0.time_and_version >> 40) as u8;
+
+        output[7] = (self.0.time_and_version >> 48) as u8;
+        output[6] = (self.0.time_and_version >> 56) as u8;
+
+        for i in 0..8 {
+            output[15 - i] = (self.0.clock_seq_and_node >> (8 * i)) as u8;
+        }
+        uuid::Uuid::from_bytes(&output).unwrap()
+    }
+}
+
 impl str::FromStr for Uuid {
     type Err = Error;
     fn from_str(str: &str) -> Result<Uuid> {

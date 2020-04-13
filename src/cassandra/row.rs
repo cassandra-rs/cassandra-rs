@@ -279,6 +279,21 @@ impl AsRustType<Uuid> for Row {
     }
 }
 
+impl AsRustType<uuid::Uuid> for Row {
+    fn get(&self, index: usize) -> Result<uuid::Uuid> {
+        let col = self.get_column(index)?;
+        col.get_uuid().map(|x| x.into())
+    }
+
+    fn get_by_name<S>(&self, name: S) -> Result<uuid::Uuid>
+    where
+        S: Into<String>,
+    {
+        let col = self.get_column_by_name(name)?;
+        col.get_uuid().map(|x| x.into())
+    }
+}
+
 impl AsRustType<Vec<u8>> for Row {
     fn get(&self, index: usize) -> Result<Vec<u8>> {
         let col = self.get_column(index)?;

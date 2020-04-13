@@ -1,6 +1,7 @@
 mod help;
 
 use cassandra_cpp::*;
+use std::str::FromStr;
 
 static TRUNCATE_QUERY: &'static str = "TRUNCATE examples.log;";
 static INSERT_QUERY: &'static str = "INSERT INTO examples.log (key, time, entry) VALUES (?, ?, ?);";
@@ -62,4 +63,16 @@ fn test_uuids() {
     let mut uniques = results.iter().map(|ref kv| kv.0).collect::<Vec<Uuid>>();
     uniques.dedup();
     assert_eq!(4, uniques.len());
+}
+
+#[test]
+fn test_uuids_from() {
+    const TEST_UUID: &'static str = "a0a1a2a3-a4a5-a6a7-a8a9-aaabacadaeaf";
+    let uuid_id_from_str = uuid::Uuid::parse_str(TEST_UUID).unwrap();
+    let cass_id_from_str = Uuid::from_str(TEST_UUID).unwrap();
+
+    let cass_id_from_uuid = Uuid::from(uuid_id_from_str);
+    let uuid_id_from_cass: uuid::Uuid = cass_id_from_str.into();
+    assert_eq!(uuid_id_from_str, uuid_id_from_cass);
+    assert_eq!(cass_id_from_str, cass_id_from_uuid);
 }
