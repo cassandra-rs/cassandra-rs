@@ -106,7 +106,8 @@ impl Uuid {
 
 impl From<uuid::Uuid> for Uuid {
     fn from(id: uuid::Uuid) -> Uuid {
-        // implementation taken from serializetion.hpp encode_uuid()
+        // implementation taken from Datastax C/C++ driver
+        // serialization.hpp, encode_uuid()
         let input = id.as_bytes();
 
         let mut time_and_version = 0u64;
@@ -132,23 +133,24 @@ impl From<uuid::Uuid> for Uuid {
     }
 }
 
-impl Into<uuid::Uuid> for Uuid {
-    fn into(self) -> uuid::Uuid {
-        // implementation taken from serializetion.hpp decode_uuid()
+impl From<Uuid> for uuid::Uuid {
+    fn from(id: Uuid) -> uuid::Uuid {
+        // implementation taken from Datastax C/C++ driver
+        // serialization.hpp decode_uuid()
         let mut output = [0u8; 16];
-        output[3] = self.0.time_and_version as u8;
-        output[2] = (self.0.time_and_version >> 8) as u8;
-        output[1] = (self.0.time_and_version >> 16) as u8;
-        output[0] = (self.0.time_and_version >> 24) as u8;
+        output[3] = id.0.time_and_version as u8;
+        output[2] = (id.0.time_and_version >> 8) as u8;
+        output[1] = (id.0.time_and_version >> 16) as u8;
+        output[0] = (id.0.time_and_version >> 24) as u8;
 
-        output[5] = (self.0.time_and_version >> 32) as u8;
-        output[4] = (self.0.time_and_version >> 40) as u8;
+        output[5] = (id.0.time_and_version >> 32) as u8;
+        output[4] = (id.0.time_and_version >> 40) as u8;
 
-        output[7] = (self.0.time_and_version >> 48) as u8;
-        output[6] = (self.0.time_and_version >> 56) as u8;
+        output[7] = (id.0.time_and_version >> 48) as u8;
+        output[6] = (id.0.time_and_version >> 56) as u8;
 
         for i in 0..8 {
-            output[15 - i] = (self.0.clock_seq_and_node >> (8 * i)) as u8;
+            output[15 - i] = (id.0.clock_seq_and_node >> (8 * i)) as u8;
         }
         uuid::Uuid::from_bytes(&output).unwrap()
     }

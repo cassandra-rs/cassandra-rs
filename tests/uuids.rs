@@ -72,7 +72,7 @@ fn test_uuids_from() {
     let cass_id_from_str = Uuid::from_str(TEST_UUID).unwrap();
 
     let cass_id_from_uuid = Uuid::from(uuid_id_from_str);
-    let uuid_id_from_cass: uuid::Uuid = cass_id_from_str.into();
+    let uuid_id_from_cass = uuid::Uuid::from(cass_id_from_str);
     assert_eq!(uuid_id_from_str, uuid_id_from_cass);
     assert_eq!(cass_id_from_str, cass_id_from_uuid);
 }
