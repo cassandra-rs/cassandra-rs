@@ -39,8 +39,8 @@ use crate::cassandra_sys::cass_statement_bind_int8;
 use crate::cassandra_sys::cass_statement_bind_int8_by_name;
 use crate::cassandra_sys::cass_statement_bind_null;
 use crate::cassandra_sys::cass_statement_bind_null_by_name;
-use crate::cassandra_sys::cass_statement_bind_string;
-use crate::cassandra_sys::cass_statement_bind_string_by_name;
+use crate::cassandra_sys::cass_statement_bind_string_by_name_n;
+use crate::cassandra_sys::cass_statement_bind_string_n;
 use crate::cassandra_sys::cass_statement_bind_tuple;
 use crate::cassandra_sys::cass_statement_bind_tuple_by_name;
 use crate::cassandra_sys::cass_statement_bind_uint32;
@@ -66,6 +66,7 @@ use crate::cassandra_sys::CassStatement as _Statement;
 use crate::cassandra_sys::CASS_UINT64_MAX;
 
 use std::ffi::CString;
+use std::os::raw::c_char;
 use time::Duration;
 /// A statement object is an executable query. It represents either a regular
 /// (adhoc) statement or a prepared statement. It maintains the queries' parameter
@@ -573,8 +574,8 @@ impl Statement {
     /// at the specified index.
     pub fn bind_string(&mut self, index: usize, value: &str) -> Result<&mut Self> {
         unsafe {
-            let value_cstr = CString::new(value)?;
-            cass_statement_bind_string(self.0, index, value_cstr.as_ptr()).to_result(self)
+            let value_ptr = value.as_ptr() as *const c_char;
+            cass_statement_bind_string_n(self.0, index, value_ptr, value.len()).to_result(self)
         }
     }
 
@@ -585,10 +586,16 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_string_by_name(&mut self, name: &str, value: &str) -> Result<&mut Self> {
         unsafe {
-            let name_cstr = CString::new(name)?;
-            let value_cstr = CString::new(value)?;
-            cass_statement_bind_string_by_name(self.0, name_cstr.as_ptr(), value_cstr.as_ptr())
-                .to_result(self)
+            let name_ptr = name.as_ptr() as *const c_char;
+            let value_ptr = value.as_ptr() as *const c_char;
+            cass_statement_bind_string_by_name_n(
+                self.0,
+                name_ptr,
+                name.len(),
+                value_ptr,
+                value.len(),
+            )
+            .to_result(self)
         }
     }
 
