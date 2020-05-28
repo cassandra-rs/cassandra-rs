@@ -8,7 +8,9 @@ version number is tracked in the file `VERSION`.
 
 ## [Unreleased]
 ### Added
+- Conversion functions between `uuid::Uuid` and this library's `Uuid`.
 ### Changed
+- `PreparedStatement` is now considered `Sync`, and can be shared across threads.
 ### Fixed
 
 ## [0.15.0] - 2020-01-28
