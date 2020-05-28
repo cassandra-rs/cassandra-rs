@@ -17,9 +17,8 @@ use std::{mem, slice, str};
 #[derive(Debug)]
 pub struct PreparedStatement(*const _PreparedStatement);
 
-// The underlying C type has no thread-local state, but does not support access
-// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
 unsafe impl Send for PreparedStatement {}
+unsafe impl Sync for PreparedStatement {}
 
 impl Drop for PreparedStatement {
     /// Frees a prepared statement
