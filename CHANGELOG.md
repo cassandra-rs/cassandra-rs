@@ -8,6 +8,7 @@ version number is tracked in the file `VERSION`.
 
 ## [Unreleased]
 ### Added
+- Conversion functions between `uuid::Uuid` and this library's `Uuid`.
 ### Changed
 ### Fixed
 
