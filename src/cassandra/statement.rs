@@ -257,6 +257,16 @@ impl BindRustType<Uuid> for Statement {
     }
 }
 
+impl BindRustType<uuid::Uuid> for Statement {
+    fn bind(&mut self, index: usize, value: uuid::Uuid) -> Result<&mut Self> {
+        self.bind_uuid(index, value.into())
+    }
+
+    fn bind_by_name(&mut self, col: &str, value: uuid::Uuid) -> Result<&mut Self> {
+        self.bind_uuid_by_name(col, value.into())
+    }
+}
+
 impl BindRustType<Inet> for Statement {
     fn bind(&mut self, index: usize, value: Inet) -> Result<&mut Self> {
         self.bind_inet(index, value)
