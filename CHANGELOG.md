@@ -8,10 +8,20 @@ version number is tracked in the file `VERSION`.
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Fixed
+
+## [0.15.1] - 2020-06-02
+### Added
 - Conversion functions between `uuid::Uuid` and this library's `Uuid`.
+
 ### Changed
 - `PreparedStatement` is now considered `Sync`, and can be shared across threads.
+
 ### Fixed
+- Remove unnecessary `build.rs`, making it easier to build the crate.
 
 ## [0.15.0] - 2020-01-28
 ### Changed
@@ -24,7 +34,6 @@ version number is tracked in the file `VERSION`.
 ### Added
 - Adds a new method, `Cluster.connect_async` that returns a future, allowing
   you to connect to the cluster without blocking the event loop.
-
 
 ## [0.14.1] - 2019-11-07
 ### Changed
@@ -165,7 +174,9 @@ First release of https://github.com/Metaswitch/cassandra-rs
 ## [0.8.1] - 2016-12-13
 Last release of https://github.com/tupshin/cassandra-rs
 
-[Unreleased]: https://github.com/Metaswitch/cassandra-rs/compare/0.14.0...HEAD
+[Unreleased]: https://github.com/Metaswitch/cassandra-rs/compare/0.15.1...HEAD
+[0.15.1]: https://github.com/Metaswitch/cassandra-rs/compare/0.15.0...0.15.1
+[0.15.0]: https://github.com/Metaswitch/cassandra-rs/compare/0.14.0...0.15.0
 [0.14.0]: https://github.com/Metaswitch/cassandra-rs/compare/0.13.2...0.14.0
 [0.13.2]: https://github.com/Metaswitch/cassandra-rs/compare/0.13.1...0.13.2
 [0.13.1]: https://github.com/Metaswitch/cassandra-rs/compare/0.13.0...0.13.1
