@@ -150,6 +150,24 @@ impl CassResult {
         }
     }
 
+    /// Gets the statement's paging state. This can be used to get the next page of
+    /// data in a multi-page query.
+    ///
+    /// <b>Warning:</b> The paging state should not be exposed to or come from
+    /// untrusted environments. The paging state could be spoofed and potentially
+    // used to gain access to other data.
+    pub fn get_paging_state_token(&self) -> Result<String> {
+        unsafe {
+            let state = CString::new("")?;
+            cass_result_paging_state_token(
+                self.0,
+                &mut state.as_ptr(),
+                &mut (state.to_bytes().len()),
+            )
+            .to_result(state.to_string_lossy().to_string())
+        }
+    }
+
     /// Creates a new iterator for the specified result. This can be
     /// used to iterate over rows in the result.
     pub fn iter(&self) -> ResultIterator {
