@@ -10,7 +10,7 @@ struct Udt {
     tm: i64,
 }
 
-#[derive(Debug, PartialEq, Copy, Clone, Default)]
+#[derive(Debug, PartialEq, Clone, Default)]
 struct Basic {
     bln: bool,
     flt: f32,
@@ -24,6 +24,7 @@ struct Basic {
     tu: Uuid,
     id: Uuid,
     ct: Udt,
+    txt: String,
 }
 
 /// Create the table for basic testing.
@@ -33,7 +34,7 @@ fn create_basic_table(session: &Session) {
     let table_statement = &stmt!(
         "CREATE TABLE IF NOT EXISTS examples.basic (key text, bln boolean, flt \
          float, dbl double, i8 tinyint, i16 smallint, i32 int, i64 bigint, \
-         ts timestamp, addr inet, tu timeuuid, id uuid, ct udt, PRIMARY KEY (key));"
+         ts timestamp, addr inet, tu timeuuid, id uuid, ct udt, txt text, PRIMARY KEY (key));"
     );
     session.execute(table_statement).wait().unwrap();
     let truncate_statement = &stmt!("TRUNCATE examples.basic;");
@@ -42,8 +43,8 @@ fn create_basic_table(session: &Session) {
 
 fn insert_into_basic(session: &Session, key: &str, basic: &Basic) -> Result<CassResult> {
     let mut statement = stmt!(
-        "INSERT INTO examples.basic (key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct) \
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+        "INSERT INTO examples.basic (key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct, txt) \
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
     );
 
     let ct_type = DataType::new_udt(2);
@@ -66,11 +67,12 @@ fn insert_into_basic(session: &Session, key: &str, basic: &Basic) -> Result<Cass
     statement.bind(10, basic.tu)?;
     statement.bind(11, basic.id)?;
     statement.bind(12, &ct_udt)?;
+    statement.bind(13, basic.txt.as_str())?;
 
     session.execute(&statement).wait()
 }
 
-const SELECT_QUERY: &str = "SELECT key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct \
+const SELECT_QUERY: &str = "SELECT key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct, txt \
                             FROM examples.basic WHERE key = ?";
 
 fn select_from_basic(session: &Session, key: &str) -> Result<Option<Basic>> {
@@ -105,6 +107,7 @@ fn select_from_basic(session: &Session, key: &str) -> Result<Option<Basic>> {
                 tu: row.get(10)?,
                 id: row.get(11)?,
                 ct: Udt { dt: dt, tm: tm },
+                txt: row.get(13)?,
             }))
         }
     }
@@ -133,6 +136,7 @@ fn select_from_basic_prepared(
         basic.addr = row.get(9)?;
         basic.tu = row.get(10)?;
         basic.id = row.get(11)?;
+        basic.txt = row.get(13)?;
 
         let fields_iter: UserTypeIterator = row.get(12)?;
         let mut dt: u32 = 0;
@@ -209,6 +213,7 @@ fn test_basic_round_trip() {
             dt: ts as u32,
             tm: ts as i64,
         },
+        txt: "some\0text".to_string(),
     };
 
     insert_into_basic(&session, "test", &input).unwrap();
@@ -250,6 +255,7 @@ fn test_prepared_round_trip() {
             dt: ts as u32,
             tm: ts as i64,
         },
+        txt: "some\0text".to_string(),
     };
     let mut output = Basic::default();
 
@@ -278,7 +284,7 @@ fn test_null_retrieval() {
 
     // Read the whole row.
     let query = stmt!(
-        "SELECT key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct \
+        "SELECT key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct, txt \
          FROM examples.basic WHERE key = 'vacant';"
     );
     let result = session.execute(&query).wait().expect("select");
@@ -338,6 +344,10 @@ fn test_null_retrieval() {
     let c = row.get_column(12).expect("should be present");
     c.get_user_type().expect_err("should be null");
     assert!(c.is_null());
+
+    let c = row.get_column(13).expect("should be present");
+    c.get_user_type().expect_err("should be null");
+    assert!(c.is_null());
 }
 
 #[test]
@@ -348,8 +358,8 @@ fn test_null_insertion() {
 
     // Insert some explicit nulls.
     let mut s = stmt!(
-        "INSERT INTO examples.basic (key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct) \
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+        "INSERT INTO examples.basic (key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct, txt) \
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
     );
     s.bind(0, "shrdlu").unwrap();
     s.bind(1, false).unwrap();
@@ -364,11 +374,12 @@ fn test_null_insertion() {
     s.bind_null(10).unwrap();
     s.bind_null(11).unwrap();
     s.bind_null(12).unwrap();
+    s.bind_null(13).unwrap();
     session.execute(&s).wait().unwrap();
 
     // Read them back.
     let s = stmt!(
-        "SELECT key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct \
+        "SELECT key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct, txt \
          FROM examples.basic WHERE key = 'shrdlu';"
     );
     let result = session.execute(&s).wait().expect("select");
@@ -388,6 +399,7 @@ fn test_null_insertion() {
     assert!(row.get_column(10).unwrap().is_null());
     assert!(row.get_column(11).unwrap().is_null());
     assert!(row.get_column(12).unwrap().is_null());
+    assert!(row.get_column(13).unwrap().is_null());
 }
 
 /// Check for a needle in a haystack, and fail if not present.
@@ -498,17 +510,6 @@ fn test_error_reporting() {
     println!("Got error {} kind {:?}", err, err.kind());
     match *err.kind() {
         ErrorKind::InvalidUtf8(_) => (),
-        ref k => panic!("Unexpected error kind {}", k),
-    }
-
-    // NUL error
-    let mut query = stmt!("SELECT ? from system_schema.tables;");
-    let err = query
-        .bind(0, "safe\0nasty!")
-        .expect_err("Should have failed!");
-    println!("Got error {} kind {:?}", err, err.kind());
-    match *err.kind() {
-        ErrorKind::StringContainsNul(_) => (),
         ref k => panic!("Unexpected error kind {}", k),
     }
 }
