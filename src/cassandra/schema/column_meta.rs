@@ -4,7 +4,7 @@ use crate::cassandra::iterator::FieldIterator;
 use crate::cassandra::util::Protected;
 use crate::cassandra::value::Value;
 use crate::cassandra_sys::cass_column_meta_data_type;
-use crate::cassandra_sys::cass_column_meta_field_by_name;
+use crate::cassandra_sys::cass_column_meta_field_by_name_n;
 use crate::cassandra_sys::cass_column_meta_name;
 use crate::cassandra_sys::cass_column_meta_type;
 use crate::cassandra_sys::cass_iterator_fields_from_column_meta;
@@ -15,8 +15,8 @@ use crate::cassandra_sys::CassColumnType as _CassColumnType;
 #[derive(Debug)]
 pub struct ColumnMeta(*const _CassColumnMeta);
 
-use std::ffi::CString;
 use std::mem;
+use std::os::raw::c_char;
 use std::slice;
 use std::str;
 
@@ -64,8 +64,8 @@ impl ColumnMeta {
     /// access to the column data found in the underlying "columns" metadata table.
     pub fn field_by_name(&self, name: &str) -> Option<Value> {
         unsafe {
-            let name_cstr = CString::new(name).expect("must be utf8");
-            let field = cass_column_meta_field_by_name(self.0, name_cstr.as_ptr());
+            let name_ptr = name.as_ptr() as *const c_char;
+            let field = cass_column_meta_field_by_name_n(self.0, name_ptr, name.len());
             if field.is_null() {
                 None
             } else {

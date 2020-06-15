@@ -1,7 +1,7 @@
 use crate::cassandra::error::*;
 use crate::cassandra::util::Protected;
 
-use crate::cassandra_sys::cass_uuid_from_string;
+use crate::cassandra_sys::cass_uuid_from_string_n;
 use crate::cassandra_sys::cass_uuid_gen_free;
 use crate::cassandra_sys::cass_uuid_gen_from_time;
 use crate::cassandra_sys::cass_uuid_gen_new;
@@ -22,6 +22,7 @@ use std::fmt;
 use std::fmt::Formatter;
 use std::fmt::{Debug, Display};
 use std::mem;
+use std::os::raw::c_char;
 use std::str;
 
 const CASS_UUID_STRING_LENGTH: usize = 37;
@@ -161,8 +162,8 @@ impl str::FromStr for Uuid {
     fn from_str(str: &str) -> Result<Uuid> {
         unsafe {
             let mut uuid = mem::zeroed();
-            let str_cstr = CString::new(str)?;
-            cass_uuid_from_string(str_cstr.as_ptr(), &mut uuid)
+            let str_ptr = str.as_ptr() as *const c_char;
+            cass_uuid_from_string_n(str_ptr, str.len(), &mut uuid)
                 .to_result(())
                 .and_then(|_| Ok(Uuid(uuid)))
         }

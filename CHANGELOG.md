@@ -10,6 +10,8 @@ version number is tracked in the file `VERSION`.
 ### Added
 
 ### Changed
+- Change various functions to avoid the extra overhead using an intermidiate
+  CString object.
 
 ### Fixed
 

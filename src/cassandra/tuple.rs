@@ -25,15 +25,15 @@ use crate::cassandra_sys::cass_tuple_set_int32;
 use crate::cassandra_sys::cass_tuple_set_int64;
 use crate::cassandra_sys::cass_tuple_set_int8;
 use crate::cassandra_sys::cass_tuple_set_null;
-use crate::cassandra_sys::cass_tuple_set_string;
+use crate::cassandra_sys::cass_tuple_set_string_n;
 use crate::cassandra_sys::cass_tuple_set_tuple;
 use crate::cassandra_sys::cass_tuple_set_uint32;
 use crate::cassandra_sys::cass_tuple_set_user_type;
 use crate::cassandra_sys::cass_tuple_set_uuid;
 use crate::cassandra_sys::CassTuple as _Tuple;
 
-use std::ffi::CString;
 use std::net::IpAddr;
+use std::os::raw::c_char;
 
 /// A tuple of values.
 #[derive(Debug)]
@@ -126,8 +126,9 @@ impl Tuple {
         S: Into<String>,
     {
         unsafe {
-            let value_cstr = CString::new(value.into())?;
-            cass_tuple_set_string(self.0, index, value_cstr.as_ptr()).to_result(self)
+            let value_str = value.into();
+            let value_ptr = value_str.as_ptr() as *const c_char;
+            cass_tuple_set_string_n(self.0, index, value_ptr, value_str.len()).to_result(self)
         }
     }
 

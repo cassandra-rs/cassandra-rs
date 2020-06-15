@@ -4,10 +4,10 @@ use crate::cassandra::schema::keyspace_meta::KeyspaceMeta;
 use crate::cassandra::util::Protected;
 use crate::cassandra_sys::cass_iterator_keyspaces_from_schema_meta;
 use crate::cassandra_sys::cass_schema_meta_free;
-use crate::cassandra_sys::cass_schema_meta_keyspace_by_name;
+use crate::cassandra_sys::cass_schema_meta_keyspace_by_name_n;
 use crate::cassandra_sys::cass_schema_meta_snapshot_version;
 use crate::cassandra_sys::CassSchemaMeta as _CassSchemaMeta;
-use std::ffi::CString;
+use std::os::raw::c_char;
 
 /// A snapshot of the schema's metadata
 #[derive(Debug)]
@@ -43,10 +43,11 @@ impl SchemaMeta {
     pub fn get_keyspace_by_name(&self, keyspace: &str) -> KeyspaceMeta {
         // TODO: can return NULL
         unsafe {
-            let keyspace_cstr = CString::new(keyspace).expect("Unable to convert string to bytes");
-            KeyspaceMeta::build(cass_schema_meta_keyspace_by_name(
+            let keyspace_ptr = keyspace.as_ptr() as *const c_char;
+            KeyspaceMeta::build(cass_schema_meta_keyspace_by_name_n(
                 self.0,
-                keyspace_cstr.as_ptr(),
+                keyspace_ptr,
+                keyspace.len(),
             ))
         }
     }

@@ -6,10 +6,10 @@ use crate::cassandra::value::Value;
 
 use crate::cassandra_sys::cass_function_meta_argument;
 use crate::cassandra_sys::cass_function_meta_argument_count;
-use crate::cassandra_sys::cass_function_meta_argument_type_by_name;
+use crate::cassandra_sys::cass_function_meta_argument_type_by_name_n;
 use crate::cassandra_sys::cass_function_meta_body;
 use crate::cassandra_sys::cass_function_meta_called_on_null_input;
-use crate::cassandra_sys::cass_function_meta_field_by_name;
+use crate::cassandra_sys::cass_function_meta_field_by_name_n;
 use crate::cassandra_sys::cass_function_meta_full_name;
 use crate::cassandra_sys::cass_function_meta_language;
 use crate::cassandra_sys::cass_function_meta_name;
@@ -19,7 +19,7 @@ use crate::cassandra_sys::cass_true;
 use crate::cassandra_sys::CassFunctionMeta as _CassFunctionMeta;
 use crate::cassandra_sys::CASS_OK;
 
-use std::ffi::CString;
+use std::os::raw::c_char;
 use std::{mem, slice, str};
 
 /// The metadata for a function
@@ -135,11 +135,12 @@ impl FunctionMeta {
     /// Gets the function's argument and type for the provided name.
     pub fn argument_type_by_name(&self, name: &str) -> ConstDataType {
         unsafe {
-            let name_cstr = CString::new(name).expect("must be utf8");
+            let name_ptr = name.as_ptr() as *const c_char;
             // TODO: can return NULL
-            ConstDataType::build(cass_function_meta_argument_type_by_name(
+            ConstDataType::build(cass_function_meta_argument_type_by_name_n(
                 self.0,
-                name_cstr.as_ptr(),
+                name_ptr,
+                name.len(),
             ))
         }
     }
@@ -153,9 +154,13 @@ impl FunctionMeta {
     /// access to the column data found in the underlying "functions" metadata table.
     pub fn field_by_name(&self, name: &str) -> Value {
         unsafe {
-            let name_cstr = CString::new(name).expect("must be utf8");
+            let name_ptr = name.as_ptr() as *const c_char;
             // TODO: can return NULL
-            Value::build(cass_function_meta_field_by_name(self.0, name_cstr.as_ptr()))
+            Value::build(cass_function_meta_field_by_name_n(
+                self.0,
+                name_ptr,
+                name.len(),
+            ))
         }
     }
 }

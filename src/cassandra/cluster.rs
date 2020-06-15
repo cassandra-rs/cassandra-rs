@@ -11,14 +11,14 @@ use crate::cassandra_sys::cass_cluster_new;
 use crate::cassandra_sys::cass_cluster_set_connect_timeout;
 use crate::cassandra_sys::cass_cluster_set_connection_heartbeat_interval;
 use crate::cassandra_sys::cass_cluster_set_connection_idle_timeout;
-use crate::cassandra_sys::cass_cluster_set_contact_points;
+use crate::cassandra_sys::cass_cluster_set_contact_points_n;
 use crate::cassandra_sys::cass_cluster_set_core_connections_per_host;
-use crate::cassandra_sys::cass_cluster_set_credentials;
+use crate::cassandra_sys::cass_cluster_set_credentials_n;
 use crate::cassandra_sys::cass_cluster_set_latency_aware_routing;
 use crate::cassandra_sys::cass_cluster_set_latency_aware_routing_settings;
-use crate::cassandra_sys::cass_cluster_set_load_balance_dc_aware;
+use crate::cassandra_sys::cass_cluster_set_load_balance_dc_aware_n;
 use crate::cassandra_sys::cass_cluster_set_load_balance_round_robin;
-use crate::cassandra_sys::cass_cluster_set_local_address;
+use crate::cassandra_sys::cass_cluster_set_local_address_n;
 use crate::cassandra_sys::cass_cluster_set_max_concurrent_creation;
 use crate::cassandra_sys::cass_cluster_set_max_concurrent_requests_threshold;
 use crate::cassandra_sys::cass_cluster_set_max_connections_per_host;
@@ -50,12 +50,13 @@ use crate::cassandra_sys::cass_true;
 use crate::cassandra_sys::CassCluster as _Cluster;
 
 use std::ffi::NulError;
-use std::ffi::{CStr, CString};
+use std::ffi::CStr;
 use std::fmt;
 use std::fmt::Display;
 use std::iter::Map;
 use std::net::AddrParseError;
 use std::net::Ipv4Addr;
+use std::os::raw::c_char;
 use std::result;
 use std::str::FromStr;
 use time::Duration;
@@ -120,8 +121,8 @@ impl Cluster {
     ///
     pub fn set_contact_points(&mut self, contact_points: &str) -> Result<&mut Self> {
         unsafe {
-            let s = CString::new(contact_points.clone())?;
-            let err = cass_cluster_set_contact_points(self.0, s.as_ptr());
+            let cp_ptr = contact_points.as_ptr() as *const c_char;
+            let err = cass_cluster_set_contact_points_n(self.0, cp_ptr, contact_points.len());
             err.to_result(self)
         }
     }
@@ -132,8 +133,8 @@ impl Cluster {
     /// Only numeric addresses are supported.
     pub fn set_local_address(&mut self, name: &str) -> Result<&mut Self> {
         unsafe {
-            let s = CString::new(name.clone())?;
-            let err = cass_cluster_set_local_address(self.0, s.as_ptr());
+            let name_ptr = name.as_ptr() as *const c_char;
+            let err = cass_cluster_set_local_address_n(self.0, name_ptr, name.len());
             err.to_result(self)
         }
     }
@@ -358,9 +359,15 @@ impl Cluster {
     /// Sets credentials for plain text authentication.
     pub fn set_credentials(&mut self, username: &str, password: &str) -> Result<&mut Self> {
         unsafe {
-            let username_cstr = CString::new(username)?;
-            let password_cstr = CString::new(password)?;
-            cass_cluster_set_credentials(self.0, username_cstr.as_ptr(), password_cstr.as_ptr());
+            let username_ptr = username.as_ptr() as *const c_char;
+            let password_ptr = password.as_ptr() as *const c_char;
+            cass_cluster_set_credentials_n(
+                self.0,
+                username_ptr,
+                username.len(),
+                password_ptr,
+                password.len(),
+            );
         }
         Ok(self)
     }
@@ -394,10 +401,11 @@ impl Cluster {
     ) -> Result<&mut Self> {
         unsafe {
             {
-                let local_dc = CString::new(local_dc)?;
-                cass_cluster_set_load_balance_dc_aware(
+                let local_dc_ptr = local_dc.as_ptr() as *const c_char;
+                cass_cluster_set_load_balance_dc_aware_n(
                     self.0,
-                    local_dc.as_ptr(),
+                    local_dc_ptr,
+                    local_dc.len(),
                     used_hosts_per_remote_dc,
                     if allow_remote_dcs_for_local_cl {
                         cass_true

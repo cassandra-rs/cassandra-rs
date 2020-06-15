@@ -50,10 +50,10 @@ use crate::cassandra_sys::cass_statement_bind_user_type_by_name_n;
 use crate::cassandra_sys::cass_statement_bind_uuid;
 use crate::cassandra_sys::cass_statement_bind_uuid_by_name_n;
 use crate::cassandra_sys::cass_statement_free;
-use crate::cassandra_sys::cass_statement_new;
+use crate::cassandra_sys::cass_statement_new_n;
 use crate::cassandra_sys::cass_statement_set_consistency;
 use crate::cassandra_sys::cass_statement_set_custom_payload;
-use crate::cassandra_sys::cass_statement_set_keyspace;
+use crate::cassandra_sys::cass_statement_set_keyspace_n;
 use crate::cassandra_sys::cass_statement_set_paging_size;
 use crate::cassandra_sys::cass_statement_set_paging_state;
 use crate::cassandra_sys::cass_statement_set_paging_state_token;
@@ -65,7 +65,6 @@ use crate::cassandra_sys::cass_true;
 use crate::cassandra_sys::CassStatement as _Statement;
 use crate::cassandra_sys::CASS_UINT64_MAX;
 
-use std::ffi::CString;
 use std::os::raw::c_char;
 use time::Duration;
 /// A statement object is an executable query. It represents either a regular
@@ -322,8 +321,12 @@ impl Statement {
     /// Creates a new query statement.
     pub fn new(query: &str, parameter_count: usize) -> Self {
         unsafe {
-            let query_cstr = CString::new(query).expect("must be utf8");
-            Statement(cass_statement_new(query_cstr.as_ptr(), parameter_count))
+            let query_ptr = query.as_ptr() as *const c_char;
+            Statement(cass_statement_new_n(
+                query_ptr,
+                query.len(),
+                parameter_count,
+            ))
         }
     }
 
@@ -357,8 +360,8 @@ impl Statement {
     /// is determined in the metadata processed in the prepare phase.
     pub fn set_keyspace(&mut self, keyspace: String) -> Result<&mut Self> {
         unsafe {
-            let keyspace_cstr = CString::new(keyspace)?;
-            cass_statement_set_keyspace(self.0, keyspace_cstr.as_ptr()).to_result(self)
+            let keyspace_ptr = keyspace.as_ptr() as *const c_char;
+            cass_statement_set_keyspace_n(self.0, keyspace_ptr, keyspace.len()).to_result(self)
         }
     }
 

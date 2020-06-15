@@ -1,16 +1,16 @@
 use crate::cassandra::error::*;
 use crate::cassandra::util::Protected;
 
-use crate::cassandra_sys::cass_ssl_add_trusted_cert;
+use crate::cassandra_sys::cass_ssl_add_trusted_cert_n;
 use crate::cassandra_sys::cass_ssl_free;
 use crate::cassandra_sys::cass_ssl_new;
-use crate::cassandra_sys::cass_ssl_set_cert;
-use crate::cassandra_sys::cass_ssl_set_private_key;
+use crate::cassandra_sys::cass_ssl_set_cert_n;
+use crate::cassandra_sys::cass_ssl_set_private_key_n;
 use crate::cassandra_sys::cass_ssl_set_verify_flags;
 use crate::cassandra_sys::CassSsl as _Ssl;
 use crate::cassandra_sys::CassSslVerifyFlags;
 
-use std::ffi::CString;
+use std::os::raw::c_char;
 
 /// The individual SSL verification levels.
 #[derive(Debug, Eq, PartialEq, Copy, Clone, Hash)]
@@ -77,8 +77,8 @@ impl Ssl {
     /// the peer's certificate.
     pub fn add_trusted_cert(&mut self, cert: &str) -> Result<&mut Self> {
         unsafe {
-            let cert_cstr = CString::new(cert)?;
-            cass_ssl_add_trusted_cert(self.0, cert_cstr.as_ptr()).to_result(self)
+            let cert_ptr = cert.as_ptr() as *const c_char;
+            cass_ssl_add_trusted_cert_n(self.0, cert_ptr, cert.len()).to_result(self)
         }
     }
 
@@ -102,8 +102,8 @@ impl Ssl {
     /// Certificate chain starting with the certificate itself.
     pub fn set_cert(&mut self, cert: &str) -> Result<&mut Self> {
         unsafe {
-            let cert_cstr = CString::new(cert)?;
-            cass_ssl_set_cert(self.0, cert_cstr.as_ptr()).to_result(self)
+            let cert_ptr = cert.as_ptr() as *const c_char;
+            cass_ssl_set_cert_n(self.0, cert_ptr, cert.len()).to_result(self)
         }
     }
 
@@ -111,8 +111,9 @@ impl Ssl {
     /// the client on the server-side.
     pub fn set_private_key(&mut self, key: &str, password: &str) -> Result<&mut Self> {
         unsafe {
-            let key_cstr = CString::new(key)?;
-            cass_ssl_set_private_key(self.0, key_cstr.as_ptr(), password.as_ptr() as *const i8)
+            let key_ptr = key.as_ptr() as *const c_char;
+            let password_ptr = key.as_ptr() as *const c_char;
+            cass_ssl_set_private_key_n(self.0, key_ptr, key.len(), password_ptr, password.len())
                 .to_result(self)
         }
     }

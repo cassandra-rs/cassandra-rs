@@ -18,7 +18,7 @@ use crate::cassandra_sys::cass_collection_append_int16;
 use crate::cassandra_sys::cass_collection_append_int32;
 use crate::cassandra_sys::cass_collection_append_int64;
 use crate::cassandra_sys::cass_collection_append_int8;
-use crate::cassandra_sys::cass_collection_append_string;
+use crate::cassandra_sys::cass_collection_append_string_n;
 use crate::cassandra_sys::cass_collection_append_tuple;
 use crate::cassandra_sys::cass_collection_append_uint32;
 use crate::cassandra_sys::cass_collection_append_user_type;
@@ -34,7 +34,7 @@ use crate::cassandra_sys::CASS_COLLECTION_TYPE_LIST;
 use crate::cassandra_sys::CASS_COLLECTION_TYPE_MAP;
 use crate::cassandra_sys::CASS_COLLECTION_TYPE_SET;
 
-use std::ffi::CString;
+use std::os::raw::c_char;
 
 // #[repr(C)]
 // #[derive(Debug,Copy,Clone)]
@@ -230,8 +230,8 @@ impl CassCollection for List {
     /// Appends an "ascii", "text" or "varchar" to the collection.
     fn append_string(&mut self, value: &str) -> Result<&mut Self> {
         unsafe {
-            let cstr = CString::new(value)?;
-            let result = cass_collection_append_string(self.inner(), cstr.as_ptr());
+            let value_ptr = value.as_ptr() as *const c_char;
+            let result = cass_collection_append_string_n(self.inner(), value_ptr, value.len());
             result.to_result(self)
         }
     }
@@ -366,8 +366,8 @@ impl CassCollection for Set {
     /// Appends an "ascii", "text" or "varchar" to the collection.
     fn append_string(&mut self, value: &str) -> Result<&mut Self> {
         unsafe {
-            let cstr = CString::new(value)?;
-            let result = cass_collection_append_string(self.inner(), cstr.as_ptr());
+            let value_ptr = value.as_ptr() as *const c_char;
+            let result = cass_collection_append_string_n(self.inner(), value_ptr, value.len());
             result.to_result(self)
         }
     }
@@ -498,8 +498,8 @@ impl CassCollection for Map {
     /// Appends an "ascii", "text" or "varchar" to the collection.
     fn append_string(&mut self, value: &str) -> Result<&mut Self> {
         unsafe {
-            let cstr = CString::new(value)?;
-            let result = cass_collection_append_string(self.inner(), cstr.as_ptr());
+            let value_ptr = value.as_ptr() as *const c_char;
+            let result = cass_collection_append_string_n(self.inner(), value_ptr, value.len());
             result.to_result(self)
         }
     }
