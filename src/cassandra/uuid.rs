@@ -17,7 +17,7 @@ use crate::cassandra_sys::CassUuid as _Uuid;
 use crate::cassandra_sys::CassUuidGen as _UuidGen;
 
 use std::cmp::Ordering;
-use std::ffi::CString;
+use std::ffi::CStr;
 use std::fmt;
 use std::fmt::Formatter;
 use std::fmt::{Debug, Display};
@@ -69,15 +69,13 @@ impl Debug for Uuid {
 impl Display for Uuid {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         unsafe {
-            // Allocate a CString large enough for cass_uuid_string to write to.
-            let mut buf = CString::from_vec_unchecked(vec![0u8; CASS_UUID_STRING_LENGTH]);
-            let cstr = buf.into_raw(); // Convert to *mut c_char
-            cass_uuid_string(self.0, cstr); // Write the UUID to *c_char
-            buf = CString::from_raw(cstr); // Convert from *c_char back to a CString.
-            let str = match buf.into_string() {
-                Ok(s) => s,
-                Err(_) => return Err(fmt::Error),
-            };
+            // Allocate an array large enough for cass_uuid_string to write to.
+            let mut buf = [0u8; CASS_UUID_STRING_LENGTH];
+            cass_uuid_string(self.0, buf.as_mut_ptr() as *mut c_char);
+            let str = CStr::from_bytes_with_nul(&buf)
+                .map_err(|_| fmt::Error)?
+                .to_str()
+                .map_err(|_| fmt::Error)?;
             fmt::Display::fmt(&str, f)
         }
     }
