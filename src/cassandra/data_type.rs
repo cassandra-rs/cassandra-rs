@@ -5,9 +5,9 @@ use crate::cassandra::value::ValueType;
 
 use crate::cassandra_sys::cass_data_sub_type_count;
 use crate::cassandra_sys::cass_data_type_add_sub_type;
-use crate::cassandra_sys::cass_data_type_add_sub_type_by_name;
+use crate::cassandra_sys::cass_data_type_add_sub_type_by_name_n;
 use crate::cassandra_sys::cass_data_type_add_sub_value_type;
-use crate::cassandra_sys::cass_data_type_add_sub_value_type_by_name;
+use crate::cassandra_sys::cass_data_type_add_sub_value_type_by_name_n;
 use crate::cassandra_sys::cass_data_type_class_name;
 use crate::cassandra_sys::cass_data_type_free;
 use crate::cassandra_sys::cass_data_type_keyspace;
@@ -15,11 +15,11 @@ use crate::cassandra_sys::cass_data_type_new;
 use crate::cassandra_sys::cass_data_type_new_from_existing;
 use crate::cassandra_sys::cass_data_type_new_tuple;
 use crate::cassandra_sys::cass_data_type_new_udt;
-use crate::cassandra_sys::cass_data_type_set_class_name;
-use crate::cassandra_sys::cass_data_type_set_keyspace;
-use crate::cassandra_sys::cass_data_type_set_type_name;
+use crate::cassandra_sys::cass_data_type_set_class_name_n;
+use crate::cassandra_sys::cass_data_type_set_keyspace_n;
+use crate::cassandra_sys::cass_data_type_set_type_name_n;
 use crate::cassandra_sys::cass_data_type_sub_data_type;
-use crate::cassandra_sys::cass_data_type_sub_data_type_by_name;
+use crate::cassandra_sys::cass_data_type_sub_data_type_by_name_n;
 use crate::cassandra_sys::cass_data_type_sub_type_name;
 use crate::cassandra_sys::cass_data_type_type;
 use crate::cassandra_sys::cass_data_type_type_name;
@@ -27,6 +27,7 @@ use crate::cassandra_sys::cass_user_type_new_from_data_type;
 use crate::cassandra_sys::CassDataType as _CassDataType;
 
 use std::ffi::CString;
+use std::os::raw::c_char;
 
 /// Any cassandra datatype
 #[derive(Debug)]
@@ -126,8 +127,10 @@ impl DataType {
         S: Into<String>,
     {
         unsafe {
-            let type_name_cstr = CString::new(type_name.into())?;
-            cass_data_type_set_type_name(data_type.0, type_name_cstr.as_ptr()).to_result(())
+            let type_name_str = type_name.into();
+            let type_name_ptr = type_name_str.as_ptr() as *const c_char;
+            cass_data_type_set_type_name_n(data_type.0, type_name_ptr, type_name_str.len())
+                .to_result(())
         }
     }
 
@@ -157,8 +160,10 @@ impl DataType {
         S: Into<String>,
     {
         unsafe {
-            let keyspace_cstr = CString::new(keyspace.into())?;
-            cass_data_type_set_keyspace(data_type.0, keyspace_cstr.as_ptr()).to_result(())
+            let keyspace_str = keyspace.into();
+            let keyspace_ptr = keyspace_str.as_ptr() as *const c_char;
+            cass_data_type_set_keyspace_n(data_type.0, keyspace_ptr, keyspace_str.len())
+                .to_result(())
         }
     }
 
@@ -188,8 +193,10 @@ impl DataType {
         S: Into<String>,
     {
         unsafe {
-            let class_name_cstr = CString::new(class_name.into())?;
-            cass_data_type_set_class_name(self.0, class_name_cstr.as_ptr()).to_result(())
+            let class_name_str = class_name.into();
+            let class_name_ptr = class_name_str.as_ptr() as *const c_char;
+            cass_data_type_set_class_name_n(self.0, class_name_ptr, class_name_str.len())
+                .to_result(())
         }
     }
 
@@ -218,11 +225,13 @@ impl DataType {
         S: Into<String>,
     {
         unsafe {
-            let name_cstr = CString::new(name.into()).expect("must be utf8");
+            let name_str = name.into();
+            let name_ptr = name_str.as_ptr() as *const c_char;
             // TODO: can return NULL
-            ConstDataType::build(cass_data_type_sub_data_type_by_name(
+            ConstDataType::build(cass_data_type_sub_data_type_by_name_n(
                 data_type.0,
-                name_cstr.as_ptr(),
+                name_ptr,
+                name_str.len(),
             ))
         }
     }
@@ -261,13 +270,10 @@ impl DataType {
         S: Into<String>,
     {
         unsafe {
-            let sub_data_type_cstr = CString::new(name.into())?;
-            cass_data_type_add_sub_type_by_name(
-                self.0,
-                sub_data_type_cstr.as_ptr(),
-                sub_data_type.0,
-            )
-            .to_result(())
+            let name_str = name.into();
+            let name_ptr = name_str.as_ptr() as *const c_char;
+            cass_data_type_add_sub_type_by_name_n(self.0, name_ptr, name_str.len(), sub_data_type.0)
+                .to_result(())
         }
     }
 
@@ -284,14 +290,20 @@ impl DataType {
     /// Adds a sub-data type to a tuple or collection using a value type.
     ///
     /// <b>Note:</b> Only valid for tuple and collection data types.
-    pub fn add_sub_value_type_by_name<S>(&self, name: &str, typ: ValueType) -> Result<()>
+    pub fn add_sub_value_type_by_name<S>(&self, name: S, typ: ValueType) -> Result<()>
     where
         S: Into<String>,
     {
         unsafe {
-            let name_cstr = CString::new(name)?;
-            cass_data_type_add_sub_value_type_by_name(self.0, name_cstr.as_ptr(), typ.inner())
-                .to_result(())
+            let name_str = name.into();
+            let name_ptr = name_str.as_ptr() as *const c_char;
+            cass_data_type_add_sub_value_type_by_name_n(
+                self.0,
+                name_ptr,
+                name_str.len(),
+                typ.inner(),
+            )
+            .to_result(())
         }
     }
 

@@ -6,10 +6,10 @@ use crate::cassandra::util::Protected;
 use crate::cassandra_sys::cass_prepared_bind;
 use crate::cassandra_sys::cass_prepared_free;
 use crate::cassandra_sys::cass_prepared_parameter_data_type;
-use crate::cassandra_sys::cass_prepared_parameter_data_type_by_name;
+use crate::cassandra_sys::cass_prepared_parameter_data_type_by_name_n;
 use crate::cassandra_sys::cass_prepared_parameter_name;
 use crate::cassandra_sys::CassPrepared as _PreparedStatement;
-use std::ffi::CString;
+use std::os::raw::c_char;
 use std::{mem, slice, str};
 
 /// A statement that has been prepared against at least one Cassandra node.
@@ -78,10 +78,11 @@ impl PreparedStatement {
     /// this reference as it is bound to the lifetime of the prepared.
     pub fn parameter_data_type_by_name(&self, name: &str) -> ConstDataType {
         unsafe {
-            let name_cstr = CString::new(name).expect("must be utf8");
-            ConstDataType::build(cass_prepared_parameter_data_type_by_name(
+            let name_ptr = name.as_ptr() as *const c_char;
+            ConstDataType::build(cass_prepared_parameter_data_type_by_name_n(
                 self.0,
-                name_cstr.as_ptr(),
+                name_ptr,
+                name.len(),
             ))
         }
     }

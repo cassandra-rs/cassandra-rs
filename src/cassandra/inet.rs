@@ -1,17 +1,17 @@
 use crate::cassandra::error::*;
 use crate::cassandra::util::Protected;
-use crate::cassandra_sys::cass_inet_from_string;
+use crate::cassandra_sys::cass_inet_from_string_n;
 use crate::cassandra_sys::cass_inet_init_v4;
 use crate::cassandra_sys::cass_inet_init_v6;
 use crate::cassandra_sys::cass_inet_string;
 use crate::cassandra_sys::CassInet as _Inet;
 use std::default::Default;
 use std::ffi::CStr;
-use std::ffi::CString;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::mem;
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
+use std::os::raw::c_char;
 use std::str::FromStr;
 use std::string::ToString;
 
@@ -87,8 +87,8 @@ impl FromStr for Inet {
         unsafe {
             let mut inet = mem::zeroed();
 
-            let str = CString::new(s)?;
-            cass_inet_from_string(str.as_ptr(), &mut inet)
+            let s_ptr = s.as_ptr() as *const c_char;
+            cass_inet_from_string_n(s_ptr, s.len(), &mut inet)
                 .to_result(())
                 .and_then(|_| Ok(Inet(inet)))
         }

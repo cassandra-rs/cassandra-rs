@@ -18,15 +18,15 @@ use crate::cassandra_sys::CassValue as _CassValue;
 
 use crate::cassandra_sys::cass_iterator_tables_from_keyspace_meta;
 use crate::cassandra_sys::cass_iterator_user_types_from_keyspace_meta;
-use crate::cassandra_sys::cass_keyspace_meta_aggregate_by_name;
-use crate::cassandra_sys::cass_keyspace_meta_field_by_name;
-use crate::cassandra_sys::cass_keyspace_meta_function_by_name;
+use crate::cassandra_sys::cass_keyspace_meta_aggregate_by_name_n;
+use crate::cassandra_sys::cass_keyspace_meta_field_by_name_n;
+use crate::cassandra_sys::cass_keyspace_meta_function_by_name_n;
 use crate::cassandra_sys::cass_keyspace_meta_name;
-use crate::cassandra_sys::cass_keyspace_meta_table_by_name;
-use crate::cassandra_sys::cass_keyspace_meta_user_type_by_name;
+use crate::cassandra_sys::cass_keyspace_meta_table_by_name_n;
+use crate::cassandra_sys::cass_keyspace_meta_user_type_by_name_n;
 use crate::cassandra_sys::raw2utf8;
-use std::ffi::CString;
 use std::mem;
+use std::os::raw::c_char;
 
 /// A snapshot of the schema's metadata.
 #[derive(Debug)]
@@ -61,8 +61,8 @@ impl KeyspaceMeta {
     /// Gets the table metadata for the provided table name.
     pub fn table_by_name(&self, name: &str) -> Option<TableMeta> {
         unsafe {
-            let name_cstr = CString::new(name).expect("must be utf8");
-            let value = cass_keyspace_meta_table_by_name(self.0, name_cstr.as_ptr());
+            let name_ptr = name.as_ptr() as *const c_char;
+            let value = cass_keyspace_meta_table_by_name_n(self.0, name_ptr, name.len());
             if value.is_null() {
                 None
             } else {
@@ -74,8 +74,8 @@ impl KeyspaceMeta {
     /// Gets the data type for the provided type name.
     pub fn user_type_by_name(&self, name: &str) -> Option<ConstDataType> {
         unsafe {
-            let name_cstr = CString::new(name).expect("must be utf8");
-            let value = cass_keyspace_meta_user_type_by_name(self.0, name_cstr.as_ptr());
+            let name_ptr = name.as_ptr() as *const c_char;
+            let value = cass_keyspace_meta_user_type_by_name_n(self.0, name_ptr, name.len());
             if value.is_null() {
                 None
             } else {
@@ -87,12 +87,15 @@ impl KeyspaceMeta {
     /// Gets the function metadata for the provided function name.
     pub fn get_function_by_name(&self, name: &str, arguments: Vec<&str>) -> Option<FunctionMeta> {
         unsafe {
-            let name_cstr = CString::new(name).expect("must be utf8");
-            let arguments_cstr = CString::new(arguments.join(",")).expect("must be utf8");
-            let value = cass_keyspace_meta_function_by_name(
+            let name_ptr = name.as_ptr() as *const c_char;
+            let arguments_str = arguments.join(",");
+            let arguments_ptr = arguments_str.as_ptr() as *const c_char;
+            let value = cass_keyspace_meta_function_by_name_n(
                 self.0,
-                name_cstr.as_ptr(),
-                arguments_cstr.as_ptr(),
+                name_ptr,
+                name.len(),
+                arguments_ptr,
+                arguments_str.len(),
             );
             if value.is_null() {
                 None
@@ -105,12 +108,15 @@ impl KeyspaceMeta {
     /// Gets the aggregate metadata for the provided aggregate name.
     pub fn aggregate_by_name(&self, name: &str, arguments: Vec<&str>) -> Option<AggregateMeta> {
         unsafe {
-            let name_cstr = CString::new(name).expect("must be utf8");
-            let arguments_cstr = CString::new(arguments.join(",")).expect("must be utf8");
-            let agg = cass_keyspace_meta_aggregate_by_name(
+            let name_ptr = name.as_ptr() as *const c_char;
+            let arguments_str = arguments.join(",");
+            let arguments_ptr = arguments_str.as_ptr() as *const c_char;
+            let agg = cass_keyspace_meta_aggregate_by_name_n(
                 self.0,
-                name_cstr.as_ptr(),
-                arguments_cstr.as_ptr(),
+                name_ptr,
+                name.len(),
+                arguments_ptr,
+                arguments_str.len(),
             );
             if agg.is_null() {
                 None
@@ -149,8 +155,8 @@ impl KeyspaceMeta {
     /// access to the column data found in the underlying "keyspaces" metadata table.
     pub fn field_by_name(&self, name: &str) -> Option<MetadataFieldValue> {
         unsafe {
-            let name_cstr = CString::new(name).expect("must be utf8");
-            let value = cass_keyspace_meta_field_by_name(self.0, name_cstr.as_ptr());
+            let name_ptr = name.as_ptr() as *const c_char;
+            let value = cass_keyspace_meta_field_by_name_n(self.0, name_ptr, name.len());
             if value.is_null() {
                 None
             } else {

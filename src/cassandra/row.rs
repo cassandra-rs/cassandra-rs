@@ -11,17 +11,17 @@ use crate::cassandra_sys::cass_iterator_from_row;
 use crate::cassandra_sys::cass_iterator_get_column;
 use crate::cassandra_sys::cass_iterator_next;
 use crate::cassandra_sys::cass_row_get_column;
-use crate::cassandra_sys::cass_row_get_column_by_name;
+use crate::cassandra_sys::cass_row_get_column_by_name_n;
 use crate::cassandra_sys::cass_true;
 use crate::cassandra_sys::CassIterator as _CassIterator;
 use crate::cassandra_sys::CassRow as _Row;
-use std::ffi::CString;
 use std::fmt;
 use std::fmt::Debug;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::iter;
 use std::iter::IntoIterator;
+use std::os::raw::c_char;
 
 /// A collection of column values. Read-only, so thread-safe.
 pub struct Row(*const _Row);
@@ -328,8 +328,9 @@ impl Row {
         S: Into<String>,
     {
         unsafe {
-            let name_cstr = CString::new(name.into())?;
-            let col = cass_row_get_column_by_name(self.0, name_cstr.as_ptr());
+            let name_str = name.into();
+            let name_ptr = name_str.as_ptr() as *const c_char;
+            let col = cass_row_get_column_by_name_n(self.0, name_ptr, name_str.len());
             if col.is_null() {
                 Err(CassErrorCode::LIB_INDEX_OUT_OF_BOUNDS.to_error())
             } else {

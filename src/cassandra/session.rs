@@ -15,19 +15,19 @@ use crate::cassandra::util::Protected;
 
 use crate::cassandra_sys::cass_session_close;
 use crate::cassandra_sys::cass_session_connect;
-use crate::cassandra_sys::cass_session_connect_keyspace;
+use crate::cassandra_sys::cass_session_connect_keyspace_n;
 use crate::cassandra_sys::cass_session_execute;
 use crate::cassandra_sys::cass_session_execute_batch;
 use crate::cassandra_sys::cass_session_free;
 use crate::cassandra_sys::cass_session_get_metrics;
 use crate::cassandra_sys::cass_session_get_schema_meta;
 use crate::cassandra_sys::cass_session_new;
-use crate::cassandra_sys::cass_session_prepare;
+use crate::cassandra_sys::cass_session_prepare_n;
 use crate::cassandra_sys::CassSession as _Session;
 
-use std::ffi::CString;
 use std::ffi::NulError;
 use std::mem;
+use std::os::raw::c_char;
 
 /// A session object is used to execute queries and maintains cluster state through
 /// the control connection. The control connection is used to auto-discover nodes and
@@ -88,11 +88,12 @@ impl Session {
     /// Connects a session and sets the keyspace.
     pub fn connect_keyspace(&self, cluster: &Cluster, keyspace: &str) -> Result<CassFuture<()>> {
         unsafe {
-            let keyspace_cstr = CString::new(keyspace)?;
-            Ok(<CassFuture<()>>::build(cass_session_connect_keyspace(
+            let keyspace_ptr = keyspace.as_ptr() as *const c_char;
+            Ok(<CassFuture<()>>::build(cass_session_connect_keyspace_n(
                 self.0,
                 cluster.inner(),
-                keyspace_cstr.as_ptr(),
+                keyspace_ptr,
+                keyspace.len(),
             )))
         }
     }
@@ -107,9 +108,9 @@ impl Session {
     /// Create a prepared statement.
     pub fn prepare(&self, query: &str) -> Result<CassFuture<PreparedStatement>> {
         unsafe {
-            let query_cstr = CString::new(query)?;
+            let query_ptr = query.as_ptr() as *const c_char;
             Ok(<CassFuture<PreparedStatement>>::build(
-                cass_session_prepare(self.0, query_cstr.as_ptr()),
+                cass_session_prepare_n(self.0, query_ptr, query.len()),
             ))
         }
     }

@@ -11,42 +11,42 @@ use crate::cassandra_sys::cass_true;
 use crate::cassandra_sys::cass_user_type_data_type;
 use crate::cassandra_sys::cass_user_type_free;
 use crate::cassandra_sys::cass_user_type_set_bool;
-use crate::cassandra_sys::cass_user_type_set_bool_by_name;
+use crate::cassandra_sys::cass_user_type_set_bool_by_name_n;
 use crate::cassandra_sys::cass_user_type_set_bytes;
-use crate::cassandra_sys::cass_user_type_set_bytes_by_name;
+use crate::cassandra_sys::cass_user_type_set_bytes_by_name_n;
 use crate::cassandra_sys::cass_user_type_set_collection;
-use crate::cassandra_sys::cass_user_type_set_collection_by_name;
+use crate::cassandra_sys::cass_user_type_set_collection_by_name_n;
 use crate::cassandra_sys::cass_user_type_set_decimal;
-use crate::cassandra_sys::cass_user_type_set_decimal_by_name;
+use crate::cassandra_sys::cass_user_type_set_decimal_by_name_n;
 use crate::cassandra_sys::cass_user_type_set_double;
-use crate::cassandra_sys::cass_user_type_set_double_by_name;
+use crate::cassandra_sys::cass_user_type_set_double_by_name_n;
 use crate::cassandra_sys::cass_user_type_set_float;
-use crate::cassandra_sys::cass_user_type_set_float_by_name;
+use crate::cassandra_sys::cass_user_type_set_float_by_name_n;
 use crate::cassandra_sys::cass_user_type_set_inet;
-use crate::cassandra_sys::cass_user_type_set_inet_by_name;
+use crate::cassandra_sys::cass_user_type_set_inet_by_name_n;
 use crate::cassandra_sys::cass_user_type_set_int16;
-use crate::cassandra_sys::cass_user_type_set_int16_by_name;
+use crate::cassandra_sys::cass_user_type_set_int16_by_name_n;
 use crate::cassandra_sys::cass_user_type_set_int32;
-use crate::cassandra_sys::cass_user_type_set_int32_by_name;
+use crate::cassandra_sys::cass_user_type_set_int32_by_name_n;
 use crate::cassandra_sys::cass_user_type_set_int64;
-use crate::cassandra_sys::cass_user_type_set_int64_by_name;
+use crate::cassandra_sys::cass_user_type_set_int64_by_name_n;
 use crate::cassandra_sys::cass_user_type_set_int8;
-use crate::cassandra_sys::cass_user_type_set_int8_by_name;
+use crate::cassandra_sys::cass_user_type_set_int8_by_name_n;
 use crate::cassandra_sys::cass_user_type_set_null;
-use crate::cassandra_sys::cass_user_type_set_null_by_name;
-use crate::cassandra_sys::cass_user_type_set_string;
-use crate::cassandra_sys::cass_user_type_set_string_by_name;
+use crate::cassandra_sys::cass_user_type_set_null_by_name_n;
+use crate::cassandra_sys::cass_user_type_set_string_by_name_n;
+use crate::cassandra_sys::cass_user_type_set_string_n;
 use crate::cassandra_sys::cass_user_type_set_tuple;
-use crate::cassandra_sys::cass_user_type_set_tuple_by_name;
+use crate::cassandra_sys::cass_user_type_set_tuple_by_name_n;
 use crate::cassandra_sys::cass_user_type_set_uint32;
-use crate::cassandra_sys::cass_user_type_set_uint32_by_name;
+use crate::cassandra_sys::cass_user_type_set_uint32_by_name_n;
 use crate::cassandra_sys::cass_user_type_set_user_type;
-use crate::cassandra_sys::cass_user_type_set_user_type_by_name;
+use crate::cassandra_sys::cass_user_type_set_user_type_by_name_n;
 use crate::cassandra_sys::cass_user_type_set_uuid;
-use crate::cassandra_sys::cass_user_type_set_uuid_by_name;
+use crate::cassandra_sys::cass_user_type_set_uuid_by_name_n;
 use crate::cassandra_sys::CassUserType as _UserType;
 
-use std::ffi::CString;
+use std::os::raw::c_char;
 // use cassandra::iterator::FieldIterator;
 
 /// A user defined type
@@ -98,8 +98,9 @@ impl UserType {
         S: Into<String>,
     {
         unsafe {
-            let name_cstr = CString::new(name.into())?;
-            cass_user_type_set_null_by_name(self.0, name_cstr.as_ptr()).to_result(self)
+            let name_str = name.into();
+            let name_ptr = name_str.as_ptr() as *const c_char;
+            cass_user_type_set_null_by_name_n(self.0, name_ptr, name_str.len()).to_result(self)
         }
     }
 
@@ -114,8 +115,10 @@ impl UserType {
         S: Into<String>,
     {
         unsafe {
-            let name = CString::new(name.into())?;
-            cass_user_type_set_int8_by_name(self.0, name.as_ptr(), value).to_result(self)
+            let name_str = name.into();
+            let name_ptr = name_str.as_ptr() as *const c_char;
+            cass_user_type_set_int8_by_name_n(self.0, name_ptr, name_str.len(), value)
+                .to_result(self)
         }
     }
 
@@ -130,8 +133,10 @@ impl UserType {
         S: Into<String>,
     {
         unsafe {
-            let name = CString::new(name.into())?;
-            cass_user_type_set_int16_by_name(self.0, name.as_ptr(), value).to_result(self)
+            let name_str = name.into();
+            let name_ptr = name_str.as_ptr() as *const c_char;
+            cass_user_type_set_int16_by_name_n(self.0, name_ptr, name_str.len(), value)
+                .to_result(self)
         }
     }
 
@@ -146,8 +151,10 @@ impl UserType {
         S: Into<String>,
     {
         unsafe {
-            let name = CString::new(name.into())?;
-            cass_user_type_set_int32_by_name(self.0, name.as_ptr(), value).to_result(self)
+            let name_str = name.into();
+            let name_ptr = name_str.as_ptr() as *const c_char;
+            cass_user_type_set_int32_by_name_n(self.0, name_ptr, name_str.len(), value)
+                .to_result(self)
         }
     }
 
@@ -162,8 +169,10 @@ impl UserType {
         S: Into<String>,
     {
         unsafe {
-            let name = CString::new(name.into())?;
-            cass_user_type_set_uint32_by_name(self.0, name.as_ptr(), value).to_result(self)
+            let name_str = name.into();
+            let name_ptr = name_str.as_ptr() as *const c_char;
+            cass_user_type_set_uint32_by_name_n(self.0, name_ptr, name_str.len(), value)
+                .to_result(self)
         }
     }
 
@@ -180,8 +189,10 @@ impl UserType {
         S: Into<String>,
     {
         unsafe {
-            let name = CString::new(name.into())?;
-            cass_user_type_set_int64_by_name(self.0, name.as_ptr(), value).to_result(self)
+            let name_str = name.into();
+            let name_ptr = name_str.as_ptr() as *const c_char;
+            cass_user_type_set_int64_by_name_n(self.0, name_ptr, name_str.len(), value)
+                .to_result(self)
         }
     }
 
@@ -196,8 +207,10 @@ impl UserType {
         S: Into<String>,
     {
         unsafe {
-            let name = CString::new(name.into())?;
-            cass_user_type_set_float_by_name(self.0, name.as_ptr(), value).to_result(self)
+            let name_str = name.into();
+            let name_ptr = name_str.as_ptr() as *const c_char;
+            cass_user_type_set_float_by_name_n(self.0, name_ptr, name_str.len(), value)
+                .to_result(self)
         }
     }
 
@@ -213,8 +226,10 @@ impl UserType {
         S: Into<String>,
     {
         unsafe {
-            let name = CString::new(name.into())?;
-            cass_user_type_set_double_by_name(self.0, name.as_ptr(), value).to_result(self)
+            let name_str = name.into();
+            let name_ptr = name_str.as_ptr() as *const c_char;
+            cass_user_type_set_double_by_name_n(self.0, name_ptr, name_str.len(), value)
+                .to_result(self)
         }
     }
 
@@ -232,10 +247,12 @@ impl UserType {
         S: Into<String>,
     {
         unsafe {
-            let name = CString::new(name.into())?;
-            cass_user_type_set_bool_by_name(
+            let name_str = name.into();
+            let name_ptr = name_str.as_ptr() as *const c_char;
+            cass_user_type_set_bool_by_name_n(
                 self.0,
-                name.as_ptr(),
+                name_ptr,
+                name_str.len(),
                 if value { cass_true } else { cass_false },
             )
             .to_result(self)
@@ -249,8 +266,9 @@ impl UserType {
         S: Into<String>,
     {
         unsafe {
-            let value = CString::new(value.into())?;
-            cass_user_type_set_string(self.0, index, value.as_ptr()).to_result(self)
+            let value_str = value.into();
+            let value_ptr = value_str.as_ptr() as *const c_char;
+            cass_user_type_set_string_n(self.0, index, value_ptr, value_str.len()).to_result(self)
         }
     }
 
@@ -261,9 +279,18 @@ impl UserType {
         S: Into<String>,
     {
         unsafe {
-            let name = CString::new(name.into())?;
-            let value = CString::new(value.into())?;
-            cass_user_type_set_string_by_name(self.0, name.as_ptr(), value.as_ptr()).to_result(self)
+            let name_str = name.into();
+            let name_ptr = name_str.as_ptr() as *const c_char;
+            let value_str = value.into();
+            let value_ptr = value_str.as_ptr() as *const c_char;
+            cass_user_type_set_string_by_name_n(
+                self.0,
+                name_ptr,
+                name_str.len(),
+                value_ptr,
+                value_str.len(),
+            )
+            .to_result(self)
         }
     }
 
@@ -281,9 +308,16 @@ impl UserType {
         S: Into<String>,
     {
         unsafe {
-            let name = CString::new(name.into())?;
-            cass_user_type_set_bytes_by_name(self.0, name.as_ptr(), value.as_ptr(), value.len())
-                .to_result(self)
+            let name_str = name.into();
+            let name_ptr = name_str.as_ptr() as *const c_char;
+            cass_user_type_set_bytes_by_name_n(
+                self.0,
+                name_ptr,
+                name_str.len(),
+                value.as_ptr(),
+                value.len(),
+            )
+            .to_result(self)
         }
     }
 
@@ -302,9 +336,15 @@ impl UserType {
         U: Into<Uuid>,
     {
         unsafe {
-            let name = CString::new(name.into())?;
-            cass_user_type_set_uuid_by_name(self.0, name.as_ptr(), value.into().inner())
-                .to_result(self)
+            let name_str = name.into();
+            let name_ptr = name_str.as_ptr() as *const c_char;
+            cass_user_type_set_uuid_by_name_n(
+                self.0,
+                name_ptr,
+                name_str.len(),
+                value.into().inner(),
+            )
+            .to_result(self)
         }
     }
 
@@ -323,9 +363,15 @@ impl UserType {
         U: Into<Inet>,
     {
         unsafe {
-            let name = CString::new(name.into())?;
-            cass_user_type_set_inet_by_name(self.0, name.as_ptr(), value.into().inner())
-                .to_result(self)
+            let name_str = name.into();
+            let name_ptr = name_str.as_ptr() as *const c_char;
+            cass_user_type_set_inet_by_name_n(
+                self.0,
+                name_ptr,
+                name_str.len(),
+                value.into().inner(),
+            )
+            .to_result(self)
         }
     }
 
@@ -346,8 +392,9 @@ impl UserType {
         S: Into<String>,
     {
         unsafe {
-            let name = CString::new(name.into())?;
-            cass_user_type_set_collection_by_name(self.0, name.as_ptr(), value.inner())
+            let name_str = name.into();
+            let name_ptr = name_str.as_ptr() as *const c_char;
+            cass_user_type_set_collection_by_name_n(self.0, name_ptr, name_str.len(), value.inner())
                 .to_result(self)
         }
     }
@@ -363,8 +410,10 @@ impl UserType {
         S: Into<String>,
     {
         unsafe {
-            let name = CString::new(name.into())?;
-            cass_user_type_set_tuple_by_name(self.0, name.as_ptr(), value.inner()).to_result(self)
+            let name_str = name.into();
+            let name_ptr = name_str.as_ptr() as *const c_char;
+            cass_user_type_set_tuple_by_name_n(self.0, name_ptr, name_str.len(), value.inner())
+                .to_result(self)
         }
     }
 
@@ -379,8 +428,10 @@ impl UserType {
         S: Into<String>,
     {
         unsafe {
-            let name = CString::new(name.into())?;
-            cass_user_type_set_user_type_by_name(self.0, name.as_ptr(), value.0).to_result(self)
+            let name_str = name.into();
+            let name_ptr = name_str.as_ptr() as *const c_char;
+            cass_user_type_set_user_type_by_name_n(self.0, name_ptr, name_str.len(), value.0)
+                .to_result(self)
         }
     }
 }

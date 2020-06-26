@@ -14,13 +14,13 @@ use crate::cassandra_sys::cass_batch_set_serial_consistency;
 use crate::cassandra_sys::cass_batch_set_timestamp;
 use crate::cassandra_sys::cass_custom_payload_free;
 use crate::cassandra_sys::cass_custom_payload_new;
-use crate::cassandra_sys::cass_custom_payload_set;
+use crate::cassandra_sys::cass_custom_payload_set_n;
 use crate::cassandra_sys::CassBatch as _Batch;
 use crate::cassandra_sys::CassBatchType_;
 use crate::cassandra_sys::CassConsistency;
 use crate::cassandra_sys::CassCustomPayload as _CassCustomPayload;
-use std::ffi::CString;
 use std::ffi::NulError;
+use std::os::raw::c_char;
 
 /// A group of statements that are executed as a single batch.
 /// <b>Note:</b> Batches are not supported by the binary protocol version 1.
@@ -69,10 +69,11 @@ impl CustomPayload {
     /// Sets an item to the custom payload.
     pub fn set(&self, name: String, value: &[u8]) -> Result<()> {
         unsafe {
-            let name_cstr = CString::new(name)?;
-            Ok(cass_custom_payload_set(
+            let name_ptr = name.as_ptr() as *const c_char;
+            Ok(cass_custom_payload_set_n(
                 self.0,
-                name_cstr.as_ptr(),
+                name_ptr,
+                name.len(),
                 value.as_ptr(),
                 value.len(),
             ))

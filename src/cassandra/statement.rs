@@ -16,44 +16,44 @@ use crate::cassandra::uuid::Uuid;
 use crate::cassandra_sys::cass_false;
 use crate::cassandra_sys::cass_statement_add_key_index;
 use crate::cassandra_sys::cass_statement_bind_bool;
-use crate::cassandra_sys::cass_statement_bind_bool_by_name;
+use crate::cassandra_sys::cass_statement_bind_bool_by_name_n;
 use crate::cassandra_sys::cass_statement_bind_bytes;
-use crate::cassandra_sys::cass_statement_bind_bytes_by_name;
+use crate::cassandra_sys::cass_statement_bind_bytes_by_name_n;
 use crate::cassandra_sys::cass_statement_bind_collection;
-use crate::cassandra_sys::cass_statement_bind_collection_by_name;
+use crate::cassandra_sys::cass_statement_bind_collection_by_name_n;
 use crate::cassandra_sys::cass_statement_bind_decimal;
-use crate::cassandra_sys::cass_statement_bind_decimal_by_name;
+use crate::cassandra_sys::cass_statement_bind_decimal_by_name_n;
 use crate::cassandra_sys::cass_statement_bind_double;
-use crate::cassandra_sys::cass_statement_bind_double_by_name;
+use crate::cassandra_sys::cass_statement_bind_double_by_name_n;
 use crate::cassandra_sys::cass_statement_bind_float;
-use crate::cassandra_sys::cass_statement_bind_float_by_name;
+use crate::cassandra_sys::cass_statement_bind_float_by_name_n;
 use crate::cassandra_sys::cass_statement_bind_inet;
-use crate::cassandra_sys::cass_statement_bind_inet_by_name;
+use crate::cassandra_sys::cass_statement_bind_inet_by_name_n;
 use crate::cassandra_sys::cass_statement_bind_int16;
-use crate::cassandra_sys::cass_statement_bind_int16_by_name;
+use crate::cassandra_sys::cass_statement_bind_int16_by_name_n;
 use crate::cassandra_sys::cass_statement_bind_int32;
-use crate::cassandra_sys::cass_statement_bind_int32_by_name;
+use crate::cassandra_sys::cass_statement_bind_int32_by_name_n;
 use crate::cassandra_sys::cass_statement_bind_int64;
-use crate::cassandra_sys::cass_statement_bind_int64_by_name;
+use crate::cassandra_sys::cass_statement_bind_int64_by_name_n;
 use crate::cassandra_sys::cass_statement_bind_int8;
-use crate::cassandra_sys::cass_statement_bind_int8_by_name;
+use crate::cassandra_sys::cass_statement_bind_int8_by_name_n;
 use crate::cassandra_sys::cass_statement_bind_null;
-use crate::cassandra_sys::cass_statement_bind_null_by_name;
-use crate::cassandra_sys::cass_statement_bind_string;
-use crate::cassandra_sys::cass_statement_bind_string_by_name;
+use crate::cassandra_sys::cass_statement_bind_null_by_name_n;
+use crate::cassandra_sys::cass_statement_bind_string_by_name_n;
+use crate::cassandra_sys::cass_statement_bind_string_n;
 use crate::cassandra_sys::cass_statement_bind_tuple;
-use crate::cassandra_sys::cass_statement_bind_tuple_by_name;
+use crate::cassandra_sys::cass_statement_bind_tuple_by_name_n;
 use crate::cassandra_sys::cass_statement_bind_uint32;
-use crate::cassandra_sys::cass_statement_bind_uint32_by_name;
+use crate::cassandra_sys::cass_statement_bind_uint32_by_name_n;
 use crate::cassandra_sys::cass_statement_bind_user_type;
-use crate::cassandra_sys::cass_statement_bind_user_type_by_name;
+use crate::cassandra_sys::cass_statement_bind_user_type_by_name_n;
 use crate::cassandra_sys::cass_statement_bind_uuid;
-use crate::cassandra_sys::cass_statement_bind_uuid_by_name;
+use crate::cassandra_sys::cass_statement_bind_uuid_by_name_n;
 use crate::cassandra_sys::cass_statement_free;
-use crate::cassandra_sys::cass_statement_new;
+use crate::cassandra_sys::cass_statement_new_n;
 use crate::cassandra_sys::cass_statement_set_consistency;
 use crate::cassandra_sys::cass_statement_set_custom_payload;
-use crate::cassandra_sys::cass_statement_set_keyspace;
+use crate::cassandra_sys::cass_statement_set_keyspace_n;
 use crate::cassandra_sys::cass_statement_set_paging_size;
 use crate::cassandra_sys::cass_statement_set_paging_state;
 use crate::cassandra_sys::cass_statement_set_paging_state_token;
@@ -65,7 +65,7 @@ use crate::cassandra_sys::cass_true;
 use crate::cassandra_sys::CassStatement as _Statement;
 use crate::cassandra_sys::CASS_UINT64_MAX;
 
-use std::ffi::CString;
+use std::os::raw::c_char;
 use time::Duration;
 /// A statement object is an executable query. It represents either a regular
 /// (adhoc) statement or a prepared statement. It maintains the queries' parameter
@@ -321,8 +321,12 @@ impl Statement {
     /// Creates a new query statement.
     pub fn new(query: &str, parameter_count: usize) -> Self {
         unsafe {
-            let query_cstr = CString::new(query).expect("must be utf8");
-            Statement(cass_statement_new(query_cstr.as_ptr(), parameter_count))
+            let query_ptr = query.as_ptr() as *const c_char;
+            Statement(cass_statement_new_n(
+                query_ptr,
+                query.len(),
+                parameter_count,
+            ))
         }
     }
 
@@ -356,8 +360,8 @@ impl Statement {
     /// is determined in the metadata processed in the prepare phase.
     pub fn set_keyspace(&mut self, keyspace: String) -> Result<&mut Self> {
         unsafe {
-            let keyspace_cstr = CString::new(keyspace)?;
-            cass_statement_set_keyspace(self.0, keyspace_cstr.as_ptr()).to_result(self)
+            let keyspace_ptr = keyspace.as_ptr() as *const c_char;
+            cass_statement_set_keyspace_n(self.0, keyspace_ptr, keyspace.len()).to_result(self)
         }
     }
 
@@ -448,8 +452,8 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_null_by_name(&mut self, name: &str) -> Result<&mut Self> {
         unsafe {
-            let name_cstr = CString::new(name)?;
-            cass_statement_bind_null_by_name(self.0, name_cstr.as_ptr()).to_result(self)
+            let name_ptr = name.as_ptr() as *const c_char;
+            cass_statement_bind_null_by_name_n(self.0, name_ptr, name.len()).to_result(self)
         }
     }
 
@@ -461,8 +465,8 @@ impl Statement {
     /// Binds a "tinyint" to all the values with the specified name.
     pub fn bind_int8_by_name(&mut self, name: &str, value: i8) -> Result<&mut Self> {
         unsafe {
-            let name_cstr = CString::new(name)?;
-            cass_statement_bind_int8_by_name(self.0, name_cstr.as_ptr(), value).to_result(self)
+            let name_ptr = name.as_ptr() as *const c_char;
+            cass_statement_bind_int8_by_name_n(self.0, name_ptr, name.len(), value).to_result(self)
         }
     }
 
@@ -474,8 +478,8 @@ impl Statement {
     /// Binds a "smallint" to all the values with the specified name.
     pub fn bind_int16_by_name(&mut self, name: &str, value: i16) -> Result<&mut Self> {
         unsafe {
-            let name_cstr = CString::new(name)?;
-            cass_statement_bind_int16_by_name(self.0, name_cstr.as_ptr(), value).to_result(self)
+            let name_ptr = name.as_ptr() as *const c_char;
+            cass_statement_bind_int16_by_name_n(self.0, name_ptr, name.len(), value).to_result(self)
         }
     }
 
@@ -487,8 +491,8 @@ impl Statement {
     /// Binds an "int" to all the values with the specified name.
     pub fn bind_int32_by_name(&mut self, name: &str, value: i32) -> Result<&mut Self> {
         unsafe {
-            let name_cstr = CString::new(name)?;
-            cass_statement_bind_int32_by_name(self.0, name_cstr.as_ptr(), value).to_result(self)
+            let name_ptr = name.as_ptr() as *const c_char;
+            cass_statement_bind_int32_by_name_n(self.0, name_ptr, name.len(), value).to_result(self)
         }
     }
 
@@ -503,8 +507,9 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_uint32_by_name(&mut self, name: &str, value: u32) -> Result<&mut Self> {
         unsafe {
-            let name_cstr = CString::new(name)?;
-            cass_statement_bind_uint32_by_name(self.0, name_cstr.as_ptr(), value).to_result(self)
+            let name_ptr = name.as_ptr() as *const c_char;
+            cass_statement_bind_uint32_by_name_n(self.0, name_ptr, name.len(), value)
+                .to_result(self)
         }
     }
 
@@ -518,8 +523,8 @@ impl Statement {
     /// with the specified name.
     pub fn bind_int64_by_name(&mut self, name: &str, value: i64) -> Result<&mut Self> {
         unsafe {
-            let name_cstr = CString::new(name)?;
-            cass_statement_bind_int64_by_name(self.0, name_cstr.as_ptr(), value).to_result(self)
+            let name_ptr = name.as_ptr() as *const c_char;
+            cass_statement_bind_int64_by_name_n(self.0, name_ptr, name.len(), value).to_result(self)
         }
     }
 
@@ -534,8 +539,8 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_float_by_name(&mut self, name: &str, value: f32) -> Result<&mut Self> {
         unsafe {
-            let name_cstr = CString::new(name)?;
-            cass_statement_bind_float_by_name(self.0, name_cstr.as_ptr(), value).to_result(self)
+            let name_ptr = name.as_ptr() as *const c_char;
+            cass_statement_bind_float_by_name_n(self.0, name_ptr, name.len(), value).to_result(self)
         }
     }
 
@@ -550,8 +555,9 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_double_by_name(&mut self, name: &str, value: f64) -> Result<&mut Self> {
         unsafe {
-            let name_cstr = CString::new(name)?;
-            cass_statement_bind_double_by_name(self.0, name_cstr.as_ptr(), value).to_result(self)
+            let name_ptr = name.as_ptr() as *const c_char;
+            cass_statement_bind_double_by_name_n(self.0, name_ptr, name.len(), value)
+                .to_result(self)
         }
     }
 
@@ -569,10 +575,11 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_bool_by_name(&mut self, name: &str, value: bool) -> Result<&mut Self> {
         unsafe {
-            let name_cstr = CString::new(name)?;
-            cass_statement_bind_bool_by_name(
+            let name_ptr = name.as_ptr() as *const c_char;
+            cass_statement_bind_bool_by_name_n(
                 self.0,
-                name_cstr.as_ptr(),
+                name_ptr,
+                name.len(),
                 if value { cass_true } else { cass_false },
             )
             .to_result(self)
@@ -583,8 +590,8 @@ impl Statement {
     /// at the specified index.
     pub fn bind_string(&mut self, index: usize, value: &str) -> Result<&mut Self> {
         unsafe {
-            let value_cstr = CString::new(value)?;
-            cass_statement_bind_string(self.0, index, value_cstr.as_ptr()).to_result(self)
+            let value_ptr = value.as_ptr() as *const c_char;
+            cass_statement_bind_string_n(self.0, index, value_ptr, value.len()).to_result(self)
         }
     }
 
@@ -595,10 +602,16 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_string_by_name(&mut self, name: &str, value: &str) -> Result<&mut Self> {
         unsafe {
-            let name_cstr = CString::new(name)?;
-            let value_cstr = CString::new(value)?;
-            cass_statement_bind_string_by_name(self.0, name_cstr.as_ptr(), value_cstr.as_ptr())
-                .to_result(self)
+            let name_ptr = name.as_ptr() as *const c_char;
+            let value_ptr = value.as_ptr() as *const c_char;
+            cass_statement_bind_string_by_name_n(
+                self.0,
+                name_ptr,
+                name.len(),
+                value_ptr,
+                value.len(),
+            )
+            .to_result(self)
         }
     }
 
@@ -616,10 +629,11 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_bytes_by_name(&mut self, name: &str, mut value: Vec<u8>) -> Result<&mut Self> {
         unsafe {
-            let name_cstr = CString::new(name)?;
-            cass_statement_bind_bytes_by_name(
+            let name_ptr = name.as_ptr() as *const c_char;
+            cass_statement_bind_bytes_by_name_n(
                 self.0,
-                name_cstr.as_ptr(),
+                name_ptr,
+                name.len(),
                 value.as_mut_ptr(),
                 value.len(),
             )
@@ -639,8 +653,8 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_uuid_by_name(&mut self, name: &str, value: Uuid) -> Result<&mut Self> {
         unsafe {
-            let name_cstr = CString::new(name)?;
-            cass_statement_bind_uuid_by_name(self.0, name_cstr.as_ptr(), value.inner())
+            let name_ptr = name.as_ptr() as *const c_char;
+            cass_statement_bind_uuid_by_name_n(self.0, name_ptr, name.len(), value.inner())
                 .to_result(self)
         }
     }
@@ -653,8 +667,8 @@ impl Statement {
     /// Binds an "inet" to all the values with the specified name.
     pub fn bind_inet_by_name(&mut self, name: &str, value: Inet) -> Result<&mut Self> {
         unsafe {
-            let name_cstr = CString::new(name)?;
-            cass_statement_bind_inet_by_name(self.0, name_cstr.as_ptr(), value.inner())
+            let name_ptr = name.as_ptr() as *const c_char;
+            cass_statement_bind_inet_by_name_n(self.0, name_ptr, name.len(), value.inner())
                 .to_result(self)
         }
     }
@@ -707,8 +721,8 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_map_by_name(&mut self, name: &str, map: Map) -> Result<&mut Self> {
         unsafe {
-            let name_cstr = CString::new(name)?;
-            cass_statement_bind_collection_by_name(self.0, name_cstr.as_ptr(), map.inner())
+            let name_ptr = name.as_ptr() as *const c_char;
+            cass_statement_bind_collection_by_name_n(self.0, name_ptr, name.len(), map.inner())
                 .to_result(self)
         }
     }
@@ -724,8 +738,13 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_set_by_name(&mut self, name: &str, collection: Set) -> Result<&mut Self> {
         unsafe {
-            let name_cstr = CString::new(name)?;
-            cass_statement_bind_collection_by_name(self.0, name_cstr.as_ptr(), collection.inner())
+            let name_ptr = name.as_ptr() as *const c_char;
+            cass_statement_bind_collection_by_name_n(
+                self.0,
+                name_ptr,
+                name.len(),
+                collection.inner(),
+            )
                 .to_result(self)
         }
     }
@@ -742,8 +761,13 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_list_by_name(&mut self, name: &str, collection: List) -> Result<&mut Self> {
         unsafe {
-            let name_cstr = CString::new(name)?;
-            cass_statement_bind_collection_by_name(self.0, name_cstr.as_ptr(), collection.inner())
+            let name_ptr = name.as_ptr() as *const c_char;
+            cass_statement_bind_collection_by_name_n(
+                self.0,
+                name_ptr,
+                name.len(),
+                collection.inner(),
+            )
                 .to_result(self)
         }
     }
@@ -759,8 +783,8 @@ impl Statement {
     /// cass_prepared_bind().
     pub fn bind_tuple_by_name(&mut self, name: &str, value: Tuple) -> Result<&mut Self> {
         unsafe {
-            let name_cstr = CString::new(name)?;
-            cass_statement_bind_tuple_by_name(self.0, name_cstr.as_ptr(), value.inner())
+            let name_ptr = name.as_ptr() as *const c_char;
+            cass_statement_bind_tuple_by_name_n(self.0, name_ptr, name.len(), value.inner())
                 .to_result(self)
         }
     }
@@ -775,8 +799,8 @@ impl Statement {
     /// specified name.
     pub fn bind_user_type_by_name(&mut self, name: &str, value: &UserType) -> Result<&mut Self> {
         unsafe {
-            let name_cstr = CString::new(name)?;
-            cass_statement_bind_user_type_by_name(self.0, name_cstr.as_ptr(), value.inner())
+            let name_ptr = name.as_ptr() as *const c_char;
+            cass_statement_bind_user_type_by_name_n(self.0, name_ptr, name.len(), value.inner())
                 .to_result(self)
         }
     }
