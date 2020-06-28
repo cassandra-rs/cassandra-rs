@@ -2,6 +2,7 @@ use crate::cassandra::error::*;
 
 use crate::cassandra::inet::Inet;
 use crate::cassandra::iterator::{MapIterator, SetIterator, UserTypeIterator};
+use crate::cassandra::result::CassResult;
 use crate::cassandra::util::Protected;
 use crate::cassandra::uuid::Uuid;
 use crate::cassandra::value::Value;
@@ -21,15 +22,16 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::iter;
 use std::iter::IntoIterator;
+use std::marker::PhantomData;
 use std::os::raw::c_char;
 
 /// A collection of column values. Read-only, so thread-safe.
-pub struct Row(*const _Row);
+pub struct Row<'a>(*const _Row, PhantomData<&'a CassResult>);
 
-unsafe impl Sync for Row {}
-unsafe impl Send for Row {}
+unsafe impl<'a> Sync for Row<'a> {}
+unsafe impl<'a> Send for Row<'a> {}
 
-impl Protected<*const _Row> for Row {
+impl<'a> Protected<*const _Row> for Row<'a> {
     fn inner(&self) -> *const _Row {
         self.0
     }
@@ -37,11 +39,11 @@ impl Protected<*const _Row> for Row {
         if inner.is_null() {
             panic!("Unexpected null pointer")
         };
-        Row(inner)
+        Row(inner, PhantomData)
     }
 }
 
-impl Debug for Row {
+impl<'a> Debug for Row<'a> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         for column in self {
             write!(f, "{:?}\t", Value::build(column.inner()))?;
@@ -50,7 +52,7 @@ impl Debug for Row {
     }
 }
 
-impl Display for Row {
+impl<'a> Display for Row<'a> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         for column in self {
             write!(f, "{}\t", Value::build(column.inner()))?;
@@ -70,7 +72,7 @@ pub trait AsRustType<T> {
         S: Into<String>;
 }
 
-impl AsRustType<bool> for Row {
+impl AsRustType<bool> for Row<'_> {
     fn get(&self, index: usize) -> Result<bool> {
         let col = self.get_column(index)?;
         col.get_bool()
@@ -84,7 +86,7 @@ impl AsRustType<bool> for Row {
     }
 }
 
-impl AsRustType<String> for Row {
+impl AsRustType<String> for Row<'_> {
     fn get(&self, index: usize) -> Result<String> {
         let col = self.get_column(index)?;
         col.get_string()
@@ -99,7 +101,7 @@ impl AsRustType<String> for Row {
     }
 }
 
-impl AsRustType<f64> for Row {
+impl AsRustType<f64> for Row<'_> {
     fn get(&self, index: usize) -> Result<f64> {
         let col = self.get_column(index)?;
         col.get_f64()
@@ -114,7 +116,7 @@ impl AsRustType<f64> for Row {
     }
 }
 
-impl AsRustType<f32> for Row {
+impl AsRustType<f32> for Row<'_> {
     fn get(&self, index: usize) -> Result<f32> {
         let col = self.get_column(index)?;
         col.get_f32()
@@ -129,7 +131,7 @@ impl AsRustType<f32> for Row {
     }
 }
 
-impl AsRustType<i64> for Row {
+impl AsRustType<i64> for Row<'_> {
     fn get(&self, index: usize) -> Result<i64> {
         let col = self.get_column(index)?;
         col.get_i64()
@@ -144,7 +146,7 @@ impl AsRustType<i64> for Row {
     }
 }
 
-impl AsRustType<i32> for Row {
+impl AsRustType<i32> for Row<'_> {
     fn get(&self, index: usize) -> Result<i32> {
         let col = self.get_column(index)?;
         col.get_i32()
@@ -159,7 +161,7 @@ impl AsRustType<i32> for Row {
     }
 }
 
-impl AsRustType<i16> for Row {
+impl AsRustType<i16> for Row<'_> {
     fn get(&self, index: usize) -> Result<i16> {
         let col = self.get_column(index)?;
         col.get_i16()
@@ -174,7 +176,7 @@ impl AsRustType<i16> for Row {
     }
 }
 
-impl AsRustType<i8> for Row {
+impl AsRustType<i8> for Row<'_> {
     fn get(&self, index: usize) -> Result<i8> {
         let col = self.get_column(index)?;
         col.get_i8()
@@ -189,7 +191,7 @@ impl AsRustType<i8> for Row {
     }
 }
 
-impl AsRustType<u32> for Row {
+impl AsRustType<u32> for Row<'_> {
     fn get(&self, index: usize) -> Result<u32> {
         let col = self.get_column(index)?;
         col.get_u32()
@@ -204,7 +206,7 @@ impl AsRustType<u32> for Row {
     }
 }
 
-impl AsRustType<Inet> for Row {
+impl AsRustType<Inet> for Row<'_> {
     fn get(&self, index: usize) -> Result<Inet> {
         let col = self.get_column(index)?;
         col.get_inet()
@@ -219,7 +221,7 @@ impl AsRustType<Inet> for Row {
     }
 }
 
-impl AsRustType<SetIterator> for Row {
+impl AsRustType<SetIterator> for Row<'_> {
     fn get(&self, index: usize) -> Result<SetIterator> {
         let col = self.get_column(index)?;
         col.get_set()
@@ -234,7 +236,7 @@ impl AsRustType<SetIterator> for Row {
     }
 }
 
-impl AsRustType<MapIterator> for Row {
+impl AsRustType<MapIterator> for Row<'_> {
     fn get(&self, index: usize) -> Result<MapIterator> {
         let col = self.get_column(index)?;
         col.get_map()
@@ -249,7 +251,7 @@ impl AsRustType<MapIterator> for Row {
     }
 }
 
-impl AsRustType<UserTypeIterator> for Row {
+impl AsRustType<UserTypeIterator> for Row<'_> {
     fn get(&self, index: usize) -> Result<UserTypeIterator> {
         let col = self.get_column(index)?;
         col.get_user_type()
@@ -264,7 +266,7 @@ impl AsRustType<UserTypeIterator> for Row {
     }
 }
 
-impl AsRustType<Uuid> for Row {
+impl AsRustType<Uuid> for Row<'_> {
     fn get(&self, index: usize) -> Result<Uuid> {
         let col = self.get_column(index)?;
         col.get_uuid()
@@ -279,7 +281,7 @@ impl AsRustType<Uuid> for Row {
     }
 }
 
-impl AsRustType<uuid::Uuid> for Row {
+impl AsRustType<uuid::Uuid> for Row<'_> {
     fn get(&self, index: usize) -> Result<uuid::Uuid> {
         let col = self.get_column(index)?;
         col.get_uuid().map(|x| x.into())
@@ -294,7 +296,7 @@ impl AsRustType<uuid::Uuid> for Row {
     }
 }
 
-impl AsRustType<Vec<u8>> for Row {
+impl AsRustType<Vec<u8>> for Row<'_> {
     fn get(&self, index: usize) -> Result<Vec<u8>> {
         let col = self.get_column(index)?;
         col.get_bytes().map(|b| b.to_vec())
@@ -309,7 +311,7 @@ impl AsRustType<Vec<u8>> for Row {
     }
 }
 
-impl Row {
+impl<'a> Row<'a> {
     /// Get a particular column by index
     pub fn get_column(&self, index: usize) -> Result<Value> {
         unsafe {
@@ -389,7 +391,7 @@ impl Display for RowIterator {
     }
 }
 
-impl IntoIterator for Row {
+impl IntoIterator for Row<'_> {
     type Item = Value;
     type IntoIter = RowIterator;
 
@@ -400,7 +402,7 @@ impl IntoIterator for Row {
     }
 }
 
-impl<'a> IntoIterator for &'a Row {
+impl<'a> IntoIterator for &'a Row<'_> {
     type Item = Value;
     type IntoIter = RowIterator;
     fn into_iter(self) -> Self::IntoIter {
