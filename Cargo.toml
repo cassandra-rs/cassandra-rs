@@ -21,7 +21,7 @@ slog = "2"
 cassandra-cpp-sys = "0.12"
 decimal = "2"
 time = "0.2"
-uuid = "0.5"
+uuid = "0.8"
 error-chain = "0.12.1"
 
 [dev-dependencies]
