@@ -151,7 +151,7 @@ impl From<Uuid> for uuid::Uuid {
         for i in 0..8 {
             output[15 - i] = (id.0.clock_seq_and_node >> (8 * i)) as u8;
         }
-        uuid::Uuid::from_bytes(&output).unwrap()
+        uuid::Uuid::from_bytes(output)
     }
 }
 
