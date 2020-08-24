@@ -173,7 +173,7 @@ impl<'a> Drop for ResultIterator<'a> {
 }
 
 impl<'a> Iterator for ResultIterator<'a> {
-    type Item = Row;
+    type Item = Row<'a>;
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {
@@ -186,13 +186,13 @@ impl<'a> Iterator for ResultIterator<'a> {
 
 impl<'a> ResultIterator<'a> {
     /// Gets the next row in the result set
-    pub fn get_row(&mut self) -> Row {
+    pub fn get_row(&mut self) -> Row<'a> {
         unsafe { Row::build(cass_iterator_get_row(self.0)) }
     }
 }
 
 impl<'a> IntoIterator for &'a CassResult {
-    type Item = Row;
+    type Item = Row<'a>;
     type IntoIter = ResultIterator<'a>;
 
     fn into_iter(self) -> Self::IntoIter {

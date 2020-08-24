@@ -12,6 +12,9 @@ version number is tracked in the file `VERSION`.
 ### Changed
 - Change various functions to avoid the extra overhead using an intermidiate
   CString object.
+- Extended the lifetime of a `CassResult` into a `Row`. This is a breaking
+  change, and may require reworking the code to satisfy the lifetime
+  requirement that the `CassResult` must live longer than the `Row`.
 
 ### Fixed
 
