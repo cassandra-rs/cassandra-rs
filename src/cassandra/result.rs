@@ -132,21 +132,32 @@ impl CassResult {
         unsafe { cass_result_has_more_pages(self.0) == cass_true }
     }
 
-    /// Sets the statement's paging state. This can be used to get the next page of
-    /// data in a multi-page query.
+    /// Gets the statement's paging state. This can be used to get the next page of
+    /// data in a multi-page query, by using `set_paging_state_token`.
     ///
-    /// <b>Warning:</b> The paging state should not be exposed to or come from
-    /// untrusted environments. The paging state could be spoofed and potentially
-    // used to gain access to other data.
-    pub fn set_paging_state_token(&mut self, paging_state: &str) -> Result<&mut Self> {
+    /// Returns:
+    ///   - `Ok(None)` if there is no more pages, and thus no paging state token.
+    ///   - `Ok(Some(Vec<u8>)) if there are more pages, and a paging state token.
+    ///   - `Err(_)` if there was an error getting the paging state token.
+    ///
+    /// [`set_paging_state_token`]: Statement::set_paging_state_token
+    pub fn paging_state_token(&self) -> Result<Option<Vec<u8>>> {
+        if !self.has_more_pages() {
+            return Ok(None);
+        }
+
         unsafe {
-            let state = CString::new(paging_state)?;
+            let mut token_ptr = mem::zeroed();
+            let mut token_length = mem::zeroed();
             cass_result_paging_state_token(
                 self.0,
-                &mut state.as_ptr(),
-                &mut (state.to_bytes().len()),
+                &mut token_ptr,
+                &mut token_length,
             )
-            .to_result(self)
+            .to_result(())
+            .map(|_| {
+                Some(slice::from_raw_parts(token_ptr as *const u8, token_length as usize).to_vec())
+            })
         }
     }
 

@@ -401,7 +401,7 @@ impl Statement {
     /// <b>Warning:</b> The paging state should not be exposed to or come from
     /// untrusted environments. The paging state could be spoofed and potentially
     /// used to gain access to other data.
-    pub fn set_paging_state_token(&mut self, paging_state: &str) -> Result<&mut Self> {
+    pub fn set_paging_state_token(&mut self, paging_state: &[u8]) -> Result<&mut Self> {
         unsafe {
             cass_statement_set_paging_state_token(
                 self.0,
