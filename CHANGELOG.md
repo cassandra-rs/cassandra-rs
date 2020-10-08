@@ -17,6 +17,10 @@ version number is tracked in the file `VERSION`.
   requirement that the `CassResult` must live longer than the `Row`.
 
 ### Fixed
+ - `CassResult::set_paging_state_token` was implemented incorrectly, namely, it did nothing,
+   and has instead been replaced with `CassResult::paging_state_token`.
+ - `Statement::set_paging_state_token` has been changed to take a `&[u8]` instead of a `&str`,
+   as a paging state token isn't necessarily utf8 encoded.
 
 ## [0.15.1] - 2020-06-02
 ### Added
