@@ -136,7 +136,7 @@ impl CassResult {
     /// data in a multi-page query, by using `set_paging_state_token`.
     ///
     /// Returns:
-    ///   - `Ok(None)` if there is no more pages, and thus no paging state token.
+    ///   - `Ok(None)` if there are no more pages, and thus no paging state token.
     ///   - `Ok(Some(Vec<u8>)) if there are more pages, and a paging state token.
     ///   - `Err(_)` if there was an error getting the paging state token.
     ///
