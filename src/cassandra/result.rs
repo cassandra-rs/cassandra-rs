@@ -156,22 +156,31 @@ impl CassResult {
             )
             .to_result(())
             .map(|_| {
-                Some(slice::from_raw_parts(token_ptr as *const u8, token_length as usize).to_vec())
-            })
+                    Some(
+                        slice::from_raw_parts(token_ptr as *const u8, token_length as usize)
+                            .to_vec(),
+                    )
+                })
         }
     }
 
     /// Creates a new iterator for the specified result. This can be
     /// used to iterate over rows in the result.
     pub fn iter(&self) -> ResultIterator {
-        unsafe { ResultIterator(cass_iterator_from_result(self.0), PhantomData) }
+        unsafe {
+            ResultIterator(
+                cass_iterator_from_result(self.0),
+                cass_result_row_count(self.0),
+                PhantomData,
+            )
+        }
     }
 }
 
 /// An iterator over the results of a query.
 /// The result holds the data, so it must last for at least the lifetime of the iterator.
 #[derive(Debug)]
-pub struct ResultIterator<'a>(pub *mut _CassIterator, PhantomData<&'a CassResult>);
+pub struct ResultIterator<'a>(pub *mut _CassIterator, usize, PhantomData<&'a CassResult>);
 
 // The underlying C type has no thread-local state, but does not support access
 // from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
@@ -192,6 +201,10 @@ impl<'a> Iterator for ResultIterator<'a> {
                 cass_true => Some(self.get_row()),
             }
         }
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.1, Some(self.1))
     }
 }
 
