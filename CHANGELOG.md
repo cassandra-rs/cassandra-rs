@@ -8,6 +8,7 @@ version number is tracked in the file `VERSION`.
 
 ## [Unreleased]
 ### Added
+ - Added `Cluster::set_token_aware_routing_shuffle_replicas`.
 
 ### Changed
 - Change various functions to avoid the extra overhead using an intermidiate
