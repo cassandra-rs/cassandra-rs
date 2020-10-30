@@ -15,6 +15,8 @@ version number is tracked in the file `VERSION`.
 - Extended the lifetime of a `CassResult` into a `Row`. This is a breaking
   change, and may require reworking the code to satisfy the lifetime
   requirement that the `CassResult` must live longer than the `Row`.
+- Switched to using `parking_lot::Mutex` instead of `std::sync::Mutex` for
+  `CassFuture` coordination.
 
 ### Fixed
  - `CassResult::set_paging_state_token` was implemented incorrectly, namely, it did nothing,

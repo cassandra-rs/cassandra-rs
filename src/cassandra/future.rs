@@ -17,13 +17,15 @@ use crate::cassandra_sys::CassFuture as _Future;
 use crate::cassandra_sys::CASS_OK;
 use crate::cassandra_sys::{cass_false, cass_true};
 
+use parking_lot::Mutex;
+
 use std::future::Future;
 use std::marker::PhantomData;
 use std::mem;
 use std::pin::Pin;
 use std::slice;
 use std::str;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::task::{Context, Poll, Waker};
 
 /// A future representing the result of a Cassandra driver operation.
@@ -141,7 +143,7 @@ impl<T: Completable> Future for CassFuture<T> {
             // (`notify_task`) if the future is already complete, so we must avoid holding the
             // Rust lock while calling it. We achieve this by using a boolean flag to request
             // the callback be set outside the lock region.
-            let mut lock = self.state.as_ref().inner.lock().expect("poll");
+            let mut lock = self.state.as_ref().inner.lock();
             match *lock {
                 ref mut state @ FutureState::Created => {
                     // No task yet - schedule a callback. But as an optimization, if it's ready
@@ -267,7 +269,7 @@ unsafe extern "C" fn notify_task(_c_future: *mut _Future, data: *mut ::std::os::
     let future_target: &FutureTarget = &*(data as *const FutureTarget);
     // The future is now ready, so transition to the appropriate state.
     let state = {
-        let mut lock = future_target.inner.lock().expect("notify_task");
+        let mut lock = future_target.inner.lock();
         mem::replace(&mut *lock, FutureState::Ready)
     };
     if let FutureState::Awaiting { ref waker, .. } = state {
