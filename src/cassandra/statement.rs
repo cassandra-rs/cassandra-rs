@@ -603,12 +603,17 @@ impl Statement {
     pub fn bind_string_by_name(&mut self, name: &str, value: &str) -> Result<&mut Self> {
         unsafe {
             let name_ptr = name.as_ptr() as *const c_char;
-            let value_ptr = value.as_ptr() as *const c_char;
+
+            // cass_statement_bind_string_by_name_n is incorrectly ignoring the
+            // value_length parameter so we have to allocate a new
+            // NULL-terminated string.
+            let value_cstr = std::ffi::CString::new(value)?;
+
             cass_statement_bind_string_by_name_n(
                 self.0,
                 name_ptr,
                 name.len(),
-                value_ptr,
+                value_cstr.as_ptr(),
                 value.len(),
             )
             .to_result(self)
