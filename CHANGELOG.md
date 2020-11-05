@@ -9,6 +9,8 @@ version number is tracked in the file `VERSION`.
 ## [Unreleased]
 ### Added
  - Added `Cluster::set_token_aware_routing_shuffle_replicas`.
+- `ConstDataType::new_user_type` has been added, to allow the creation of a user data type
+  from an existing data type.
 
 ### Changed
 - Change various functions to avoid the extra overhead using an intermidiate
