@@ -204,7 +204,7 @@ impl<'a> Iterator for ResultIterator<'a> {
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.1, Some(self.1))
+        (0, Some(self.1))
     }
 }
 
