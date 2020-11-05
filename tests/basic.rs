@@ -41,6 +41,37 @@ fn create_basic_table(session: &Session) {
     session.execute(truncate_statement).wait().unwrap();
 }
 
+fn insert_into_basic_by_name(session: &Session, key: &str, basic: &Basic) -> Result<CassResult> {
+    let mut statement = stmt!(
+        "INSERT INTO examples.basic (key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct, txt) \
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+    );
+
+    let ct_type = DataType::new_udt(2);
+    ct_type.add_sub_value_type_by_name::<&str>("dt", ValueType::DATE)?;
+    ct_type.add_sub_value_type_by_name::<&str>("tm", ValueType::TIME)?;
+    let mut ct_udt = ct_type.new_user_type();
+    ct_udt.set_uint32_by_name("dt", basic.ct.dt)?;
+    ct_udt.set_int64_by_name("tm", basic.ct.tm)?;
+
+    statement.bind_by_name("key", key)?;
+    statement.bind_by_name("bln", basic.bln)?;
+    statement.bind_by_name("flt", basic.flt)?;
+    statement.bind_by_name("dbl", basic.dbl)?;
+    statement.bind_by_name("i8", basic.i8)?;
+    statement.bind_by_name("i16", basic.i16)?;
+    statement.bind_by_name("i32", basic.i32)?;
+    statement.bind_by_name("i64", basic.i64)?;
+    statement.bind_by_name("ts", basic.ts)?;
+    statement.bind_by_name("addr", basic.addr)?;
+    statement.bind_by_name("tu", basic.tu)?;
+    statement.bind_by_name("id", basic.id)?;
+    statement.bind_by_name("ct", &ct_udt)?;
+    statement.bind_by_name("txt", basic.txt.as_str())?;
+
+    session.execute(&statement).wait()
+}
+
 fn insert_into_basic(session: &Session, key: &str, basic: &Basic) -> Result<CassResult> {
     let mut statement = stmt!(
         "INSERT INTO examples.basic (key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct, txt) \
@@ -214,7 +245,7 @@ fn test_basic_round_trip() {
             dt: ts as u32,
             tm: ts as i64,
         },
-        txt: "some\0text".to_string(),
+        txt: "some\0unicode text 😊".to_string(),
     };
 
     insert_into_basic(&session, "test", &input).unwrap();
@@ -224,6 +255,21 @@ fn test_basic_round_trip() {
 
     println!("{:?}", input);
     println!("{:?}", output);
+
+    assert!(input == output);
+
+    // We are forced to use a null terminated CString to workaround a bug in the
+    // cpp driver. Therefore, null char is not allowed.
+    let input = {
+        let mut input = input;
+        input.txt = "some unicode text 😊".to_string();
+        input
+    };
+
+    insert_into_basic_by_name(&session, "test_by_name", &input).unwrap();
+    let output = select_from_basic(&session, "test_by_name")
+        .unwrap()
+        .expect("no output from select");
 
     assert!(input == output);
 }
