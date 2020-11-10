@@ -1,4 +1,4 @@
-use crate::cassandra::collection::Set;
+use crate::cassandra::collection::{List, Map, Set};
 use crate::cassandra::data_type::ConstDataType;
 use crate::cassandra::data_type::DataType;
 use crate::cassandra::error::*;
@@ -151,8 +151,24 @@ impl Tuple {
         unsafe { cass_tuple_set_inet(self.0, index, inet.inner()).to_result(self) }
     }
 
-    /// Sets a "list", "map" or "set" in a tuple at the specified index.
-    pub fn set_collection<S>(&mut self, index: usize, value: S) -> Result<&mut Self>
+    /// Sets a list in a tuple at the specified index.
+    pub fn set_list<S>(&mut self, index: usize, value: S) -> Result<&mut Self>
+    where
+        S: Into<List>,
+    {
+        unsafe { cass_tuple_set_collection(self.0, index, value.into().inner()).to_result(self) }
+    }
+
+    /// Sets a map in a tuple at the specified index.
+    pub fn set_map<S>(&mut self, index: usize, value: S) -> Result<&mut Self>
+    where
+        S: Into<Map>,
+    {
+        unsafe { cass_tuple_set_collection(self.0, index, value.into().inner()).to_result(self) }
+    }
+
+    /// Sets a set" in a tuple at the specified index.
+    pub fn set_set<S>(&mut self, index: usize, value: S) -> Result<&mut Self>
     where
         S: Into<Set>,
     {
