@@ -38,6 +38,7 @@ use crate::cassandra_sys::cass_cluster_set_tcp_keepalive;
 use crate::cassandra_sys::cass_cluster_set_tcp_nodelay;
 use crate::cassandra_sys::cass_cluster_set_timestamp_gen;
 use crate::cassandra_sys::cass_cluster_set_token_aware_routing;
+use crate::cassandra_sys::cass_cluster_set_token_aware_routing_shuffle_replicas;
 use crate::cassandra_sys::cass_cluster_set_use_schema;
 use crate::cassandra_sys::cass_cluster_set_whitelist_filtering;
 use crate::cassandra_sys::cass_cluster_set_write_bytes_high_water_mark;
@@ -434,6 +435,26 @@ impl Cluster {
     pub fn set_token_aware_routing(&mut self, enabled: bool) -> &Self {
         unsafe {
             cass_cluster_set_token_aware_routing(
+                self.0,
+                if enabled { cass_true } else { cass_false },
+            );
+        }
+        self
+    }
+
+    /// Configures token-aware routing to randomly shuffle replicas.
+    /// This can reduce the effectiveness of server-side caching, but it
+    /// can better distribute load over replicas for a given partition key.
+    ///
+    ///
+    /// Default: true (enabled)
+    ///
+    ///
+    /// Note: Token-aware routing must be enabled for the setting to be
+    /// applicable.
+    pub fn set_token_aware_routing_shuffle_replicas(&mut self, enabled: bool) -> &Self {
+        unsafe {
+            cass_cluster_set_token_aware_routing_shuffle_replicas(
                 self.0,
                 if enabled { cass_true } else { cass_false },
             );

@@ -11,6 +11,7 @@ version number is tracked in the file `VERSION`.
 - Exposes separate setters for collection types on `Tuple` and `UserType`. As such, the respective
   `set_collection` and `set_collection_by_name` on both types have been removed. `set_collection`
   becomes `set_set` and `set_collection_by_name` becomes `set_set_by_name`.
+ - Added `Cluster::set_token_aware_routing_shuffle_replicas`.
 - `ConstDataType::new_user_type` has been added, to allow the creation of a user data type
   from an existing data type.
 
