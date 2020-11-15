@@ -10,7 +10,7 @@ use crate::cassandra::policy::retry::RetryPolicy;
 use crate::cassandra::result::CassResult;
 use crate::cassandra::tuple::Tuple;
 use crate::cassandra::user_type::UserType;
-use crate::cassandra::util::{ProtectedInner, ProtectedWithSession};
+use crate::cassandra::util::{Protected, ProtectedInner, ProtectedWithSession};
 use crate::cassandra::uuid::Uuid;
 use crate::{CassFuture, Session};
 
@@ -73,6 +73,13 @@ use time::Duration;
 #[derive(Debug)]
 struct StatementInner(*mut _Statement);
 
+impl StatementInner {
+    fn new(query: &str, parameter_count: usize) -> Self {
+        let query_ptr = query.as_ptr() as *const c_char;
+        Self(unsafe { cass_statement_new_n(query_ptr, query.len(), parameter_count) })
+    }
+}
+
 /// A statement object is an executable query. It represents either a regular
 /// (adhoc) statement or a prepared statement. It maintains the queries' parameter
 /// values along with query options (consistency level, paging state, etc.)
@@ -87,44 +94,39 @@ pub struct Statement(StatementInner, Session);
 unsafe impl Send for StatementInner {}
 
 impl ProtectedInner<*mut _Statement> for StatementInner {
+    #[inline(always)]
     fn inner(&self) -> *mut _Statement {
         self.0
     }
 }
 
+impl Protected<*mut _Statement> for StatementInner {
+    #[inline(always)]
+    fn build(inner: *mut _Statement) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        Self(inner)
+    }
+}
+
 impl ProtectedInner<*mut _Statement> for Statement {
+    #[inline(always)]
     fn inner(&self) -> *mut _Statement {
         self.0.inner()
     }
 }
 
 impl ProtectedWithSession<*mut _Statement> for Statement {
+    #[inline(always)]
     fn build(inner: *mut _Statement, session: Session) -> Self {
-        if inner.is_null() {
-            panic!("Unexpected null pointer")
-        };
-        Statement(StatementInner(inner), session)
+        Statement(StatementInner::build(inner), session)
     }
 
-    fn inner_session(&self) -> &Session {
+    #[inline(always)]
+    fn session(&self) -> &Session {
         &self.1
     }
-}
-
-#[macro_export]
-/// Create a Statement from a query string, automatically counting `?`
-/// characters to determine the number of parameters.
-macro_rules! stmt {
-    ($statement: expr, $( $x:expr ),*) => {
-        {
-            $(
-            let query = $x;
-            let param_count = query.matches("?").count();
-            let statement = $crate::Statement::new($statement, query, param_count);
-            )*
-            statement
-        }
-    };
 }
 
 // statement,
@@ -338,18 +340,8 @@ impl BindRustType<Vec<u8>> for Statement {
 
 impl Statement {
     /// Creates a new query statement.
-    pub fn new(session: Session, query: &str, parameter_count: usize) -> Self {
-        unsafe {
-            let query_ptr = query.as_ptr() as *const c_char;
-            Statement(
-                StatementInner(cass_statement_new_n(
-                    query_ptr,
-                    query.len(),
-                    parameter_count,
-                )),
-                session,
-            )
-        }
+    pub(crate) fn new(session: Session, query: &str, parameter_count: usize) -> Self {
+        Statement(StatementInner::new(query, parameter_count), session)
     }
 
     /// Executes the statement.

@@ -28,12 +28,6 @@ use std::os::raw::c_char;
 #[derive(Debug)]
 struct BatchInner(*mut _Batch);
 
-impl ProtectedInner<*mut _Batch> for BatchInner {
-    fn inner(&self) -> *mut _Batch {
-        self.0
-    }
-}
-
 /// A group of statements that are executed as a single batch.
 /// <b>Note:</b> Batches are not supported by the binary protocol version 1.
 #[derive(Debug)]
@@ -43,21 +37,38 @@ pub struct Batch(BatchInner, Session);
 // from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
 unsafe impl Send for BatchInner {}
 
+impl ProtectedInner<*mut _Batch> for BatchInner {
+    #[inline(always)]
+    fn inner(&self) -> *mut _Batch {
+        self.0
+    }
+}
+
+impl Protected<*mut _Batch> for BatchInner {
+    #[inline(always)]
+    fn build(inner: *mut _Batch) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        Self(inner)
+    }
+}
+
 impl ProtectedInner<*mut _Batch> for Batch {
+    #[inline(always)]
     fn inner(&self) -> *mut _Batch {
         self.0.inner()
     }
 }
 
 impl ProtectedWithSession<*mut _Batch> for Batch {
+    #[inline(always)]
     fn build(inner: *mut _Batch, session: Session) -> Self {
-        if inner.is_null() {
-            panic!("Unexpected null pointer")
-        };
-        Batch(BatchInner(inner), session)
+        Self(BatchInner::build(inner), session)
     }
 
-    fn inner_session(&self) -> &Session {
+    #[inline(always)]
+    fn session(&self) -> &Session {
         &self.1
     }
 }

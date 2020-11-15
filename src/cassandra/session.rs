@@ -125,15 +125,22 @@ impl Session {
         }
     }
 
-    /// Create a prepared statement.
-    pub fn prepare(&self, query: &str) -> Result<CassFuture<PreparedStatement>> {
-        unsafe {
+    /// Create a prepared statement with the given query.
+    pub async fn prepare(&self, query: &str) -> Result<PreparedStatement> {
+        let future = unsafe {
             let query_ptr = query.as_ptr() as *const c_char;
-            Ok(<CassFuture<PreparedStatement>>::build(
+            <CassFuture<PreparedStatement>>::build(
                 self.clone(),
                 cass_session_prepare_n(self.inner(), query_ptr, query.len()),
-            ))
-        }
+            )
+        };
+        future.await
+    }
+
+    /// Creates a statement with the given query.
+    pub fn statement(&self, query: &str) -> Statement {
+        let param_count = query.matches("?").count();
+        Statement::new(self.clone(), query, param_count)
     }
 
     //    ///Execute a query or bound statement.

@@ -23,19 +23,19 @@ unsafe impl Sync for PreparedStatement {}
 impl Drop for PreparedStatement {
     /// Frees a prepared statement
     fn drop(&mut self) {
-        if !self.0.is_null() {
-            unsafe { cass_prepared_free(self.0) }
-        }
+        unsafe { cass_prepared_free(self.0) }
     }
 }
 
 impl ProtectedInner<*const _PreparedStatement> for PreparedStatement {
+    #[inline(always)]
     fn inner(&self) -> *const _PreparedStatement {
         self.0
     }
 }
 
 impl ProtectedWithSession<*const _PreparedStatement> for PreparedStatement {
+    #[inline(always)]
     fn build(inner: *const _PreparedStatement, session: Session) -> Self {
         if inner.is_null() {
             panic!("Unexpected null pointer")
@@ -43,7 +43,8 @@ impl ProtectedWithSession<*const _PreparedStatement> for PreparedStatement {
         PreparedStatement(inner, session)
     }
 
-    fn inner_session(&self) -> &Session {
+    #[inline(always)]
+    fn session(&self) -> &Session {
         &self.1
     }
 }
@@ -51,12 +52,7 @@ impl ProtectedWithSession<*const _PreparedStatement> for PreparedStatement {
 impl PreparedStatement {
     /// Creates a bound statement from a pre-prepared statement.
     pub fn bind(&self) -> Statement {
-        unsafe {
-            Statement::build(
-                cass_prepared_bind(self.inner()),
-                self.inner_session().clone(),
-            )
-        }
+        unsafe { Statement::build(cass_prepared_bind(self.inner()), self.session().clone()) }
     }
 
     /// Gets the name of a parameter at the specified index.
