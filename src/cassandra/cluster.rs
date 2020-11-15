@@ -4,7 +4,7 @@ use crate::cassandra::policy::retry::RetryPolicy;
 use crate::cassandra::session::Session;
 use crate::cassandra::ssl::Ssl;
 use crate::cassandra::time::TimestampGen;
-use crate::cassandra::util::Protected;
+use crate::cassandra::util::{Protected, ProtectedInner};
 
 use crate::cassandra_sys::cass_cluster_free;
 use crate::cassandra_sys::cass_cluster_new;
@@ -91,10 +91,13 @@ impl Drop for Cluster {
     }
 }
 
-impl Protected<*mut _Cluster> for Cluster {
+impl ProtectedInner<*mut _Cluster> for Cluster {
     fn inner(&self) -> *mut _Cluster {
         self.0
     }
+}
+
+impl Protected<*mut _Cluster> for Cluster {
     fn build(inner: *mut _Cluster) -> Self {
         if inner.is_null() {
             panic!("Unexpected null pointer")
@@ -157,24 +160,21 @@ impl Cluster {
         }
     }
 
+    fn connect_inner(&mut self) -> CassFuture<Session> {
+        let session = Session::new();
+        let connect = unsafe { cass_session_connect(session.inner(), self.0) };
+        <CassFuture<Session>>::build(session, connect)
+    }
+
     /// Performs a blocking call to connect to Cassandra cluster
     pub fn connect(&mut self) -> Result<Session> {
-        unsafe {
-            let session = Session(cass_session_new());
-            let connect_future = <CassFuture<()>>::build(cass_session_connect(session.0, self.0));
-            connect_future.wait()?;
-            Ok(session)
-        }
+        self.connect_inner().wait()
     }
 
     /// Asynchronously connects to the cassandra cluster
     pub async fn connect_async(&mut self) -> Result<Session> {
-        unsafe {
-            let session = Session(cass_session_new());
-            let connect_future = <CassFuture<()>>::build(cass_session_connect(session.0, self.0));
-            connect_future.await?;
-            Ok(session)
-        }
+        let connect_future = self.connect_inner();
+        connect_future.await
     }
 
     /// Sets the protocol version. This will automatically downgrade to the lowest
