@@ -1,5 +1,5 @@
 use crate::cassandra::consistency::Consistency;
-use crate::cassandra::util::Protected;
+use crate::cassandra::util::{Protected, ProtectedInner};
 use crate::cassandra::value::ValueType;
 use crate::cassandra::write_type::WriteType;
 

@@ -1,7 +1,7 @@
-use crate::cassandra::data_type::ConstDataType;
 use crate::cassandra::error::*;
 use crate::cassandra::statement::Statement;
-use crate::cassandra::util::Protected;
+use crate::cassandra::util::{Protected, ProtectedInner, ProtectedWithSession};
+use crate::{cassandra::data_type::ConstDataType, Session};
 
 use crate::cassandra_sys::cass_prepared_bind;
 use crate::cassandra_sys::cass_prepared_free;
@@ -15,7 +15,7 @@ use std::{mem, slice, str};
 /// A statement that has been prepared against at least one Cassandra node.
 /// Instances of this class should not be created directly, but through Session.prepare().
 #[derive(Debug)]
-pub struct PreparedStatement(*const _PreparedStatement);
+pub struct PreparedStatement(*const _PreparedStatement, Session);
 
 unsafe impl Send for PreparedStatement {}
 unsafe impl Sync for PreparedStatement {}
@@ -29,22 +29,34 @@ impl Drop for PreparedStatement {
     }
 }
 
-impl Protected<*const _PreparedStatement> for PreparedStatement {
+impl ProtectedInner<*const _PreparedStatement> for PreparedStatement {
     fn inner(&self) -> *const _PreparedStatement {
         self.0
     }
-    fn build(inner: *const _PreparedStatement) -> Self {
+}
+
+impl ProtectedWithSession<*const _PreparedStatement> for PreparedStatement {
+    fn build(inner: *const _PreparedStatement, session: Session) -> Self {
         if inner.is_null() {
             panic!("Unexpected null pointer")
         };
-        PreparedStatement(inner)
+        PreparedStatement(inner, session)
+    }
+
+    fn inner_session(&self) -> &Session {
+        &self.1
     }
 }
 
 impl PreparedStatement {
     /// Creates a bound statement from a pre-prepared statement.
     pub fn bind(&self) -> Statement {
-        unsafe { Statement::build(cass_prepared_bind(self.0)) }
+        unsafe {
+            Statement::build(
+                cass_prepared_bind(self.inner()),
+                self.inner_session().clone(),
+            )
+        }
     }
 
     /// Gets the name of a parameter at the specified index.
