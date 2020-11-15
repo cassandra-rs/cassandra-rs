@@ -15,7 +15,7 @@ pub(crate) trait Protected<T>: ProtectedInner<T> {
 
 pub(crate) trait ProtectedWithSession<T>: ProtectedInner<T> {
     fn build(inner: T, session: Session) -> Self;
-    fn inner_session(&self) -> &Session;
+    fn session(&self) -> &Session;
 }
 
 /// Enhance a nullary enum as follows:

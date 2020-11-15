@@ -213,14 +213,6 @@ impl<T: Completable> Future for CassFuture<T> {
     }
 }
 
-impl<T: Completable> CassFuture<T> {
-    /// Synchronously executes the CassFuture, blocking until it
-    /// completes.
-    pub fn wait(mut self) -> Result<T> {
-        unsafe { get_completion(self.take_session(), self.inner) }
-    }
-}
-
 /// Extract success or failure from a future.
 ///
 /// This function will block if the future is not yet ready. In order to ensure that this
