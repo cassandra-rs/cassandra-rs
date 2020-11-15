@@ -46,6 +46,7 @@ use crate::cassandra_sys::cass_cluster_set_write_bytes_low_water_mark;
 use crate::cassandra_sys::cass_false;
 use crate::cassandra_sys::cass_future_error_code;
 use crate::cassandra_sys::cass_session_connect;
+use crate::cassandra_sys::cass_session_connect_keyspace_n;
 use crate::cassandra_sys::cass_session_new;
 use crate::cassandra_sys::cass_true;
 use crate::cassandra_sys::CassCluster as _Cluster;
@@ -160,11 +161,27 @@ impl Cluster {
         }
     }
 
-    /// Asynchronously connects to the cassandra cluster
+    /// Connects to the cassandra cluster
     pub async fn connect(&mut self) -> Result<Session> {
         let session = Session::new();
         let connect = unsafe { cass_session_connect(session.inner(), self.0) };
-        let connect_future = <CassFuture<Session>>::build(session, connect);
+        let connect_future = CassFuture::build(session, connect);
+        connect_future.await
+    }
+
+    /// Connects to the cassandra cluster, setting the keyspace of the session.
+    pub async fn connect_keyspace(&mut self, keyspace: &str) -> Result<Session> {
+        let session = Session::new();
+        let keyspace_ptr = keyspace.as_ptr() as *const c_char;
+        let connect_keyspace = unsafe {
+            cass_session_connect_keyspace_n(
+                session.inner(),
+                self.inner(),
+                keyspace_ptr,
+                keyspace.len(),
+            )
+        };
+        let connect_future = CassFuture::build(session, connect_keyspace);
         connect_future.await
     }
 
