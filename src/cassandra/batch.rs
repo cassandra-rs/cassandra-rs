@@ -1,5 +1,3 @@
-use cassandra_cpp_sys::cass_session_execute_batch;
-
 use crate::cassandra::consistency::Consistency;
 use crate::cassandra::error::*;
 use crate::cassandra::policy::retry::RetryPolicy;
@@ -18,6 +16,7 @@ use crate::cassandra_sys::cass_batch_set_timestamp;
 use crate::cassandra_sys::cass_custom_payload_free;
 use crate::cassandra_sys::cass_custom_payload_new;
 use crate::cassandra_sys::cass_custom_payload_set_n;
+use crate::cassandra_sys::cass_session_execute_batch;
 use crate::cassandra_sys::CassBatch as _Batch;
 use crate::cassandra_sys::CassBatchType_;
 use crate::cassandra_sys::CassConsistency;

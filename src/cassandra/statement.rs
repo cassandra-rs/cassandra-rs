@@ -15,6 +15,7 @@ use crate::cassandra::uuid::Uuid;
 use crate::{CassFuture, Session};
 
 use crate::cassandra_sys::cass_false;
+use crate::cassandra_sys::cass_session_execute;
 use crate::cassandra_sys::cass_statement_add_key_index;
 use crate::cassandra_sys::cass_statement_bind_bool;
 use crate::cassandra_sys::cass_statement_bind_bool_by_name_n;
@@ -66,7 +67,6 @@ use crate::cassandra_sys::cass_true;
 use crate::cassandra_sys::CassStatement as _Statement;
 use crate::cassandra_sys::CASS_UINT64_MAX;
 
-use cassandra_cpp_sys::cass_session_execute;
 use std::os::raw::c_char;
 use time::Duration;
 

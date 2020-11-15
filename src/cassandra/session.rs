@@ -89,30 +89,8 @@ impl Default for Session {
 }
 
 impl Session {
-    /// Create a new Cassanda session.
-    /// It's recommended to use Cluster.connect() instead
-    pub fn new() -> Session {
+    pub(crate) fn new() -> Session {
         unsafe { Session(SessionInner::new(cass_session_new())) }
-    }
-
-    /// Connects a session.
-    pub fn connect(self, cluster: &Cluster) -> CassFuture<Self> {
-        let connect = unsafe { cass_session_connect(self.inner(), cluster.inner()) };
-        <CassFuture<Self>>::build(self, connect)
-    }
-
-    /// Connects a session and sets the keyspace.
-    pub fn connect_keyspace(self, cluster: &Cluster, keyspace: &str) -> Result<CassFuture<Self>> {
-        let connect_keyspace = unsafe {
-            let keyspace_ptr = keyspace.as_ptr() as *const c_char;
-            cass_session_connect_keyspace_n(
-                self.inner(),
-                cluster.inner(),
-                keyspace_ptr,
-                keyspace.len(),
-            )
-        };
-        Ok(<CassFuture<Self>>::build(self, connect_keyspace))
     }
 
     /// Closes the session instance, outputs a close future which can
@@ -127,13 +105,10 @@ impl Session {
 
     /// Create a prepared statement with the given query.
     pub async fn prepare(&self, query: &str) -> Result<PreparedStatement> {
-        let future = unsafe {
-            let query_ptr = query.as_ptr() as *const c_char;
-            <CassFuture<PreparedStatement>>::build(
-                self.clone(),
-                cass_session_prepare_n(self.inner(), query_ptr, query.len()),
-            )
-        };
+        let query_ptr = query.as_ptr() as *const c_char;
+        let future = <CassFuture<PreparedStatement>>::build(self.clone(), unsafe {
+            cass_session_prepare_n(self.inner(), query_ptr, query.len())
+        });
         future.await
     }
 
@@ -143,13 +118,11 @@ impl Session {
         Statement::new(self.clone(), query, param_count)
     }
 
-    //    ///Execute a query or bound statement.
-    //    pub fn execute(&self, statement: &str, parameter_count: u64) -> CassFuture {
-    //        unsafe {
-    //            CassFuture::build(cass_session_execute(self.0,
-    //            Statement::new(statement, parameter_count).inner()))
-    //        }
-    //    }
+    /// Executes a given query.
+    pub async fn execute(&self, query: &str) -> Result<CassResult> {
+        let statement = self.statement(query);
+        statement.execute().await
+    }
 
     /// Creates a new batch that is bound to this session.
     pub fn batch(&self, batch_type: BatchType) -> Batch {
