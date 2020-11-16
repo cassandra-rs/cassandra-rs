@@ -347,8 +347,10 @@ impl Statement {
     /// Executes the statement.
     pub async fn execute(self) -> Result<CassResult> {
         let (statement, session) = (self.0, self.1);
-        let execute = unsafe { cass_session_execute(session.inner(), statement.inner()) };
-        let fut = <CassFuture<CassResult>>::build(session, execute);
+        let fut = {
+            let execute = unsafe { cass_session_execute(session.inner(), statement.inner()) };
+            <CassFuture<CassResult>>::build(session, execute)
+        };
         fut.await
     }
 
