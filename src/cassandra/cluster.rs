@@ -164,8 +164,10 @@ impl Cluster {
     /// Connects to the cassandra cluster
     pub async fn connect(&mut self) -> Result<Session> {
         let session = Session::new();
-        let connect = unsafe { cass_session_connect(session.inner(), self.0) };
-        let connect_future = CassFuture::build(session, connect);
+        let connect_future = {
+            let connect = unsafe { cass_session_connect(session.inner(), self.0) };
+            CassFuture::build(session, connect)
+        };
         connect_future.await
     }
 

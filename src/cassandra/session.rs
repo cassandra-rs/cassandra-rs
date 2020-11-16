@@ -30,7 +30,7 @@ use std::mem;
 use std::os::raw::c_char;
 use std::sync::Arc;
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 struct SessionInner(*mut _Session);
 
 // The underlying C type has no thread-local state, and explicitly supports access
@@ -50,8 +50,13 @@ impl SessionInner {
 /// /pools of connections to cluster nodes which are used to query the cluster.
 ///
 /// Instances of the session object are thread-safe to execute queries.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Session(Arc<SessionInner>);
+
+// The underlying C type has no thread-local state, and explicitly supports access
+// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+unsafe impl Send for Session {}
+unsafe impl Sync for Session {}
 
 impl ProtectedInner<*mut _Session> for SessionInner {
     fn inner(&self) -> *mut _Session {
@@ -105,11 +110,13 @@ impl Session {
 
     /// Create a prepared statement with the given query.
     pub async fn prepare(&self, query: &str) -> Result<PreparedStatement> {
-        let query_ptr = query.as_ptr() as *const c_char;
-        let future = <CassFuture<PreparedStatement>>::build(self.clone(), unsafe {
-            cass_session_prepare_n(self.inner(), query_ptr, query.len())
-        });
-        future.await
+        let prepare_future = {
+            let query_ptr = query.as_ptr() as *const c_char;
+            CassFuture::build(self.clone(), unsafe {
+                cass_session_prepare_n(self.inner(), query_ptr, query.len())
+            })
+        };
+        prepare_future.await
     }
 
     /// Creates a statement with the given query.

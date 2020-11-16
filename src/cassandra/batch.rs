@@ -136,9 +136,12 @@ impl Batch {
     /// Executes this batch.
     pub async fn execute(self) -> Result<CassResult> {
         let (batch, session) = (self.0, self.1);
-        let execute_batch = unsafe { cass_session_execute_batch(session.inner(), batch.inner()) };
-        let fut = <CassFuture<CassResult>>::build(session, execute_batch);
-        fut.await
+        let execute_future = {
+            let execute_batch =
+                unsafe { cass_session_execute_batch(session.inner(), batch.inner()) };
+            CassFuture::build(session, execute_batch)
+        };
+        execute_future.await
     }
 
     /// Sets the batch's consistency level
@@ -171,7 +174,15 @@ impl Batch {
     }
 
     /// Adds a statement to a batch.
-    pub fn add_statement(&mut self, statement: &Statement) -> Result<&Self> {
+    pub fn add_statement(&mut self, statement: Statement) -> Result<&Self> {
+        // If their sessions are not the same, we can reject at this level.
+        if self.session() != statement.session() {
+            return Err(ErrorKind::BatchSessionMismatch(
+                self.session().clone(),
+                statement.session().clone(),
+            )
+            .into());
+        }
         unsafe { cass_batch_add_statement(self.inner(), statement.inner()).to_result(self) }
     }
 }
