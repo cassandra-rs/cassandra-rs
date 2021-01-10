@@ -48,7 +48,6 @@ impl PreparedStatement {
     }
 
     /// Gets the name of a parameter at the specified index.
-    #[allow(cast_possible_truncation)]
     pub fn parameter_name(&self, index: usize) -> Result<&str> {
         unsafe {
             let mut name = mem::zeroed();

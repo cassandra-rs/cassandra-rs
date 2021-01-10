@@ -60,7 +60,6 @@ impl TableMeta {
     }
 
     /// Gets the name of the table.
-    #[allow(cast_possible_truncation)]
     pub fn get_name(&self) -> String {
         unsafe {
             let mut name = mem::zeroed();

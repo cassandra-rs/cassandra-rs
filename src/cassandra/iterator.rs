@@ -195,7 +195,6 @@ unsafe impl Send for FieldIterator {}
 
 impl Iterator for FieldIterator {
     type Item = Field;
-    #[allow(cast_possible_truncation)]
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
         unsafe {
             match cass_iterator_next(self.0) {

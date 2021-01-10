@@ -424,7 +424,7 @@ impl Statement {
         unsafe {
             let timeout_millis = match timeout {
                 None => CASS_UINT64_MAX as u64,
-                Some(time) => time.num_milliseconds() as u64,
+                Some(time) => time.whole_milliseconds() as u64,
             };
             cass_statement_set_request_timeout(self.0, timeout_millis);
         }
