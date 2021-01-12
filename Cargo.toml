@@ -26,5 +26,5 @@ error-chain = "0.12"
 parking_lot = "0.11"
 
 [dev-dependencies]
-tokio = { version = "0.2", features = ["rt-core", "macros", "test-util"] }
+tokio = { version = "1.0", features = ["rt", "rt-multi-thread", "macros", "test-util"] }
 futures = "0.3.1"
