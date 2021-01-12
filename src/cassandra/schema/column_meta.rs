@@ -39,7 +39,6 @@ impl ColumnMeta {
     }
 
     /// Gets the name of the column.
-    #[allow(cast_possible_truncation)]
     pub fn name(&self) -> String {
         unsafe {
             let mut name = mem::zeroed();
