@@ -99,7 +99,8 @@ impl Session {
     }
 
     /// Create a prepared statement with the given query.
-    pub async fn prepare(&self, query: &str) -> Result<PreparedStatement> {
+    pub async fn prepare(&self, query: impl AsRef<str>) -> Result<PreparedStatement> {
+        let query = query.as_ref();
         let prepare_future = {
             let query_ptr = query.as_ptr() as *const c_char;
             CassFuture::build(self.clone(), unsafe {
@@ -110,13 +111,14 @@ impl Session {
     }
 
     /// Creates a statement with the given query.
-    pub fn statement(&self, query: &str) -> Statement {
+    pub fn statement(&self, query: impl AsRef<str>) -> Statement {
+        let query = query.as_ref();
         let param_count = query.matches("?").count();
         Statement::new(self.clone(), query, param_count)
     }
 
     /// Executes a given query.
-    pub async fn execute(&self, query: &str) -> Result<CassResult> {
+    pub async fn execute(&self, query: impl AsRef<str>) -> Result<CassResult> {
         let statement = self.statement(query);
         statement.execute().await
     }

@@ -78,7 +78,8 @@ impl Default for Ssl {
 impl Ssl {
     /// Adds a trusted certificate. This is used to verify
     /// the peer's certificate.
-    pub fn add_trusted_cert(&mut self, cert: &str) -> Result<&mut Self> {
+    pub fn add_trusted_cert(&mut self, cert: impl AsRef<str>) -> Result<&mut Self> {
+        let cert = cert.as_ref();
         unsafe {
             let cert_ptr = cert.as_ptr() as *const c_char;
             cass_ssl_add_trusted_cert_n(self.0, cert_ptr, cert.len()).to_result(self)

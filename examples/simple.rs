@@ -53,17 +53,21 @@ async fn execute_batch_statement() -> Result<()> {
     Ok(())
 }
 
-fn assert_send_static_future<F, T>(_: F)
+fn assert_send_static_future<F, T>(f: F) -> F
 where
     F: std::future::Future<Output = T> + Send + 'static,
 {
+    f
 }
 
-fn main() {
+#[tokio::main]
+async fn main() -> Result<()> {
     // tokio, et-al expect the future to be send + 'static, this ensures that the operations we do above are
     // send + static, something that can quickly turn not to be, because of the lower level FFI code, and the await boundaries
     // of the `async fn`'s within cassandra-rs.
-    assert_send_static_future(execute_prepared_statement());
-    assert_send_static_future(execute_statement());
-    assert_send_static_future(execute_batch_statement());
+    assert_send_static_future(execute_prepared_statement()).await?;
+    assert_send_static_future(execute_statement()).await?;
+    assert_send_static_future(execute_batch_statement()).await?;
+
+    Ok(())
 }

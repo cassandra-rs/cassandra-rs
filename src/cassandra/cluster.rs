@@ -154,7 +154,7 @@ impl Cluster {
     }
 
     /// Sets the SSL context and enables SSL
-    pub fn set_ssl(&mut self, ssl: &mut Ssl) -> &Self {
+    pub fn set_ssl(&mut self, ssl: Ssl) -> &Self {
         unsafe {
             cass_cluster_set_ssl(self.0, ssl.inner());
             self
