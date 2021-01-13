@@ -1,9 +1,10 @@
 use crate::cassandra::consistency::Consistency;
 use crate::cassandra::error::*;
+use crate::cassandra::future::CassFuture;
 use crate::cassandra::policy::retry::RetryPolicy;
 use crate::cassandra::statement::Statement;
 use crate::cassandra::util::{Protected, ProtectedInner, ProtectedWithSession};
-use crate::{CassFuture, CassResult, Session};
+use crate::{CassResult, Session};
 
 use crate::cassandra_sys::cass_batch_add_statement;
 use crate::cassandra_sys::cass_batch_free;

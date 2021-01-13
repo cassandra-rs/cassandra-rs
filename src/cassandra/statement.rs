@@ -5,6 +5,7 @@ use crate::cassandra::collection::Map;
 use crate::cassandra::collection::Set;
 use crate::cassandra::consistency::Consistency;
 use crate::cassandra::error::*;
+use crate::cassandra::future::CassFuture;
 use crate::cassandra::inet::Inet;
 use crate::cassandra::policy::retry::RetryPolicy;
 use crate::cassandra::result::CassResult;
@@ -12,7 +13,7 @@ use crate::cassandra::tuple::Tuple;
 use crate::cassandra::user_type::UserType;
 use crate::cassandra::util::{Protected, ProtectedInner, ProtectedWithSession};
 use crate::cassandra::uuid::Uuid;
-use crate::{CassFuture, Session};
+use crate::Session;
 
 use crate::cassandra_sys::cass_false;
 use crate::cassandra_sys::cass_session_execute;

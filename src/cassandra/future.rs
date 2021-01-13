@@ -37,7 +37,7 @@ use std::task::{Context, Poll, Waker};
 /// driver future (see `Completable`).
 #[must_use]
 #[derive(Debug)]
-pub struct CassFuture<T> {
+pub(crate) struct CassFuture<T> {
     /// The underlying Cassandra driver future object.
     inner: *mut _Future,
 

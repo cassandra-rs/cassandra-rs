@@ -98,16 +98,6 @@ impl Session {
         unsafe { Session(SessionInner::new(cass_session_new())) }
     }
 
-    /// Closes the session instance, outputs a close future which can
-    /// be used to determine when the session has been terminated. This allows
-    /// in-flight requests to finish.
-    pub fn close(self) -> CassFuture<()> {
-        unsafe {
-            let close = cass_session_close(self.inner());
-            <CassFuture<()>>::build(self, close)
-        }
-    }
-
     /// Create a prepared statement with the given query.
     pub async fn prepare(&self, query: &str) -> Result<PreparedStatement> {
         let prepare_future = {
