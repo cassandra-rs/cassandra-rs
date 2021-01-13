@@ -43,7 +43,7 @@ impl TimestampGen {
     /// Converts a unix timestamp (in seconds) to the Cassandra "time" type. The "time" type
     /// represents the number of nanoseconds since midnight (range 0 to 86399999999999).
     pub fn time_from_epoch(epoch_seconds: Duration) -> Time {
-        unsafe { Time(cass_time_from_epoch(epoch_seconds.num_seconds())) }
+        unsafe { Time(cass_time_from_epoch(epoch_seconds.whole_seconds())) }
     }
 
     /// Creates a new monotonically increasing timestamp generator. This generates

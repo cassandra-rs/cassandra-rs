@@ -305,7 +305,6 @@ impl Display for Value {
 
 impl Value {
     /// Get the raw bytes of this Cassandra value.
-    #[allow(cast_possible_truncation)]
     pub fn get_bytes(&self) -> Result<&[u8]> {
         unsafe {
             let mut output = mem::zeroed();

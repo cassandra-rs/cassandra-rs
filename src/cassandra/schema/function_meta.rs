@@ -48,7 +48,6 @@ impl FunctionMeta {
     }
 
     /// Gets the name of the function.
-    #[allow(cast_possible_truncation)]
     pub fn get_name(&self) -> String {
         unsafe {
             let mut name = mem::zeroed();
@@ -66,7 +65,6 @@ impl FunctionMeta {
     /// Gets the full name of the function. The full name includes the
     /// function's name and the function's signature:
     /// "name(type1 type2.. typeN)".
-    #[allow(cast_possible_truncation)]
     pub fn full_name(&self) -> String {
         unsafe {
             let mut name = mem::zeroed();
@@ -82,7 +80,6 @@ impl FunctionMeta {
     }
 
     /// Gets the body of the function.
-    #[allow(cast_possible_truncation)]
     pub fn body(&self) -> String {
         unsafe {
             let mut name = mem::zeroed();
@@ -98,7 +95,6 @@ impl FunctionMeta {
     }
 
     /// Gets the language of the function.
-    #[allow(cast_possible_truncation)]
     pub fn language(&self) -> String {
         unsafe {
             let mut name = mem::zeroed();

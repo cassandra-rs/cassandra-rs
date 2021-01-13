@@ -347,10 +347,9 @@ impl Cluster {
     ///
     ///
     /// Default: 5000ms
-    #[allow(cast_possible_truncation, cast_sign_loss)]
     pub fn set_connect_timeout(&mut self, timeout: Duration) -> &Self {
         unsafe {
-            cass_cluster_set_connect_timeout(self.0, timeout.num_milliseconds() as u32);
+            cass_cluster_set_connect_timeout(self.0, timeout.whole_milliseconds() as u32);
         }
         self
     }
@@ -359,10 +358,9 @@ impl Cluster {
     ///
     ///
     /// Default: 12000ms
-    #[allow(cast_possible_truncation, cast_sign_loss)]
     pub fn set_request_timeout(&mut self, timeout: Duration) -> &Self {
         unsafe {
-            cass_cluster_set_request_timeout(self.0, timeout.num_milliseconds() as u32);
+            cass_cluster_set_request_timeout(self.0, timeout.whole_milliseconds() as u32);
         }
         self
     }
@@ -503,7 +501,6 @@ impl Cluster {
     ///  <li>update_rate_ms: 100 milliseconds</li>
     ///  <li>min_measured: 50</li>
     /// </ul>
-    #[allow(cast_sign_loss)]
     pub fn set_latency_aware_routing_settings(
         &mut self,
         exclusion_threshold: f64,
@@ -516,9 +513,9 @@ impl Cluster {
             cass_cluster_set_latency_aware_routing_settings(
                 self.0,
                 exclusion_threshold,
-                scale.num_milliseconds() as u64,
-                retry_period.num_milliseconds() as u64,
-                update_rate.num_milliseconds() as u64,
+                scale.whole_milliseconds() as u64,
+                retry_period.whole_milliseconds() as u64,
+                update_rate.whole_milliseconds() as u64,
                 min_measured,
             );
         }
@@ -558,13 +555,12 @@ impl Cluster {
     ///
     ///
     /// Default: false (disabled).
-    #[allow(cast_possible_truncation, cast_sign_loss)]
     pub fn set_tcp_keepalive(&mut self, enable: bool, delay: Duration) -> &Self {
         unsafe {
             cass_cluster_set_tcp_keepalive(
                 self.0,
                 if enable { cass_true } else { cass_false },
-                delay.num_seconds() as u32,
+                delay.whole_seconds() as u32,
             );
         }
         self
@@ -589,10 +585,9 @@ impl Cluster {
     ///
     ///
     /// Default: 30 seconds
-    #[allow(cast_possible_truncation, cast_sign_loss)]
     pub fn set_connection_heartbeat_interval(&mut self, hearbeat: Duration) -> &mut Self {
         unsafe {
-            cass_cluster_set_connection_heartbeat_interval(self.0, hearbeat.num_seconds() as u32);
+            cass_cluster_set_connection_heartbeat_interval(self.0, hearbeat.whole_seconds() as u32);
             self
         }
     }
@@ -602,10 +597,9 @@ impl Cluster {
     ///
     ///
     /// Default: 60 seconds
-    #[allow(cast_possible_truncation, cast_sign_loss)]
     pub fn set_connection_idle_timeout(&mut self, timeout: Duration) -> &mut Self {
         unsafe {
-            cass_cluster_set_connection_idle_timeout(self.0, timeout.num_seconds() as u32);
+            cass_cluster_set_connection_idle_timeout(self.0, timeout.whole_seconds() as u32);
             self
         }
     }
