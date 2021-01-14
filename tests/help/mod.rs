@@ -20,7 +20,7 @@ pub async fn create_test_session() -> Session {
 
 /// Create the keyspace for testing.
 pub async fn create_example_keyspace(session: &Session) {
-    let ks_statement = session
+    session
         .execute(
             "CREATE KEYSPACE IF NOT EXISTS examples WITH replication = { \'class\': \
          \'SimpleStrategy\', \'replication_factor\': \'1\' };",

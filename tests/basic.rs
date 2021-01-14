@@ -230,7 +230,7 @@ async fn test_basic_round_trip() -> Result<()> {
         txt: "some\0unicode text 😊".to_string(),
     };
 
-    insert_into_basic(&session, "test", &input).await;
+    insert_into_basic(&session, "test", &input).await?;
     let output = select_from_basic(&session, "test")
         .await?
         .expect("no output from select");
@@ -288,7 +288,7 @@ async fn test_prepared_round_trip() -> Result<()> {
         },
         txt: "some\0text".to_string(),
     };
-    let mut output = Basic::default();
+    let output = Basic::default();
 
     println!("Basic insertions");
     insert_into_basic(&session, "prepared_test", &input).await?;

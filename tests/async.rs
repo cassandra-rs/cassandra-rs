@@ -1,14 +1,12 @@
 mod help;
 
 use cassandra_cpp::*;
+use futures::future::BoxFuture;
 
 static NUM_CONCURRENT_REQUESTS: usize = 1000;
 
-fn insert_into_async(
-    session: &Session,
-    key: String,
-) -> Result<Vec<tokio::task::JoinHandle<Result<CassResult>>>> {
-    let mut futures = Vec::new();
+fn insert_into_async(session: &Session, key: String) -> Result<Vec<BoxFuture<Result<CassResult>>>> {
+    let mut futures: Vec<BoxFuture<Result<CassResult>>> = Vec::new();
     for i in 0..NUM_CONCURRENT_REQUESTS {
         let key: &str = &(key.clone() + &i.to_string());
         let mut statement = session.statement(
@@ -23,7 +21,7 @@ fn insert_into_async(
         statement.bind(4, i as i32 * 10)?;
         statement.bind(5, i as i64 * 100)?;
 
-        futures.push(tokio::spawn(statement.execute()));
+        futures.push(Box::pin(statement.execute()));
     }
 
     Ok(futures)
@@ -46,7 +44,7 @@ pub async fn test_async() -> Result<()> {
 
     let futures = insert_into_async(&session, "test".to_owned())?;
     for future in futures {
-        future.await.expect("future did not panic")?;
+        future.await?;
     }
 
     Ok(())
