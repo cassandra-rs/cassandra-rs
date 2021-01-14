@@ -288,7 +288,6 @@ async fn test_prepared_round_trip() -> Result<()> {
         },
         txt: "some\0text".to_string(),
     };
-    let output = Basic::default();
 
     println!("Basic insertions");
     insert_into_basic(&session, "prepared_test", &input).await?;

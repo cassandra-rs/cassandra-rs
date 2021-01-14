@@ -24,13 +24,13 @@ async fn insert_into_log(
 }
 
 async fn select_from_log(session: &Session, key: &str) -> Result<Vec<(Uuid, String)>> {
-    let mut statement = session.statement(INSERT_QUERY);
+    let mut statement = session.statement(SELECT_QUERY);
     statement.bind(0, key)?;
     let results = statement.execute().await?;
     Ok(results
         .iter()
         .map(|r| {
-            let t: Uuid = r.get_column(1).expect("time0").get_uuid().expect("time");
+            let t: Uuid = r.get_column(1).expect("time").get_uuid().expect("time");
             let e: String = r.get(2).expect("entry");
             (t, e)
         })
