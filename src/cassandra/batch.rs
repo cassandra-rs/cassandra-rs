@@ -134,6 +134,11 @@ impl Batch {
         unsafe { Batch(BatchInner(cass_batch_new(batch_type.inner())), session) }
     }
 
+    /// Returns the session of which this batch is bound to.
+    pub fn session(&self) -> &Session {
+        ProtectedWithSession::session(self)
+    }
+
     /// Executes this batch.
     pub async fn execute(self) -> Result<CassResult> {
         let (batch, session) = (self.0, self.1);

@@ -345,6 +345,11 @@ impl Statement {
         Statement(StatementInner::new(query, parameter_count), session)
     }
 
+    /// Returns the session of which this statement is bound to.
+    pub fn session(&self) -> &Session {
+        ProtectedWithSession::session(self)
+    }
+
     /// Executes the statement.
     pub async fn execute(self) -> Result<CassResult> {
         let (statement, session) = (self.0, self.1);

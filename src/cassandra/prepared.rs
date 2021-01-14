@@ -53,7 +53,12 @@ impl PreparedStatement {
     /// Creates a bound statement from a pre-prepared statement.
     pub fn bind(&self) -> Statement {
         unsafe { Statement::build(cass_prepared_bind(self.inner()), self.session().clone()) }
-    }   
+    }
+
+    /// Returns the session of which this prepared statement is bound to.
+    pub fn session(&self) -> &Session {
+        ProtectedWithSession::session(self)
+    }
 
     /// Gets the name of a parameter at the specified index.
     pub fn parameter_name(&self, index: usize) -> Result<&str> {
