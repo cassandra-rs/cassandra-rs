@@ -7,7 +7,8 @@ use crate::cassandra_sys::cass_timestamp_gen_server_side_new;
 use crate::cassandra_sys::CassTimestampGen as _TimestampGen;
 // use cassandra_sys::cass_date_from_epoch;
 // use cassandra_sys::cass_date_time_to_epoch;
-use time::Duration;
+
+use std::time::Duration;
 
 /// Generators of client-side, microsecond-precision timestamps.
 /// <b>Note:</b> This generator is thread-safe and can be shared by multiple sessions.
@@ -40,7 +41,7 @@ impl TimestampGen {
     /// Converts a unix timestamp (in seconds) to the Cassandra "time" type. The "time" type
     /// represents the number of nanoseconds since midnight (range 0 to 86399999999999).
     pub fn time_from_epoch(epoch_seconds: Duration) -> Time {
-        unsafe { Time(cass_time_from_epoch(epoch_seconds.whole_seconds())) }
+        unsafe { Time(cass_time_from_epoch(epoch_seconds.as_secs() as _)) }
     }
 
     /// Creates a new monotonically increasing timestamp generator. This generates
