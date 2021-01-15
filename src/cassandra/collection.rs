@@ -45,12 +45,21 @@ use std::os::raw::c_char;
 // }
 
 /// A generic Cassandra collection that needs to go away
-pub trait CassCollection {
+pub trait CassCollection: Sized {
     /// The type of value held by this collection
     type Value;
 
     /// Creates a new collection.
-    fn new(item_count: usize) -> Self;
+    fn new() -> Self {
+        Self::with_capacity(0)
+    }
+
+    /// Creates a new collection, specifying a capacity which will be
+    /// used as a size hint to avoid re-allocations of the collection internally.
+    ///
+    /// If you know the number of items you'll insert into the collection ahead of time,
+    /// it is recommended to use this function over [`CassCollection::new`].
+    fn with_capacity(capacity: usize) -> Self;
 
     /// Creates a new collection from an existing data type.
     fn new_from_data_type(value: DataType, item_count: usize) -> Self;
@@ -165,8 +174,8 @@ impl CassCollection for List {
     type Value = _CassCollection;
 
     /// create a new list
-    fn new(item_count: usize) -> Self {
-        unsafe { List::build(cass_collection_new(CASS_COLLECTION_TYPE_LIST, item_count)) }
+    fn with_capacity(capacity: usize) -> Self {
+        unsafe { List::build(cass_collection_new(CASS_COLLECTION_TYPE_LIST, capacity)) }
     }
 
     fn new_from_data_type(value: DataType, item_count: usize) -> Self {
@@ -302,8 +311,8 @@ impl CassCollection for Set {
     type Value = _CassCollection;
 
     /// create a new list
-    fn new(item_count: usize) -> Self {
-        unsafe { Set(cass_collection_new(CASS_COLLECTION_TYPE_SET, item_count)) }
+    fn with_capacity(capacity: usize) -> Self {
+        unsafe { Set(cass_collection_new(CASS_COLLECTION_TYPE_SET, capacity)) }
     }
 
     fn new_from_data_type(value: DataType, item_count: usize) -> Self {
@@ -432,9 +441,9 @@ impl Drop for Map {
 
 impl CassCollection for Map {
     type Value = _CassCollection;
-    /// create a new list
-    fn new(item_count: usize) -> Self {
-        unsafe { Map(cass_collection_new(CASS_COLLECTION_TYPE_MAP, item_count)) }
+
+    fn with_capacity(capacity: usize) -> Self {
+        unsafe { Map(cass_collection_new(CASS_COLLECTION_TYPE_MAP, capacity)) }
     }
 
     fn new_from_data_type(value: DataType, item_count: usize) -> Self {
