@@ -1,8 +1,8 @@
 mod help;
 
 use cassandra_cpp::*;
+use std::time::Duration;
 use std::time::SystemTime;
-use time::Duration;
 
 #[derive(Debug, PartialEq, Copy, Clone, Default)]
 struct Udt {
@@ -574,7 +574,7 @@ fn test_result() {
 #[test]
 fn test_statement_timeout() {
     let mut query = stmt!("SELECT * FROM system_schema.tables;");
-    query.set_statement_request_timeout(Some(Duration::milliseconds(30000 as i64)));
+    query.set_statement_request_timeout(Some(Duration::from_millis(30000)));
     let session = help::create_test_session();
     let result = session.execute(&query).wait().unwrap();
 

@@ -24,6 +24,7 @@ version number is tracked in the file `VERSION`.
 - Switched to using `parking_lot::Mutex` instead of `std::sync::Mutex` for
   `CassFuture` coordination.
 - Implemented `size_hint` on `ResultIterator`.
+- `time::Duration` has been replaced with `std::time::Duration`.
 
 ### Fixed
  - `CassResult::set_paging_state_token` was implemented incorrectly, namely, it did nothing,
