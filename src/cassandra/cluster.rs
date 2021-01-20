@@ -60,7 +60,7 @@ use std::net::Ipv4Addr;
 use std::os::raw::c_char;
 use std::result;
 use std::str::FromStr;
-use time::Duration;
+use std::time::Duration;
 
 /// A CQL protocol version is just an integer.
 pub type CqlProtocol = i32;
@@ -339,7 +339,7 @@ impl Cluster {
     /// Default: 5000ms
     pub fn set_connect_timeout(&mut self, timeout: Duration) -> &Self {
         unsafe {
-            cass_cluster_set_connect_timeout(self.0, timeout.whole_milliseconds() as u32);
+            cass_cluster_set_connect_timeout(self.0, timeout.as_millis() as u32);
         }
         self
     }
@@ -350,7 +350,7 @@ impl Cluster {
     /// Default: 12000ms
     pub fn set_request_timeout(&mut self, timeout: Duration) -> &Self {
         unsafe {
-            cass_cluster_set_request_timeout(self.0, timeout.whole_milliseconds() as u32);
+            cass_cluster_set_request_timeout(self.0, timeout.as_millis() as u32);
         }
         self
     }
@@ -503,9 +503,9 @@ impl Cluster {
             cass_cluster_set_latency_aware_routing_settings(
                 self.0,
                 exclusion_threshold,
-                scale.whole_milliseconds() as u64,
-                retry_period.whole_milliseconds() as u64,
-                update_rate.whole_milliseconds() as u64,
+                scale.as_millis() as u64,
+                retry_period.as_millis() as u64,
+                update_rate.as_millis() as u64,
                 min_measured,
             );
         }
@@ -550,7 +550,7 @@ impl Cluster {
             cass_cluster_set_tcp_keepalive(
                 self.0,
                 if enable { cass_true } else { cass_false },
-                delay.whole_seconds() as u32,
+                delay.as_secs() as u32,
             );
         }
         self
@@ -577,7 +577,7 @@ impl Cluster {
     /// Default: 30 seconds
     pub fn set_connection_heartbeat_interval(&mut self, hearbeat: Duration) -> &mut Self {
         unsafe {
-            cass_cluster_set_connection_heartbeat_interval(self.0, hearbeat.whole_seconds() as u32);
+            cass_cluster_set_connection_heartbeat_interval(self.0, hearbeat.as_secs() as u32);
             self
         }
     }
@@ -589,7 +589,7 @@ impl Cluster {
     /// Default: 60 seconds
     pub fn set_connection_idle_timeout(&mut self, timeout: Duration) -> &mut Self {
         unsafe {
-            cass_cluster_set_connection_idle_timeout(self.0, timeout.whole_seconds() as u32);
+            cass_cluster_set_connection_idle_timeout(self.0, timeout.as_secs() as u32);
             self
         }
     }

@@ -66,7 +66,7 @@ use crate::cassandra_sys::CassStatement as _Statement;
 use crate::cassandra_sys::CASS_UINT64_MAX;
 
 use std::os::raw::c_char;
-use time::Duration;
+use std::time::Duration;
 /// A statement object is an executable query. It represents either a regular
 /// (adhoc) statement or a prepared statement. It maintains the queries' parameter
 /// values along with query options (consistency level, paging state, etc.)
@@ -424,7 +424,7 @@ impl Statement {
         unsafe {
             let timeout_millis = match timeout {
                 None => CASS_UINT64_MAX as u64,
-                Some(time) => time.whole_milliseconds() as u64,
+                Some(time) => time.as_millis() as u64,
             };
             cass_statement_set_request_timeout(self.0, timeout_millis);
         }

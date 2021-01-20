@@ -28,6 +28,7 @@ version number is tracked in the file `VERSION`.
   been created, that no longer requires a capacity. This closely mirrors the API that the standard library
   collections expose, and that the `item_count` passed to `new` is merely a capacity hint for the purpose of
   optimization.
+- `time::Duration` has been replaced with `std::time::Duration`.
 
 ### Fixed
  - `CassResult::set_paging_state_token` was implemented incorrectly, namely, it did nothing,
