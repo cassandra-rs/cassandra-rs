@@ -18,7 +18,7 @@ fn insert_into_maps(session: &Session, key: &str, items: &Vec<Pair>) -> Result<(
     let mut insert_statement = stmt!("INSERT INTO examples.maps (key, items) VALUES (?, ?);");
     insert_statement.bind(0, key).unwrap();
 
-    let mut map = Map::new(items.len());
+    let mut map = Map::with_capacity(items.len());
     for item in items {
         map.append_string(item.key.as_ref()).unwrap();
         map.append_int32(item.value).unwrap();

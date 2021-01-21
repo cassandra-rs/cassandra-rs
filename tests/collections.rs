@@ -10,7 +10,7 @@ fn insert_into_collections(
 ) -> Result<CassResult> {
     let mut statement = stmt!("INSERT INTO examples.collections (key, items) VALUES (?, ?);");
     statement.bind(0, key)?;
-    let mut set = Set::new(2);
+    let mut set = Set::with_capacity(2);
     for item in items {
         set.append_string(item)?;
     }

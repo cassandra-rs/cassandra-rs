@@ -15,12 +15,12 @@ fn do_work(session: &Session) -> Result<()> {
 
     insert_data.bind(0, "Paul")?;
     insert_data.bind_null(1)?;
-    let mut addresses = List::new(0);
+    let mut addresses = List::new();
     addresses.append_string("george@example.com")?;
     addresses.append_string("paul@example.com")?;
     insert_data.bind(2, addresses)?;
     insert_data.bind(3, "George")?;
-    let mut phones = List::new(0);
+    let mut phones = List::new();
     phones.append_string("123-456")?;
     phones.append_string("789-012")?;
     insert_data.bind(4, phones)?; // TODO: bind should really accept Vec<T>, and map should accept HashMap<T, U>. Requires generic CassCollection::append.
