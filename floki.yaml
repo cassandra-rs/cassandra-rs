@@ -1,0 +1,10 @@
+image:
+  build:
+    name: cassandra-rs
+    dockerfile: .floki/Dockerfile
+    context: .floki
+shell: bash
+volumes:
+  cargo-registry:
+    shared: true
+    mount: /root/.cargo/registry
