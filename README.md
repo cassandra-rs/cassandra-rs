@@ -16,6 +16,8 @@ It is a wrapper around the raw driver binding crate [cassandra-cpp-sys](https://
 
 ## Getting started
 
+### Local environment
+
 For this crate to work, you must first have installed the datastax-cpp driver.
 Follow the steps in the
 [cpp driver docs](https://github.com/datastax/cpp-driver/tree/master/topics#installation)
@@ -23,6 +25,15 @@ to do so. Pre-built packages are available for most platforms.
 
 Make sure that the driver (specifically `libcassandra_static.a` and `libcassandra.so`) are in your `/usr/local/lib64/` directory
 
+### Floki
+
+Alternatively you can use the [Floki](https://github.com/Metaswitch/floki) utility to create you a Dockerized compilation environment. After installing Floki, just type
+
+```
+floki
+```
+
+in the root of this project. You will be dropped into a Rust compilation environment; type `cargo build` as normal to build the driver.
 
 ## Documentation
 

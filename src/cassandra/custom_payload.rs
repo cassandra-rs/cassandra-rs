@@ -15,6 +15,10 @@ pub type CustomPayloadResponse = HashMap<String, Vec<u8>>;
 #[derive(Debug)]
 pub struct CustomPayload(*mut _CassCustomPayload);
 
+// The underlying C type has no thread-local state, but does not support access
+// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+unsafe impl Send for CustomPayload {}
+
 impl Protected<*mut _CassCustomPayload> for CustomPayload {
     fn inner(&self) -> *mut _CassCustomPayload {
         self.0

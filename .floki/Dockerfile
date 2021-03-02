@@ -3,7 +3,7 @@ FROM ubuntu:18.04
 # Install rust and cassandra drivers
 WORKDIR /tmp
 RUN apt-get -qq update && \
-    apt-get -y -qq install wget multiarch-support build-essential && \
+    apt-get -y -qq install wget multiarch-support build-essential libssl-dev && \
     wget -O rustup.sh https://sh.rustup.rs && \
     sh rustup.sh -y && \
     wget https://downloads.datastax.com/cpp-driver/ubuntu/18.04/dependencies/libuv/v1.35.0/libuv1_1.35.0-1_amd64.deb \
