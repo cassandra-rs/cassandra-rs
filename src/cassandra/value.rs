@@ -306,10 +306,9 @@ impl Value {
         unsafe {
             let mut output = mem::zeroed();
             let mut output_size = mem::zeroed();
-            let result = cass_value_get_bytes(self.0, &mut output, &mut output_size);
-            // raw2utf8(output, output_size).unwrap()
-            let slice = slice::from_raw_parts(output, output_size as usize);
-            result.to_result(slice)
+            cass_value_get_bytes(self.0, &mut output, &mut output_size)
+                .to_result((output, output_size))
+                .map(|(output, output_size)| slice::from_raw_parts(output, output_size as usize))
         }
     }
     // pub fn get_decimal<'a>(&'a self, mut output: String) ->

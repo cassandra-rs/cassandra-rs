@@ -4,6 +4,7 @@
 
 use crate::cassandra::batch::Batch;
 use crate::cassandra::cluster::Cluster;
+use crate::cassandra::custom_payload::CustomPayloadResponse;
 use crate::cassandra::error::*;
 use crate::cassandra::future::CassFuture;
 use crate::cassandra::metrics::SessionMetrics;
@@ -12,6 +13,7 @@ use crate::cassandra::result::CassResult;
 use crate::cassandra::schema::schema_meta::SchemaMeta;
 use crate::cassandra::statement::Statement;
 use crate::cassandra::util::Protected;
+use crate::CustomPayload;
 
 use crate::cassandra_sys::cass_session_close;
 use crate::cassandra_sys::cass_session_connect;
@@ -130,9 +132,32 @@ impl Session {
         })
     }
 
+    /// Execute a batch statement and get any custom payloads from the response.
+    pub fn execute_batch_with_payloads(
+        &self,
+        batch: Batch,
+    ) -> CassFuture<(CassResult, CustomPayloadResponse)> {
+        <CassFuture<(CassResult, CustomPayloadResponse)>>::build(unsafe {
+            cass_session_execute_batch(self.0, batch.inner())
+        })
+    }
+
     /// Execute a statement.
     pub fn execute(&self, statement: &Statement) -> CassFuture<CassResult> {
         unsafe { <CassFuture<CassResult>>::build(cass_session_execute(self.0, statement.inner())) }
+    }
+
+    /// Execute a statement and get any custom payloads from the response.
+    pub fn execute_with_payloads(
+        &self,
+        statement: &Statement,
+    ) -> CassFuture<(CassResult, CustomPayloadResponse)> {
+        unsafe {
+            <CassFuture<(CassResult, CustomPayloadResponse)>>::build(cass_session_execute(
+                self.0,
+                statement.inner(),
+            ))
+        }
     }
 
     /// Gets a snapshot of this session's schema metadata. The returned

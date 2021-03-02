@@ -1,6 +1,6 @@
-use crate::cassandra::batch::CustomPayload;
 use crate::cassandra::collection::List;
 use crate::cassandra::collection::Map;
+use crate::cassandra::custom_payload::CustomPayload;
 // use decimal::d128;
 use crate::cassandra::collection::Set;
 use crate::cassandra::consistency::Consistency;

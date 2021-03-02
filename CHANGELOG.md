@@ -14,6 +14,8 @@ version number is tracked in the file `VERSION`.
  - Added `Cluster::set_token_aware_routing_shuffle_replicas`.
 - `ConstDataType::new_user_type` has been added, to allow the creation of a user data type
   from an existing data type.
+- Added `Session::execute_with_payloads` and `Session::execute_batch_with_payloads` to allow getting
+  custom payloads from query and batch executions.
 
 ### Changed
 - Change various functions to avoid the extra overhead using an intermidiate

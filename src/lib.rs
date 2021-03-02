@@ -14,10 +14,11 @@ extern crate error_chain;
 
 use cassandra_cpp_sys as cassandra_sys;
 
-pub use crate::cassandra::batch::{Batch, BatchType, CustomPayload};
+pub use crate::cassandra::batch::{Batch, BatchType};
 pub use crate::cassandra::cluster::{Cluster, CqlProtocol};
 pub use crate::cassandra::collection::{CassCollection, List, Map, Set};
 pub use crate::cassandra::consistency::Consistency;
+pub use crate::cassandra::custom_payload::CustomPayload;
 pub use crate::cassandra::data_type::DataType;
 // pub use cassandra::write_type::*;
 pub use crate::cassandra::field::Field;

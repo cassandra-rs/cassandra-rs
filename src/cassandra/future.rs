@@ -1,9 +1,12 @@
 use crate::cassandra::consistency::Consistency;
+use crate::cassandra::custom_payload::{CustomPayload, CustomPayloadResponse};
 use crate::cassandra::error::*;
 use crate::cassandra::prepared::PreparedStatement;
 use crate::cassandra::result::CassResult;
 use crate::cassandra::util::Protected;
 use crate::cassandra::write_type::WriteType;
+use crate::cassandra_sys::cass_future_custom_payload_item;
+use crate::cassandra_sys::cass_future_custom_payload_item_count;
 use crate::cassandra_sys::cass_future_error_code;
 use crate::cassandra_sys::cass_future_error_message;
 use crate::cassandra_sys::cass_future_free;
@@ -19,6 +22,7 @@ use crate::cassandra_sys::{cass_false, cass_true};
 
 use parking_lot::Mutex;
 
+use std::collections::HashMap;
 use std::future::Future;
 use std::marker::PhantomData;
 use std::mem;
@@ -120,6 +124,54 @@ impl Completable for PreparedStatement {
         cass_future_get_prepared(inner)
             .as_ref()
             .map(|r| PreparedStatement::build(r as *const _))
+    }
+}
+
+/// For each custom payload defined in the future, convert it into a
+/// name and value pair, then insert it into the CustomPayloadResponse.
+///
+unsafe fn payloads_from_future(future: *mut _Future) -> Result<CustomPayloadResponse> {
+    let cp_count = cass_future_custom_payload_item_count(future);
+    (0..cp_count)
+        .into_iter()
+        .map(|index| {
+            let mut name = mem::zeroed();
+            let mut name_length = mem::zeroed();
+            let mut value = mem::zeroed();
+            let mut value_size = mem::zeroed();
+
+            cass_future_custom_payload_item(
+                future,
+                index,
+                &mut name,
+                &mut name_length,
+                &mut value,
+                &mut value_size,
+            )
+            .to_result((name, name_length, value, value_size))
+            .and_then(|(name, name_length, value, value_size)| {
+                let name_slice = slice::from_raw_parts(name as *const u8, name_length);
+                str::from_utf8(name_slice)
+                    .map_err(|err| err.into())
+                    .map(|name| {
+                        (
+                            name.to_string(),
+                            slice::from_raw_parts(value, value_size).to_vec(),
+                        )
+                    })
+            })
+        })
+        .collect::<Result<CustomPayloadResponse>>()
+}
+
+/// Futures that complete with a normal result and a custom payload response.
+impl Completable for (CassResult, CustomPayloadResponse) {
+    unsafe fn get(inner: *mut _Future) -> Option<Self> {
+        payloads_from_future(inner).ok().and_then(|payloads| {
+            cass_future_get_result(inner)
+                .as_ref()
+                .map(|r| (CassResult::build(r as *const _), payloads))
+        })
     }
 }
 
