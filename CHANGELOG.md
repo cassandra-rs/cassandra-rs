@@ -8,6 +8,11 @@ version number is tracked in the file `VERSION`.
 
 ## [Unreleased]
 ### Added
+### Changed
+### Fixed
+
+## [0.16.0] - 2021-03-10
+### Added
 - Exposes separate setters for collection types on `Tuple` and `UserType`. As such, the respective
   `set_collection` and `set_collection_by_name` on both types have been removed. `set_collection`
   becomes `set_set` and `set_collection_by_name` becomes `set_set_by_name`.
@@ -17,20 +22,23 @@ version number is tracked in the file `VERSION`.
 - Added `Session::execute_with_payloads` and `Session::execute_batch_with_payloads` to allow getting
   custom payloads from query and batch executions.
 
-### Changed
-- Change various functions to avoid the extra overhead using an intermidiate
-  CString object.
+### Breaking changes
 - Extended the lifetime of a `CassResult` into a `Row`. This is a breaking
   change, and may require reworking the code to satisfy the lifetime
   requirement that the `CassResult` must live longer than the `Row`.
-- Switched to using `parking_lot::Mutex` instead of `std::sync::Mutex` for
-  `CassFuture` coordination.
-- Implemented `size_hint` on `ResultIterator`.
 - `CassCollection::new` has been renamed to `CassCollection::with_capacity`, and `CassCollection::new` has
   been created, that no longer requires a capacity. This closely mirrors the API that the standard library
   collections expose, and that the `item_count` passed to `new` is merely a capacity hint for the purpose of
   optimization.
 - `time::Duration` has been replaced with `std::time::Duration`.
+
+### Changed
+- Change various functions to avoid the extra overhead using an intermediate
+  CString object.
+- Switched to using `parking_lot::Mutex` instead of `std::sync::Mutex` for
+  `CassFuture` coordination.
+- Implemented `size_hint` on `ResultIterator`.
+- Bumped versions of various dependencies.
 
 ### Fixed
  - `CassResult::set_paging_state_token` was implemented incorrectly, namely, it did nothing,
