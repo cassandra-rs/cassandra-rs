@@ -9,6 +9,10 @@ version number is tracked in the file `VERSION`.
 ## [Unreleased]
 ### Added
 ### Changed
+- Changed `Session::execute_batch` and `Session::execute_batch_with_payloads` to take only 
+  a reference to `Batch` rather than consuming it. This is a breaking change; to update
+  your code, simply change `batch` to `&batch` in your argument list.
+  
 ### Fixed
 
 ## [0.16.0] - 2021-03-10

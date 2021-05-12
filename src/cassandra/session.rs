@@ -126,7 +126,7 @@ impl Session {
     //    }
 
     /// Execute a batch statement.
-    pub fn execute_batch(&self, batch: Batch) -> CassFuture<CassResult> {
+    pub fn execute_batch(&self, batch: &Batch) -> CassFuture<CassResult> {
         <CassFuture<CassResult>>::build(unsafe {
             cass_session_execute_batch(self.0, batch.inner())
         })
@@ -135,7 +135,7 @@ impl Session {
     /// Execute a batch statement and get any custom payloads from the response.
     pub fn execute_batch_with_payloads(
         &self,
-        batch: Batch,
+        batch: &Batch,
     ) -> CassFuture<(CassResult, CustomPayloadResponse)> {
         <CassFuture<(CassResult, CustomPayloadResponse)>>::build(unsafe {
             cass_session_execute_batch(self.0, batch.inner())
