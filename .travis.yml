@@ -26,11 +26,6 @@ before_install:
   - sudo docker pull cassandra
   - sudo docker run -d --net=host --name=cassandra cassandra
 
-before_script:
-- |
-  pip install 'travis-cargo<0.2' --user &&
-  export PATH=$HOME/.local/bin:/usr/local/bin:$PATH
-
 # Enforce that all new commits are signed off according to the DCO,
 # per CONTRIBUTING.md. Prior commits are either pre-fork, are signed off,
 # or were made by Keith Wansbrough, who hereby certifies the DCO with regard
@@ -47,5 +42,3 @@ script:
   cargo build --all &&
   cargo test -- --test-threads 1
 
-after_success:
-- travis-cargo coveralls --no-sudo
