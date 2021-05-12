@@ -50,6 +50,7 @@ fn test_logging() {
     let log_output: String = drain.0.lock().unwrap().clone();
     assert!(
         log_output.contains("Unable to resolve address for absolute-gibberish.invalid"),
+        "{}",
         log_output
     );
 }
