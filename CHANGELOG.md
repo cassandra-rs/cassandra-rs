@@ -10,8 +10,16 @@ version number is tracked in the file `VERSION`.
 ### Added
 ### Changed
 - Changed `Session::execute_batch` and `Session::execute_batch_with_payloads` to take only 
-  a reference to `Batch` rather than consuming it. This is a breaking change; to update
-  your code, simply change `batch` to `&batch` in your argument list.
+  a reference to `Batch` rather than consuming it.
+
+  This is a breaking change; to update your code, simply change `batch` to `&batch`
+  in your argument list. If this causes an error `future cannot be sent between threads safely`
+  because `&Batch` is `used across an await`, you need to introduce a `let` before the `await`
+  as follows:
+  ```
+  let fut = session.execute_batch(&batch);
+  let result = fut.await?
+  ```
   
 ### Fixed
 
