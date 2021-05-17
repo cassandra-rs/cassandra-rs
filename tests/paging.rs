@@ -52,7 +52,7 @@ fn select_from_paging(session: &Session) -> Result<Vec<(String, String)>> {
                     println!("key: '{:?}' value: '{:?}'", &key_str, &value);
                     res.push((key_str, value));
                 }
-                Err(err) => panic!(err),
+                Err(err) => panic!("{}", err),
             }
         }
         has_more_pages = result.has_more_pages();
