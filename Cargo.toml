@@ -8,7 +8,7 @@ keywords = [ "Cassandra", "binding", "CQL", "client", "database" ]
 categories = [ "api-bindings", "database", "external-ffi-bindings", "asynchronous" ]
 license = "Apache-2.0"
 name = "cassandra-cpp"
-version = "0.17.0"
+version = "0.17.1-pre"
 authors = ["Tupshin Harper <tupshin@tupshin.com>", "Keith Wansbrough <Keith.Wansbrough@metaswitch.com>"]
 edition = "2018"
 
