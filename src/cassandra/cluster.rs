@@ -525,7 +525,7 @@ impl Cluster {
     /// Examples: "127.0.0.1" "127.0.0.1,127.0.0.2", "server1.domain.com"
     pub fn set_whitelist_filtering(&mut self, hosts: Vec<String>) -> &Self {
         unsafe {
-            cass_cluster_set_whitelist_filtering(self.0, hosts.join(",").as_ptr() as *const i8);
+            cass_cluster_set_whitelist_filtering(self.0, hosts.join(",").as_ptr() as *const c_char);
         }
         self
     }

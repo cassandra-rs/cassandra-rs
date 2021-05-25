@@ -405,7 +405,7 @@ impl Statement {
         unsafe {
             cass_statement_set_paging_state_token(
                 self.0,
-                paging_state.as_ptr() as *const i8,
+                paging_state.as_ptr() as *const c_char,
                 paging_state.len(),
             )
             .to_result(self)

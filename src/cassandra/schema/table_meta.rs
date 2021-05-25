@@ -17,6 +17,7 @@ use crate::cassandra_sys::cass_table_meta_partition_key;
 use crate::cassandra_sys::cass_table_meta_partition_key_count;
 use crate::cassandra_sys::CassTableMeta as _CassTableMeta;
 use std::mem;
+use std::os::raw::c_char;
 use std::slice;
 
 use std::str;
@@ -54,7 +55,7 @@ impl TableMeta {
         unsafe {
             ColumnMeta::build(cass_table_meta_column_by_name(
                 self.0,
-                name.as_ptr() as *const i8,
+                name.as_ptr() as *const c_char,
             ))
         }
     }
@@ -124,7 +125,10 @@ impl TableMeta {
     pub fn field_by_name(&self, name: &str) -> Option<Value> {
         // fixme replace CassValule with a custom type
         unsafe {
-            let value = cass_table_meta_field_by_name(self.0, name.as_ptr() as *const i8);
+            let value = cass_table_meta_field_by_name(
+                self.0,
+                name.as_ptr() as *const c_char,
+            );
             if value.is_null() {
                 None
             } else {
