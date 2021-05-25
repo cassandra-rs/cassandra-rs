@@ -26,7 +26,7 @@ fn insert_into_batch_with_prepared(
             Err(err) => panic!("{:?}", err),
         }
     }
-    session.execute_batch(batch).wait()?;
+    session.execute_batch(&batch).wait()?;
     Ok(prepared)
 }
 
