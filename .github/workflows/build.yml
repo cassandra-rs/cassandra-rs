@@ -1,0 +1,58 @@
+name: Build
+
+on: [push]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-18.04
+    services:
+      cassandra:
+        image: cassandra:3.11.11
+        ports:
+          - 9042:9042
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          # Need all history so we can validate the commits.
+          fetch-depth: 0
+
+      # Enforce that all new commits are signed off according to the DCO,
+      # per CONTRIBUTING.md. Prior commits are either pre-fork, are signed off,
+      # or were made by Keith Wansbrough, who hereby certifies the DCO with regard
+      # to each such commit.
+      - run: |
+          DCO_SIGNING_BASE_COMMIT=c0b2ceb11dbe4628bd377f45776170b4348cb57c
+          git log ${DCO_SIGNING_BASE_COMMIT}.. --grep "^signed-off-by: .\+@.\+" --regexp-ignore-case --invert-grep --no-merges --pretty=oneline > tmp-unsigned-dco
+          # The following commit IDs are signed off as follows:
+          # 00d3207: Keith Wansbrough hereby certifies the DCO with regard to this commit.
+          # 1206d15: Brandon Dail <brandon@dail.family> has certified in https://github.com/Metaswitch/cassandra-rs/pull/117#issuecomment-971611331
+          # 865a762: Bot-authored commit, no DCO required.
+          # 741e699: TODO: Jake <me@jh.gg> to certify
+          grep -v "00d32073bdc21d992ee645a536e34728ca2a0086\|1206d1506fb7a1df637abe2dac102cfe39e37fb5\|865a76274eab12caddae68f399c571834d213056\|741e6991393f4dcf68f7ab896b21948db3b19d5d" tmp-unsigned-dco > tmp-unsigned-dco-2 || /bin/true
+          if [ -s tmp-unsigned-dco-2 ] ; then
+            echo '**One or more commits are not signed off! Unsigned commits:'
+            cat tmp-unsigned-dco-2
+            echo '**Please sign these commits and amend your PR.'
+            /bin/false
+          fi
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+      - run: sudo apt install libcurl4-openssl-dev libelf-dev libdw-dev
+      - run: wget http://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.10.0/cassandra-cpp-driver-dbg_2.10.0-1_amd64.deb
+      - run: wget http://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.10.0/cassandra-cpp-driver-dev_2.10.0-1_amd64.deb
+      - run: wget http://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.10.0/cassandra-cpp-driver_2.10.0-1_amd64.deb
+      - run: wget http://downloads.datastax.com/cpp-driver/ubuntu/18.04/dependencies/libuv/v1.23.0/libuv1-dbg_1.23.0-1_amd64.deb
+      - run: wget http://downloads.datastax.com/cpp-driver/ubuntu/18.04/dependencies/libuv/v1.23.0/libuv1-dev_1.23.0-1_amd64.deb
+      - run: wget http://downloads.datastax.com/cpp-driver/ubuntu/18.04/dependencies/libuv/v1.23.0/libuv1_1.23.0-1_amd64.deb
+      - run: sudo dpkg -i libuv1-dbg_1.23.0-1_amd64.deb libuv1-dev_1.23.0-1_amd64.deb libuv1_1.23.0-1_amd64.deb cassandra-cpp-driver_2.10.0-1_amd64.deb cassandra-cpp-driver-dbg_2.10.0-1_amd64.deb cassandra-cpp-driver-dev_2.10.0-1_amd64.deb
+
+      # We now build all the code, then test it.
+      #
+      # Tests must be run on a single thread since they share keyspaces and tables.
+      - run: |
+          cargo build --all
+      - run: |
+          cargo test -- --test-threads 1
