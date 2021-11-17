@@ -9,11 +9,12 @@ version number is tracked in the file `VERSION`.
 ## [Unreleased]
 ### Added
 ### Changed
+- Move GitHub build to GitHub Actions (was previously Travis).
 ### Fixed
 
 ## [0.17.0] - 2021-05-17
 ### Changed
-- Changed `Session::execute_batch` and `Session::execute_batch_with_payloads` to take only 
+- Changed `Session::execute_batch` and `Session::execute_batch_with_payloads` to take only
   a reference to `Batch` rather than consuming it.
 
   This is a breaking change; to update your code, simply change `batch` to `&batch`
