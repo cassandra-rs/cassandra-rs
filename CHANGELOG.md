@@ -11,6 +11,7 @@ version number is tracked in the file `VERSION`.
 ### Changed
 - Move GitHub build to GitHub Actions (was previously Travis).
 ### Fixed
+- Removed unused `decimal` dependency.
 
 ## [0.17.0] - 2021-05-17
 ### Changed
