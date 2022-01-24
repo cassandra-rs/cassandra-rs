@@ -7,9 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/). The
 version number is tracked in the file `VERSION`.
 
 ## [Unreleased]
+### Changed
 ### Added
+### Fixed
+
+## [0.17.1] - 2022-01-24
 ### Changed
 - Move GitHub build to GitHub Actions (was previously Travis).
+
 ### Fixed
 - Removed unused `decimal` dependency.
 
@@ -223,7 +228,10 @@ First release of https://github.com/Metaswitch/cassandra-rs
 ## [0.8.1] - 2016-12-13
 Last release of https://github.com/tupshin/cassandra-rs
 
-[Unreleased]: https://github.com/Metaswitch/cassandra-rs/compare/0.15.1...HEAD
+[Unreleased]: https://github.com/Metaswitch/cassandra-rs/compare/0.17.0...HEAD
+[0.17.1]: https://github.com/Metaswitch/cassandra-rs/compare/0.17.0...0.17.1
+[0.17.0]: https://github.com/Metaswitch/cassandra-rs/compare/0.16.0...0.17.0
+[0.16.0]: https://github.com/Metaswitch/cassandra-rs/compare/0.15.1...0.16.0
 [0.15.1]: https://github.com/Metaswitch/cassandra-rs/compare/0.15.0...0.15.1
 [0.15.0]: https://github.com/Metaswitch/cassandra-rs/compare/0.14.0...0.15.0
 [0.14.0]: https://github.com/Metaswitch/cassandra-rs/compare/0.13.2...0.14.0
