@@ -14,7 +14,7 @@ edition = "2018"
 
 [dependencies]
 slog = "2"
-cassandra-cpp-sys = "0.12"
+cassandra-cpp-sys = { git = "https://github.com/Metaswitch/cassandra-sys-rs", rev = "c61855861ad26e8c23d504c64aca007c4d6b4a00" }
 uuid = "0.8"
 error-chain = "0.12"
 parking_lot = "0.12"
