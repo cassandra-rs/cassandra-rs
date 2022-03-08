@@ -98,9 +98,11 @@ impl FromStr for Inet {
 impl ToString for Inet {
     fn to_string(&self) -> String {
         unsafe {
-            let mut inet_str = mem::zeroed();
-            cass_inet_string(self.0, &mut inet_str);
-            CStr::from_ptr(&inet_str).to_string_lossy().into_owned()
+            let mut inet_str = [0i8; cassandra_cpp_sys::CASS_INET_STRING_LENGTH as usize];
+            cass_inet_string(self.0, inet_str.as_mut_ptr());
+            CStr::from_ptr(inet_str.as_ptr())
+                .to_string_lossy()
+                .into_owned()
         }
     }
 }
@@ -133,4 +135,11 @@ fn ipv6_conversion() {
     let inet = Inet::cass_inet_init_v6(&ipv6_in);
     let ip_out = IpAddr::from(&inet);
     assert_eq!(IpAddr::V6(ipv6_in), ip_out);
+}
+
+#[test]
+fn ipv4_to_string() {
+    let ipv4_in = Ipv4Addr::new(127, 0, 0, 1);
+    let inet = Inet::cass_inet_init_v4(&ipv4_in);
+    assert_eq!("127.0.0.1", inet.to_string());
 }
