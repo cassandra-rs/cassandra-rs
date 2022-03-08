@@ -9,6 +9,12 @@ version number is tracked in the file `VERSION`.
 ## [Unreleased]
 ### Changed
 ### Added
+- Added new set_cloud_secure_connection_bundle and set_cloud_secure_connection_bundle_no_ssl_lib_init   
+  functions using the functions Datastax defined in
+  cassandra-cpp-driver version 2.16.0.
+- Added new error codes LIB_NO_TRACING_ID and SSL_CLOSED
+  using the codes Datastax defined in
+  cassandra-cpp-driver version 2.16.0.
 ### Fixed
 
 ## [0.17.2] - 2022-03-09
