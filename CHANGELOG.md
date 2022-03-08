@@ -10,6 +10,7 @@ version number is tracked in the file `VERSION`.
 ### Changed
 ### Added
 ### Fixed
+- Fixed UB in `Inet::to_string`
 
 ## [0.17.1] - 2022-01-24
 ### Changed
