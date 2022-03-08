@@ -179,6 +179,7 @@ pub(crate) unsafe fn get_cass_future_error(rc: CassError_, inner: *mut _Future) 
 #[derive(Debug, Eq, PartialEq, Copy, Clone, Hash)]
 #[allow(missing_docs)] // Meanings are defined in CQL documentation.
 #[allow(non_camel_case_types)] // Names are traditional.
+#[non_exhaustive]
 pub enum CassErrorCode {
     // deliberately omits CASS_OK
     LIB_BAD_PARAMS,
