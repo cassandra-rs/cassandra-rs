@@ -12,11 +12,7 @@ version = "0.17.2-pre"
 authors = ["Tupshin Harper <tupshin@tupshin.com>", "Keith Wansbrough <Keith.Wansbrough@metaswitch.com>"]
 edition = "2018"
 
-[badges]
-travis-ci = { repository = "Metaswitch/cassandra-rs" }
-
 [dependencies]
-clippy = {version = "0.0", optional = true}
 slog = "2"
 cassandra-cpp-sys = "0.12"
 uuid = "0.8"
