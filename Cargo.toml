@@ -14,7 +14,7 @@ edition = "2018"
 
 [dependencies]
 slog = "2"
-cassandra-cpp-sys = "0.12"
+cassandra-cpp-sys = "1.0"
 uuid = "0.8"
 error-chain = "0.12"
 parking_lot = "0.12"
