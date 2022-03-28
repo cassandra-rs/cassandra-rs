@@ -72,6 +72,11 @@ The API changed significantly in version 0.10.
 (Version 0.9 was skipped, for consistency with the `cassandra-cpp-sys` version number.)
 For a summary of the main changes, see [`CHANGELOG`](CHANGELOG.md#0100).
 
+## Feature flags
+
+This crate includes the feature flag `early_access_min_tls_version`, which allows you to build against a version of the DataStax driver including the `cass_ssl_set_min_protocol_version` method, as defined in [this PR](https://github.com/datastax/cpp-driver/pull/525). You must have a version of the driver supporting this installed local to be able to compile (and run) with this feature flag.
+
+When this this feature is available in the mainline driver this flag will be set to do nothing and deprecated, and the functions will be added to the main library. The flag will then be retired in the next breaking change.
 
 ## License
 

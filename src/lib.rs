@@ -43,6 +43,8 @@ pub use crate::cassandra::schema::keyspace_meta::KeyspaceMeta;
 pub use crate::cassandra::schema::schema_meta::SchemaMeta;
 pub use crate::cassandra::schema::table_meta::TableMeta;
 pub use crate::cassandra::session::Session;
+#[cfg(features = "early_access_min_tls_version")]
+pub use crate::cassandra::ssl::SslTlsVersion;
 pub use crate::cassandra::ssl::{Ssl, SslVerifyFlag};
 pub use crate::cassandra::statement::BindRustType;
 pub use crate::cassandra::statement::Statement;

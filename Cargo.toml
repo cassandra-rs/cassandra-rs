@@ -14,7 +14,7 @@ edition = "2018"
 
 [dependencies]
 slog = "2"
-cassandra-cpp-sys = "1.0.0"
+cassandra-cpp-sys = "1.1.0"
 uuid = "0.8"
 error-chain = "0.12"
 parking_lot = "0.12"
@@ -22,3 +22,7 @@ parking_lot = "0.12"
 [dev-dependencies]
 tokio = { version = "1.0", features = ["rt", "rt-multi-thread", "macros", "test-util"] }
 futures = "0.3.1"
+
+[features]
+default = []
+early_access_min_tls_version = ["cassandra-cpp-sys/early_access_min_tls_version"]
