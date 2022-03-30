@@ -18,7 +18,7 @@ It is a wrapper around the raw driver binding crate [cassandra-cpp-sys](https://
 
 ### Local environment
 
-For this crate to work, you must first have installed the datastax-cpp driver.
+For this crate to work, you must first have installed a sufficiently-recent version of the datastax-cpp driver (at least 2.16).
 Follow the steps in the
 [cpp driver docs](https://github.com/datastax/cpp-driver/tree/master/topics#installation)
 to do so. Pre-built packages are available for most platforms.

@@ -7,16 +7,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/). The
 version number is tracked in the file `VERSION`.
 
 ## [Unreleased]
-### Changed
 ### Added
-- Added new set_cloud_secure_connection_bundle and set_cloud_secure_connection_bundle_no_ssl_lib_init
+- Added new `min_tls_version` features, which enables a `set_min_protocol_version` method on an Ssl object.
+
+## [1.0.0] - 2022-03-29
+### Added
+- Added new `set_cloud_secure_connection_bundle` and `set_cloud_secure_connection_bundle_no_ssl_lib_init`
   functions using the functions Datastax defined in
   cassandra-cpp-driver version 2.16.0.
-- Added new error codes LIB_NO_TRACING_ID and SSL_CLOSED
+- Added new error codes `LIB_NO_TRACING_ID` and `SSL_CLOSED`
   using the codes Datastax defined in
   cassandra-cpp-driver version 2.16.0.
-- Added new `min_tls_version` features, which enables a `set_min_protocol_version` method on an Ssl object.
-### Fixed
 
 ## [0.17.2] - 2022-03-09
 ### Fixed
@@ -239,7 +240,9 @@ First release of https://github.com/Metaswitch/cassandra-rs
 ## [0.8.1] - 2016-12-13
 Last release of https://github.com/tupshin/cassandra-rs
 
-[Unreleased]: https://github.com/Metaswitch/cassandra-rs/compare/0.17.0...HEAD
+[Unreleased]: https://github.com/Metaswitch/cassandra-rs/compare/1.0.0...HEAD
+[1.0.0]: https://github.com/Metaswitch/cassandra-rs/compare/0.17.2...1.0.0
+[0.17.2]: https://github.com/Metaswitch/cassandra-rs/compare/0.17.1...0.17.2
 [0.17.1]: https://github.com/Metaswitch/cassandra-rs/compare/0.17.0...0.17.1
 [0.17.0]: https://github.com/Metaswitch/cassandra-rs/compare/0.16.0...0.17.0
 [0.16.0]: https://github.com/Metaswitch/cassandra-rs/compare/0.15.1...0.16.0
