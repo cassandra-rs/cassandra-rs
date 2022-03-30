@@ -125,10 +125,7 @@ impl TableMeta {
     pub fn field_by_name(&self, name: &str) -> Option<Value> {
         // fixme replace CassValule with a custom type
         unsafe {
-            let value = cass_table_meta_field_by_name(
-                self.0,
-                name.as_ptr() as *const c_char,
-            );
+            let value = cass_table_meta_field_by_name(self.0, name.as_ptr() as *const c_char);
             if value.is_null() {
                 None
             } else {

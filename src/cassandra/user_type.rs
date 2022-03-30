@@ -394,8 +394,13 @@ impl UserType {
         unsafe {
             let name_str = name.into();
             let name_ptr = name_str.as_ptr() as *const c_char;
-            cass_user_type_set_collection_by_name_n(self.0, name_ptr, name_str.len(), value.into().inner())
-                .to_result(self)
+            cass_user_type_set_collection_by_name_n(
+                self.0,
+                name_ptr,
+                name_str.len(),
+                value.into().inner(),
+            )
+            .to_result(self)
         }
     }
 

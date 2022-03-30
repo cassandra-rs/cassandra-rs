@@ -5,12 +5,14 @@ use crate::cassandra_sys::cass_ssl_add_trusted_cert_n;
 use crate::cassandra_sys::cass_ssl_free;
 use crate::cassandra_sys::cass_ssl_new;
 use crate::cassandra_sys::cass_ssl_set_cert_n;
+#[cfg(feature = "early_access_min_tls_version")]
+use crate::cassandra_sys::cass_ssl_set_min_protocol_version;
 use crate::cassandra_sys::cass_ssl_set_private_key_n;
 use crate::cassandra_sys::cass_ssl_set_verify_flags;
 use crate::cassandra_sys::CassSsl as _Ssl;
-use crate::cassandra_sys::CassSslVerifyFlags;
 #[cfg(feature = "early_access_min_tls_version")]
-use crate::cassandra_sys::{cass_ssl_set_min_protocol_version, CassSslTlsVersion as SslTlsVersion};
+pub use crate::cassandra_sys::CassSslTlsVersion as SslTlsVersion;
+use crate::cassandra_sys::CassSslVerifyFlags;
 
 use std::os::raw::c_char;
 
