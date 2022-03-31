@@ -8,7 +8,7 @@ version number is tracked in the file `VERSION`.
 
 ## [Unreleased]
 ### Added
-- Added new `min_tls_version` features, which enables a `set_min_protocol_version` method on an Ssl object.
+- Added new `min_tls_version` features, which enables a `set_min_protocol_version` method on an `Ssl` object.
 
 ## [1.0.0] - 2022-03-29
 ### Added
