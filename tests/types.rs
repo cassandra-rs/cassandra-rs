@@ -1,5 +1,7 @@
 mod help;
 
+#[cfg(feature = "early_access_min_tls_version")]
+use cassandra_cpp::SslTlsVersion;
 use cassandra_cpp::*;
 
 #[test]
@@ -123,4 +125,16 @@ fn test_parsing_printing_batch_type() {
     let _ = "INVALID"
         .parse::<BatchType>()
         .expect_err("Should have failed to parse");
+}
+
+#[cfg(feature = "early_access_min_tls_version")]
+#[test]
+fn test_using_min_tls_version() {
+    let mut ssl = Ssl::default();
+    ssl.set_min_protocol_version(SslTlsVersion::CASS_SSL_VERSION_TLS1)
+        .expect("Failed to set TLS Version");
+    ssl.set_min_protocol_version(SslTlsVersion::CASS_SSL_VERSION_TLS1_1)
+        .expect("Failed to set TLS Version");
+    ssl.set_min_protocol_version(SslTlsVersion::CASS_SSL_VERSION_TLS1_2)
+        .expect("Failed to set TLS Version");
 }

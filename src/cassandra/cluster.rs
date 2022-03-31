@@ -163,7 +163,8 @@ impl Cluster {
     pub fn set_cloud_secure_connection_bundle(&mut self, path: &str) -> Result<&mut Self> {
         unsafe {
             let path_ptr = path.as_ptr() as *const c_char;
-            let err = cass_cluster_set_cloud_secure_connection_bundle_n(self.0, path_ptr, path.len());
+            let err =
+                cass_cluster_set_cloud_secure_connection_bundle_n(self.0, path_ptr, path.len());
             err.to_result(self)
         }
     }
@@ -172,10 +173,17 @@ impl Cluster {
     /// does not initialize the underlying SSL library implementation. The SSL library still
     /// needs to be initialized, but it's up to the client application to handle
     /// initialization.
-    pub fn set_cloud_secure_connection_bundle_no_ssl_lib_init(&mut self, path: &str) -> Result<&mut Self> {
+    pub fn set_cloud_secure_connection_bundle_no_ssl_lib_init(
+        &mut self,
+        path: &str,
+    ) -> Result<&mut Self> {
         unsafe {
             let path_ptr = path.as_ptr() as *const c_char;
-            let err = cass_cluster_set_cloud_secure_connection_bundle_no_ssl_lib_init_n(self.0, path_ptr, path.len());
+            let err = cass_cluster_set_cloud_secure_connection_bundle_no_ssl_lib_init_n(
+                self.0,
+                path_ptr,
+                path.len(),
+            );
             err.to_result(self)
         }
     }

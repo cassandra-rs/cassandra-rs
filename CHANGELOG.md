@@ -5,11 +5,11 @@ All notable changes to this project will be documented in this file.
 This file's format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/). The
 version number is tracked in the file `VERSION`.
-## [Unreleased]
-### Changed
-### Added
 
-### Fixed
+## [Unreleased]
+### Added
+- Added new `min_tls_version` features, which enables a `set_min_protocol_version` method on an `Ssl` object.
+
 ## [1.0.0] - 2022-03-29
 ### Added
 - Added new `set_cloud_secure_connection_bundle` and `set_cloud_secure_connection_bundle_no_ssl_lib_init`

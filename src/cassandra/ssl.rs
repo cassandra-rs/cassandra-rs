@@ -5,9 +5,13 @@ use crate::cassandra_sys::cass_ssl_add_trusted_cert_n;
 use crate::cassandra_sys::cass_ssl_free;
 use crate::cassandra_sys::cass_ssl_new;
 use crate::cassandra_sys::cass_ssl_set_cert_n;
+#[cfg(feature = "early_access_min_tls_version")]
+use crate::cassandra_sys::cass_ssl_set_min_protocol_version;
 use crate::cassandra_sys::cass_ssl_set_private_key_n;
 use crate::cassandra_sys::cass_ssl_set_verify_flags;
 use crate::cassandra_sys::CassSsl as _Ssl;
+#[cfg(feature = "early_access_min_tls_version")]
+pub use crate::cassandra_sys::CassSslTlsVersion as SslTlsVersion;
 use crate::cassandra_sys::CassSslVerifyFlags;
 
 use std::os::raw::c_char;
@@ -116,5 +120,14 @@ impl Ssl {
             cass_ssl_set_private_key_n(self.0, key_ptr, key.len(), password_ptr, password.len())
                 .to_result(self)
         }
+    }
+
+    /// Set minimum TLS version. This helps avoid TLS downgrade attacks.
+    #[cfg(feature = "early_access_min_tls_version")]
+    pub fn set_min_protocol_version(
+        &mut self,
+        min_tls_version: SslTlsVersion,
+    ) -> Result<&mut Self> {
+        unsafe { cass_ssl_set_min_protocol_version(self.0, min_tls_version).to_result(self) }
     }
 }

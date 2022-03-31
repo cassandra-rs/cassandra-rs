@@ -149,13 +149,9 @@ impl CassResult {
         unsafe {
             let mut token_ptr = mem::zeroed();
             let mut token_length = mem::zeroed();
-            cass_result_paging_state_token(
-                self.0,
-                &mut token_ptr,
-                &mut token_length,
-            )
-            .to_result(())
-            .map(|_| {
+            cass_result_paging_state_token(self.0, &mut token_ptr, &mut token_length)
+                .to_result(())
+                .map(|_| {
                     Some(
                         slice::from_raw_parts(token_ptr as *const u8, token_length as usize)
                             .to_vec(),
