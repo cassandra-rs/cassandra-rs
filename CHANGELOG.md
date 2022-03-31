@@ -8,7 +8,14 @@ version number is tracked in the file `VERSION`.
 
 ## [Unreleased]
 ### Added
-- Added new `min_tls_version` features, which enables a `set_min_protocol_version` method on an `Ssl` object.
+
+### Changed
+
+### Fixed
+
+## [1.1.0] - 2022-03-31
+### Added
+- Added new `early_access_min_tls_version` feature, which enables a `set_min_protocol_version` method on an `Ssl` object.
 
 ## [1.0.0] - 2022-03-29
 ### Added
@@ -240,7 +247,8 @@ First release of https://github.com/Metaswitch/cassandra-rs
 ## [0.8.1] - 2016-12-13
 Last release of https://github.com/tupshin/cassandra-rs
 
-[Unreleased]: https://github.com/Metaswitch/cassandra-rs/compare/1.0.0...HEAD
+[Unreleased]: https://github.com/Metaswitch/cassandra-rs/compare/1.1.0...HEAD
+[1.1.0]: https://github.com/Metaswitch/cassandra-rs/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/Metaswitch/cassandra-rs/compare/0.17.2...1.0.0
 [0.17.2]: https://github.com/Metaswitch/cassandra-rs/compare/0.17.1...0.17.2
 [0.17.1]: https://github.com/Metaswitch/cassandra-rs/compare/0.17.0...0.17.1
