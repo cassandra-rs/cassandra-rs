@@ -18,6 +18,7 @@ cassandra-cpp-sys = "1.1.0"
 uuid = "1.0"
 error-chain = "0.12"
 parking_lot = "0.12"
+libc = "0.2"
 
 [dev-dependencies]
 tokio = { version = "1.0", features = ["rt", "rt-multi-thread", "macros", "test-util"] }
