@@ -47,15 +47,15 @@ impl Drop for AggregateIterator {
 impl Iterator for AggregateIterator {
     type Item = AggregateMeta;
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
-        unsafe {
-            match cass_iterator_next(self.0) {
+        
+            match unsafe {cass_iterator_next(self.0)} {
                 cass_false => None,
                 cass_true => {
-                    let field_value = cass_iterator_get_aggregate_meta(self.0);
+                    let field_value = unsafe {cass_iterator_get_aggregate_meta(self.0) };
                     Some(AggregateMeta::build(field_value))
                 }
             }
-        }
+        
     }
 }
 
@@ -76,12 +76,12 @@ impl Drop for UserTypeIterator {
 impl Iterator for UserTypeIterator {
     type Item = (String, Value);
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
-        unsafe {
-            match cass_iterator_next(self.0) {
+        
+            match unsafe {cass_iterator_next(self.0)} {
                 cass_false => None,
                 cass_true => Some((self.get_field_name(), self.get_field_value())),
             }
-        }
+        
     }
 }
 

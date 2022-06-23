@@ -80,8 +80,8 @@ impl Ssl {
     /// Adds a trusted certificate. This is used to verify
     /// the peer's certificate.
     pub fn add_trusted_cert(&mut self, cert: &str) -> Result<&mut Self> {
+        let cert_ptr = cert.as_ptr() as *const c_char;
         unsafe {
-            let cert_ptr = cert.as_ptr() as *const c_char;
             cass_ssl_add_trusted_cert_n(self.0, cert_ptr, cert.len()).to_result(self)
         }
     }
@@ -105,8 +105,8 @@ impl Ssl {
     /// the client on the server-side. This should contain the entire
     /// Certificate chain starting with the certificate itself.
     pub fn set_cert(&mut self, cert: &str) -> Result<&mut Self> {
+        let cert_ptr = cert.as_ptr() as *const c_char;
         unsafe {
-            let cert_ptr = cert.as_ptr() as *const c_char;
             cass_ssl_set_cert_n(self.0, cert_ptr, cert.len()).to_result(self)
         }
     }
@@ -114,9 +114,9 @@ impl Ssl {
     /// Set client-side private key. This is used to authenticate
     /// the client on the server-side.
     pub fn set_private_key(&mut self, key: &str, password: &str) -> Result<&mut Self> {
+        let key_ptr = key.as_ptr() as *const c_char;
+        let password_ptr = key.as_ptr() as *const c_char;
         unsafe {
-            let key_ptr = key.as_ptr() as *const c_char;
-            let password_ptr = key.as_ptr() as *const c_char;
             cass_ssl_set_private_key_n(self.0, key_ptr, key.len(), password_ptr, password.len())
                 .to_result(self)
         }

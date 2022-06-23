@@ -60,49 +60,49 @@ impl KeyspaceMeta {
 
     /// Gets the table metadata for the provided table name.
     pub fn table_by_name(&self, name: &str) -> Option<TableMeta> {
-        unsafe {
+        
             let name_ptr = name.as_ptr() as *const c_char;
-            let value = cass_keyspace_meta_table_by_name_n(self.0, name_ptr, name.len());
+            let value = unsafe {cass_keyspace_meta_table_by_name_n(self.0, name_ptr, name.len())};
             if value.is_null() {
                 None
             } else {
                 Some(TableMeta::build(value))
             }
-        }
+        
     }
 
     /// Gets the data type for the provided type name.
     pub fn user_type_by_name(&self, name: &str) -> Option<ConstDataType> {
-        unsafe {
+        
             let name_ptr = name.as_ptr() as *const c_char;
-            let value = cass_keyspace_meta_user_type_by_name_n(self.0, name_ptr, name.len());
+            let value = unsafe {cass_keyspace_meta_user_type_by_name_n(self.0, name_ptr, name.len())};
             if value.is_null() {
                 None
             } else {
                 Some(ConstDataType::build(value))
             }
-        }
+        
     }
 
     /// Gets the function metadata for the provided function name.
     pub fn get_function_by_name(&self, name: &str, arguments: Vec<&str>) -> Option<FunctionMeta> {
-        unsafe {
+        
             let name_ptr = name.as_ptr() as *const c_char;
             let arguments_str = arguments.join(",");
             let arguments_ptr = arguments_str.as_ptr() as *const c_char;
-            let value = cass_keyspace_meta_function_by_name_n(
+            let value = unsafe {cass_keyspace_meta_function_by_name_n(
                 self.0,
                 name_ptr,
                 name.len(),
                 arguments_ptr,
                 arguments_str.len(),
-            );
+            )};
             if value.is_null() {
                 None
             } else {
                 Some(FunctionMeta::build(value))
             }
-        }
+        
     }
 
     /// Gets the aggregate metadata for the provided aggregate name.

@@ -130,8 +130,8 @@ impl FunctionMeta {
 
     /// Gets the function's argument and type for the provided name.
     pub fn argument_type_by_name(&self, name: &str) -> ConstDataType {
+        let name_ptr = name.as_ptr() as *const c_char;
         unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
             // TODO: can return NULL
             ConstDataType::build(cass_function_meta_argument_type_by_name_n(
                 self.0,
@@ -149,8 +149,8 @@ impl FunctionMeta {
     /// Gets a metadata field for the provided name. Metadata fields allow direct
     /// access to the column data found in the underlying "functions" metadata table.
     pub fn field_by_name(&self, name: &str) -> Value {
+        let name_ptr = name.as_ptr() as *const c_char;
         unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
             // TODO: can return NULL
             Value::build(cass_function_meta_field_by_name_n(
                 self.0,

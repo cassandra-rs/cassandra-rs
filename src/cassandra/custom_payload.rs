@@ -40,8 +40,8 @@ impl Default for CustomPayload {
 impl CustomPayload {
     /// Sets an item to the custom payload.
     pub fn set(&self, name: String, value: &[u8]) -> Result<()> {
+        let name_ptr = name.as_ptr() as *const c_char;
         unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
             Ok(cass_custom_payload_set_n(
                 self.0,
                 name_ptr,

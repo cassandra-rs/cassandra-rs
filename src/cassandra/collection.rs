@@ -238,19 +238,19 @@ impl CassCollection for List {
 
     /// Appends an "ascii", "text" or "varchar" to the collection.
     fn append_string(&mut self, value: &str) -> Result<&mut Self> {
-        unsafe {
+        
             let value_ptr = value.as_ptr() as *const c_char;
-            let result = cass_collection_append_string_n(self.inner(), value_ptr, value.len());
+            let result = unsafe { cass_collection_append_string_n(self.inner(), value_ptr, value.len()) };
             result.to_result(self)
-        }
+        
     }
 
     /// Appends a "blob", "varint" or "custom" to the collection.
     fn append_bytes(&mut self, value: Vec<u8>) -> Result<&mut Self> {
-        unsafe {
-            let bytes = cass_collection_append_bytes(self.inner(), value[..].as_ptr(), value.len());
+        
+            let bytes = unsafe { cass_collection_append_bytes(self.inner(), value[..].as_ptr(), value.len()) };
             bytes.to_result(self)
-        }
+        
     }
 
     /// Appends a "uuid" or "timeuuid"  to the collection.
@@ -374,19 +374,19 @@ impl CassCollection for Set {
 
     /// Appends an "ascii", "text" or "varchar" to the collection.
     fn append_string(&mut self, value: &str) -> Result<&mut Self> {
-        unsafe {
+        
             let value_ptr = value.as_ptr() as *const c_char;
-            let result = cass_collection_append_string_n(self.inner(), value_ptr, value.len());
+            let result = unsafe { cass_collection_append_string_n(self.inner(), value_ptr, value.len()) };
             result.to_result(self)
-        }
+        
     }
 
     /// Appends a "blob", "varint" or "custom" to the collection.
     fn append_bytes(&mut self, value: Vec<u8>) -> Result<&mut Self> {
-        unsafe {
-            let bytes = cass_collection_append_bytes(self.inner(), value[..].as_ptr(), value.len());
+        
+            let bytes = unsafe { cass_collection_append_bytes(self.inner(), value[..].as_ptr(), value.len()) };
             bytes.to_result(self)
-        }
+        
     }
 
     /// Appends a "uuid" or "timeuuid"  to the collection.
@@ -506,19 +506,19 @@ impl CassCollection for Map {
 
     /// Appends an "ascii", "text" or "varchar" to the collection.
     fn append_string(&mut self, value: &str) -> Result<&mut Self> {
-        unsafe {
+        
             let value_ptr = value.as_ptr() as *const c_char;
-            let result = cass_collection_append_string_n(self.inner(), value_ptr, value.len());
+            let result = unsafe { cass_collection_append_string_n(self.inner(), value_ptr, value.len()) };
             result.to_result(self)
-        }
+        
     }
 
     /// Appends a "blob", "varint" or "custom" to the collection.
     fn append_bytes(&mut self, value: Vec<u8>) -> Result<&mut Self> {
-        unsafe {
-            let bytes = cass_collection_append_bytes(self.inner(), value[..].as_ptr(), value.len());
+        
+            let bytes = unsafe { cass_collection_append_bytes(self.inner(), value[..].as_ptr(), value.len()) };
             bytes.to_result(self)
-        }
+        
     }
 
     /// Appends a "uuid" or "timeuuid"  to the collection.

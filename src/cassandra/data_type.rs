@@ -115,15 +115,15 @@ impl DataType {
     where
         S: Into<String>,
     {
-        unsafe {
+        
             let type_name2 = CString::new(type_name.into())?;
-            let err = cass_data_type_type_name(
+            let err = unsafe { cass_data_type_type_name(
                 data_type.0,
                 &mut type_name2.as_ptr(),
                 &mut (type_name2.as_bytes().len()),
-            );
+            ) };
             err.to_result(())
-        }
+        
     }
 
     /// Sets the type name of a UDT data type.
@@ -133,12 +133,12 @@ impl DataType {
     where
         S: Into<String>,
     {
-        unsafe {
+        
             let type_name_str = type_name.into();
             let type_name_ptr = type_name_str.as_ptr() as *const c_char;
-            cass_data_type_set_type_name_n(data_type.0, type_name_ptr, type_name_str.len())
-                .to_result(())
-        }
+            unsafe { cass_data_type_set_type_name_n(data_type.0, type_name_ptr, type_name_str.len())
+                .to_result(()) }
+        
     }
 
     /// Gets the type name of a UDT data type.
@@ -148,8 +148,8 @@ impl DataType {
     where
         S: Into<String>,
     {
+        let keyspace2 = CString::new(keyspace.into())?;
         unsafe {
-            let keyspace2 = CString::new(keyspace.into())?;
             cass_data_type_keyspace(
                 data_type.0,
                 &mut (keyspace2.as_ptr()),
@@ -166,9 +166,9 @@ impl DataType {
     where
         S: Into<String>,
     {
+        let keyspace_str = keyspace.into();
+        let keyspace_ptr = keyspace_str.as_ptr() as *const c_char;
         unsafe {
-            let keyspace_str = keyspace.into();
-            let keyspace_ptr = keyspace_str.as_ptr() as *const c_char;
             cass_data_type_set_keyspace_n(data_type.0, keyspace_ptr, keyspace_str.len())
                 .to_result(())
         }
@@ -181,8 +181,8 @@ impl DataType {
     where
         S: Into<String>,
     {
+        let class_name2 = CString::new(class_name.into())?;
         unsafe {
-            let class_name2 = CString::new(class_name.into())?;
             cass_data_type_class_name(
                 data_type.0,
                 &mut class_name2.as_ptr(),
@@ -199,9 +199,9 @@ impl DataType {
     where
         S: Into<String>,
     {
+        let class_name_str = class_name.into();
+        let class_name_ptr = class_name_str.as_ptr() as *const c_char;
         unsafe {
-            let class_name_str = class_name.into();
-            let class_name_ptr = class_name_str.as_ptr() as *const c_char;
             cass_data_type_set_class_name_n(self.0, class_name_ptr, class_name_str.len())
                 .to_result(())
         }
@@ -231,9 +231,9 @@ impl DataType {
     where
         S: Into<String>,
     {
+        let name_str = name.into();
+        let name_ptr = name_str.as_ptr() as *const c_char;
         unsafe {
-            let name_str = name.into();
-            let name_ptr = name_str.as_ptr() as *const c_char;
             // TODO: can return NULL
             ConstDataType::build(cass_data_type_sub_data_type_by_name_n(
                 data_type.0,
@@ -250,8 +250,8 @@ impl DataType {
     where
         S: Into<String>,
     {
+        let name2 = CString::new(name.into())?;
         unsafe {
-            let name2 = CString::new(name.into())?;
             cass_data_type_sub_type_name(
                 data_type.0,
                 index,
@@ -276,9 +276,9 @@ impl DataType {
     where
         S: Into<String>,
     {
+        let name_str = name.into();
+        let name_ptr = name_str.as_ptr() as *const c_char;
         unsafe {
-            let name_str = name.into();
-            let name_ptr = name_str.as_ptr() as *const c_char;
             cass_data_type_add_sub_type_by_name_n(self.0, name_ptr, name_str.len(), sub_data_type.0)
                 .to_result(())
         }
@@ -301,9 +301,9 @@ impl DataType {
     where
         S: Into<String>,
     {
+        let name_str = name.into();
+        let name_ptr = name_str.as_ptr() as *const c_char;
         unsafe {
-            let name_str = name.into();
-            let name_ptr = name_str.as_ptr() as *const c_char;
             cass_data_type_add_sub_value_type_by_name_n(
                 self.0,
                 name_ptr,

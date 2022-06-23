@@ -123,11 +123,11 @@ impl Cluster {
     ///
     ///
     pub fn set_contact_points(&mut self, contact_points: &str) -> Result<&mut Self> {
-        unsafe {
+        
             let cp_ptr = contact_points.as_ptr() as *const c_char;
-            let err = cass_cluster_set_contact_points_n(self.0, cp_ptr, contact_points.len());
+            let err = unsafe { cass_cluster_set_contact_points_n(self.0, cp_ptr, contact_points.len()) };
             err.to_result(self)
-        }
+        
     }
 
     /// Sets the local address to bind when connecting to the cluster,
@@ -135,11 +135,11 @@ impl Cluster {
     ///
     /// Only numeric addresses are supported.
     pub fn set_local_address(&mut self, name: &str) -> Result<&mut Self> {
-        unsafe {
+        
             let name_ptr = name.as_ptr() as *const c_char;
-            let err = cass_cluster_set_local_address_n(self.0, name_ptr, name.len());
+            let err = unsafe { cass_cluster_set_local_address_n(self.0, name_ptr, name.len()) };
             err.to_result(self)
-        }
+        
     }
 
     /// Sets the port
@@ -161,12 +161,12 @@ impl Cluster {
 
     /// Sets the secure connection bundle path for processing DBaaS credentials.
     pub fn set_cloud_secure_connection_bundle(&mut self, path: &str) -> Result<&mut Self> {
-        unsafe {
+        
             let path_ptr = path.as_ptr() as *const c_char;
             let err =
-                cass_cluster_set_cloud_secure_connection_bundle_n(self.0, path_ptr, path.len());
+                unsafe { cass_cluster_set_cloud_secure_connection_bundle_n(self.0, path_ptr, path.len()) };
             err.to_result(self)
-        }
+        
     }
 
     /// Sets the secure connection bundle path for processing DBaaS credentials, but it
@@ -177,35 +177,35 @@ impl Cluster {
         &mut self,
         path: &str,
     ) -> Result<&mut Self> {
-        unsafe {
+        
             let path_ptr = path.as_ptr() as *const c_char;
-            let err = cass_cluster_set_cloud_secure_connection_bundle_no_ssl_lib_init_n(
+            let err = unsafe { cass_cluster_set_cloud_secure_connection_bundle_no_ssl_lib_init_n(
                 self.0,
                 path_ptr,
                 path.len(),
-            );
+            ) };
             err.to_result(self)
-        }
+        
     }
 
     /// Performs a blocking call to connect to Cassandra cluster
     pub fn connect(&mut self) -> Result<Session> {
-        unsafe {
-            let session = Session(cass_session_new());
-            let connect_future = <CassFuture<()>>::build(cass_session_connect(session.0, self.0));
+        
+            let session = Session(unsafe { cass_session_new() });
+            let connect_future = <CassFuture<()>>::build(unsafe { cass_session_connect(session.0, self.0) });
             connect_future.wait()?;
             Ok(session)
-        }
+        
     }
 
     /// Asynchronously connects to the cassandra cluster
     pub async fn connect_async(&mut self) -> Result<Session> {
-        unsafe {
-            let session = Session(cass_session_new());
-            let connect_future = <CassFuture<()>>::build(cass_session_connect(session.0, self.0));
+        
+            let session = Session(unsafe { cass_session_new() });
+            let connect_future = <CassFuture<()>>::build(unsafe { cass_session_connect(session.0, self.0) });
             connect_future.await?;
             Ok(session)
-        }
+        
     }
 
     /// Sets the protocol version. This will automatically downgrade to the lowest
@@ -388,9 +388,9 @@ impl Cluster {
 
     /// Sets credentials for plain text authentication.
     pub fn set_credentials(&mut self, username: &str, password: &str) -> Result<&mut Self> {
+        let username_ptr = username.as_ptr() as *const c_char;
+        let password_ptr = password.as_ptr() as *const c_char;
         unsafe {
-            let username_ptr = username.as_ptr() as *const c_char;
-            let password_ptr = password.as_ptr() as *const c_char;
             cass_cluster_set_credentials_n(
                 self.0,
                 username_ptr,

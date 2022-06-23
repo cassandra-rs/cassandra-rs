@@ -354,10 +354,10 @@ impl Value {
 
     /// Gets this value as a set iterator.
     pub fn get_set(&self) -> Result<SetIterator> {
-        unsafe {
+        
             match self.get_type() {
                 ValueType::SET | ValueType::LIST | ValueType::TUPLE => {
-                    let iter = cass_iterator_from_collection(self.0);
+                    let iter = unsafe { cass_iterator_from_collection(self.0) };
                     if iter.is_null() {
                         // No iterator, probably because this set is_null. Complain.
                         Err(CASS_ERROR_LIB_NULL_VALUE.to_error())
@@ -367,15 +367,15 @@ impl Value {
                 }
                 _ => Err(CASS_ERROR_LIB_INVALID_VALUE_TYPE.to_error()),
             }
-        }
+        
     }
 
     /// Gets this value as a map iterator.
     pub fn get_map(&self) -> Result<MapIterator> {
-        unsafe {
+        
             match self.get_type() {
                 ValueType::MAP => {
-                    let iter = cass_iterator_from_map(self.0);
+                    let iter = unsafe { cass_iterator_from_map(self.0) };
                     if iter.is_null() {
                         // No iterator, probably because this map is_null. Complain.
                         Err(CASS_ERROR_LIB_NULL_VALUE.to_error())
@@ -385,15 +385,15 @@ impl Value {
                 }
                 _ => Err(CASS_ERROR_LIB_INVALID_VALUE_TYPE.to_error()),
             }
-        }
+        
     }
 
     /// Gets an iterator over the fields of the user type in this column or errors if you ask for the wrong type
     pub fn get_user_type(&self) -> Result<UserTypeIterator> {
-        unsafe {
+        
             match self.get_type() {
                 ValueType::UDT => {
-                    let iter = cass_iterator_fields_from_user_type(self.0);
+                    let iter = unsafe {cass_iterator_fields_from_user_type(self.0) };
                     if iter.is_null() {
                         // No iterator, probably because this user_type field is null. Complain.
                         Err(CASS_ERROR_LIB_NULL_VALUE.to_error())
@@ -403,7 +403,7 @@ impl Value {
                 }
                 _ => Err(CASS_ERROR_LIB_INVALID_VALUE_TYPE.to_error()),
             }
-        }
+        
     }
 
     /// Get this value as a string slice

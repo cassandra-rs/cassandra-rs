@@ -82,26 +82,26 @@ pub(crate) trait CassErrorExt {
 
 impl CassErrorExt for CassError_ {
     fn to_result<T>(&self, default: T) -> Result<T> {
-        unsafe {
+        
             match *self {
                 CASS_OK => Ok(default),
                 _ => {
-                    let message = CStr::from_ptr(cass_error_desc(*self))
+                    let message = unsafe {CStr::from_ptr(cass_error_desc(*self))}
                         .to_string_lossy()
                         .into_owned();
                     Err(ErrorKind::CassError(CassErrorCode::build(*self), message).into())
                 }
             }
-        }
+        
     }
 
     fn to_error(&self) -> Error {
-        unsafe {
-            let message = CStr::from_ptr(cass_error_desc(*self))
+        
+            let message = unsafe {CStr::from_ptr(cass_error_desc(*self))}
                 .to_string_lossy()
                 .into_owned();
             ErrorKind::CassError(CassErrorCode::build(*self), message).into()
-        }
+        
     }
 }
 

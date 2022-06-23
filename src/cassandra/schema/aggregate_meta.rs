@@ -102,14 +102,14 @@ impl AggregateMeta {
     ///  Gets a metadata field for the provided name. Metadata fields allow direct
     /// access to the column data found in the underlying "aggregates" metadata table.
     pub fn field_by_name(&self, name: &str) -> Option<Value> {
-        unsafe {
+        
             let name_ptr = name.as_ptr() as *const c_char;
-            let agg = cass_aggregate_meta_field_by_name_n(self.0, name_ptr, name.len());
+            let agg = unsafe {cass_aggregate_meta_field_by_name_n(self.0, name_ptr, name.len())};
             if agg.is_null() {
                 None
             } else {
                 Some(Value::build(agg))
             }
-        }
+        
     }
 }

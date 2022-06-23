@@ -62,14 +62,14 @@ impl ColumnMeta {
     /// Gets a metadata field for the provided name. Metadata fields allow direct
     /// access to the column data found in the underlying "columns" metadata table.
     pub fn field_by_name(&self, name: &str) -> Option<Value> {
-        unsafe {
+        
             let name_ptr = name.as_ptr() as *const c_char;
-            let field = cass_column_meta_field_by_name_n(self.0, name_ptr, name.len());
+            let field = unsafe { cass_column_meta_field_by_name_n(self.0, name_ptr, name.len()) };
             if field.is_null() {
                 None
             } else {
                 Some(Value::build(field))
             }
-        }
+        
     }
 }

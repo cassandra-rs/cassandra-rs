@@ -86,15 +86,15 @@ unsafe extern "C" fn logger_callback(log: *const CassLogMessage, data: *mut raw:
 
 /// Set or unset a logger to receive all Cassandra driver logs.
 pub fn set_logger(logger: Option<slog::Logger>) {
-    unsafe {
+    
         match logger {
             Some(logger) => {
                 // Pass ownership to C. In fact we leak the logger; it never gets freed.
                 // We don't expect this to be called many times, so we're not worried.
                 let data = Box::new(logger);
-                cass_log_set_callback(Some(logger_callback), Box::into_raw(data) as _)
+                unsafe { cass_log_set_callback(Some(logger_callback), Box::into_raw(data) as _)}
             }
-            None => cass_log_set_callback(None, ptr::null_mut()),
+            None => unsafe {cass_log_set_callback(None, ptr::null_mut())},
         }
-    }
+    
 }

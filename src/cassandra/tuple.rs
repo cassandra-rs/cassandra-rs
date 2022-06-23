@@ -125,9 +125,9 @@ impl Tuple {
     where
         S: Into<String>,
     {
+        let value_str = value.into();
+        let value_ptr = value_str.as_ptr() as *const c_char;
         unsafe {
-            let value_str = value.into();
-            let value_ptr = value_str.as_ptr() as *const c_char;
             cass_tuple_set_string_n(self.0, index, value_ptr, value_str.len()).to_result(self)
         }
     }

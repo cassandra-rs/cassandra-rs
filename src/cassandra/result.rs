@@ -119,12 +119,12 @@ impl CassResult {
 
     /// Gets the first row of the result.
     pub fn first_row(&self) -> Option<Row> {
-        unsafe {
+        
             match self.row_count() {
                 0 => None,
-                _ => Some(Row::build(cass_result_first_row(self.0))),
+                _ => Some(Row::build(unsafe {cass_result_first_row(self.0)})),
             }
-        }
+        
     }
 
     /// Returns true if there are more pages.
@@ -191,12 +191,12 @@ impl<'a> Drop for ResultIterator<'a> {
 impl<'a> Iterator for ResultIterator<'a> {
     type Item = Row<'a>;
     fn next(&mut self) -> Option<<Self as Iterator>::Item> {
-        unsafe {
-            match cass_iterator_next(self.0) {
+        
+            match unsafe {cass_iterator_next(self.0)} {
                 cass_false => None,
                 cass_true => Some(self.get_row()),
             }
-        }
+        
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {

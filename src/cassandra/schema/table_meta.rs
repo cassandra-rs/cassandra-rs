@@ -93,14 +93,14 @@ impl TableMeta {
 
     /// Gets the partition key column metadata for the provided index.
     pub fn partition_key(&self, index: usize) -> Option<ColumnMeta> {
-        unsafe {
-            let key = cass_table_meta_partition_key(self.0, index);
+        
+            let key = unsafe {cass_table_meta_partition_key(self.0, index)};
             if key.is_null() {
                 None
             } else {
                 Some(ColumnMeta::build(key))
             }
-        }
+        
     }
 
     /// Gets the number of columns for the table's clustering key
@@ -110,27 +110,27 @@ impl TableMeta {
 
     /// Gets the clustering key column metadata for the provided index.
     pub fn cluster_key(&self, index: usize) -> Option<ColumnMeta> {
-        unsafe {
-            let key = cass_table_meta_clustering_key(self.0, index);
+        
+            let key = unsafe {cass_table_meta_clustering_key(self.0, index)};
             if key.is_null() {
                 None
             } else {
                 Some(ColumnMeta::build(key))
             }
-        }
+        
     }
 
     /// Gets a metadata field for the provided name. Metadata fields allow direct
     /// access to the column data found in the underlying "tables" metadata table.
     pub fn field_by_name(&self, name: &str) -> Option<Value> {
         // fixme replace CassValule with a custom type
-        unsafe {
-            let value = cass_table_meta_field_by_name(self.0, name.as_ptr() as *const c_char);
+        
+            let value = unsafe {cass_table_meta_field_by_name(self.0, name.as_ptr() as *const c_char)};
             if value.is_null() {
                 None
             } else {
                 Some(Value::build(value))
             }
-        }
+        
     }
 }

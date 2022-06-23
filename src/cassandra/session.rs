@@ -109,8 +109,8 @@ impl Session {
 
     /// Create a prepared statement.
     pub fn prepare(&self, query: &str) -> Result<CassFuture<PreparedStatement>> {
+        let query_ptr = query.as_ptr() as *const c_char;
         unsafe {
-            let query_ptr = query.as_ptr() as *const c_char;
             Ok(<CassFuture<PreparedStatement>>::build(
                 cass_session_prepare_n(self.0, query_ptr, query.len()),
             ))

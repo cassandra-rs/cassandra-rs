@@ -68,16 +68,16 @@ impl Debug for Uuid {
 
 impl Display for Uuid {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        unsafe {
+        
             // Allocate an array large enough for cass_uuid_string to write to.
             let mut buf = [0u8; CASS_UUID_STRING_LENGTH];
-            cass_uuid_string(self.0, buf.as_mut_ptr() as *mut c_char);
+            unsafe {cass_uuid_string(self.0, buf.as_mut_ptr() as *mut c_char)};
             let str = CStr::from_bytes_with_nul(&buf)
                 .map_err(|_| fmt::Error)?
                 .to_str()
                 .map_err(|_| fmt::Error)?;
             fmt::Display::fmt(&str, f)
-        }
+        
     }
 }
 

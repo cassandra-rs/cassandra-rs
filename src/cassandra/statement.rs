@@ -320,8 +320,8 @@ impl BindRustType<Vec<u8>> for Statement {
 impl Statement {
     /// Creates a new query statement.
     pub fn new(query: &str, parameter_count: usize) -> Self {
+        let query_ptr = query.as_ptr() as *const c_char;
         unsafe {
-            let query_ptr = query.as_ptr() as *const c_char;
             Statement(cass_statement_new_n(
                 query_ptr,
                 query.len(),
@@ -359,8 +359,8 @@ impl Statement {
     /// This is not necessary for prepared statements, as the keyspace
     /// is determined in the metadata processed in the prepare phase.
     pub fn set_keyspace(&mut self, keyspace: String) -> Result<&mut Self> {
+        let keyspace_ptr = keyspace.as_ptr() as *const c_char;
         unsafe {
-            let keyspace_ptr = keyspace.as_ptr() as *const c_char;
             cass_statement_set_keyspace_n(self.0, keyspace_ptr, keyspace.len()).to_result(self)
         }
     }
@@ -421,11 +421,11 @@ impl Statement {
     /// Some(Duration::milliseconds(0)) sets no timeout, and None disables it
     /// (to use the cluster-level request timeout).
     pub fn set_statement_request_timeout(&mut self, timeout: Option<Duration>) -> &mut Self {
+        let timeout_millis = match timeout {
+            None => CASS_UINT64_MAX as u64,
+            Some(time) => time.as_millis() as u64,
+        };
         unsafe {
-            let timeout_millis = match timeout {
-                None => CASS_UINT64_MAX as u64,
-                Some(time) => time.as_millis() as u64,
-            };
             cass_statement_set_request_timeout(self.0, timeout_millis);
         }
         self
@@ -451,8 +451,8 @@ impl Statement {
     /// This can only be used with statements created by
     /// cass_prepared_bind().
     pub fn bind_null_by_name(&mut self, name: &str) -> Result<&mut Self> {
+        let name_ptr = name.as_ptr() as *const c_char;
         unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
             cass_statement_bind_null_by_name_n(self.0, name_ptr, name.len()).to_result(self)
         }
     }
@@ -464,8 +464,8 @@ impl Statement {
 
     /// Binds a "tinyint" to all the values with the specified name.
     pub fn bind_int8_by_name(&mut self, name: &str, value: i8) -> Result<&mut Self> {
+        let name_ptr = name.as_ptr() as *const c_char;
         unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
             cass_statement_bind_int8_by_name_n(self.0, name_ptr, name.len(), value).to_result(self)
         }
     }
@@ -477,8 +477,8 @@ impl Statement {
 
     /// Binds a "smallint" to all the values with the specified name.
     pub fn bind_int16_by_name(&mut self, name: &str, value: i16) -> Result<&mut Self> {
+        let name_ptr = name.as_ptr() as *const c_char;
         unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
             cass_statement_bind_int16_by_name_n(self.0, name_ptr, name.len(), value).to_result(self)
         }
     }
@@ -490,8 +490,8 @@ impl Statement {
 
     /// Binds an "int" to all the values with the specified name.
     pub fn bind_int32_by_name(&mut self, name: &str, value: i32) -> Result<&mut Self> {
+        let name_ptr = name.as_ptr() as *const c_char;
         unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
             cass_statement_bind_int32_by_name_n(self.0, name_ptr, name.len(), value).to_result(self)
         }
     }
@@ -506,8 +506,8 @@ impl Statement {
     /// This can only be used with statements created by
     /// cass_prepared_bind().
     pub fn bind_uint32_by_name(&mut self, name: &str, value: u32) -> Result<&mut Self> {
+        let name_ptr = name.as_ptr() as *const c_char;
         unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
             cass_statement_bind_uint32_by_name_n(self.0, name_ptr, name.len(), value)
                 .to_result(self)
         }
@@ -522,8 +522,8 @@ impl Statement {
     /// Binds a "bigint", "counter", "timestamp" or "time" to all values
     /// with the specified name.
     pub fn bind_int64_by_name(&mut self, name: &str, value: i64) -> Result<&mut Self> {
+        let name_ptr = name.as_ptr() as *const c_char;
         unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
             cass_statement_bind_int64_by_name_n(self.0, name_ptr, name.len(), value).to_result(self)
         }
     }
@@ -538,8 +538,8 @@ impl Statement {
     /// This can only be used with statements created by
     /// cass_prepared_bind().
     pub fn bind_float_by_name(&mut self, name: &str, value: f32) -> Result<&mut Self> {
+        let name_ptr = name.as_ptr() as *const c_char;
         unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
             cass_statement_bind_float_by_name_n(self.0, name_ptr, name.len(), value).to_result(self)
         }
     }
@@ -554,8 +554,8 @@ impl Statement {
     /// This can only be used with statements created by
     /// cass_prepared_bind().
     pub fn bind_double_by_name(&mut self, name: &str, value: f64) -> Result<&mut Self> {
+        let name_ptr = name.as_ptr() as *const c_char;
         unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
             cass_statement_bind_double_by_name_n(self.0, name_ptr, name.len(), value)
                 .to_result(self)
         }
@@ -574,8 +574,8 @@ impl Statement {
     /// This can only be used with statements created by
     /// cass_prepared_bind().
     pub fn bind_bool_by_name(&mut self, name: &str, value: bool) -> Result<&mut Self> {
+        let name_ptr = name.as_ptr() as *const c_char;
         unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
             cass_statement_bind_bool_by_name_n(
                 self.0,
                 name_ptr,
@@ -589,8 +589,8 @@ impl Statement {
     /// Binds an "ascii", "text" or "varchar" to a query or bound statement
     /// at the specified index.
     pub fn bind_string(&mut self, index: usize, value: &str) -> Result<&mut Self> {
+        let value_ptr = value.as_ptr() as *const c_char;
         unsafe {
-            let value_ptr = value.as_ptr() as *const c_char;
             cass_statement_bind_string_n(self.0, index, value_ptr, value.len()).to_result(self)
         }
     }
@@ -601,13 +601,13 @@ impl Statement {
     /// This can only be used with statements created by
     /// cass_prepared_bind().
     pub fn bind_string_by_name(&mut self, name: &str, value: &str) -> Result<&mut Self> {
+        let name_ptr = name.as_ptr() as *const c_char;
+        
+        // cass_statement_bind_string_by_name_n is incorrectly ignoring the
+        // value_length parameter so we have to allocate a new
+        // NULL-terminated string.
+        let value_cstr = std::ffi::CString::new(value)?;
         unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
-
-            // cass_statement_bind_string_by_name_n is incorrectly ignoring the
-            // value_length parameter so we have to allocate a new
-            // NULL-terminated string.
-            let value_cstr = std::ffi::CString::new(value)?;
 
             cass_statement_bind_string_by_name_n(
                 self.0,
@@ -633,8 +633,8 @@ impl Statement {
     /// This can only be used with statements created by
     /// cass_prepared_bind().
     pub fn bind_bytes_by_name(&mut self, name: &str, mut value: Vec<u8>) -> Result<&mut Self> {
+        let name_ptr = name.as_ptr() as *const c_char;
         unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
             cass_statement_bind_bytes_by_name_n(
                 self.0,
                 name_ptr,
@@ -657,8 +657,8 @@ impl Statement {
     /// This can only be used with statements created by
     /// cass_prepared_bind().
     pub fn bind_uuid_by_name(&mut self, name: &str, value: Uuid) -> Result<&mut Self> {
+        let name_ptr = name.as_ptr() as *const c_char;
         unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
             cass_statement_bind_uuid_by_name_n(self.0, name_ptr, name.len(), value.inner())
                 .to_result(self)
         }
@@ -671,8 +671,8 @@ impl Statement {
 
     /// Binds an "inet" to all the values with the specified name.
     pub fn bind_inet_by_name(&mut self, name: &str, value: Inet) -> Result<&mut Self> {
+        let name_ptr = name.as_ptr() as *const c_char;
         unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
             cass_statement_bind_inet_by_name_n(self.0, name_ptr, name.len(), value.inner())
                 .to_result(self)
         }
@@ -725,8 +725,8 @@ impl Statement {
     /// This can only be used with statements created by
     /// cass_prepared_bind().
     pub fn bind_map_by_name(&mut self, name: &str, map: Map) -> Result<&mut Self> {
+        let name_ptr = name.as_ptr() as *const c_char;
         unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
             cass_statement_bind_collection_by_name_n(self.0, name_ptr, name.len(), map.inner())
                 .to_result(self)
         }
@@ -742,8 +742,8 @@ impl Statement {
     /// This can only be used with statements created by
     /// cass_prepared_bind().
     pub fn bind_set_by_name(&mut self, name: &str, collection: Set) -> Result<&mut Self> {
+        let name_ptr = name.as_ptr() as *const c_char;
         unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
             cass_statement_bind_collection_by_name_n(
                 self.0,
                 name_ptr,
@@ -765,8 +765,8 @@ impl Statement {
     /// This can only be used with statements created by
     /// cass_prepared_bind().
     pub fn bind_list_by_name(&mut self, name: &str, collection: List) -> Result<&mut Self> {
+        let name_ptr = name.as_ptr() as *const c_char;
         unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
             cass_statement_bind_collection_by_name_n(
                 self.0,
                 name_ptr,
@@ -787,8 +787,8 @@ impl Statement {
     /// This can only be used with statements created by
     /// cass_prepared_bind().
     pub fn bind_tuple_by_name(&mut self, name: &str, value: Tuple) -> Result<&mut Self> {
+        let name_ptr = name.as_ptr() as *const c_char;
         unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
             cass_statement_bind_tuple_by_name_n(self.0, name_ptr, name.len(), value.inner())
                 .to_result(self)
         }
@@ -803,8 +803,8 @@ impl Statement {
     /// Bind a user defined type to a query or bound statement with the
     /// specified name.
     pub fn bind_user_type_by_name(&mut self, name: &str, value: &UserType) -> Result<&mut Self> {
+        let name_ptr = name.as_ptr() as *const c_char;
         unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
             cass_statement_bind_user_type_by_name_n(self.0, name_ptr, name.len(), value.inner())
                 .to_result(self)
         }
