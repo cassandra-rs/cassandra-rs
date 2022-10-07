@@ -7,6 +7,7 @@ use crate::cassandra_sys::cass_log_set_level;
 use crate::cassandra_sys::CassLogCallback;
 // use cassandra_sys::cass_log_set_queue_size; @deprecated
 
+#[cfg(feature = "slog")]
 use slog;
 use std::borrow::Borrow;
 use std::boxed::Box;
@@ -49,9 +50,15 @@ pub fn set_level(level: LogLevel) {
     unsafe { cass_log_set_level(level.inner()) }
 }
 
+/// unset the logger that receives all Cassandra driver logs.
+pub fn unset_logger() {
+    unsafe { cass_log_set_callback(None, ptr::null_mut()) }
+}
+
+#[cfg(feature = "slog")]
 /// Called by Cassandra for every log if logging is enabled. Passes the log to the configured
 /// slog logger.
-unsafe extern "C" fn logger_callback(log: *const CassLogMessage, data: *mut raw::c_void) {
+unsafe extern "C" fn slog_callback(log: *const CassLogMessage, data: *mut raw::c_void) {
     let log = &*log;
     let logger: &slog::Logger = &*(data as *const _);
 
@@ -59,7 +66,7 @@ unsafe extern "C" fn logger_callback(log: *const CassLogMessage, data: *mut raw:
     let time_ms: u64 = log.time_ms;
     let file: &str = &CStr::from_ptr(log.file).to_string_lossy();
     let line: i32 = log.line;
-    let function: &str = &CStr::from_ptr(log.file).to_string_lossy();
+    let function: &str = &CStr::from_ptr(log.function).to_string_lossy();
     let kv = o!(
         "time_ms" => time_ms,
         "file" => file,
@@ -84,17 +91,64 @@ unsafe extern "C" fn logger_callback(log: *const CassLogMessage, data: *mut raw:
     };
 }
 
-/// Set or unset a logger to receive all Cassandra driver logs.
-pub fn set_logger(logger: Option<slog::Logger>) {
+#[cfg(feature = "slog")]
+/// Set a slog logger to receive all Cassandra driver logs.
+pub fn set_slog_logger(logger: slog::Logger) {
     unsafe {
-        match logger {
-            Some(logger) => {
-                // Pass ownership to C. In fact we leak the logger; it never gets freed.
-                // We don't expect this to be called many times, so we're not worried.
-                let data = Box::new(logger);
-                cass_log_set_callback(Some(logger_callback), Box::into_raw(data) as _)
-            }
-            None => cass_log_set_callback(None, ptr::null_mut()),
-        }
+        // Pass ownership to C. In fact we leak the logger; it never gets freed.
+        // We don't expect this to be called many times, so we're not worried.
+        let data = Box::new(logger);
+        cass_log_set_callback(Some(slog_callback), Box::into_raw(data) as _)
     }
+}
+
+#[cfg(feature = "log")]
+/// Called by Cassandra for every log if logging is enabled. Passes the log to the configured
+/// log logger.
+unsafe extern "C" fn log_callback(log: *const CassLogMessage, _data: *mut raw::c_void) {
+    use log::{logger, Level, Record};
+
+    let log = &*log;
+    let message: &str = &CStr::from_ptr(log.message.as_ptr()).to_string_lossy();
+    let file = &CStr::from_ptr(log.file).to_string_lossy();
+    let line = log.line as u32;
+    let function = &CStr::from_ptr(log.function).to_string_lossy();
+    let module_and_function_name = function_definition_to_module_name(function).unwrap_or(function);
+
+    let level = match log.severity {
+        CassLogLevel_::CASS_LOG_DISABLED | CassLogLevel_::CASS_LOG_CRITICAL => Level::Error,
+        CassLogLevel_::CASS_LOG_ERROR => Level::Error,
+        CassLogLevel_::CASS_LOG_WARN => Level::Warn,
+        CassLogLevel_::CASS_LOG_INFO => Level::Info,
+        CassLogLevel_::CASS_LOG_DEBUG => Level::Debug,
+        CassLogLevel_::CASS_LOG_TRACE | CassLogLevel_::CASS_LOG_LAST_ENTRY => Level::Trace,
+    };
+
+    logger().log(
+        &Record::builder()
+            .level(level)
+            .args(format_args!("{}", message))
+            .line(Some(line))
+            .file(Some(file))
+            .module_path(Some(module_and_function_name))
+            .target(module_and_function_name)
+            .build(),
+    );
+}
+
+fn function_definition_to_module_name(definition: &str) -> Option<&str> {
+    // definition strings look like:
+    // void datastax::internal::core::ControlConnection::handle_refresh_keyspace(datastax::internal::core::RefreshKeyspaceCallback*))
+    let mut definition_iter = definition.split(' ');
+    // skip the return type
+    definition_iter.next()?;
+    // return the module + function name
+    // we include the function name with the module because we may as well keep the extra information and it doesnt impair log readability like the return type + args do
+    definition_iter.next()?.split('(').next()
+}
+
+#[cfg(feature = "log")]
+/// Set log to receive all Cassandra driver logs.
+pub fn set_log_logger() {
+    unsafe { cass_log_set_callback(Some(log_callback), ptr::null_mut()) }
 }
