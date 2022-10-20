@@ -91,6 +91,17 @@ unsafe extern "C" fn slog_callback(log: *const CassLogMessage, data: *mut raw::c
     };
 }
 
+#[doc(hidden)]
+#[cfg(feature = "slog")]
+/// Set or unset a logger to receive all Cassandra driver logs.
+pub fn set_logger(logger: Option<slog::Logger>) {
+    if let Some(logger) = logger {
+        set_slog_logger(logger);
+    } else {
+        unset_logger();
+    }
+}
+
 #[cfg(feature = "slog")]
 /// Set a slog logger to receive all Cassandra driver logs.
 pub fn set_slog_logger(logger: slog::Logger) {
@@ -136,6 +147,7 @@ unsafe extern "C" fn log_callback(log: *const CassLogMessage, _data: *mut raw::c
     );
 }
 
+/// Extract the module name from a cpp function definition
 fn function_definition_to_module_name(definition: &str) -> Option<&str> {
     // definition strings look like:
     // void datastax::internal::core::ControlConnection::handle_refresh_keyspace(datastax::internal::core::RefreshKeyspaceCallback*))
