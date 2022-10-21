@@ -7,6 +7,7 @@
 // `error_chain!` can recurse deeply
 #![recursion_limit = "1024"]
 
+#[cfg(feature = "slog")]
 #[macro_use]
 extern crate slog;
 #[macro_use]
@@ -30,7 +31,11 @@ pub use crate::cassandra::iterator::{
     AggregateIterator, ColumnIterator, FieldIterator, FunctionIterator, KeyspaceIterator,
     MapIterator, SetIterator, TableIterator, UserTypeIterator,
 };
-pub use crate::cassandra::log::{set_level, set_logger, LogLevel};
+#[cfg(feature = "log")]
+pub use crate::cassandra::log::set_log_logger;
+#[cfg(feature = "slog")]
+pub use crate::cassandra::log::set_slog_logger;
+pub use crate::cassandra::log::{set_level, LogLevel};
 pub use crate::cassandra::policy::retry::RetryPolicy;
 pub use crate::cassandra::prepared::PreparedStatement;
 pub use crate::cassandra::result::CassResult;

@@ -13,7 +13,8 @@ authors = ["Tupshin Harper <tupshin@tupshin.com>", "Keith Wansbrough <Keith.Wans
 edition = "2018"
 
 [dependencies]
-slog = "2"
+slog = { version = "2", optional = true }
+log = { version = "0.4.17", optional = true }
 cassandra-cpp-sys = "1.1.0"
 uuid = "1.0"
 error-chain = "0.12"
@@ -23,7 +24,8 @@ libc = "0.2"
 [dev-dependencies]
 tokio = { version = "1.0", features = ["rt", "rt-multi-thread", "macros", "test-util"] }
 futures = "0.3.1"
+logtest = "2.0.0"
 
 [features]
-default = []
+default = ["slog", "log"]
 early_access_min_tls_version = ["cassandra-cpp-sys/early_access_min_tls_version"]
