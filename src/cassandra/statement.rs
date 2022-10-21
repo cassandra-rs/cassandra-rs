@@ -61,6 +61,7 @@ use crate::cassandra_sys::cass_statement_set_request_timeout;
 use crate::cassandra_sys::cass_statement_set_retry_policy;
 use crate::cassandra_sys::cass_statement_set_serial_consistency;
 use crate::cassandra_sys::cass_statement_set_timestamp;
+use crate::cassandra_sys::cass_statement_set_tracing;
 use crate::cassandra_sys::cass_true;
 use crate::cassandra_sys::CassStatement as _Statement;
 use crate::cassandra_sys::CASS_UINT64_MAX;
@@ -439,6 +440,14 @@ impl Statement {
     /// Sets the statement's custom payload.
     pub fn set_custom_payload(&mut self, payload: CustomPayload) -> Result<&mut Self> {
         unsafe { cass_statement_set_custom_payload(self.0, payload.inner()).to_result(self) }
+    }
+
+    /// Sets the statement's tracing flag.
+    pub fn set_tracing(&mut self, value: bool) -> Result<&mut Self> {
+        unsafe {
+            cass_statement_set_tracing(self.0, if value { cass_true } else { cass_false })
+                .to_result(self)
+        }
     }
 
     /// Binds null to a query or bound statement at the specified index.
