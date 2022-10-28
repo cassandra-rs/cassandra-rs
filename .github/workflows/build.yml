@@ -4,12 +4,31 @@ on: [push,pull_request]
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-18.04
     services:
       cassandra:
         image: cassandra:3.11.11
         ports:
           - 9042:9042
+    strategy:
+      matrix:
+        include:
+          - name: Ubuntu 20.04 - Release
+            runner: ubuntu-20.04
+            cargo_flags: --release
+
+          - name: Ubuntu 22.04 - Release
+            runner: ubuntu-22.04
+            cargo_flags: --release
+
+          - name: Ubuntu 20.04 - Debug
+            runner: ubuntu-20.04
+            cargo_flags:
+
+          - name: Ubuntu 22.04 - Debug
+            runner: ubuntu-22.04
+            cargo_flags:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -40,20 +59,16 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
-      - run: sudo apt update
-      - run: sudo apt install libcurl4-openssl-dev libelf-dev libdw-dev
-      - run: wget http://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.16.0/cassandra-cpp-driver-dbg_2.16.0-1_amd64.deb
-      - run: wget http://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.16.0/cassandra-cpp-driver-dev_2.16.0-1_amd64.deb
-      - run: wget http://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.16.0/cassandra-cpp-driver_2.16.0-1_amd64.deb
-      - run: wget http://downloads.datastax.com/cpp-driver/ubuntu/18.04/dependencies/libuv/v1.23.0/libuv1-dbg_1.23.0-1_amd64.deb
-      - run: wget http://downloads.datastax.com/cpp-driver/ubuntu/18.04/dependencies/libuv/v1.23.0/libuv1-dev_1.23.0-1_amd64.deb
-      - run: wget http://downloads.datastax.com/cpp-driver/ubuntu/18.04/dependencies/libuv/v1.23.0/libuv1_1.23.0-1_amd64.deb
-      - run: sudo dpkg -i libuv1-dbg_1.23.0-1_amd64.deb libuv1-dev_1.23.0-1_amd64.deb libuv1_1.23.0-1_amd64.deb cassandra-cpp-driver_2.16.0-1_amd64.deb cassandra-cpp-driver-dbg_2.16.0-1_amd64.deb cassandra-cpp-driver-dev_2.16.0-1_amd64.deb
+      - name: cache custom ubuntu packages
+        uses: actions/cache@v3
+        with:
+          path: scripts/packages
+          key: ubuntu-packages-${{ matrix.runner }}
+      - run: scripts/install_ubuntu_packages.sh
 
+      # Check we're clean and tidy.
+      - run: cargo fmt --all --check
       # We now build all the code, then test it.
-      #
+      - run: cargo build --all ${{ matrix.cargo_flags }}
       # Tests must be run on a single thread since they share keyspaces and tables.
-      - run: |
-          cargo build --all
-      - run: |
-          cargo test -- --test-threads 1
+      - run: cargo test ${{ matrix.cargo_flags }} -- --test-threads 1
