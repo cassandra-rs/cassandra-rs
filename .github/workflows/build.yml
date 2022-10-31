@@ -40,6 +40,7 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
+      - run: sudo apt update
       - run: sudo apt install libcurl4-openssl-dev libelf-dev libdw-dev
       - run: wget http://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.16.0/cassandra-cpp-driver-dbg_2.16.0-1_amd64.deb
       - run: wget http://downloads.datastax.com/cpp-driver/ubuntu/18.04/cassandra/v2.16.0/cassandra-cpp-driver-dev_2.16.0-1_amd64.deb
