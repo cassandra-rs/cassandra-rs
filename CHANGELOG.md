@@ -12,6 +12,7 @@ version number is tracked in the file `VERSION`.
 ### Changed
 
 ### Fixed
+- Inet::Default now returns an ipv4 address of 0.0.0.0 instead of the previous value which was semantically incorrect.
 
 ## [1.1.0] - 2022-03-31
 ### Added

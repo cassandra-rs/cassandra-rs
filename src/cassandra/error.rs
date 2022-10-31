@@ -313,13 +313,13 @@ pub(crate) unsafe fn get_lossy_string<F>(get: F) -> Option<String>
 where
     F: Fn(*mut *const ::std::os::raw::c_char, *mut usize) -> CassError_,
 {
-    let mut msg = mem::zeroed();
-    let mut msg_len = mem::zeroed();
+    let mut msg = std::ptr::null();
+    let mut msg_len = 0;
     match (get)(&mut msg, &mut msg_len) {
         CASS_OK => (),
         _ => return None,
     }
-    let slice = slice::from_raw_parts(msg as *const u8, msg_len as usize);
+    let slice = slice::from_raw_parts(msg as *const u8, msg_len);
     Some(String::from_utf8_lossy(slice).into_owned())
 }
 

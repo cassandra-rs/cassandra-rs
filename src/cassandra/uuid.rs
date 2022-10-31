@@ -42,7 +42,10 @@ impl Protected<_Uuid> for Uuid {
 
 impl Default for Uuid {
     fn default() -> Uuid {
-        unsafe { ::std::mem::zeroed() }
+        Uuid(_Uuid {
+            time_and_version: 0,
+            clock_seq_and_node: 0,
+        })
     }
 }
 
@@ -158,9 +161,12 @@ impl From<Uuid> for uuid::Uuid {
 impl str::FromStr for Uuid {
     type Err = Error;
     fn from_str(str: &str) -> Result<Uuid> {
+        let str_ptr = str.as_ptr() as *const c_char;
+        let mut uuid = _Uuid {
+            time_and_version: 0,
+            clock_seq_and_node: 0,
+        };
         unsafe {
-            let mut uuid = mem::zeroed();
-            let str_ptr = str.as_ptr() as *const c_char;
             cass_uuid_from_string_n(str_ptr, str.len(), &mut uuid)
                 .to_result(())
                 .and_then(|_| Ok(Uuid(uuid)))
@@ -209,8 +215,11 @@ impl UuidGen {
 
     /// Generates a V1 (time) UUID.
     pub fn gen_time(&self) -> Uuid {
+        let mut output = _Uuid {
+            time_and_version: 0,
+            clock_seq_and_node: 0,
+        };
         unsafe {
-            let mut output: _Uuid = mem::zeroed();
             cass_uuid_gen_time(self.0, &mut output);
             Uuid(output)
         }
@@ -218,8 +227,11 @@ impl UuidGen {
 
     /// Generates a new V4 (random) UUID
     pub fn gen_random(&self) -> Uuid {
+        let mut output = _Uuid {
+            time_and_version: 0,
+            clock_seq_and_node: 0,
+        };
         unsafe {
-            let mut output: _Uuid = mem::zeroed();
             cass_uuid_gen_random(self.0, &mut output);
             Uuid(output)
         }
@@ -239,8 +251,11 @@ impl UuidGen {
     /// # }
     /// ```
     pub fn gen_from_time(&self, timestamp: u64) -> Uuid {
+        let mut output = _Uuid {
+            time_and_version: 0,
+            clock_seq_and_node: 0,
+        };
         unsafe {
-            let mut output: _Uuid = mem::zeroed();
             cass_uuid_gen_from_time(self.0, timestamp, &mut output);
             Uuid(output)
         }

@@ -88,12 +88,12 @@ impl Iterator for UserTypeIterator {
 impl UserTypeIterator {
     fn get_field_name(&mut self) -> String {
         unsafe {
-            let mut name = mem::zeroed();
-            let mut name_length = mem::zeroed();
+            let mut name = std::ptr::null();
+            let mut name_length = 0;
             cass_iterator_get_user_type_field_name(self.0, &mut name, &mut name_length)
                 .to_result(())
                 .and_then(|_| {
-                    let slice = slice::from_raw_parts(name as *const u8, name_length as usize);
+                    let slice = slice::from_raw_parts(name as *const u8, name_length);
                     let name = str::from_utf8(slice)?.to_owned();
                     Ok(name)
                 })
@@ -200,13 +200,12 @@ impl Iterator for FieldIterator {
             match cass_iterator_next(self.0) {
                 cass_false => None,
                 cass_true => {
-                    let mut name = mem::zeroed();
-                    let mut name_length = mem::zeroed();
+                    let mut name = std::ptr::null();
+                    let mut name_length = 0;
                     cass_iterator_get_meta_field_name(self.0, &mut name, &mut name_length)
                         .to_result(())
                         .and_then(|_| {
-                            let slice =
-                                slice::from_raw_parts(name as *const u8, name_length as usize);
+                            let slice = slice::from_raw_parts(name as *const u8, name_length);
                             let name = str::from_utf8(slice)?.to_owned();
                             let value = Value::build(cass_iterator_get_meta_field_value(self.0));
                             Ok(Some(Field { name, value }))
