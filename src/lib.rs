@@ -34,6 +34,9 @@ pub use crate::cassandra::iterator::{
 #[cfg(feature = "log")]
 pub use crate::cassandra::log::set_log_logger;
 #[cfg(feature = "slog")]
+#[allow(deprecated)]
+pub use crate::cassandra::log::set_logger;
+#[cfg(feature = "slog")]
 pub use crate::cassandra::log::set_slog_logger;
 pub use crate::cassandra::log::{set_level, LogLevel};
 pub use crate::cassandra::policy::retry::RetryPolicy;

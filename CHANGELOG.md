@@ -8,8 +8,10 @@ version number is tracked in the file `VERSION`.
 
 ## [Unreleased]
 ### Added
+- Added `unset_logger`, `set_slog_logger` (behind `slog` feature) and `set_log_logger` (behind `log` feature)
 
 ### Changed
+- `set_logger` is deprecated and behind `slog` feature which is enabled by default
 
 ### Fixed
 - Inet::Default now returns an ipv4 address of 0.0.0.0 instead of the previous value which was semantically incorrect.

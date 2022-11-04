@@ -92,6 +92,7 @@ unsafe extern "C" fn slog_callback(log: *const CassLogMessage, data: *mut raw::c
 }
 
 #[doc(hidden)]
+#[deprecated(note = "Please use set_slog_logger instead")]
 #[cfg(feature = "slog")]
 /// Set or unset a logger to receive all Cassandra driver logs.
 pub fn set_logger(logger: Option<slog::Logger>) {
@@ -103,7 +104,7 @@ pub fn set_logger(logger: Option<slog::Logger>) {
 }
 
 #[cfg(feature = "slog")]
-/// Set a slog logger to receive all Cassandra driver logs.
+/// Set a [slog](https://docs.rs/slog/latest/slog) logger to receive all Cassandra driver logs.
 pub fn set_slog_logger(logger: slog::Logger) {
     unsafe {
         // Pass ownership to C. In fact we leak the logger; it never gets freed.
@@ -160,7 +161,8 @@ fn function_definition_to_module_name(definition: &str) -> Option<&str> {
 }
 
 #[cfg(feature = "log")]
-/// Set log to receive all Cassandra driver logs.
+/// Set [log](https://docs.rs/log/latest/log) to receive all Cassandra driver logs.
+/// By default [tracing](https://docs.rs/tracing/latest/tracing) will pick up logs emitted by `log`, so also use this if you are a tracing user.
 pub fn set_log_logger() {
     unsafe { cass_log_set_callback(Some(log_callback), ptr::null_mut()) }
 }
