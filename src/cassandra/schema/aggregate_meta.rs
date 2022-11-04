@@ -45,9 +45,9 @@ impl AggregateMeta {
 
     /// Gets the name of the aggregate.
     pub fn get_name(&self) -> String {
+        let mut name = std::ptr::null();
+        let mut name_length = 0;
         unsafe {
-            let mut name = mem::zeroed();
-            let mut name_length = mem::zeroed();
             cass_aggregate_meta_name(self.0, &mut name, &mut name_length);
             raw2utf8(name, name_length).expect("must be utf8")
         }
@@ -55,9 +55,9 @@ impl AggregateMeta {
 
     /// Gets the full name of the aggregate.
     pub fn full_name(&self) -> String {
+        let mut name = std::ptr::null();
+        let mut name_length = 0;
         unsafe {
-            let mut name = mem::zeroed();
-            let mut name_length = mem::zeroed();
             cass_aggregate_meta_full_name(self.0, &mut name, &mut name_length);
             raw2utf8(name, name_length).expect("must be utf8")
         }

@@ -94,13 +94,13 @@ impl CassResult {
 
     /// Gets the column name at index for the specified result.
     pub fn column_name(&self, index: usize) -> Result<&str> {
+        let mut name = std::ptr::null();
+        let mut name_length = 0;
         unsafe {
-            let mut name = mem::zeroed();
-            let mut name_length = mem::zeroed();
             cass_result_column_name(self.0, index, &mut name, &mut name_length)
                 .to_result(())
                 .and_then(|_| {
-                    let slice = slice::from_raw_parts(name as *const u8, name_length as usize);
+                    let slice = slice::from_raw_parts(name as *const u8, name_length);
                     Ok(str::from_utf8(slice)?)
                 })
         }
@@ -146,17 +146,12 @@ impl CassResult {
             return Ok(None);
         }
 
+        let mut token_ptr = std::ptr::null();
+        let mut token_length = 0;
         unsafe {
-            let mut token_ptr = mem::zeroed();
-            let mut token_length = mem::zeroed();
             cass_result_paging_state_token(self.0, &mut token_ptr, &mut token_length)
                 .to_result(())
-                .map(|_| {
-                    Some(
-                        slice::from_raw_parts(token_ptr as *const u8, token_length as usize)
-                            .to_vec(),
-                    )
-                })
+                .map(|_| Some(slice::from_raw_parts(token_ptr as *const u8, token_length).to_vec()))
         }
     }
 

@@ -143,9 +143,9 @@ impl KeyspaceMeta {
 
     /// Gets the name of the keyspace.
     pub fn name(&self) -> String {
+        let mut name = std::ptr::null();
+        let mut name_length = 0;
         unsafe {
-            let mut name = mem::zeroed();
-            let mut name_length = mem::zeroed();
             cass_keyspace_meta_name(self.0, &mut name, &mut name_length);
             raw2utf8(name, name_length).expect("must be utf8")
         }

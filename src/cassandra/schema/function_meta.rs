@@ -46,16 +46,13 @@ impl FunctionMeta {
 
     /// Gets the name of the function.
     pub fn get_name(&self) -> String {
+        let mut name = std::ptr::null();
+        let mut name_length = 0;
         unsafe {
-            let mut name = mem::zeroed();
-            let mut name_length = mem::zeroed();
             cass_function_meta_name(self.0, &mut name, &mut name_length);
-            str::from_utf8(slice::from_raw_parts(
-                name as *const u8,
-                name_length as usize,
-            ))
-            .expect("must be utf8")
-            .to_owned()
+            str::from_utf8(slice::from_raw_parts(name as *const u8, name_length))
+                .expect("must be utf8")
+                .to_owned()
         }
     }
 
@@ -63,46 +60,37 @@ impl FunctionMeta {
     /// function's name and the function's signature:
     /// "name(type1 type2.. typeN)".
     pub fn full_name(&self) -> String {
+        let mut name = std::ptr::null();
+        let mut name_length = 0;
         unsafe {
-            let mut name = mem::zeroed();
-            let mut name_length = mem::zeroed();
             cass_function_meta_full_name(self.0, &mut name, &mut name_length);
-            str::from_utf8(slice::from_raw_parts(
-                name as *const u8,
-                name_length as usize,
-            ))
-            .expect("must be utf8")
-            .to_owned()
+            str::from_utf8(slice::from_raw_parts(name as *const u8, name_length))
+                .expect("must be utf8")
+                .to_owned()
         }
     }
 
     /// Gets the body of the function.
     pub fn body(&self) -> String {
+        let mut name = std::ptr::null();
+        let mut name_length = 0;
         unsafe {
-            let mut name = mem::zeroed();
-            let mut name_length = mem::zeroed();
             cass_function_meta_body(self.0, &mut name, &mut name_length);
-            str::from_utf8(slice::from_raw_parts(
-                name as *const u8,
-                name_length as usize,
-            ))
-            .expect("must be utf8")
-            .to_owned()
+            str::from_utf8(slice::from_raw_parts(name as *const u8, name_length))
+                .expect("must be utf8")
+                .to_owned()
         }
     }
 
     /// Gets the language of the function.
     pub fn language(&self) -> String {
+        let mut name = std::ptr::null();
+        let mut name_length = 0;
         unsafe {
-            let mut name = mem::zeroed();
-            let mut name_length = mem::zeroed();
             cass_function_meta_language(self.0, &mut name, &mut name_length);
-            str::from_utf8(slice::from_raw_parts(
-                name as *const u8,
-                name_length as usize,
-            ))
-            .expect("must be utf8")
-            .to_owned()
+            str::from_utf8(slice::from_raw_parts(name as *const u8, name_length))
+                .expect("must be utf8")
+                .to_owned()
         }
     }
 
@@ -118,11 +106,10 @@ impl FunctionMeta {
 
     /// Gets the function's argument name and type for the provided index.
     pub fn argument(&self, index: usize) -> Result<()> {
+        let mut name = std::ptr::null();
+        let mut name_length = 0;
+        let mut data_type = std::ptr::null();
         unsafe {
-            let mut name = mem::zeroed();
-            let mut name_length = mem::zeroed();
-            let mut data_type = mem::zeroed();
-
             cass_function_meta_argument(self.0, index, &mut name, &mut name_length, &mut data_type)
                 .to_result(())
         }

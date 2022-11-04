@@ -135,10 +135,10 @@ unsafe fn payloads_from_future(future: *mut _Future) -> Result<CustomPayloadResp
     (0..cp_count)
         .into_iter()
         .map(|index| {
-            let mut name = mem::zeroed();
-            let mut name_length = mem::zeroed();
-            let mut value = mem::zeroed();
-            let mut value_size = mem::zeroed();
+            let mut name = std::ptr::null();
+            let mut name_length = 0;
+            let mut value = std::ptr::null();
+            let mut value_size = 0;
 
             cass_future_custom_payload_item(
                 future,

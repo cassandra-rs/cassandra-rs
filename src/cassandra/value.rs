@@ -7,6 +7,7 @@ use crate::cassandra::iterator::UserTypeIterator;
 use crate::cassandra::util::Protected;
 use crate::cassandra::uuid::Uuid;
 
+use crate::cassandra_sys::cass_bool_t;
 use crate::cassandra_sys::cass_collection_append_decimal;
 use crate::cassandra_sys::cass_iterator_fields_from_user_type;
 use crate::cassandra_sys::cass_iterator_from_collection;
@@ -31,6 +32,8 @@ use crate::cassandra_sys::cass_value_item_count;
 use crate::cassandra_sys::cass_value_primary_sub_type;
 use crate::cassandra_sys::cass_value_secondary_sub_type;
 use crate::cassandra_sys::cass_value_type;
+use crate::cassandra_sys::CassInet;
+use crate::cassandra_sys::CassUuid;
 use crate::cassandra_sys::CassValue as _CassValue;
 use crate::cassandra_sys::CassValueType_;
 use crate::cassandra_sys::CASS_ERROR_LIB_INVALID_VALUE_TYPE;
@@ -303,12 +306,12 @@ impl Display for Value {
 impl Value {
     /// Get the raw bytes of this Cassandra value.
     pub fn get_bytes(&self) -> Result<&[u8]> {
+        let mut output = std::ptr::null();
+        let mut output_size = 0;
         unsafe {
-            let mut output = mem::zeroed();
-            let mut output_size = mem::zeroed();
             cass_value_get_bytes(self.0, &mut output, &mut output_size)
                 .to_result((output, output_size))
-                .map(|(output, output_size)| slice::from_raw_parts(output, output_size as usize))
+                .map(|(output, output_size)| slice::from_raw_parts(output, output_size))
         }
     }
     // pub fn get_decimal<'a>(&'a self, mut output: String) ->
@@ -408,14 +411,13 @@ impl Value {
 
     /// Get this value as a string slice
     pub fn get_str(&self) -> Result<&str> {
+        let mut message_ptr = std::ptr::null();
+        let mut message_length = 0;
         unsafe {
-            let mut message_ptr = mem::zeroed();
-            let mut message_length = mem::zeroed();
             cass_value_get_string(self.0, &mut message_ptr, &mut message_length)
                 .to_result(())
                 .and_then(|_| {
-                    let slice =
-                        slice::from_raw_parts(message_ptr as *const u8, message_length as usize);
+                    let slice = slice::from_raw_parts(message_ptr as *const u8, message_length);
                     Ok(str::from_utf8(slice)?)
                 })
         }
@@ -428,81 +430,67 @@ impl Value {
 
     /// Get this value as an Inet
     pub fn get_inet(&self) -> Result<Inet> {
-        unsafe {
-            let mut inet = mem::zeroed();
-            cass_value_get_inet(self.0, &mut inet).to_result(Inet::build(inet))
-        }
+        let mut inet = CassInet {
+            address: [0; 16usize],
+            address_length: 0,
+        };
+        unsafe { cass_value_get_inet(self.0, &mut inet).to_result(Inet::build(inet)) }
     }
 
     /// Get this value as an i32
     pub fn get_i32(&self) -> Result<i32> {
-        unsafe {
-            let mut output = mem::zeroed();
-            cass_value_get_int32(self.0, &mut output).to_result(output)
-        }
+        let mut output = 0;
+        unsafe { cass_value_get_int32(self.0, &mut output).to_result(output) }
     }
 
     /// Get this value as a u32
     pub fn get_u32(&self) -> Result<u32> {
-        unsafe {
-            let mut output = mem::zeroed();
-            cass_value_get_uint32(self.0, &mut output).to_result(output)
-        }
+        let mut output = 0;
+        unsafe { cass_value_get_uint32(self.0, &mut output).to_result(output) }
     }
 
     /// Get this value as an i16
     pub fn get_i16(&self) -> Result<i16> {
-        unsafe {
-            let mut output = mem::zeroed();
-            cass_value_get_int16(self.0, &mut output).to_result(output)
-        }
+        let mut output = 0;
+        unsafe { cass_value_get_int16(self.0, &mut output).to_result(output) }
     }
 
     /// Get this value as an i8
     pub fn get_i8(&self) -> Result<i8> {
-        unsafe {
-            let mut output = mem::zeroed();
-            cass_value_get_int8(self.0, &mut output).to_result(output)
-        }
+        let mut output = 0;
+        unsafe { cass_value_get_int8(self.0, &mut output).to_result(output) }
     }
 
     /// Get this value as an i64
     pub fn get_i64(&self) -> Result<i64> {
-        unsafe {
-            let mut output = mem::zeroed();
-            cass_value_get_int64(self.0, &mut output).to_result(output)
-        }
+        let mut output = 0;
+        unsafe { cass_value_get_int64(self.0, &mut output).to_result(output) }
     }
 
     /// Get this value as a float
     pub fn get_f32(&self) -> Result<f32> {
-        unsafe {
-            let mut output = mem::zeroed();
-            cass_value_get_float(self.0, &mut output).to_result(output)
-        }
+        let mut output = 0.0;
+        unsafe { cass_value_get_float(self.0, &mut output).to_result(output) }
     }
 
     /// Get this value as a double
     pub fn get_f64(&self) -> Result<f64> {
-        unsafe {
-            let mut output = mem::zeroed();
-            cass_value_get_double(self.0, &mut output).to_result(output)
-        }
+        let mut output = 0.0;
+        unsafe { cass_value_get_double(self.0, &mut output).to_result(output) }
     }
 
-    /// Get this value asa boolean
+    /// Get this value as a boolean
     pub fn get_bool(&self) -> Result<bool> {
-        unsafe {
-            let mut output = mem::zeroed();
-            cass_value_get_bool(self.0, &mut output).to_result(output == cass_true)
-        }
+        let mut output = cass_bool_t::cass_false;
+        unsafe { cass_value_get_bool(self.0, &mut output).to_result(output == cass_true) }
     }
 
     /// Get this value as a UUID
     pub fn get_uuid(&self) -> Result<Uuid> {
-        unsafe {
-            let mut uuid = mem::zeroed();
-            cass_value_get_uuid(self.0, &mut uuid).to_result(Uuid::build(uuid))
-        }
+        let mut output = CassUuid {
+            time_and_version: 0,
+            clock_seq_and_node: 0,
+        };
+        unsafe { cass_value_get_uuid(self.0, &mut output).to_result(Uuid::build(output)) }
     }
 }

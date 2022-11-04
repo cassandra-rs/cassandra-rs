@@ -49,15 +49,15 @@ impl PreparedStatement {
 
     /// Gets the name of a parameter at the specified index.
     pub fn parameter_name(&self, index: usize) -> Result<&str> {
+        let mut name = std::ptr::null();
+        let mut name_length = 0;
         unsafe {
-            let mut name = mem::zeroed();
-            let mut name_length = mem::zeroed();
             cass_prepared_parameter_name(self.0, index, &mut name, &mut name_length)
                 .to_result(())
                 .and_then(|_| {
                     Ok(str::from_utf8(slice::from_raw_parts(
                         name as *const u8,
-                        name_length as usize,
+                        name_length,
                     ))?)
                 })
         }
