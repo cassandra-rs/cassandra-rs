@@ -388,10 +388,9 @@ impl Cluster {
     }
 
     /// Sets the timeout for resolving the host.
-    /// Note: the timeout when using resolv.conf to connect to a DNS server is 5000ms.
-    /// If the default cassandra-cpp-driver timeout (also 5000ms) is used and the 
-    /// primary DNS server is down then the DNS resolution will fail before attempting 
-    /// to query backup DNS servers.
+    /// Note: the default timeout when doing dns resolution with resolv.conf (as is done here) is 5000ms.
+    /// When using the default cassandra-cpp-driver timeout (also 5000ms) then DNS resolution will fail 
+    /// before attempting to query backup DNS servers in resolv.conf.
     ///
     /// 
     /// Default: 5000ms
