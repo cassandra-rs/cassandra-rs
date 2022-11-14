@@ -10,6 +10,7 @@ version number is tracked in the file `VERSION`.
 ### Added
 - Added `unset_logger`, `set_slog_logger` (behind `slog` feature) and `set_log_logger` (behind `log` feature)
 - Expose `set_resolve_timeout` function.
+- Expose `set_exponential_reconnect` function.
 
 ### Changed
 - `set_logger` is deprecated and behind `slog` feature which is enabled by default
