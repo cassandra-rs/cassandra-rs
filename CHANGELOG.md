@@ -6,6 +6,10 @@ This file's format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/). The
 version number is tracked in the file `VERSION`.
 
+## [Unreleased]
+### Fixed
+- The main development branch is now `main` not `master`. To track this, fetch and then check out `main`.
+
 ## [1.2.0] - 2022-11-14
 ### Added
 - Added `unset_logger`, `set_slog_logger` (behind `slog` feature) and `set_log_logger` (behind `log` feature)
