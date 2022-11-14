@@ -35,6 +35,7 @@ use crate::cassandra_sys::cass_cluster_set_queue_size_event;
 use crate::cassandra_sys::cass_cluster_set_queue_size_io;
 use crate::cassandra_sys::cass_cluster_set_reconnect_wait_time;
 use crate::cassandra_sys::cass_cluster_set_request_timeout;
+use crate::cassandra_sys::cass_cluster_set_resolve_timeout;
 use crate::cassandra_sys::cass_cluster_set_retry_policy;
 use crate::cassandra_sys::cass_cluster_set_ssl;
 use crate::cassandra_sys::cass_cluster_set_tcp_keepalive;
@@ -383,6 +384,20 @@ impl Cluster {
     pub fn set_request_timeout(&mut self, timeout: Duration) -> &Self {
         unsafe {
             cass_cluster_set_request_timeout(self.0, timeout.as_millis() as u32);
+        }
+        self
+    }
+
+    /// Sets the timeout for resolving the host.
+    /// Note: the default timeout when doing dns resolution with resolv.conf (as is done here) is 5000ms.
+    /// When using the default cassandra-cpp-driver timeout (also 5000ms) then DNS resolution will fail
+    /// before attempting to query backup DNS servers.
+    ///
+    ///
+    /// Default: 5000ms
+    pub fn set_resolve_timeout(&mut self, timeout: Duration) -> &Self {
+        unsafe {
+            cass_cluster_set_resolve_timeout(self.0, timeout.as_millis() as u32);
         }
         self
     }
