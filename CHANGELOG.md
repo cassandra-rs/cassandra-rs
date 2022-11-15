@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/). The
 version number is tracked in the file `VERSION`.
 
 ## [Unreleased]
+### Fixed
+- The main development branch is now `main` not `master`. To track this, fetch and then check out `main`.
+
+## [1.2.0] - 2022-11-14
 ### Added
 - Added `unset_logger`, `set_slog_logger` (behind `slog` feature) and `set_log_logger` (behind `log` feature)
+- Expose `set_resolve_timeout` function.
 - Expose `set_exponential_reconnect` function.
 
 ### Changed
@@ -251,7 +256,8 @@ First release of https://github.com/Metaswitch/cassandra-rs
 ## [0.8.1] - 2016-12-13
 Last release of https://github.com/tupshin/cassandra-rs
 
-[Unreleased]: https://github.com/Metaswitch/cassandra-rs/compare/1.1.0...HEAD
+[Unreleased]: https://github.com/Metaswitch/cassandra-rs/compare/1.2.0...HEAD
+[1.2.0]: https://github.com/Metaswitch/cassandra-rs/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/Metaswitch/cassandra-rs/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/Metaswitch/cassandra-rs/compare/0.17.2...1.0.0
 [0.17.2]: https://github.com/Metaswitch/cassandra-rs/compare/0.17.1...0.17.2
