@@ -466,7 +466,8 @@ fn test_rendering() {
     let result = session.execute(&query).wait().unwrap();
     println!("test_rendering: {}", result);
 
-    let row = result.iter().next().unwrap();
+    let mut row_iter = result.iter();
+    let row = row_iter.next().unwrap();
     let compaction_col = row.get_column_by_name("compaction").unwrap();
 
     // Check rendering of a column
