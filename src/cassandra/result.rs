@@ -137,7 +137,7 @@ impl CassResult {
     ///
     /// Returns:
     ///   - `Ok(None)` if there are no more pages, and thus no paging state token.
-    ///   - `Ok(Some(Vec<u8>)) if there are more pages, and a paging state token.
+    ///   - `Ok(Some(Vec<u8>))` if there are more pages, and a paging state token.
     ///   - `Err(_)` if there was an error getting the paging state token.
     ///
     /// [`set_paging_state_token`]: Statement::set_paging_state_token
