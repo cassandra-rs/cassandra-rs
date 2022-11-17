@@ -75,7 +75,7 @@ This repository is a fork of another repository. This means that whenever
 you create a pull request, it defaults to using that other repository as
 base.
 
-**Please make sure you change the base to this repository's master branch
+**Please make sure you change the base to this repository's main branch
 before submitting the pull request.**
 
 If you make a mistake, unfortunately it is not possible to delete an
