@@ -41,7 +41,7 @@ jobs:
       # to each such commit.
       - run: |
           DCO_SIGNING_BASE_COMMIT=c0b2ceb11dbe4628bd377f45776170b4348cb57c
-          git log ${DCO_SIGNING_BASE_COMMIT}.. --grep "^signed-off-by: .\+@.\+" --regexp-ignore-case --invert-grep --no-merges --pretty=oneline > tmp-unsigned-dco
+          git log ${DCO_SIGNING_BASE_COMMIT}.. --grep "^signed-off-by: .\+\(@\| at \).\+" --regexp-ignore-case --invert-grep --no-merges --pretty=oneline > tmp-unsigned-dco
           # The following commit IDs are signed off as follows:
           # 00d3207: Keith Wansbrough hereby certifies the DCO with regard to this commit.
           # 1206d15: Brandon Dail <brandon@dail.family> has certified in https://github.com/Metaswitch/cassandra-rs/pull/117#issuecomment-971611331
