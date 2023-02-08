@@ -3,6 +3,7 @@
 #![allow(missing_copy_implementations)]
 
 use crate::cassandra::cluster::Cluster;
+use crate::cassandra::custom_payload::CustomPayloadResponse;
 use crate::cassandra::error::*;
 use crate::cassandra::future::CassFuture;
 use crate::cassandra::metrics::SessionMetrics;
@@ -31,7 +32,7 @@ use std::os::raw::c_char;
 use std::sync::Arc;
 
 #[derive(Debug, Eq, PartialEq)]
-struct SessionInner(*mut _Session);
+pub struct SessionInner(*mut _Session);
 
 // The underlying C type has no thread-local state, and explicitly supports access
 // from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
@@ -51,7 +52,7 @@ impl SessionInner {
 ///
 /// Instances of the session object are thread-safe to execute queries.
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Session(Arc<SessionInner>);
+pub struct Session(pub Arc<SessionInner>);
 
 // The underlying C type has no thread-local state, and explicitly supports access
 // from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
@@ -117,6 +118,25 @@ impl Session {
         Statement::new(self.clone(), query, param_count)
     }
 
+    /// Execute a batch statement.
+    pub fn execute_batch(&self, batch: &Batch) -> CassFuture<CassResult> {
+        let inner_future = unsafe {
+            cass_session_execute_batch(self.inner(), batch.inner())
+        };
+        <CassFuture<CassResult>>::build(self.clone(), inner_future)
+    }
+
+    /// Execute a batch statement and get any custom payloads from the response.
+    pub fn execute_batch_with_payloads(
+        &self,
+        batch: &Batch,
+    ) -> CassFuture<(CassResult, CustomPayloadResponse)> {
+        let inner_future = unsafe {
+            cass_session_execute_batch(self.inner(), batch.inner())
+        };
+        <CassFuture<(CassResult, CustomPayloadResponse)>>::build(self.clone(), inner_future)
+    }
+
     /// Executes a given query.
     pub async fn execute(&self, query: impl AsRef<str>) -> Result<CassResult> {
         let statement = self.statement(query);
@@ -126,6 +146,18 @@ impl Session {
     /// Creates a new batch that is bound to this session.
     pub fn batch(&self, batch_type: BatchType) -> Batch {
         Batch::new(batch_type, self.clone())
+    }
+
+    /// Execute a statement and get any custom payloads from the response.
+    pub fn execute_with_payloads(
+        &self,
+        statement: &Statement,
+    ) -> CassFuture<(CassResult, CustomPayloadResponse)> {
+        let inner_future = unsafe {
+            cass_session_execute(self.inner(), statement.inner())
+        };
+        <CassFuture<(CassResult, CustomPayloadResponse)>>::build(self.clone(), inner_future)
+
     }
 
     /// Gets a snapshot of this session's schema metadata. The returned

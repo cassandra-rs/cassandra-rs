@@ -1,5 +1,5 @@
 use crate::cassandra::error::*;
-use crate::cassandra::util::Protected;
+use crate::cassandra::util::{Protected, ProtectedInner, ProtectedWithSession};
 
 use crate::cassandra_sys::cass_custom_payload_free;
 use crate::cassandra_sys::cass_custom_payload_new;
@@ -19,10 +19,14 @@ pub struct CustomPayload(*mut _CassCustomPayload);
 // from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
 unsafe impl Send for CustomPayload {}
 
-impl Protected<*mut _CassCustomPayload> for CustomPayload {
+impl ProtectedInner<*mut _CassCustomPayload> for CustomPayload {
+    #[inline(always)]
     fn inner(&self) -> *mut _CassCustomPayload {
         self.0
     }
+}
+
+impl Protected<*mut _CassCustomPayload> for CustomPayload {
     fn build(inner: *mut _CassCustomPayload) -> Self {
         if inner.is_null() {
             panic!("Unexpected null pointer")
@@ -37,6 +41,7 @@ impl Default for CustomPayload {
         unsafe { CustomPayload(cass_custom_payload_new()) }
     }
 }
+
 impl CustomPayload {
     /// Sets an item to the custom payload.
     pub fn set(&self, name: String, value: &[u8]) -> Result<()> {

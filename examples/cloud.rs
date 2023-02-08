@@ -1,7 +1,8 @@
 use cassandra_cpp::*;
 use std::env;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() < 4 {
         eprintln!(
@@ -21,9 +22,8 @@ fn main() {
         .unwrap();
     cluster.set_credentials(username, password).unwrap();
 
-    let session = cluster.connect().unwrap();
-    let statement = stmt!("SELECT release_version FROM system.local");
-    let result = session.execute(&statement).wait().unwrap();
+    let session = cluster.connect().await.unwrap();
+    let result = session.execute("SELECT release_version FROM system.local").await.unwrap();
     let row = result.first_row().unwrap();
     let version: String = row.get_by_name("release_version").unwrap();
     println!("release_version: {}", version);

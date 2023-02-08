@@ -18,7 +18,7 @@ async fn main() -> Result<()> {
     cluster.set_load_balance_round_robin();
     cluster.set_ssl(ssl);
 
-    let session = cluster.connect().await?;
+    let session = cluster.connect_async().await?;
     let result = session
         .execute("SELECT keyspace_name FROM system_schema.keyspaces;")
         .await

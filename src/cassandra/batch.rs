@@ -1,9 +1,11 @@
 use crate::cassandra::consistency::Consistency;
+use crate::cassandra::custom_payload::CustomPayload;
 use crate::cassandra::error::*;
 use crate::cassandra::future::CassFuture;
 use crate::cassandra::policy::retry::RetryPolicy;
 use crate::cassandra::statement::Statement;
 use crate::cassandra::util::{Protected, ProtectedInner, ProtectedWithSession};
+use crate::cassandra_sys::cass_session_execute_batch;
 use crate::{CassResult, Session};
 
 use crate::cassandra_sys::cass_batch_add_statement;
@@ -14,10 +16,6 @@ use crate::cassandra_sys::cass_batch_set_custom_payload;
 use crate::cassandra_sys::cass_batch_set_retry_policy;
 use crate::cassandra_sys::cass_batch_set_serial_consistency;
 use crate::cassandra_sys::cass_batch_set_timestamp;
-use crate::cassandra_sys::cass_custom_payload_free;
-use crate::cassandra_sys::cass_custom_payload_new;
-use crate::cassandra_sys::cass_custom_payload_set_n;
-use crate::cassandra_sys::cass_session_execute_batch;
 use crate::cassandra_sys::CassBatch as _Batch;
 use crate::cassandra_sys::CassBatchType_;
 use crate::cassandra_sys::CassConsistency;
@@ -70,53 +68,6 @@ impl ProtectedWithSession<*mut _Batch> for Batch {
     #[inline(always)]
     fn session(&self) -> &Session {
         &self.1
-    }
-}
-
-/// Custom payloads not fully supported yet
-#[derive(Debug)]
-pub struct CustomPayload(*mut _CassCustomPayload);
-
-impl ProtectedInner<*mut _CassCustomPayload> for CustomPayload {
-    fn inner(&self) -> *mut _CassCustomPayload {
-        self.0
-    }
-}
-
-impl Protected<*mut _CassCustomPayload> for CustomPayload {
-    fn build(inner: *mut _CassCustomPayload) -> Self {
-        if inner.is_null() {
-            panic!("Unexpected null pointer")
-        };
-        CustomPayload(inner)
-    }
-}
-
-impl Default for CustomPayload {
-    /// creates a new custom payload
-    fn default() -> Self {
-        unsafe { CustomPayload(cass_custom_payload_new()) }
-    }
-}
-impl CustomPayload {
-    /// Sets an item to the custom payload.
-    pub fn set(&self, name: String, value: &[u8]) -> Result<()> {
-        unsafe {
-            let name_ptr = name.as_ptr() as *const c_char;
-            Ok(cass_custom_payload_set_n(
-                self.0,
-                name_ptr,
-                name.len(),
-                value.as_ptr(),
-                value.len(),
-            ))
-        }
-    }
-}
-
-impl Drop for CustomPayload {
-    fn drop(&mut self) {
-        unsafe { cass_custom_payload_free(self.0) }
     }
 }
 
@@ -176,7 +127,7 @@ impl Batch {
 
     /// Sets the batch's custom payload.
     pub fn set_custom_payload(&mut self, custom_payload: CustomPayload) -> Result<&mut Self> {
-        unsafe { cass_batch_set_custom_payload(self.inner(), custom_payload.0).to_result(self) }
+        unsafe { cass_batch_set_custom_payload(self.inner(), custom_payload.inner()).to_result(self) }
     }
 
     /// Adds a statement to a batch.

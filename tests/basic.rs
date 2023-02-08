@@ -1,8 +1,8 @@
 mod help;
 
 use cassandra_cpp::*;
+use std::time::Duration;
 use std::time::SystemTime;
-use time::Duration;
 
 #[derive(Debug, PartialEq, Copy, Clone, Default)]
 struct Udt {
@@ -457,8 +457,9 @@ async fn test_rendering() -> Result<()> {
         .await?;
     println!("test_rendering: {}", result);
 
-    let row = result.iter().next().unwrap();
-    let compaction_col = row.get_column_by_name("compaction")?;
+    let mut row_iter = result.iter();
+    let row = row_iter.next().unwrap();
+    let compaction_col = row.get_column_by_name("compaction").unwrap();
 
     // Check rendering of a column
     let column_debug = format!("{:?}", compaction_col);
@@ -570,7 +571,7 @@ async fn test_result() {
 async fn test_statement_timeout() {
     let session = help::create_test_session().await;
     let mut query = session.statement("SELECT * FROM system_schema.tables;");
-    query.set_statement_request_timeout(Some(Duration::milliseconds(30000 as i64)));
+    query.set_statement_request_timeout(Some(Duration::from_millis(30000)));
     let result = query.execute().await.unwrap();
 
     assert_eq!("keyspace_name", result.column_name(0).unwrap());

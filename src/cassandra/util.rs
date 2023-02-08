@@ -2,6 +2,8 @@
 
 use crate::Session;
 
+/// `ProtectedInner` is a trait for types that hold an inner value `T` and
+/// provide a method to access it.
 pub(crate) trait ProtectedInner<T> {
     fn inner(&self) -> T;
 }
@@ -13,6 +15,8 @@ pub(crate) trait Protected<T>: ProtectedInner<T> {
     fn build(inner: T) -> Self;
 }
 
+/// `ProtectedWithSession` is a trait for types that wrap an inner value `T` and provide additional protection via a `Session`.
+/// Types that implement this trait must also implement the `ProtectedInner` trait.
 pub(crate) trait ProtectedWithSession<T>: ProtectedInner<T> {
     fn build(inner: T, session: Session) -> Self;
     fn session(&self) -> &Session;

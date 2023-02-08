@@ -1,6 +1,6 @@
-use crate::cassandra::batch::CustomPayload;
 use crate::cassandra::collection::List;
 use crate::cassandra::collection::Map;
+use crate::cassandra::custom_payload::CustomPayload;
 // use decimal::d128;
 use crate::cassandra::collection::Set;
 use crate::cassandra::consistency::Consistency;
@@ -64,12 +64,13 @@ use crate::cassandra_sys::cass_statement_set_request_timeout;
 use crate::cassandra_sys::cass_statement_set_retry_policy;
 use crate::cassandra_sys::cass_statement_set_serial_consistency;
 use crate::cassandra_sys::cass_statement_set_timestamp;
+use crate::cassandra_sys::cass_statement_set_tracing;
 use crate::cassandra_sys::cass_true;
 use crate::cassandra_sys::CassStatement as _Statement;
 use crate::cassandra_sys::CASS_UINT64_MAX;
 
 use std::os::raw::c_char;
-use time::Duration;
+use std::time::Duration;
 
 #[derive(Debug)]
 struct StatementInner(*mut _Statement);
@@ -432,7 +433,7 @@ impl Statement {
         unsafe {
             cass_statement_set_paging_state_token(
                 self.inner(),
-                paging_state.as_ptr() as *const i8,
+                paging_state.as_ptr() as *const c_char,
                 paging_state.len(),
             )
             .to_result(self)
@@ -451,7 +452,7 @@ impl Statement {
         unsafe {
             let timeout_millis = match timeout {
                 None => CASS_UINT64_MAX as u64,
-                Some(time) => time.whole_milliseconds() as u64,
+                Some(time) => time.as_millis() as u64,
             };
             cass_statement_set_request_timeout(self.inner(), timeout_millis);
         }
@@ -468,6 +469,14 @@ impl Statement {
     /// Sets the statement's custom payload.
     pub fn set_custom_payload(&mut self, payload: CustomPayload) -> Result<&mut Self> {
         unsafe { cass_statement_set_custom_payload(self.inner(), payload.inner()).to_result(self) }
+    }
+
+    /// Sets the statement's tracing flag.
+    pub fn set_tracing(&mut self, value: bool) -> Result<&mut Self> {
+        unsafe {
+            cass_statement_set_tracing(self.inner(), if value { cass_true } else { cass_false })
+                .to_result(self)
+        }
     }
 
     /// Binds null to a query or bound statement at the specified index.

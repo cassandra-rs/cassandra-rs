@@ -13,7 +13,7 @@ pub async fn create_test_session() -> Session {
     cluster.set_load_balance_round_robin();
 
     cluster
-        .connect()
+        .connect_async()
         .await
         .expect("Failed to connect to Cassandra")
 }

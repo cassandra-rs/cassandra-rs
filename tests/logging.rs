@@ -2,6 +2,7 @@ mod help;
 
 use cassandra_cpp::*;
 
+#[cfg(feature = "slog")]
 use slog::*;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -16,6 +17,7 @@ impl Default for MyDrain {
     }
 }
 
+#[cfg(feature = "slog")]
 impl Drain for MyDrain {
     type Ok = ();
     type Err = ();
@@ -33,13 +35,37 @@ impl Drain for MyDrain {
     }
 }
 
+#[cfg(feature = "slog")]
 #[tokio::test]
-async fn test_logging() {
+async fn test_slog_logger() {
     let drain = MyDrain::default();
     let logger = Logger::root(drain.clone().fuse(), o!());
 
     set_level(LogLevel::WARN);
-    set_logger(Some(logger));
+    set_slog_logger(logger);
+
+    let mut cluster = Cluster::default();
+    cluster
+        .set_contact_points("absolute-gibberish.invalid")
+        .unwrap();
+    cluster.connect_async().await.expect_err("Should fail to connect");
+
+    let log_output: String = drain.0.lock().unwrap().clone();
+    assert!(
+        log_output.contains("Unable to resolve address for absolute-gibberish.invalid"),
+        "{}",
+        log_output
+    );
+}
+
+#[cfg(feature = "log")]
+#[tokio::test]
+async fn test_log_logger() {
+    use log::Level;
+
+    let mut logger = logtest::Logger::start();
+    set_level(LogLevel::WARN);
+    set_log_logger();
 
     let mut cluster = Cluster::default();
     cluster
@@ -47,13 +73,18 @@ async fn test_logging() {
         .unwrap();
     cluster.connect().await.expect_err("Should fail to connect");
 
-    let log_output: String = drain.0.lock().unwrap().clone();
-    assert!(
-        log_output.contains("Unable to resolve address for absolute-gibberish.invalid"),
-        log_output
+    let record = logger.pop().unwrap();
+    assert_eq!(
+        record.args(),
+        "Unable to resolve address for absolute-gibberish.invalid:9042\n",
     );
+    assert_eq!(record.level(), Level::Error);
+    assert_eq!(
+        record.target(),
+        "{anonymous}::DefaultClusterMetadataResolver::on_resolve"
+    );
+    assert_eq!(record.key_values(), vec!());
 }
-
 #[tokio::test]
 async fn test_metrics() {
     // This is just a check that metrics work and actually notice requests.

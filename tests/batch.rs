@@ -11,8 +11,7 @@ struct Pair {
 
 async fn insert_into_batch_with_prepared(session: &Session, pairs: &Vec<Pair>) -> Result<()> {
     let prepared = session
-        .prepare("INSERT INTO examples.pairs (key, value) VALUES (?, ?)")
-        .await?;
+        .prepare("INSERT INTO examples.pairs (key, value) VALUES (?, ?)").await?;
     let mut batch = session.batch(BatchType::LOGGED);
     batch.set_consistency(Consistency::ONE)?;
     for pair in pairs {
