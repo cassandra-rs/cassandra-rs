@@ -48,7 +48,10 @@ async fn test_slog_logger() {
     cluster
         .set_contact_points("absolute-gibberish.invalid")
         .unwrap();
-    cluster.connect_async().await.expect_err("Should fail to connect");
+    cluster
+        .connect_async()
+        .await
+        .expect_err("Should fail to connect");
 
     let log_output: String = drain.0.lock().unwrap().clone();
     assert!(

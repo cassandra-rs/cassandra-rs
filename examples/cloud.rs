@@ -23,7 +23,10 @@ async fn main() {
     cluster.set_credentials(username, password).unwrap();
 
     let session = cluster.connect().await.unwrap();
-    let result = session.execute("SELECT release_version FROM system.local").await.unwrap();
+    let result = session
+        .execute("SELECT release_version FROM system.local")
+        .await
+        .unwrap();
     let row = result.first_row().unwrap();
     let version: String = row.get_by_name("release_version").unwrap();
     println!("release_version: {}", version);

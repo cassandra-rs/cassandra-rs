@@ -120,9 +120,7 @@ impl Session {
 
     /// Execute a batch statement.
     pub fn execute_batch(&self, batch: &Batch) -> CassFuture<CassResult> {
-        let inner_future = unsafe {
-            cass_session_execute_batch(self.inner(), batch.inner())
-        };
+        let inner_future = unsafe { cass_session_execute_batch(self.inner(), batch.inner()) };
         <CassFuture<CassResult>>::build(self.clone(), inner_future)
     }
 
@@ -131,9 +129,7 @@ impl Session {
         &self,
         batch: &Batch,
     ) -> CassFuture<(CassResult, CustomPayloadResponse)> {
-        let inner_future = unsafe {
-            cass_session_execute_batch(self.inner(), batch.inner())
-        };
+        let inner_future = unsafe { cass_session_execute_batch(self.inner(), batch.inner()) };
         <CassFuture<(CassResult, CustomPayloadResponse)>>::build(self.clone(), inner_future)
     }
 
@@ -153,11 +149,8 @@ impl Session {
         &self,
         statement: &Statement,
     ) -> CassFuture<(CassResult, CustomPayloadResponse)> {
-        let inner_future = unsafe {
-            cass_session_execute(self.inner(), statement.inner())
-        };
+        let inner_future = unsafe { cass_session_execute(self.inner(), statement.inner()) };
         <CassFuture<(CassResult, CustomPayloadResponse)>>::build(self.clone(), inner_future)
-
     }
 
     /// Gets a snapshot of this session's schema metadata. The returned

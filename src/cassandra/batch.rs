@@ -127,7 +127,9 @@ impl Batch {
 
     /// Sets the batch's custom payload.
     pub fn set_custom_payload(&mut self, custom_payload: CustomPayload) -> Result<&mut Self> {
-        unsafe { cass_batch_set_custom_payload(self.inner(), custom_payload.inner()).to_result(self) }
+        unsafe {
+            cass_batch_set_custom_payload(self.inner(), custom_payload.inner()).to_result(self)
+        }
     }
 
     /// Adds a statement to a batch.
