@@ -23,7 +23,6 @@ pub use crate::cassandra::custom_payload::CustomPayload;
 pub use crate::cassandra::data_type::DataType;
 // pub use cassandra::write_type::*;
 pub use crate::cassandra::field::Field;
-pub use crate::cassandra::future::CassFuture;
 pub use crate::cassandra::inet::Inet;
 // pub use cassandra::util::*;
 // pub use cassandra::metrics::*;

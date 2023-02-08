@@ -4,7 +4,7 @@ use crate::cassandra::error::*;
 use crate::cassandra::inet::Inet;
 use crate::cassandra::tuple::Tuple;
 use crate::cassandra::user_type::UserType;
-use crate::cassandra::util::Protected;
+use crate::cassandra::util::{Protected, ProtectedInner};
 use crate::cassandra::uuid::Uuid;
 
 use crate::cassandra_sys::cass_collection_append_bool;
@@ -128,10 +128,13 @@ pub struct List(*mut _CassCollection);
 // from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
 unsafe impl Send for List {}
 
-impl Protected<*mut _CassCollection> for List {
+impl ProtectedInner<*mut _CassCollection> for List {
     fn inner(&self) -> *mut _CassCollection {
         self.0
     }
+}
+
+impl Protected<*mut _CassCollection> for List {
     fn build(inner: *mut _CassCollection) -> Self {
         if inner.is_null() {
             panic!("Unexpected null pointer")
@@ -140,10 +143,13 @@ impl Protected<*mut _CassCollection> for List {
     }
 }
 
-impl Protected<*mut _CassCollection> for Map {
+impl ProtectedInner<*mut _CassCollection> for Map {
     fn inner(&self) -> *mut _CassCollection {
         self.0
     }
+}
+
+impl Protected<*mut _CassCollection> for Map {
     fn build(inner: *mut _CassCollection) -> Self {
         if inner.is_null() {
             panic!("Unexpected null pointer")
@@ -152,10 +158,13 @@ impl Protected<*mut _CassCollection> for Map {
     }
 }
 
-impl Protected<*mut _CassCollection> for Set {
+impl ProtectedInner<*mut _CassCollection> for Set {
     fn inner(&self) -> *mut _CassCollection {
         self.0
     }
+}
+
+impl Protected<*mut _CassCollection> for Set {
     fn build(inner: *mut _CassCollection) -> Self {
         if inner.is_null() {
             panic!("Unexpected null pointer")
