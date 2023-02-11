@@ -6,6 +6,12 @@ This file's format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/). The
 version number is tracked in the file `VERSION`.
 
+## [2.0.0] - 2022-01-24
+### Changed
+- All functions were converted to be asynchronous. This allows for better performance, as asynchronous functions can run in parallel and make better use of system resources.
+- The macro `stmt!` was changed from a macro to a function, named `statement`. This change fundamentally alters how the API is used and was made to provide a more intuitive and clear interface for users.
+- The wait function was replaced with await from the tokio runtime. This change was made to take advantage of the asynchronous capabilities of the tokio runtime, allowing for better performance and scalability in Cassandra operations.
+
 ## [Unreleased]
 ### Fixed
 - The main development branch is now `main` not `master`. To track this, fetch and then check out `main`.
