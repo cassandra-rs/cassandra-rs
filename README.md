@@ -51,10 +51,15 @@ thin wrapper around the DataStax driver, you may also find the DataStax
 ## Example
 
 For a straightforward example see [`simple.rs`](examples/simple.rs).
-
+    
 There are additional examples included with the project in [`tests`](tests/) and
 [`examples`](examples/).
 
+## Sessions Arc (version 2.0)
+
+With the release of version 2.0, this crate's functions have became `async`, meaning they can only be called as part of an asynchronous workflow. To use these functions, you can either call them from within an asynchronous function using the `.await` operator, or you can call them from a synchronous context using the `block_on` method from [tokio runtime](https://docs.rs/tokio/latest/tokio/runtime/struct.Runtime.html#method.block_on).
+
+Additionally, the `stmt!` macro has been replaced with `session.statement()` method. Simply update your code to use the new method instead of the macro to continue using it's functionality.
 
 ## Futures (version 0.15)
 
