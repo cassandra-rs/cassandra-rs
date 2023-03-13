@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/). The
 version number is tracked in the file `VERSION`.
 
 ## [Unreleased]
+
+### Added
+
+### Changed
+
+### Fixed
+
+## [2.0.0] - 2023-03-13
 ### Changed
 - All functions were converted to be asynchronous. This allows for better performance, as asynchronous functions can run in parallel and make better use of system resources.
 - The macro `stmt!` was changed from a macro to a function, named `statement`. This change fundamentally alters how the API is used and was made to provide a more intuitive and clear interface for users.
@@ -261,7 +269,8 @@ First release of https://github.com/Metaswitch/cassandra-rs
 ## [0.8.1] - 2016-12-13
 Last release of https://github.com/tupshin/cassandra-rs
 
-[Unreleased]: https://github.com/Metaswitch/cassandra-rs/compare/1.2.0...HEAD
+[Unreleased]: https://github.com/Metaswitch/cassandra-rs/compare/2.0.0...HEAD
+[2.0.0]: https://github.com/Metaswitch/cassandra-rs/compare/1.2.0...2.0.0
 [1.2.0]: https://github.com/Metaswitch/cassandra-rs/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/Metaswitch/cassandra-rs/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/Metaswitch/cassandra-rs/compare/0.17.2...1.0.0
