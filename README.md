@@ -51,9 +51,48 @@ thin wrapper around the DataStax driver, you may also find the DataStax
 ## Example
 
 For a straightforward example see [`simple.rs`](examples/simple.rs).
-
+    
 There are additional examples included with the project in [`tests`](tests/) and
 [`examples`](examples/).
+
+## New session API (version 2.0)
+
+Version 2.0 introduces a new and safer API. `Statement`s (and
+`PreparedStatement` and `Batch`) are now associated with a specific `Session`.
+In addition, the legacy `.wait()` API is removed in favour of the now-ubiquitous
+`.await`.
+
+* This crate's functions have became `async`, meaning they can only be called as
+  part of an asynchronous workflow. To use these functions, you can either call
+  them from within an asynchronous function using the `.await` operator, or you
+  can call them from a synchronous context using the `block_on` method from
+  [tokio
+  runtime](https://docs.rs/tokio/latest/tokio/runtime/struct.Runtime.html#method.block_on).
+
+* The `stmt!` macro and `Statement::new` method have been replaced with the
+  `Session::statement()` method, which records the association with the session.
+  Simply update your code to use the new method instead of the macro to continue
+  using its functionality.
+
+* Statements are executed with `.execute()`, which consumes
+  the statement: you cannot execute the same statement twice; if you need this,
+  recreate the statement.
+
+* `Batch::new` is removed in favour of `Session::batch`.
+  
+* There is a new error, `BatchSessionMismatch`, which occurs if you try to add
+  statements from different `Session`s into the same `Batch`.
+
+* Connection methods are tidied up. `Cluster::connect_async` is removed since
+ `Cluster::connect` is now async. `Session::connect` and
+ `Session::connect_keyspace` are removed - use `Cluster::connect` and
+ `Cluster::connect_keyspace` instead.
+
+* `Session::close` (which allowed waiting until in-flight requests on the
+  session were complete) is removed because it is non-trivial to implement
+  safely. This functionality is no longer supported.
+
+* `Cluster::set_ssl` now consumes its argument, for improved safety.
 
 
 ## Futures (version 0.15)

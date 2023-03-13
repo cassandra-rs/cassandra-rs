@@ -1,9 +1,8 @@
-use crate::cassandra::consistency::Consistency;
 use crate::cassandra::custom_payload::{CustomPayload, CustomPayloadResponse};
 use crate::cassandra::error::*;
 use crate::cassandra::prepared::PreparedStatement;
 use crate::cassandra::result::CassResult;
-use crate::cassandra::util::Protected;
+use crate::cassandra::util::{Protected, ProtectedWithSession};
 use crate::cassandra::write_type::WriteType;
 use crate::cassandra_sys::cass_future_custom_payload_item;
 use crate::cassandra_sys::cass_future_custom_payload_item_count;
@@ -19,6 +18,7 @@ use crate::cassandra_sys::CassError_;
 use crate::cassandra_sys::CassFuture as _Future;
 use crate::cassandra_sys::CASS_OK;
 use crate::cassandra_sys::{cass_false, cass_true};
+use crate::{cassandra::consistency::Consistency, Session};
 
 use parking_lot::Mutex;
 
@@ -48,6 +48,9 @@ pub struct CassFuture<T> {
     /// The current state of this future.
     state: Arc<FutureTarget>,
 
+    /// The session the future is being executed upon.
+    session: Option<Session>,
+
     /// Treat as if it contains a T.
     phantom: PhantomData<T>,
 }
@@ -62,6 +65,7 @@ pub struct CassFuture<T> {
 // concurrent access to the value (you can only poll a future once).
 unsafe impl<T> Sync for CassFuture<T> {}
 unsafe impl<T> Send for CassFuture<T> where T: Send {}
+impl<T> Unpin for CassFuture<T> {}
 
 impl<T> CassFuture<T> {
     /// Wrap a Cassandra driver future to make it a proper Rust future.
@@ -69,14 +73,21 @@ impl<T> CassFuture<T> {
     /// When invoking this take care to supply the correct type argument, since it will
     /// be used to control how the result is extracted from the underlying Cassandra
     /// driver future (see `Completable`).
-    pub(crate) fn build(inner: *mut _Future) -> Self {
+    pub(crate) fn build(session: Session, inner: *mut _Future) -> Self {
         CassFuture {
             inner,
+            session: Some(session),
             state: Arc::new(FutureTarget {
                 inner: Mutex::new(FutureState::Created),
             }),
             phantom: PhantomData,
         }
+    }
+
+    fn take_session(&mut self) -> Session {
+        self.session.take().expect(
+            "invariant: could not take session from CassFuture that already has had session taken.",
+        )
     }
 }
 
@@ -99,19 +110,26 @@ where
     Self: Sized,
 {
     /// Extract the result from the future, if present.
-    unsafe fn get(inner: *mut _Future) -> Option<Self>;
+    unsafe fn get(session: Session, inner: *mut _Future) -> Option<Self>;
 }
 
 /// Futures that complete with no value, or report an error.
 impl Completable for () {
-    unsafe fn get(_inner: *mut _Future) -> Option<Self> {
+    unsafe fn get(_session: Session, _inner: *mut _Future) -> Option<Self> {
         Some(())
+    }
+}
+
+/// Futures that completes with just the session.
+impl Completable for Session {
+    unsafe fn get(session: Session, _inner: *mut _Future) -> Option<Self> {
+        Some(session)
     }
 }
 
 /// The mainline case - a CassResult.
 impl Completable for CassResult {
-    unsafe fn get(inner: *mut _Future) -> Option<Self> {
+    unsafe fn get(_session: Session, inner: *mut _Future) -> Option<Self> {
         cass_future_get_result(inner)
             .as_ref()
             .map(|r| CassResult::build(r as *const _))
@@ -120,10 +138,10 @@ impl Completable for CassResult {
 
 /// Futures that complete with a prepared statement.
 impl Completable for PreparedStatement {
-    unsafe fn get(inner: *mut _Future) -> Option<Self> {
+    unsafe fn get(session: Session, inner: *mut _Future) -> Option<Self> {
         cass_future_get_prepared(inner)
             .as_ref()
-            .map(|r| PreparedStatement::build(r as *const _))
+            .map(|r| PreparedStatement::build(r as *const _, session))
     }
 }
 
@@ -166,7 +184,7 @@ unsafe fn payloads_from_future(future: *mut _Future) -> Result<CustomPayloadResp
 
 /// Futures that complete with a normal result and a custom payload response.
 impl Completable for (CassResult, CustomPayloadResponse) {
-    unsafe fn get(inner: *mut _Future) -> Option<Self> {
+    unsafe fn get(_session: Session, inner: *mut _Future) -> Option<Self> {
         payloads_from_future(inner).ok().and_then(|payloads| {
             cass_future_get_result(inner)
                 .as_ref()
@@ -175,11 +193,19 @@ impl Completable for (CassResult, CustomPayloadResponse) {
     }
 }
 
+impl<T: Completable> CassFuture<T> {
+    /// Synchronously executes the CassFuture, blocking until it
+    /// completes.
+    pub fn wait(mut self) -> Result<T> {
+        unsafe { get_completion(self.take_session(), self.inner) }
+    }
+}
+
 /// A Cassandra future is a normal Rust future.
 impl<T: Completable> Future for CassFuture<T> {
     type Output = Result<T>;
 
-    fn poll(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
+    fn poll(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
         let mut install_callback = false;
         let ret = {
             // Perform the following computations under the lock, and then release it.
@@ -202,7 +228,7 @@ impl<T: Completable> Future for CassFuture<T> {
                     // already, complete now without scheduling a callback.
                     if unsafe { cass_future_ready(self.inner) } == cass_true {
                         // Future is ready; wrap success in `Ok(Ready)` or report failure as `Err`.
-                        Poll::Ready(unsafe { get_completion(self.inner) })
+                        Poll::Ready(self.inner)
                     } else {
                         // Future is not ready; park this task and arrange to be called back when
                         // it is.
@@ -226,7 +252,7 @@ impl<T: Completable> Future for CassFuture<T> {
                 }
                 FutureState::Ready => {
                     // Future has been marked ready by callback. Safe to return now.
-                    Poll::Ready(unsafe { get_completion(self.inner) })
+                    Poll::Ready(self.inner)
                 }
             }
         };
@@ -238,15 +264,12 @@ impl<T: Completable> Future for CassFuture<T> {
                 .to_result(())?;
         }
 
-        ret
-    }
-}
-
-impl<T: Completable> CassFuture<T> {
-    /// Synchronously executes the CassFuture, blocking until it
-    /// completes.
-    pub fn wait(self) -> Result<T> {
-        unsafe { get_completion(self.inner) }
+        match ret {
+            Poll::Pending => Poll::Pending,
+            Poll::Ready(inner) => {
+                Poll::Ready(unsafe { get_completion(self.take_session(), inner) })
+            }
+        }
     }
 }
 
@@ -256,12 +279,12 @@ impl<T: Completable> CassFuture<T> {
 /// function will not block, you can check if the future is ready prior to calling this using
 /// `cass_future_ready`. If the future is ready, this function will not block, otherwise
 /// it will block on waiting for the future to become ready.
-unsafe fn get_completion<T: Completable>(inner: *mut _Future) -> Result<T> {
+unsafe fn get_completion<T: Completable>(session: Session, inner: *mut _Future) -> Result<T> {
     // Wrap success in `Ok(Ready)` or report failure as `Err`.
     // This will block if the future is not yet ready.
     let rc = cass_future_error_code(inner);
     match rc {
-        CASS_OK => match Completable::get(inner) {
+        CASS_OK => match Completable::get(session, inner) {
             None => Err(CassErrorCode::LIB_NULL_VALUE.to_error()),
             Some(v) => Ok(v),
         },
