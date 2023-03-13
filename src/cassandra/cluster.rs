@@ -196,16 +196,6 @@ impl Cluster {
         }
     }
 
-    /// Asynchronously connects to the cassandra cluster
-    pub async fn connect_async(&mut self) -> Result<Session> {
-        let session = Session::new();
-        let connect_future = {
-            let connect = unsafe { cass_session_connect(session.inner(), self.0) };
-            CassFuture::build(session, connect)
-        };
-        connect_future.await
-    }
-
     /// Connects to the cassandra cluster
     pub async fn connect(&mut self) -> Result<Session> {
         let session = Session::new();

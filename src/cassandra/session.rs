@@ -48,16 +48,11 @@ impl SessionInner {
 /// A session object is used to execute queries and maintains cluster state through
 /// the control connection. The control connection is used to auto-discover nodes and
 /// monitor cluster changes (topology and schema). Each session also maintains multiple
-/// /pools of connections to cluster nodes which are used to query the cluster.
+/// pools of connections to cluster nodes which are used to query the cluster.
 ///
 /// Instances of the session object are thread-safe to execute queries.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Session(pub Arc<SessionInner>);
-
-// The underlying C type has no thread-local state, and explicitly supports access
-// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
-unsafe impl Send for Session {}
-unsafe impl Sync for Session {}
 
 impl ProtectedInner<*mut _Session> for SessionInner {
     fn inner(&self) -> *mut _Session {

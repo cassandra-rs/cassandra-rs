@@ -5,7 +5,7 @@ async fn main() -> Result<()> {
     let mut cluster = Cluster::default();
     cluster.set_contact_points("127.0.0.1").unwrap();
     cluster.set_load_balance_round_robin();
-    let session = cluster.connect_async().await?;
+    let session = cluster.connect().await?;
 
     let result = session
         .execute("SELECT keyspace_name FROM system_schema.keyspaces;")
