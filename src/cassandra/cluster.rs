@@ -209,16 +209,18 @@ impl Cluster {
     /// Connects to the cassandra cluster, setting the keyspace of the session.
     pub async fn connect_keyspace(&mut self, keyspace: &str) -> Result<Session> {
         let session = Session::new();
-        let keyspace_ptr = keyspace.as_ptr() as *const c_char;
-        let connect_keyspace = unsafe {
-            cass_session_connect_keyspace_n(
-                session.inner(),
-                self.inner(),
-                keyspace_ptr,
-                keyspace.len(),
-            )
+        let connect_future = {
+            let keyspace_ptr = keyspace.as_ptr() as *const c_char;
+            let connect_keyspace = unsafe {
+                cass_session_connect_keyspace_n(
+                    session.inner(),
+                    self.inner(),
+                    keyspace_ptr,
+                    keyspace.len(),
+                )
+            };
+            CassFuture::build(session, connect_keyspace)
         };
-        let connect_future = CassFuture::build(session, connect_keyspace);
         connect_future.await
     }
 
