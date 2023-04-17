@@ -1,5 +1,5 @@
 use crate::cassandra::consistency::Consistency;
-use crate::cassandra::custom_payload::CustomPayload;
+use crate::cassandra::custom_payload::{CustomPayload, CustomPayloadResponse};
 use crate::cassandra::error::*;
 use crate::cassandra::future::CassFuture;
 use crate::cassandra::policy::retry::RetryPolicy;
@@ -97,6 +97,17 @@ impl Batch {
             let execute_batch =
                 unsafe { cass_session_execute_batch(session.inner(), batch.inner()) };
             CassFuture::build(session, execute_batch)
+        };
+        execute_future.await
+    }
+
+    /// Executes this batch and gets any custom payloads from the response.
+    pub async fn execute_with_payloads(self) -> Result<(CassResult, CustomPayloadResponse)> {
+        let (batch, session) = (self.0, self.1);
+        let execute_future = {
+            let execute_batch =
+                unsafe { cass_session_execute_batch(session.inner(), batch.inner()) };
+            CassFuture::<(CassResult, CustomPayloadResponse)>::build(session, execute_batch)
         };
         execute_future.await
     }
