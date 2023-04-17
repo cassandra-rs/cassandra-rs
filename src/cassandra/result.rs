@@ -60,9 +60,9 @@ impl Protected<*const _CassResult> for CassResult {
 
 impl Debug for CassResult {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "Result row count: {:?}\n", self.row_count())?;
+        writeln!(f, "Result row count: {:?}", self.row_count())?;
         for row in self.iter() {
-            write!(f, "{:?}\n", row)?;
+            writeln!(f, "{:?}", row)?;
         }
         Ok(())
     }
@@ -70,9 +70,9 @@ impl Debug for CassResult {
 
 impl Display for CassResult {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "Result row count: {}\n", self.row_count())?;
+        writeln!(f, "Result row count: {}", self.row_count())?;
         for row in self.iter() {
-            write!(f, "{}\n", row)?;
+            writeln!(f, "{}", row)?;
         }
         Ok(())
     }

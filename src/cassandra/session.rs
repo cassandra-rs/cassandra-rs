@@ -109,7 +109,7 @@ impl Session {
     /// Creates a statement with the given query.
     pub fn statement(&self, query: impl AsRef<str>) -> Statement {
         let query = query.as_ref();
-        let param_count = query.matches("?").count();
+        let param_count = query.matches('?').count();
         Statement::new(self.clone(), query, param_count)
     }
 

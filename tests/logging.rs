@@ -1,5 +1,6 @@
 mod help;
 
+#[cfg(any(feature = "slog", feature = "log"))]
 use cassandra_cpp::*;
 
 #[cfg(feature = "slog")]
@@ -85,6 +86,7 @@ async fn test_log_logger() {
     );
     assert_eq!(record.key_values(), vec!());
 }
+
 #[tokio::test]
 async fn test_metrics() {
     // This is just a check that metrics work and actually notice requests.

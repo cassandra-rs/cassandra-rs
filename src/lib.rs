@@ -1,7 +1,7 @@
 //! This is a wrapper around the DataStax C++ driver for Cassandra. It aims to be 100% safe with minimal overhead added
 #![deny(missing_docs)]
 #![allow(unknown_lints)]
-#![allow(doc_markdown)]
+#![allow(clippy::doc_markdown)]
 #![allow(unused_imports)] // TODO: remove
 #![allow(dead_code)] // TODO: remove
 // `error_chain!` can recurse deeply

@@ -139,7 +139,7 @@ fn basic_from_result(result: CassResult) -> Result<Option<Basic>> {
                 addr: row.get(9)?,
                 tu: row.get(10)?,
                 id: row.get(11)?,
-                ct: Udt { dt: dt, tm: tm },
+                ct: Udt { dt, tm },
                 txt: row.get(13)?,
             }))
         }
@@ -330,7 +330,7 @@ async fn test_null_retrieval() -> Result<()> {
     assert!(!row.get_column(0).unwrap().is_null());
 
     let v: bool = row.get(1).unwrap();
-    assert_eq!(v, true);
+    assert!(v);
     assert!(!row.get_column(1).unwrap().is_null());
 
     let v: f32 = row.get(2).unwrap();
@@ -387,8 +387,8 @@ async fn test_null_retrieval() -> Result<()> {
 #[tokio::test]
 async fn test_null_insertion() -> Result<()> {
     let session = help::create_test_session().await;
-    help::create_example_keyspace(&session);
-    create_basic_table(&session);
+    help::create_example_keyspace(&session).await;
+    create_basic_table(&session).await.unwrap();
 
     // Insert some explicit nulls.
     let mut s = session.statement(
@@ -480,10 +480,10 @@ async fn test_rendering() -> Result<()> {
     let keyspace_col = row.get_column_by_name("keyspace_name").unwrap();
     let str: &str = keyspace_col.get_str().unwrap();
     println!("Str is {}", str);
-    assert!(str.len() > 0, "empty str");
+    assert!(!str.is_empty(), "empty str");
     let str: String = keyspace_col.get_string().unwrap();
     println!("String is {}", str);
-    assert!(str.len() > 0, "empty string");
+    assert!(!str.is_empty(), "empty string");
 
     // Check invalid retrieval type.
     keyspace_col

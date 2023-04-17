@@ -25,7 +25,9 @@ fn test_parsing_printing_consistency() {
 
     for c in all {
         let s = c.to_string();
-        let c2: Consistency = s.parse().expect(&format!("Failed on {:?} as {}", c, s));
+        let c2: Consistency = s
+            .parse()
+            .unwrap_or_else(|_| panic!("Failed on {:?} as {}", c, s));
         assert_eq!(c2, *c, "with intermediate {}", s);
     }
 
@@ -52,7 +54,9 @@ fn test_using_loglevel() {
 fn test_parsing_printing_loglevel() {
     for v in LogLevel::variants() {
         let s = v.to_string();
-        let v2: LogLevel = s.parse().expect(&format!("Failed on {:?} as {}", v, s));
+        let v2: LogLevel = s
+            .parse()
+            .unwrap_or_else(|_| panic!("Failed on {:?} as {}", v, s));
         assert_eq!(v2, *v, "with intermediate {}", s);
     }
 
@@ -69,20 +73,19 @@ fn test_parsing_printing_loglevel() {
 #[test]
 fn test_using_ssl_verify_flags() {
     let mut ssl = Ssl::default();
-    ssl.set_verify_flags(&vec![]);
-    ssl.set_verify_flags(&vec![SslVerifyFlag::NONE]);
-    ssl.set_verify_flags(&vec![SslVerifyFlag::PEER_CERT]);
-    ssl.set_verify_flags(&vec![
-        SslVerifyFlag::PEER_IDENTITY_DNS,
-        SslVerifyFlag::PEER_CERT,
-    ]);
+    ssl.set_verify_flags(&[]);
+    ssl.set_verify_flags(&[SslVerifyFlag::NONE]);
+    ssl.set_verify_flags(&[SslVerifyFlag::PEER_CERT]);
+    ssl.set_verify_flags(&[SslVerifyFlag::PEER_IDENTITY_DNS, SslVerifyFlag::PEER_CERT]);
 }
 
 #[test]
 fn test_parsing_printing_ssl_verify_flags() {
     for v in SslVerifyFlag::variants() {
         let s = v.to_string();
-        let v2: SslVerifyFlag = s.parse().expect(&format!("Failed on {:?} as {}", v, s));
+        let v2: SslVerifyFlag = s
+            .parse()
+            .unwrap_or_else(|_| panic!("Failed on {:?} as {}", v, s));
         assert_eq!(v2, *v, "with intermediate {}", s);
     }
 
@@ -114,7 +117,9 @@ fn test_using_cql_protocol_version() {
 fn test_parsing_printing_batch_type() {
     for v in BatchType::variants() {
         let s = v.to_string();
-        let v2: BatchType = s.parse().expect(&format!("Failed on {:?} as {}", v, s));
+        let v2: BatchType = s
+            .parse()
+            .unwrap_or_else(|_| panic!("Failed on {:?} as {}", v, s));
         assert_eq!(v2, *v, "with intermediate {}", s);
     }
 

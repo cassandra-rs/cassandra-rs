@@ -40,13 +40,11 @@ async fn do_work(session: &Session) -> Result<()> {
             }
         };
         let emails_iter: SetIterator = row.get_by_name("email")?;
-        let emails: Vec<String> = emails_iter
-            .map(|v| Ok(v.get_string()?))
-            .collect::<Result<_>>()?;
+        let emails: Vec<String> = emails_iter.map(|v| v.get_string()).collect::<Result<_>>()?;
         let last_name: String = row.get_by_name("last_name")?;
         let phone_numbers_iter: SetIterator = row.get_by_name("phone_numbers")?;
         let phone_numbers: Vec<String> = phone_numbers_iter
-            .map(|v| Ok(v.get_string()?))
+            .map(|v| v.get_string())
             .collect::<Result<_>>()?;
         let title: i32 = row.get_by_name("title")?;
         println!(

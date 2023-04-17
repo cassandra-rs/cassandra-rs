@@ -231,9 +231,7 @@ impl Cluster {
     /// Default: version 4
     ///
     pub fn set_protocol_version(&mut self, protocol_version: CqlProtocol) -> Result<&mut Self> {
-        unsafe {
-            cass_cluster_set_protocol_version(self.0, protocol_version as i32).to_result(self)
-        }
+        unsafe { cass_cluster_set_protocol_version(self.0, protocol_version).to_result(self) }
     }
 
     /// Sets the number of IO threads. This is the number of threads

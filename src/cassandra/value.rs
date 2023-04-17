@@ -260,8 +260,8 @@ impl Display for Value {
             Ok(())
         } else {
             match self.get_type() {
-                ValueType::UNKNOWN => write!(f, "{}", "unknown"),
-                ValueType::CUSTOM => write!(f, "{}", "custom"),
+                ValueType::UNKNOWN => write!(f, "unknown"),
+                ValueType::CUSTOM => write!(f, "custom"),
                 ValueType::ASCII | ValueType::TEXT | ValueType::VARCHAR => {
                     write_value(f, self.get_string(), |f, v| write!(f, "{}", v))
                 }
