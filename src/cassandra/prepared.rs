@@ -13,11 +13,12 @@ use crate::cassandra_sys::CassPrepared as _PreparedStatement;
 use std::os::raw::c_char;
 use std::{mem, slice, str};
 use std::sync::Arc;
+use parking_lot::Mutex;
 
 /// A statement that has been prepared against at least one Cassandra node.
 /// Instances of this class should not be created directly, but through Session.prepare().
 #[derive(Debug, Clone)]
-pub struct PreparedStatement(Arc<PreparedStatementInner>, Session);
+pub struct PreparedStatement(Arc<Mutex<PreparedStatementInner>>, Session);
 
 #[derive(Debug)]
 struct PreparedStatementInner(*const _PreparedStatement);
@@ -52,7 +53,7 @@ impl Protected<*const _PreparedStatement> for PreparedStatementInner {
 impl ProtectedInner<*const _PreparedStatement> for PreparedStatement {
     #[inline(always)]
     fn inner(&self) -> *const _PreparedStatement {
-        self.0.inner()
+        self.0.lock().inner()
     }
 }
 
@@ -62,7 +63,7 @@ impl ProtectedWithSession<*const _PreparedStatement> for PreparedStatement {
         if inner.is_null() {
             panic!("Unexpected null pointer")
         };
-        PreparedStatement(Arc::new(PreparedStatementInner::build(inner)), session)
+        PreparedStatement(Arc::new(Mutex::new(PreparedStatementInner::build(inner))), session)
     }
 
     #[inline(always)]

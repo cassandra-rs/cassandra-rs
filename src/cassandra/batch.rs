@@ -24,6 +24,7 @@ use crate::cassandra_sys::CassCustomPayload as _CassCustomPayload;
 use std::ffi::NulError;
 use std::os::raw::c_char;
 use std::sync::Arc;
+use parking_lot::Mutex;
 
 #[derive(Debug)]
 struct BatchInner(*mut _Batch);
@@ -31,7 +32,7 @@ struct BatchInner(*mut _Batch);
 /// A group of statements that are executed as a single batch.
 /// <b>Note:</b> Batches are not supported by the binary protocol version 1.
 #[derive(Debug, Clone)]
-pub struct Batch(Arc<BatchInner>, Session);
+pub struct Batch(Arc<Mutex<BatchInner>>, Session);
 
 // The underlying C type has no thread-local state, but does not support access
 // from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
@@ -54,17 +55,19 @@ impl Protected<*mut _Batch> for BatchInner {
     }
 }
 
-impl ProtectedInner<*mut _Batch> for Batch {
-    #[inline(always)]
-    fn inner(&self) -> *mut _Batch {
-        self.0.inner()
-    }
-}
+// TODO: releasing the lock before returning the pointer is not safe; find a
+// more careful approach. Likewise for PreparedStatement and Statement.
+// impl ProtectedInner<*mut _Batch> for Batch {
+//     #[inline(always)]
+//     fn inner(&self) -> *mut _Batch {
+//         self.0.lock().inner()
+//     }
+// }
 
 impl ProtectedWithSession<*mut _Batch> for Batch {
     #[inline(always)]
     fn build(inner: *mut _Batch, session: Session) -> Self {
-        Self(Arc::new(BatchInner::build(inner)), session)
+        Self(Arc::new(Mutex::new(BatchInner::build(inner))), session)
     }
 
     #[inline(always)]
@@ -84,7 +87,7 @@ impl Drop for BatchInner {
 impl Batch {
     /// Creates a new batch statement with batch type.
     pub(crate) fn new(batch_type: BatchType, session: Session) -> Batch {
-        unsafe { Batch(Arc::new(BatchInner(cass_batch_new(batch_type.inner()))), session) }
+        unsafe { Batch(Arc::new(Mutex::new(BatchInner(cass_batch_new(batch_type.inner())))), session) }
     }
 
     /// Returns the session of which this batch is bound to.
@@ -96,8 +99,14 @@ impl Batch {
     pub async fn execute(self) -> Result<CassResult> {
         let (batch, session) = (self.0, self.1);
         let execute_future = {
+            // Ensure only one thread at a time uses the batch.
+            let batch_guard = batch.lock();
             let execute_batch =
-                unsafe { cass_session_execute_batch(session.inner(), batch.inner()) };
+                unsafe { cass_session_execute_batch(session.inner(), batch_guard.inner()) };
+            // Now we've called into the driver, we can free the batch.
+            // For efficiency, we do it right now - before reaching an await point.
+            drop(batch_guard);
+            drop(batch);
             CassFuture::build(session, execute_batch)
         };
         execute_future.await
