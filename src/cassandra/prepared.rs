@@ -9,28 +9,50 @@ use crate::cassandra_sys::cass_prepared_parameter_data_type;
 use crate::cassandra_sys::cass_prepared_parameter_data_type_by_name_n;
 use crate::cassandra_sys::cass_prepared_parameter_name;
 use crate::cassandra_sys::CassPrepared as _PreparedStatement;
+
 use std::os::raw::c_char;
 use std::{mem, slice, str};
+use std::sync::Arc;
 
 /// A statement that has been prepared against at least one Cassandra node.
 /// Instances of this class should not be created directly, but through Session.prepare().
+#[derive(Debug, Clone)]
+pub struct PreparedStatement(Arc<PreparedStatementInner>, Session);
+
 #[derive(Debug)]
-pub struct PreparedStatement(*const _PreparedStatement, Session);
+struct PreparedStatementInner(*const _PreparedStatement);
 
-unsafe impl Send for PreparedStatement {}
-unsafe impl Sync for PreparedStatement {}
+unsafe impl Send for PreparedStatementInner {}
+unsafe impl Sync for PreparedStatementInner {}
 
-impl Drop for PreparedStatement {
+impl Drop for PreparedStatementInner {
     /// Frees a prepared statement
     fn drop(&mut self) {
         unsafe { cass_prepared_free(self.0) }
     }
 }
 
-impl ProtectedInner<*const _PreparedStatement> for PreparedStatement {
+impl ProtectedInner<*const _PreparedStatement> for PreparedStatementInner {
     #[inline(always)]
     fn inner(&self) -> *const _PreparedStatement {
         self.0
+    }
+}
+
+impl Protected<*const _PreparedStatement> for PreparedStatementInner {
+    #[inline(always)]
+    fn build(inner: *const _PreparedStatement) -> Self {
+        if inner.is_null() {
+            panic!("Unexpected null pointer")
+        };
+        Self(inner)
+    }
+}
+
+impl ProtectedInner<*const _PreparedStatement> for PreparedStatement {
+    #[inline(always)]
+    fn inner(&self) -> *const _PreparedStatement {
+        self.0.inner()
     }
 }
 
@@ -40,7 +62,7 @@ impl ProtectedWithSession<*const _PreparedStatement> for PreparedStatement {
         if inner.is_null() {
             panic!("Unexpected null pointer")
         };
-        PreparedStatement(inner, session)
+        PreparedStatement(Arc::new(PreparedStatementInner::build(inner)), session)
     }
 
     #[inline(always)]
@@ -65,7 +87,7 @@ impl PreparedStatement {
         let mut name = std::ptr::null();
         let mut name_length = 0;
         unsafe {
-            cass_prepared_parameter_name(self.0, index, &mut name, &mut name_length)
+            cass_prepared_parameter_name(self.inner(), index, &mut name, &mut name_length)
                 .to_result(())
                 .and_then(|_| {
                     Ok(str::from_utf8(slice::from_raw_parts(
@@ -81,7 +103,7 @@ impl PreparedStatement {
     /// Returns a reference to the data type of the parameter. Do not free
     /// this reference as it is bound to the lifetime of the prepared.
     pub fn parameter_data_type(&self, index: usize) -> ConstDataType {
-        unsafe { ConstDataType::build(cass_prepared_parameter_data_type(self.0, index)) }
+        unsafe { ConstDataType::build(cass_prepared_parameter_data_type(self.inner(), index)) }
     }
 
     /// Gets the data type of a parameter for the specified name.
@@ -92,7 +114,7 @@ impl PreparedStatement {
         unsafe {
             let name_ptr = name.as_ptr() as *const c_char;
             ConstDataType::build(cass_prepared_parameter_data_type_by_name_n(
-                self.0,
+                self.inner(),
                 name_ptr,
                 name.len(),
             ))

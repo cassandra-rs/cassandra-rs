@@ -20,16 +20,18 @@ use crate::cassandra_sys::CassBatch as _Batch;
 use crate::cassandra_sys::CassBatchType_;
 use crate::cassandra_sys::CassConsistency;
 use crate::cassandra_sys::CassCustomPayload as _CassCustomPayload;
+
 use std::ffi::NulError;
 use std::os::raw::c_char;
+use std::sync::Arc;
 
 #[derive(Debug)]
 struct BatchInner(*mut _Batch);
 
 /// A group of statements that are executed as a single batch.
 /// <b>Note:</b> Batches are not supported by the binary protocol version 1.
-#[derive(Debug)]
-pub struct Batch(BatchInner, Session);
+#[derive(Debug, Clone)]
+pub struct Batch(Arc<BatchInner>, Session);
 
 // The underlying C type has no thread-local state, but does not support access
 // from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
@@ -62,7 +64,7 @@ impl ProtectedInner<*mut _Batch> for Batch {
 impl ProtectedWithSession<*mut _Batch> for Batch {
     #[inline(always)]
     fn build(inner: *mut _Batch, session: Session) -> Self {
-        Self(BatchInner::build(inner), session)
+        Self(Arc::new(BatchInner::build(inner)), session)
     }
 
     #[inline(always)]
@@ -82,7 +84,7 @@ impl Drop for BatchInner {
 impl Batch {
     /// Creates a new batch statement with batch type.
     pub(crate) fn new(batch_type: BatchType, session: Session) -> Batch {
-        unsafe { Batch(BatchInner(cass_batch_new(batch_type.inner())), session) }
+        unsafe { Batch(Arc::new(BatchInner(cass_batch_new(batch_type.inner()))), session) }
     }
 
     /// Returns the session of which this batch is bound to.

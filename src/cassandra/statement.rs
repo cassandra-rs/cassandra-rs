@@ -89,7 +89,7 @@ impl StatementInner {
 ///
 /// <b>Note:</b> Parameters for regular queries are not supported by the binary protocol
 /// version 1.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Statement(Arc<StatementInner>, Session);
 
 // The underlying C type has no thread-local state, but does not support access
@@ -116,7 +116,7 @@ impl Protected<*mut _Statement> for StatementInner {
 impl ProtectedInner<*mut _Statement> for Statement {
     #[inline(always)]
     fn inner(&self) -> *mut _Statement {
-        self.0.inner()
+        *self.0.inner()
     }
 }
 
