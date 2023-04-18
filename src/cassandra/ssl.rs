@@ -37,7 +37,7 @@ enhance_nullary_enum!(SslVerifyFlag, CassSslVerifyFlags, {
 fn to_bitset(flags: &[SslVerifyFlag]) -> i32 {
     let mut res = 0;
     for f in flags.iter() {
-        res = res | f.inner() as u32;
+        res |= f.inner() as u32;
     }
     res as i32
 }

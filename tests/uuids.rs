@@ -3,10 +3,10 @@ mod help;
 use cassandra_cpp::*;
 use std::str::FromStr;
 
-static TRUNCATE_QUERY: &'static str = "TRUNCATE examples.log;";
-static INSERT_QUERY: &'static str = "INSERT INTO examples.log (key, time, entry) VALUES (?, ?, ?);";
-static SELECT_QUERY: &'static str = "SELECT * FROM examples.log WHERE key = ?";
-static CREATE_TABLE: &'static str =
+static TRUNCATE_QUERY: &str = "TRUNCATE examples.log;";
+static INSERT_QUERY: &str = "INSERT INTO examples.log (key, time, entry) VALUES (?, ?, ?);";
+static SELECT_QUERY: &str = "SELECT * FROM examples.log WHERE key = ?";
+static CREATE_TABLE: &str =
     "CREATE TABLE IF NOT EXISTS examples.log (key text, time timeuuid, entry text, \
      PRIMARY KEY (key, time));";
 
@@ -56,13 +56,13 @@ async fn test_uuids() -> Result<()> {
     println!("{:?}", results);
 
     // Check the resulting UUIDs are in order.
-    results.sort_by_key(|ref kv| kv.0);
+    results.sort_by_key(|kv| kv.0);
     assert_eq!(results[0].1, "Log entry #1");
     assert_eq!(results[1].1, "Log entry #2");
     assert_eq!(results[2].1, "Log entry #3");
     assert_eq!(results[3].1, "Log entry #4");
 
-    let mut uniques = results.iter().map(|ref kv| kv.0).collect::<Vec<Uuid>>();
+    let mut uniques = results.iter().map(|kv| kv.0).collect::<Vec<Uuid>>();
     uniques.dedup();
     assert_eq!(4, uniques.len());
 
@@ -71,7 +71,7 @@ async fn test_uuids() -> Result<()> {
 
 #[test]
 fn test_uuids_from() {
-    const TEST_UUID: &'static str = "a0a1a2a3-a4a5-a6a7-a8a9-aaabacadaeaf";
+    const TEST_UUID: &str = "a0a1a2a3-a4a5-a6a7-a8a9-aaabacadaeaf";
     let uuid_id_from_str = uuid::Uuid::parse_str(TEST_UUID).unwrap();
     let cass_id_from_str = Uuid::from_str(TEST_UUID).unwrap();
 

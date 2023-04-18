@@ -151,7 +151,6 @@ impl Completable for PreparedStatement {
 unsafe fn payloads_from_future(future: *mut _Future) -> Result<CustomPayloadResponse> {
     let cp_count = cass_future_custom_payload_item_count(future);
     (0..cp_count)
-        .into_iter()
         .map(|index| {
             let mut name = std::ptr::null();
             let mut name_length = 0;

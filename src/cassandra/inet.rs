@@ -98,7 +98,7 @@ impl FromStr for Inet {
         unsafe {
             cass_inet_from_string_n(s_ptr, s.len(), &mut inet)
                 .to_result(())
-                .and_then(|_| Ok(Inet(inet)))
+                .map(|_| Inet(inet))
         }
     }
 }
