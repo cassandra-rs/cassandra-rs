@@ -5,15 +5,15 @@ use cassandra_cpp::*;
 static NUM_CONCURRENT_REQUESTS: usize = 100;
 const PAGE_SIZE: i32 = 10;
 
-static CREATE_TABLE: &'static str =
+static CREATE_TABLE: &str =
     "CREATE TABLE IF NOT EXISTS examples.paging (key ascii, value text, PRIMARY KEY \
      (key));";
-static SELECT_QUERY: &'static str = "SELECT * FROM paging";
-static INSERT_QUERY: &'static str = "INSERT INTO paging (key, value) VALUES (?, ?);";
+static SELECT_QUERY: &str = "SELECT * FROM paging";
+static INSERT_QUERY: &str = "INSERT INTO paging (key, value) VALUES (?, ?);";
 
 // FIXME uuids not yet working
 async fn insert_into_paging(session: &Session /* , uuid_gen:&mut UuidGen */) -> Result<()> {
-    let mut futures = Vec::with_capacity(NUM_CONCURRENT_REQUESTS as usize);
+    let mut futures = Vec::with_capacity(NUM_CONCURRENT_REQUESTS);
     let prepared_statement = session.prepare(INSERT_QUERY).await?;
 
     for i in 0..NUM_CONCURRENT_REQUESTS {

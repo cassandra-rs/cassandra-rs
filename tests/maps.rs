@@ -9,10 +9,10 @@ struct Pair {
     value: i32,
 }
 
-static CREATE_TABLE: &'static str =
+static CREATE_TABLE: &str =
     "CREATE TABLE IF NOT EXISTS examples.maps (key text, items map<text, int>, \
      PRIMARY KEY (key))";
-static SELECT_QUERY: &'static str = "SELECT items FROM examples.maps WHERE key = ?";
+static SELECT_QUERY: &str = "SELECT items FROM examples.maps WHERE key = ?";
 
 async fn insert_into_maps(session: &Session, key: &str, items: &Vec<Pair>) -> Result<()> {
     let mut insert_statement =

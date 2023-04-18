@@ -172,7 +172,7 @@ impl str::FromStr for Uuid {
         unsafe {
             cass_uuid_from_string_n(str_ptr, str.len(), &mut uuid)
                 .to_result(())
-                .and_then(|_| Ok(Uuid(uuid)))
+                .map(|_| Uuid(uuid))
         }
     }
 }
