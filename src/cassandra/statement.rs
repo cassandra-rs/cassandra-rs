@@ -71,6 +71,7 @@ use crate::cassandra_sys::CASS_UINT64_MAX;
 
 use std::os::raw::c_char;
 use std::time::Duration;
+use std::sync::Arc;
 
 #[derive(Debug)]
 struct StatementInner(*mut _Statement);
@@ -89,7 +90,7 @@ impl StatementInner {
 /// <b>Note:</b> Parameters for regular queries are not supported by the binary protocol
 /// version 1.
 #[derive(Debug)]
-pub struct Statement(StatementInner, Session);
+pub struct Statement(Arc<StatementInner>, Session);
 
 // The underlying C type has no thread-local state, but does not support access
 // from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
@@ -122,7 +123,7 @@ impl ProtectedInner<*mut _Statement> for Statement {
 impl ProtectedWithSession<*mut _Statement> for Statement {
     #[inline(always)]
     fn build(inner: *mut _Statement, session: Session) -> Self {
-        Statement(StatementInner::build(inner), session)
+        Statement(Arc::new(StatementInner::build(inner)), session)
     }
 
     #[inline(always)]
@@ -343,7 +344,7 @@ impl BindRustType<Vec<u8>> for Statement {
 impl Statement {
     /// Creates a new query statement.
     pub(crate) fn new(session: Session, query: &str, parameter_count: usize) -> Self {
-        Statement(StatementInner::new(query, parameter_count), session)
+        Statement(Arc::new(StatementInner::new(query, parameter_count)), session)
     }
 
     /// Returns the session of which this statement is bound to.
