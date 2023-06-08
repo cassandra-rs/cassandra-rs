@@ -28,7 +28,9 @@ fn insert_into_async(
         statement.bind(4, i as i32 * 10)?;
         statement.bind(5, i as i64 * 100)?;
 
-        futures.push(Box::pin(statement.execute()));
+        let fut = statement.execute();
+
+        futures.push(Box::pin(fut));
     }
 
     Ok(futures)
