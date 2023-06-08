@@ -14,6 +14,12 @@ version number is tracked in the file `VERSION`.
 
 ### Fixed
 
+## [2.0.1] - 2023-06-08
+
+### Fixed
+- Fix bug where `connect_keyspace` was not `Send`
+- Fixed some rustc and clippy warnings.
+
 ## [2.0.0] - 2023-03-13
 ### Changed
 - All functions were converted to be asynchronous. This allows for better performance, as asynchronous functions can run in parallel and make better use of system resources.
