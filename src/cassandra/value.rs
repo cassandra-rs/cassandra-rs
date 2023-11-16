@@ -224,7 +224,7 @@ impl Debug for Value {
                 ValueType::DECIMAL => write_value(f, self.get_bytes(), |f, v| write!(f, "{:?}", v)),
                 ValueType::COUNTER => write_value(f, self.get_i64(), |f, v| write!(f, "{:?}", v)),
                 ValueType::BIGINT => write_value(f, self.get_i64(), |f, v| write!(f, "{:?}", v)),
-                ValueType::DATE => write_value(f, self.get_string(), |f, v| write!(f, "{:?}", v)),
+                ValueType::DATE => write_value(f, self.get_u32(), |f, v| write!(f, "{:?}", v)),
                 ValueType::TIME => write_value(f, self.get_string(), |f, v| write!(f, "{:?}", v)),
                 ValueType::VARINT => write_value(f, self.get_bytes(), |f, v| write!(f, "{:?}", v)),
                 ValueType::BOOLEAN => write_value(f, self.get_bool(), |f, v| write!(f, "{:?}", v)),
@@ -270,7 +270,7 @@ impl Display for Value {
                 }
                 ValueType::COUNTER => write_value(f, self.get_i64(), |f, v| write!(f, "{}", v)),
                 ValueType::BIGINT => write_value(f, self.get_i64(), |f, v| write!(f, "{}", v)),
-                ValueType::DATE => write_value(f, self.get_string(), |f, v| write!(f, "{}", v)),
+                ValueType::DATE => write_value(f, self.get_u32(), |f, v| write!(f, "{}", v)),
                 ValueType::TIME => write_value(f, self.get_string(), |f, v| write!(f, "{}", v)),
                 ValueType::VARINT => {
                     write_value(f, self.get_bytes(), |f, v| write!(f, "VARINT:{:?}", v))
