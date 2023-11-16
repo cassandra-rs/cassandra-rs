@@ -1,9 +1,9 @@
+// use decimal::d128;
 use crate::cassandra::collection::List;
 use crate::cassandra::collection::Map;
-use crate::cassandra::custom_payload::CustomPayload;
-// use decimal::d128;
 use crate::cassandra::collection::Set;
 use crate::cassandra::consistency::Consistency;
+use crate::cassandra::custom_payload::{CustomPayload, CustomPayloadResponse};
 use crate::cassandra::error::*;
 use crate::cassandra::future::CassFuture;
 use crate::cassandra::inet::Inet;
@@ -357,6 +357,16 @@ impl Statement {
         let fut = {
             let execute = unsafe { cass_session_execute(session.inner(), statement.inner()) };
             <CassFuture<CassResult>>::build(session, execute)
+        };
+        fut.await
+    }
+
+    /// Executes the statement and gets any custom payloads from the response.
+    pub async fn execute_with_payloads(self) -> Result<(CassResult, CustomPayloadResponse)> {
+        let (statement, session) = (self.0, self.1);
+        let fut = {
+            let execute = unsafe { cass_session_execute(session.inner(), statement.inner()) };
+            <CassFuture<(CassResult, CustomPayloadResponse)>>::build(session, execute)
         };
         fut.await
     }
