@@ -1,3 +1,5 @@
+use bigdecimal::BigDecimal;
+
 use crate::cassandra::error::*;
 
 use crate::cassandra::inet::Inet;
@@ -311,6 +313,21 @@ impl AsRustType<Vec<u8>> for Row<'_> {
     {
         let col = self.get_column_by_name(name)?;
         col.get_bytes().map(|b| b.to_vec())
+    }
+}
+
+impl AsRustType<BigDecimal> for Row<'_> {
+    fn get(&self, index: usize) -> Result<BigDecimal> {
+        let col = self.get_column(index)?;
+        col.get_decimal().map(|x| x.into())
+    }
+
+    fn get_by_name<S>(&self, name: S) -> Result<BigDecimal>
+    where
+        S: Into<String>,
+    {
+        let col = self.get_column_by_name(name)?;
+        col.get_decimal().map(|x| x.into())
     }
 }
 
