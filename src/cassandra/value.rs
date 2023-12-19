@@ -502,16 +502,15 @@ impl Value {
         let mut varint = std::ptr::null();
         let mut varint_size = 0;
         let mut scale = 0;
-        let slice = unsafe {
-            if cass_value_get_decimal(self.0, &mut varint, &mut varint_size, &mut scale)
-                != cassandra_cpp_sys::CassError::CASS_OK
-            {
-                return Err(CASS_ERROR_LIB_INVALID_VALUE_TYPE.to_error());
-            }
-            slice::from_raw_parts(varint, varint_size)
-        };
-        let bigint = BigInt::from_signed_bytes_be(slice);
-        let bigdec = BigDecimal::new(bigint, scale as i64);
-        return Ok(bigdec);
+
+        unsafe {
+            cass_value_get_decimal(self.0, &mut varint, &mut varint_size, &mut scale)
+                .to_result((varint, varint_size, scale))
+                .map(|(varint, varint_size, scale)| {
+                    let slice = slice::from_raw_parts(varint, varint_size);
+                    let bigint = BigInt::from_signed_bytes_be(slice);
+                    BigDecimal::new(bigint, scale as i64)
+                })
+        }
     }
 }
