@@ -311,6 +311,82 @@ async fn test_prepared_round_trip() -> Result<()> {
 }
 
 #[tokio::test]
+async fn test_decimal_round_trip() -> Result<()> {
+    let session = help::create_test_session().await;
+    help::create_example_keyspace(&session).await;
+    create_basic_table(&session).await?;
+
+    let decimal_values = vec![
+        ("big positive number", "1234567890123456789012345678901234567890123456789012345678901234567890.123456789012345678901234567890123456789012345678901234567890"),
+        ("big negative number", "-1234567890123456789012345678901234567890123456789012345678901234567890.123456789012345678901234567890123456789012345678901234567890"),
+        ("zero with 16 trailing zero", "0.0000000000000000"),
+    ];
+
+    // compare "literal CQL statement" to "driver value"
+    for (key, value) in decimal_values.iter() {
+        session
+            .execute(format!(
+                "INSERT INTO examples.basic (key, txt, dec) VALUES ('{}', '{}', {});",
+                key, value, value
+            ))
+            .await?;
+
+        let result = session
+            .execute(format!(
+                "SELECT key, txt, dec FROM examples.basic WHERE key = '{}';",
+                key
+            ))
+            .await?;
+
+        for row in result.into_iter() {
+            let txt: String = row.get_by_name("txt").unwrap();
+            let dec: BigDecimal = row.get_by_name("dec").unwrap();
+
+            assert_eq!(
+                txt,
+                dec.to_string(),
+                "Decimal test for literal CQL ({}):  {} and {}",
+                key,
+                txt,
+                dec.to_string()
+            );
+        }
+    }
+
+    // compare "driver value" to "driver value"
+    for (key, value) in decimal_values.iter() {
+        let mut s =
+            session.statement("INSERT INTO examples.basic (key, txt, dec) VALUES ('{}', '{}', ?);");
+        let dec = BigDecimal::from_str(value).unwrap();
+        s.bind(0, &dec)?;
+        s.execute().await?;
+
+        let result = session
+            .execute(format!(
+                "SELECT key, txt, dec FROM examples.basic WHERE key = '{}';",
+                key
+            ))
+            .await?;
+
+        for row in result.into_iter() {
+            let txt: String = row.get_by_name("txt").unwrap();
+            let dec: BigDecimal = row.get_by_name("dec").unwrap();
+
+            assert_eq!(
+                txt,
+                dec.to_string(),
+                "Decimal test for driver ({}):  {} and {}",
+                key,
+                txt,
+                dec.to_string()
+            );
+        }
+    }
+
+    Ok(())
+}
+
+#[tokio::test]
 async fn test_null_retrieval() -> Result<()> {
     let session = help::create_test_session().await;
     help::create_example_keyspace(&session).await;
