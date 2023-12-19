@@ -3,9 +3,9 @@ use bigdecimal::BigDecimal;
 
 use crate::cassandra::collection::List;
 use crate::cassandra::collection::Map;
-use crate::cassandra::custom_payload::CustomPayload;
 use crate::cassandra::collection::Set;
 use crate::cassandra::consistency::Consistency;
+use crate::cassandra::custom_payload::CustomPayload;
 use crate::cassandra::error::*;
 use crate::cassandra::future::CassFuture;
 use crate::cassandra::inet::Inet;
@@ -351,7 +351,6 @@ impl BindRustType<&BigDecimal> for Statement {
         self.bind_decimal_by_name(col, value)
     }
 }
-
 
 impl Statement {
     /// Creates a new query statement.
