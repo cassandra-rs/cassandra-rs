@@ -1,3 +1,4 @@
+use crate::cassandra_sys::CASS_ERROR_LIB_INVALID_DATA;
 use bigdecimal::num_bigint::BigInt;
 use bigdecimal::BigDecimal;
 
@@ -71,6 +72,7 @@ use crate::cassandra_sys::cass_true;
 use crate::cassandra_sys::CassStatement as _Statement;
 use crate::cassandra_sys::CASS_UINT64_MAX;
 
+use std::convert::TryInto;
 use std::os::raw::c_char;
 use std::time::Duration;
 
@@ -743,18 +745,16 @@ impl Statement {
     pub fn bind_decimal(&mut self, index: usize, value: &BigDecimal) -> Result<&mut Self> {
         let dec_parts = value.as_bigint_and_exponent();
         let varint = dec_parts.0.to_signed_bytes_be();
-        let scale = dec_parts.1;
+        let scale: i32 = match dec_parts.1.try_into() {
+            Ok(s) => s,
+            Err(_) => {
+                return Err(CASS_ERROR_LIB_INVALID_DATA.to_error());
+            }
+        };
 
-        //@TODO: cpp scale = i32, BigInt scale = i64
         unsafe {
-            cass_statement_bind_decimal(
-                self.inner(),
-                index,
-                varint.as_ptr(),
-                varint.len(),
-                scale as i32,
-            )
-            .to_result(self)
+            cass_statement_bind_decimal(self.inner(), index, varint.as_ptr(), varint.len(), scale)
+                .to_result(self)
         }
     }
 
@@ -762,9 +762,13 @@ impl Statement {
     pub fn bind_decimal_by_name(&mut self, name: &str, value: &BigDecimal) -> Result<&mut Self> {
         let dec_parts = value.as_bigint_and_exponent();
         let varint = dec_parts.0.to_signed_bytes_be();
-        let scale = dec_parts.1;
+        let scale: i32 = match dec_parts.1.try_into() {
+            Ok(s) => s,
+            Err(_) => {
+                return Err(CASS_ERROR_LIB_INVALID_DATA.to_error());
+            }
+        };
 
-        //@TODO: cpp scale = i32, BigInt scale = i64
         unsafe {
             let name_ptr = name.as_ptr() as *const c_char;
             cass_statement_bind_decimal_by_name_n(
@@ -773,7 +777,7 @@ impl Statement {
                 name.len(),
                 varint.as_ptr(),
                 varint.len(),
-                scale as i32,
+                scale,
             )
             .to_result(self)
         }
