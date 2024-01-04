@@ -1,6 +1,8 @@
 mod help;
 
+use bigdecimal::BigDecimal;
 use cassandra_cpp::*;
+use std::str::FromStr;
 use std::time::Duration;
 use std::time::SystemTime;
 
@@ -25,6 +27,7 @@ struct Basic {
     id: Uuid,
     ct: Udt,
     txt: String,
+    dec: BigDecimal,
 }
 
 /// Create the table for basic testing.
@@ -37,7 +40,7 @@ async fn create_basic_table(session: &Session) -> Result<()> {
             "
                 CREATE TABLE IF NOT EXISTS examples.basic (key text, bln boolean, flt \
                 float, dbl double, i8 tinyint, i16 smallint, i32 int, i64 bigint, \
-                ts timestamp, addr inet, tu timeuuid, id uuid, ct udt, txt text, PRIMARY KEY (key));
+                ts timestamp, addr inet, tu timeuuid, id uuid, ct udt, txt text, dec decimal, PRIMARY KEY (key));
             ",
         )
         .await?;
@@ -51,8 +54,8 @@ async fn insert_into_basic_by_name(
     basic: &Basic,
 ) -> Result<CassResult> {
     let mut statement = session.statement("
-        INSERT INTO examples.basic (key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct, txt) \
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        INSERT INTO examples.basic (key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct, txt, dec) \
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     ");
 
     let ct_type = DataType::new_udt(2);
@@ -76,14 +79,15 @@ async fn insert_into_basic_by_name(
     statement.bind_by_name("id", basic.id)?;
     statement.bind_by_name("ct", &ct_udt)?;
     statement.bind_by_name("txt", basic.txt.as_str())?;
+    statement.bind_by_name("dec", &basic.dec)?;
 
     statement.execute().await
 }
 
 async fn insert_into_basic(session: &Session, key: &str, basic: &Basic) -> Result<CassResult> {
     let mut statement = session.statement("
-        INSERT INTO examples.basic (key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct, txt) \
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        INSERT INTO examples.basic (key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct, txt, dec) \
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     ");
 
     let ct_type = DataType::new_udt(2);
@@ -107,6 +111,7 @@ async fn insert_into_basic(session: &Session, key: &str, basic: &Basic) -> Resul
     statement.bind(11, basic.id)?;
     statement.bind(12, &ct_udt)?;
     statement.bind(13, basic.txt.as_str())?;
+    statement.bind(14, &basic.dec)?;
 
     statement.execute().await
 }
@@ -141,13 +146,14 @@ fn basic_from_result(result: CassResult) -> Result<Option<Basic>> {
                 id: row.get(11)?,
                 ct: Udt { dt, tm },
                 txt: row.get(13)?,
+                dec: row.get(14)?,
             }))
         }
     }
 }
 
 const SELECT_QUERY: &str = "
-SELECT key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct, txt \
+SELECT key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct, txt, dec \
 FROM examples.basic WHERE key = ?";
 
 async fn select_from_basic(session: &Session, key: &str) -> Result<Option<Basic>> {
@@ -228,6 +234,7 @@ async fn test_basic_round_trip() -> Result<()> {
             tm: ts as i64,
         },
         txt: "some\0unicode text 😊".to_string(),
+        dec: BigDecimal::from_str("-999999999999999999999999999999.12345678901234567890").unwrap(),
     };
 
     insert_into_basic(&session, "test", &input).await?;
@@ -287,6 +294,7 @@ async fn test_prepared_round_trip() -> Result<()> {
             tm: ts as i64,
         },
         txt: "some\0text".to_string(),
+        dec: BigDecimal::from_str("-999999999999999999999999999999.12345678901234567890").unwrap(),
     };
 
     println!("Basic insertions");
@@ -298,6 +306,82 @@ async fn test_prepared_round_trip() -> Result<()> {
         .await?
         .expect("did not find row");
     assert_eq!(input, output, "Input:  {:?}\noutput: {:?}", &input, &output);
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_decimal_round_trip() -> Result<()> {
+    let session = help::create_test_session().await;
+    help::create_example_keyspace(&session).await;
+    create_basic_table(&session).await?;
+
+    let decimal_values = vec![
+        ("big positive number", "1234567890123456789012345678901234567890123456789012345678901234567890.123456789012345678901234567890123456789012345678901234567890"),
+        ("big negative number", "-1234567890123456789012345678901234567890123456789012345678901234567890.123456789012345678901234567890123456789012345678901234567890"),
+        ("zero with 16 trailing zero", "0.0000000000000000"),
+    ];
+
+    // compare "literal CQL statement" to "driver value"
+    for (key, value) in decimal_values.iter() {
+        session
+            .execute(format!(
+                "INSERT INTO examples.basic (key, txt, dec) VALUES ('{}', '{}', {});",
+                key, value, value
+            ))
+            .await?;
+
+        let result = session
+            .execute(format!(
+                "SELECT key, txt, dec FROM examples.basic WHERE key = '{}';",
+                key
+            ))
+            .await?;
+
+        for row in result.into_iter() {
+            let txt: String = row.get_by_name("txt").unwrap();
+            let dec: BigDecimal = row.get_by_name("dec").unwrap();
+
+            assert_eq!(
+                txt,
+                dec.to_string(),
+                "Decimal test for literal CQL ({}):  {} and {}",
+                key,
+                txt,
+                dec.to_string()
+            );
+        }
+    }
+
+    // compare "driver value" to "driver value"
+    for (key, value) in decimal_values.iter() {
+        let mut s =
+            session.statement("INSERT INTO examples.basic (key, txt, dec) VALUES ('{}', '{}', ?);");
+        let dec = BigDecimal::from_str(value).unwrap();
+        s.bind(0, &dec)?;
+        s.execute().await?;
+
+        let result = session
+            .execute(format!(
+                "SELECT key, txt, dec FROM examples.basic WHERE key = '{}';",
+                key
+            ))
+            .await?;
+
+        for row in result.into_iter() {
+            let txt: String = row.get_by_name("txt").unwrap();
+            let dec: BigDecimal = row.get_by_name("dec").unwrap();
+
+            assert_eq!(
+                txt,
+                dec.to_string(),
+                "Decimal test for driver ({}):  {} and {}",
+                key,
+                txt,
+                dec.to_string()
+            );
+        }
+    }
 
     Ok(())
 }
@@ -316,7 +400,7 @@ async fn test_null_retrieval() -> Result<()> {
     // Read the whole row.
     let result = session
         .execute(
-            "SELECT key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct, txt \
+            "SELECT key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct, txt, dec \
               FROM examples.basic WHERE key = 'vacant';",
         )
         .await?;
@@ -381,6 +465,10 @@ async fn test_null_retrieval() -> Result<()> {
     c.get_user_type().expect_err("should be null");
     assert!(c.is_null());
 
+    let c = row.get_column(14)?;
+    c.get_user_type().expect_err("should be null");
+    assert!(c.is_null());
+
     Ok(())
 }
 
@@ -392,8 +480,8 @@ async fn test_null_insertion() -> Result<()> {
 
     // Insert some explicit nulls.
     let mut s = session.statement(
-        "INSERT INTO examples.basic (key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct, txt) \
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
+        "INSERT INTO examples.basic (key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct, txt, dec) \
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"
     );
     s.bind(0, "shrdlu")?;
     s.bind(1, false)?;
@@ -409,12 +497,13 @@ async fn test_null_insertion() -> Result<()> {
     s.bind_null(11)?;
     s.bind_null(12)?;
     s.bind_null(13)?;
+    s.bind_null(14)?;
     s.execute().await?;
 
     // Read them back.
     let result = session
         .execute(
-            "SELECT key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct, txt \
+            "SELECT key, bln, flt, dbl, i8, i16, i32, i64, ts, addr, tu, id, ct, txt, dec \
               FROM examples.basic WHERE key = 'shrdlu';",
         )
         .await?;
@@ -435,6 +524,7 @@ async fn test_null_insertion() -> Result<()> {
     assert!(row.get_column(11)?.is_null());
     assert!(row.get_column(12)?.is_null());
     assert!(row.get_column(13)?.is_null());
+    assert!(row.get_column(14)?.is_null());
 
     Ok(())
 }

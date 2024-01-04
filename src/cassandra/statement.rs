@@ -1,9 +1,12 @@
+use crate::cassandra_sys::CASS_ERROR_LIB_INVALID_DATA;
+use bigdecimal::num_bigint::BigInt;
+use bigdecimal::BigDecimal;
+
 use crate::cassandra::collection::List;
 use crate::cassandra::collection::Map;
-use crate::cassandra::custom_payload::CustomPayload;
-// use decimal::d128;
 use crate::cassandra::collection::Set;
 use crate::cassandra::consistency::Consistency;
+use crate::cassandra::custom_payload::CustomPayload;
 use crate::cassandra::error::*;
 use crate::cassandra::future::CassFuture;
 use crate::cassandra::inet::Inet;
@@ -69,6 +72,7 @@ use crate::cassandra_sys::cass_true;
 use crate::cassandra_sys::CassStatement as _Statement;
 use crate::cassandra_sys::CASS_UINT64_MAX;
 
+use std::convert::TryInto;
 use std::os::raw::c_char;
 use std::time::Duration;
 
@@ -337,6 +341,16 @@ impl BindRustType<Vec<u8>> for Statement {
 
     fn bind_by_name(&mut self, col: &str, value: Vec<u8>) -> Result<&mut Self> {
         self.bind_bytes_by_name(col, value)
+    }
+}
+
+impl BindRustType<&BigDecimal> for Statement {
+    fn bind(&mut self, index: usize, value: &BigDecimal) -> Result<&mut Self> {
+        self.bind_decimal(index, value)
+    }
+
+    fn bind_by_name(&mut self, col: &str, value: &BigDecimal) -> Result<&mut Self> {
+        self.bind_decimal_by_name(col, value)
     }
 }
 
@@ -727,41 +741,47 @@ impl Statement {
         }
     }
 
-    //  ///Bind a "decimal" to a query or bound statement at the specified index.
-    //    pub fn bind_decimal(&self,
-    //                                index: i32,
-    //                                value: d128)
-    //                                -> Result<&mut Self, CassError> {
-    //            unsafe {
-    //                CassError::build(
-    //                    cass_statement_bind_decimal(
-    //                        self.inner(),
-    //                        index,
-    //                        value
-    //                    )
-    //                ).wrap(&mut self)
-    //            }
-    //        }
+    /// Binds a "BigDecimal" to a query or bound statement at the specified index.
+    pub fn bind_decimal(&mut self, index: usize, value: &BigDecimal) -> Result<&mut Self> {
+        let dec_parts = value.as_bigint_and_exponent();
+        let varint = dec_parts.0.to_signed_bytes_be();
+        let scale: i32 = match dec_parts.1.try_into() {
+            Ok(s) => s,
+            Err(_) => {
+                return Err(CASS_ERROR_LIB_INVALID_DATA.to_error());
+            }
+        };
 
-    // Binds a "decimal" to all the values with the specified name.
-    //
-    // This can only be used with statements created by
-    // cass_prepared_bind().
-    //    pub fn bind_decimal_by_name<'a>(&'a self,
-    //                                    name: &str,
-    //                                    value: String)
-    //                                    -> Result<&'a Self, CassError> {
-    //        unsafe {
-    //            let name = CString::new(name).unwrap();
-    //            CassError::build(
-    //            cass_statement_bind_decimal_by_name(
-    //                self.inner(),
-    //                name.as_ptr(),
-    //                value
-    //            )
-    //        ).wrap(&self)
-    //        }
-    //    }
+        unsafe {
+            cass_statement_bind_decimal(self.inner(), index, varint.as_ptr(), varint.len(), scale)
+                .to_result(self)
+        }
+    }
+
+    /// Binds an "BigDecimal" to all the values with the specified name.
+    pub fn bind_decimal_by_name(&mut self, name: &str, value: &BigDecimal) -> Result<&mut Self> {
+        let dec_parts = value.as_bigint_and_exponent();
+        let varint = dec_parts.0.to_signed_bytes_be();
+        let scale: i32 = match dec_parts.1.try_into() {
+            Ok(s) => s,
+            Err(_) => {
+                return Err(CASS_ERROR_LIB_INVALID_DATA.to_error());
+            }
+        };
+
+        unsafe {
+            let name_ptr = name.as_ptr() as *const c_char;
+            cass_statement_bind_decimal_by_name_n(
+                self.inner(),
+                name_ptr,
+                name.len(),
+                varint.as_ptr(),
+                varint.len(),
+                scale,
+            )
+            .to_result(self)
+        }
+    }
 
     /// Bind a "map" to a query or bound statement at the specified index.
     pub fn bind_map(&mut self, index: usize, map: Map) -> Result<&mut Self> {

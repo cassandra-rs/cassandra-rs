@@ -16,6 +16,7 @@ use crate::cassandra_sys::cass_true;
 use crate::cassandra_sys::cass_value_data_type;
 use crate::cassandra_sys::cass_value_get_bool;
 use crate::cassandra_sys::cass_value_get_bytes;
+use crate::cassandra_sys::cass_value_get_decimal;
 use crate::cassandra_sys::cass_value_get_double;
 use crate::cassandra_sys::cass_value_get_float;
 use crate::cassandra_sys::cass_value_get_inet;
@@ -68,6 +69,8 @@ use crate::cassandra_sys::CASS_VALUE_TYPE_UUID;
 use crate::cassandra_sys::CASS_VALUE_TYPE_VARCHAR;
 use crate::cassandra_sys::CASS_VALUE_TYPE_VARINT;
 
+use bigdecimal::num_bigint::BigInt;
+use bigdecimal::BigDecimal;
 use std::ffi::CString;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
@@ -221,7 +224,9 @@ impl Debug for Value {
                 ValueType::ASCII | ValueType::TEXT | ValueType::VARCHAR => {
                     write_value(f, self.get_string(), |f, v| write!(f, "{:?}", v))
                 }
-                ValueType::DECIMAL => write_value(f, self.get_bytes(), |f, v| write!(f, "{:?}", v)),
+                ValueType::DECIMAL => {
+                    write_value(f, self.get_decimal(), |f, v| write!(f, "{:?}", v))
+                }
                 ValueType::COUNTER => write_value(f, self.get_i64(), |f, v| write!(f, "{:?}", v)),
                 ValueType::BIGINT => write_value(f, self.get_i64(), |f, v| write!(f, "{:?}", v)),
                 ValueType::DATE => write_value(f, self.get_u32(), |f, v| write!(f, "{:?}", v)),
@@ -266,7 +271,7 @@ impl Display for Value {
                     write_value(f, self.get_string(), |f, v| write!(f, "{}", v))
                 }
                 ValueType::DECIMAL => {
-                    write_value(f, self.get_bytes(), |f, v| write!(f, "DECIMAL:{:?}", v))
+                    write_value(f, self.get_decimal(), |f, v| write!(f, "DECIMAL:{:?}", v))
                 }
                 ValueType::COUNTER => write_value(f, self.get_i64(), |f, v| write!(f, "{}", v)),
                 ValueType::BIGINT => write_value(f, self.get_i64(), |f, v| write!(f, "{}", v)),
@@ -317,11 +322,6 @@ impl Value {
                 .map(|(output, output_size)| slice::from_raw_parts(output, output_size))
         }
     }
-    // pub fn get_decimal<'a>(&'a self, mut output: String) ->
-    // Result<String,CassError> {unsafe{
-    // CassError::build(cass_value_get_decimal(self.0,&mut
-    // output)).wrap(output)
-    //    }}
 
     /// Get the type of this Cassandra value
     pub fn get_type(&self) -> ValueType {
@@ -495,5 +495,22 @@ impl Value {
             clock_seq_and_node: 0,
         };
         unsafe { cass_value_get_uuid(self.0, &mut output).to_result(Uuid::build(output)) }
+    }
+
+    /// Get this value as a BigDecimal
+    pub fn get_decimal(&self) -> Result<BigDecimal> {
+        let mut varint = std::ptr::null();
+        let mut varint_size = 0;
+        let mut scale = 0;
+
+        unsafe {
+            cass_value_get_decimal(self.0, &mut varint, &mut varint_size, &mut scale)
+                .to_result((varint, varint_size, scale))
+                .map(|(varint, varint_size, scale)| {
+                    let slice = slice::from_raw_parts(varint, varint_size);
+                    let bigint = BigInt::from_signed_bytes_be(slice);
+                    BigDecimal::new(bigint, scale as i64)
+                })
+        }
     }
 }
