@@ -160,7 +160,7 @@ impl CassResult {
 
     /// Creates a new iterator for the specified result. This can be
     /// used to iterate over rows in the result.
-    pub fn iter(&self) -> ResultIterator {
+    pub fn iter<'a>(&'a self) -> ResultIterator<'a> {
         unsafe {
             ResultIterator(
                 cass_iterator_from_result(self.0),
