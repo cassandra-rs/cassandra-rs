@@ -16,7 +16,7 @@ use crate::cassandra_sys::cass_tuple_new_from_data_type;
 use crate::cassandra_sys::cass_tuple_set_bool;
 use crate::cassandra_sys::cass_tuple_set_bytes;
 use crate::cassandra_sys::cass_tuple_set_collection;
-use crate::cassandra_sys::cass_tuple_set_decimal;
+
 use crate::cassandra_sys::cass_tuple_set_double;
 use crate::cassandra_sys::cass_tuple_set_float;
 use crate::cassandra_sys::cass_tuple_set_inet;
@@ -39,9 +39,10 @@ use std::os::raw::c_char;
 #[derive(Debug)]
 pub struct Tuple(*mut _Tuple);
 
-// The underlying C type has no thread-local state, but does not support access
-// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+// The underlying C type has no thread-local state, and forbids only concurrent
+// mutation/free: https://datastax.github.io/cpp-driver/topics/#thread-safety
 unsafe impl Send for Tuple {}
+unsafe impl Sync for Tuple {}
 
 impl ProtectedInner<*mut _Tuple> for Tuple {
     fn inner(&self) -> *mut _Tuple {

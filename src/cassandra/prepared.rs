@@ -10,7 +10,7 @@ use crate::cassandra_sys::cass_prepared_parameter_data_type_by_name_n;
 use crate::cassandra_sys::cass_prepared_parameter_name;
 use crate::cassandra_sys::CassPrepared as _PreparedStatement;
 use std::os::raw::c_char;
-use std::{mem, slice, str};
+use std::{slice, str};
 
 /// A statement that has been prepared against at least one Cassandra node.
 /// Instances of this class should not be created directly, but through Session.prepare().
@@ -78,16 +78,14 @@ impl PreparedStatement {
 
     /// Gets the data type of a parameter at the specified index.
     ///
-    /// Returns a reference to the data type of the parameter. Do not free
-    /// this reference as it is bound to the lifetime of the prepared.
+    /// Returns a reference to the data type of the parameter.
     pub fn parameter_data_type(&self, index: usize) -> ConstDataType {
         unsafe { ConstDataType::build(cass_prepared_parameter_data_type(self.0, index)) }
     }
 
     /// Gets the data type of a parameter for the specified name.
     ///
-    /// Returns a reference to the data type of the parameter. Do not free
-    /// this reference as it is bound to the lifetime of the prepared.
+    /// Returns a reference to the data type of the parameter.
     pub fn parameter_data_type_by_name(&self, name: &str) -> ConstDataType {
         unsafe {
             let name_ptr = name.as_ptr() as *const c_char;

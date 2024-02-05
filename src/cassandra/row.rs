@@ -4,7 +4,7 @@ use crate::cassandra::error::*;
 
 use crate::cassandra::inet::Inet;
 use crate::cassandra::iterator::{MapIterator, SetIterator, UserTypeIterator};
-use crate::cassandra::result::CassResult;
+
 use crate::cassandra::util::{Protected, ProtectedInner};
 use crate::cassandra::uuid::Uuid;
 use crate::cassandra::value::Value;
@@ -18,28 +18,29 @@ use crate::cassandra_sys::cass_row_get_column_by_name_n;
 use crate::cassandra_sys::cass_true;
 use crate::cassandra_sys::CassIterator as _CassIterator;
 use crate::cassandra_sys::CassRow as _Row;
+use crate::LendingIterator;
 use std::fmt;
 use std::fmt::Debug;
 use std::fmt::Display;
 use std::fmt::Formatter;
-use std::iter;
-use std::iter::IntoIterator;
 use std::marker::PhantomData;
 use std::os::raw::c_char;
 
 /// A collection of column values. Read-only, so thread-safe.
-pub struct Row<'a>(*const _Row, PhantomData<&'a CassResult>);
+//
+// Borrowed immutably.
+pub struct Row<'a>(*const _Row, PhantomData<&'a _Row>);
 
-unsafe impl<'a> Sync for Row<'a> {}
-unsafe impl<'a> Send for Row<'a> {}
+unsafe impl Sync for Row<'_> {}
+unsafe impl Send for Row<'_> {}
 
-impl<'a> ProtectedInner<*const _Row> for Row<'a> {
+impl ProtectedInner<*const _Row> for Row<'_> {
     fn inner(&self) -> *const _Row {
         self.0
     }
 }
 
-impl<'a> Protected<*const _Row> for Row<'a> {
+impl Protected<*const _Row> for Row<'_> {
     fn build(inner: *const _Row) -> Self {
         if inner.is_null() {
             panic!("Unexpected null pointer")
@@ -48,30 +49,32 @@ impl<'a> Protected<*const _Row> for Row<'a> {
     }
 }
 
-impl<'a> Debug for Row<'a> {
+impl Debug for Row<'_> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        for column in self {
+        let mut iter = self.iter();
+        while let Some(column) = iter.next() {
             write!(f, "{:?}\t", Value::build(column.inner()))?;
         }
         Ok(())
     }
 }
 
-impl<'a> Display for Row<'a> {
+impl Display for Row<'_> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        for column in self {
+        let mut iter = self.iter();
+        while let Some(column) = iter.next() {
             write!(f, "{}\t", Value::build(column.inner()))?;
         }
         Ok(())
     }
 }
 
-/// Auto inferencing conversion from c* to rust
+/// Auto inferencing conversion from Cassandra to Rust.
 pub trait AsRustType<T> {
-    /// convert while reading cassandra columns
+    /// Convert Cassandra column by index.
     fn get(&self, index: usize) -> Result<T>;
 
-    /// convert while reading cassandra columns by name
+    /// Convert Cassandra column by name.
     fn get_by_name<S>(&self, name: S) -> Result<T>
     where
         S: Into<String>;
@@ -226,13 +229,16 @@ impl AsRustType<Inet> for Row<'_> {
     }
 }
 
-impl AsRustType<SetIterator> for Row<'_> {
-    fn get(&self, index: usize) -> Result<SetIterator> {
+impl<'a> AsRustType<SetIterator<'a>> for Row<'a> {
+    // The iterator is newly-created here, but it borrows the data it iterates
+    // over from the row (i.e., from its underlying result). Thus its lifetime
+    // parameter is the same as the row's.
+    fn get(&self, index: usize) -> Result<SetIterator<'a>> {
         let col = self.get_column(index)?;
         col.get_set()
     }
 
-    fn get_by_name<S>(&self, name: S) -> Result<SetIterator>
+    fn get_by_name<S>(&self, name: S) -> Result<SetIterator<'a>>
     where
         S: Into<String>,
     {
@@ -241,13 +247,16 @@ impl AsRustType<SetIterator> for Row<'_> {
     }
 }
 
-impl AsRustType<MapIterator> for Row<'_> {
-    fn get(&self, index: usize) -> Result<MapIterator> {
+impl<'a> AsRustType<MapIterator<'a>> for Row<'a> {
+    // The iterator is newly-created here, but it borrows the data it iterates
+    // over from the row (i.e., from its underlying result). Thus its lifetime
+    // parameter is the same as the row's.
+    fn get(&self, index: usize) -> Result<MapIterator<'a>> {
         let col = self.get_column(index)?;
         col.get_map()
     }
 
-    fn get_by_name<S>(&self, name: S) -> Result<MapIterator>
+    fn get_by_name<S>(&self, name: S) -> Result<MapIterator<'a>>
     where
         S: Into<String>,
     {
@@ -256,13 +265,16 @@ impl AsRustType<MapIterator> for Row<'_> {
     }
 }
 
-impl AsRustType<UserTypeIterator> for Row<'_> {
-    fn get(&self, index: usize) -> Result<UserTypeIterator> {
+impl<'a> AsRustType<UserTypeIterator<'a>> for Row<'a> {
+    // The iterator is newly-created here, but it borrows the data it iterates
+    // over from the row (i.e., from its underlying result). Thus its lifetime
+    // parameter is the same as the row's.
+    fn get(&self, index: usize) -> Result<UserTypeIterator<'a>> {
         let col = self.get_column(index)?;
         col.get_user_type()
     }
 
-    fn get_by_name<S>(&self, name: S) -> Result<UserTypeIterator>
+    fn get_by_name<S>(&self, name: S) -> Result<UserTypeIterator<'a>>
     where
         S: Into<String>,
     {
@@ -333,7 +345,7 @@ impl AsRustType<BigDecimal> for Row<'_> {
 
 impl<'a> Row<'a> {
     /// Get a particular column by index
-    pub fn get_column(&self, index: usize) -> Result<Value> {
+    pub fn get_column(&self, index: usize) -> Result<Value<'a>> {
         unsafe {
             let col = cass_row_get_column(self.0, index);
             if col.is_null() {
@@ -345,7 +357,7 @@ impl<'a> Row<'a> {
     }
 
     /// Get a particular column by name
-    pub fn get_column_by_name<S>(&self, name: S) -> Result<Value>
+    pub fn get_column_by_name<S>(&self, name: S) -> Result<Value<'a>>
     where
         S: Into<String>,
     {
@@ -360,72 +372,43 @@ impl<'a> Row<'a> {
             }
         }
     }
+
+    /// Creates a new iterator for the specified row. This can be
+    /// used to iterate over columns in a row.
+    fn iter(&'a self) -> RowIterator<'a> {
+        unsafe { RowIterator(cass_iterator_from_row(self.0), PhantomData) }
+    }
 }
 
 /// An iterator over the columns in a row
+///
+/// A Cassandra iterator is a `LendingIterator` because it borrows from some
+/// underlying value, but owns a single item. Each time `next()` is invoked it
+/// decodes the current item into that item, thus invalidating its previous
+/// value.
 #[derive(Debug)]
-pub struct RowIterator(pub *mut _CassIterator);
+pub struct RowIterator<'a>(*mut _CassIterator, PhantomData<&'a _Row>);
 
-// The underlying C type has no thread-local state, but does not support access
-// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
-unsafe impl Send for RowIterator {}
+// The underlying C type has no thread-local state, and forbids only concurrent
+// mutation/free: https://datastax.github.io/cpp-driver/topics/#thread-safety
+unsafe impl Send for RowIterator<'_> {}
+unsafe impl Sync for RowIterator<'_> {}
 
-impl Drop for RowIterator {
+impl Drop for RowIterator<'_> {
     fn drop(&mut self) {
         unsafe { cass_iterator_free(self.0) }
     }
 }
 
-impl iter::Iterator for RowIterator {
-    type Item = Value;
+impl LendingIterator for RowIterator<'_> {
+    type Item<'a> = Value<'a> where Self: 'a;
 
-    fn next(&mut self) -> Option<<Self as Iterator>::Item> {
+    fn next(&mut self) -> Option<<Self as LendingIterator>::Item<'_>> {
         unsafe {
             match cass_iterator_next(self.0) {
                 cass_false => None,
                 cass_true => Some(Value::build(cass_iterator_get_column(self.0))),
             }
         }
-    }
-}
-
-impl<'a> Iterator for &'a RowIterator {
-    type Item = Value;
-
-    fn next(&mut self) -> Option<<Self as Iterator>::Item> {
-        unsafe {
-            match cass_iterator_next(self.0) {
-                cass_false => None,
-                cass_true => Some(Value::build(cass_iterator_get_column(self.0))),
-            }
-        }
-    }
-}
-
-impl Display for RowIterator {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        for item in self {
-            write!(f, "{}\t", Value::build(item.inner()))?;
-        }
-        Ok(())
-    }
-}
-
-impl IntoIterator for Row<'_> {
-    type Item = Value;
-    type IntoIter = RowIterator;
-
-    /// Creates a new iterator for the specified row. This can be
-    /// used to iterate over columns in a row.
-    fn into_iter(self) -> Self::IntoIter {
-        unsafe { RowIterator(cass_iterator_from_row(self.0)) }
-    }
-}
-
-impl<'a> IntoIterator for &'a Row<'_> {
-    type Item = Value;
-    type IntoIter = RowIterator;
-    fn into_iter(self) -> Self::IntoIter {
-        unsafe { RowIterator(cass_iterator_from_row(self.0)) }
     }
 }

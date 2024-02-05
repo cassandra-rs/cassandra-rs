@@ -2,7 +2,6 @@
 #![allow(dead_code)]
 #![allow(missing_copy_implementations)]
 
-use crate::cassandra::cluster::Cluster;
 use crate::cassandra::custom_payload::CustomPayloadResponse;
 use crate::cassandra::error::*;
 use crate::cassandra::future::CassFuture;
@@ -14,9 +13,6 @@ use crate::cassandra::statement::Statement;
 use crate::cassandra::util::{Protected, ProtectedInner};
 use crate::{cassandra::batch::Batch, BatchType};
 
-use crate::cassandra_sys::cass_session_close;
-use crate::cassandra_sys::cass_session_connect;
-use crate::cassandra_sys::cass_session_connect_keyspace_n;
 use crate::cassandra_sys::cass_session_execute;
 use crate::cassandra_sys::cass_session_execute_batch;
 use crate::cassandra_sys::cass_session_free;
@@ -26,7 +22,6 @@ use crate::cassandra_sys::cass_session_new;
 use crate::cassandra_sys::cass_session_prepare_n;
 use crate::cassandra_sys::CassSession as _Session;
 
-use std::ffi::NulError;
 use std::mem;
 use std::os::raw::c_char;
 use std::sync::Arc;

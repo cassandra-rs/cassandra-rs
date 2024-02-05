@@ -14,6 +14,34 @@ version number is tracked in the file `VERSION`.
 
 ### Fixed
 
+## [3.0.0]
+
+### Added
+- `get_decimal()` now gets a Cassanda decimal value as `BigDecimal`,
+  `bind_decimal()` does the reverse.
+
+### Changed
+- Date type is now `u32`.
+
+### Fixed
+- Soundness issue fixed - the various iterators no longer implement
+  `std::iter::Iterator`, but instead a new `LendingIterator` trait.
+  For migration guide, see [`README`](README.md#lending-iterator-api-version-30).
+- Many types now take a lifetime argument, e.g., `Value` is now `Value<'a>`,
+  `ResultIterator` is now `ResultIterator<'a>`.
+- `RowIterator` no longer implements `Display` (since it would consume the
+  iterator); however `Row` does.
+- `Result::into_iter()` and `Row::into_iter()` are now both `iter()`, since they
+  do not consume their argument.
+- `TupleIterator` is removed - it was never used, since you use the set iterator
+  (Value::get_set()) for lists, sets, and tuples.
+- `ConstDataType::sub_data_by_name` and `ConstDataType::sub_type_name` now take
+  `&self` rather than an explicit argument.
+- `FunctionMeta::argument` now returns the name and type, rather than just `()`.
+- The underlying raw pointer is no longer exposed as a field of `Cluster`,
+  `ResultIterator`, and `RowIterator`.
+- Many types now implement `Sync` as well as `Send`.
+
 ## [2.0.1] - 2023-06-08
 
 ### Fixed

@@ -4,6 +4,7 @@
 
 use crate::cassandra::data_type::ConstDataType;
 use crate::cassandra::error::*;
+use crate::cassandra::iterator::LendingIterator;
 use crate::cassandra::row::Row;
 use crate::cassandra::util::{Protected, ProtectedInner};
 use crate::cassandra::value::ValueType;
@@ -26,13 +27,12 @@ use crate::cassandra_sys::cass_true;
 use crate::cassandra_sys::CassIterator as _CassIterator;
 use crate::cassandra_sys::CassResult as _CassResult;
 
-use std::ffi::CString;
 use std::fmt;
 use std::fmt::Debug;
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::marker::PhantomData;
-use std::mem;
+
 use std::slice;
 use std::str;
 
@@ -61,7 +61,8 @@ impl Protected<*const _CassResult> for CassResult {
 impl Debug for CassResult {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         writeln!(f, "Result row count: {:?}", self.row_count())?;
-        for row in self.iter() {
+        let mut iter = self.iter();
+        while let Some(row) = iter.next() {
             writeln!(f, "{:?}", row)?;
         }
         Ok(())
@@ -71,7 +72,8 @@ impl Debug for CassResult {
 impl Display for CassResult {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         writeln!(f, "Result row count: {}", self.row_count())?;
-        for row in self.iter() {
+        let mut iter = self.iter();
+        while let Some(row) = iter.next() {
             writeln!(f, "{}", row)?;
         }
         Ok(())
@@ -171,14 +173,33 @@ impl CassResult {
     }
 }
 
-/// An iterator over the results of a query.
-/// The result holds the data, so it must last for at least the lifetime of the iterator.
+/// An iterator over the results of a query. The result holds the data, so
+/// the result must last for at least the lifetime of the iterator.
+///
+/// This is a lending iterator (you must stop using each item before you move to
+/// the next), and so it does not implement `std::iter::Iterator`. The best way
+/// to use it is as follows:
+///
+/// ```no_run
+/// # use cassandra_cpp::*;
+/// # let result: CassResult = unimplemented!();
+/// let mut iter = result.iter();
+/// while let Some(row) = iter.next() {
+///   // ... do something with `row` ...
+/// }
+/// ```
+///
+/// A Cassandra iterator is a `LendingIterator` because it borrows from some
+/// underlying value, but owns a single item. Each time `next()` is invoked it
+/// decodes the current item into that item, thus invalidating its previous
+/// value.
 #[derive(Debug)]
-pub struct ResultIterator<'a>(pub *mut _CassIterator, usize, PhantomData<&'a CassResult>);
+pub struct ResultIterator<'a>(*mut _CassIterator, usize, PhantomData<&'a _CassResult>);
 
-// The underlying C type has no thread-local state, but does not support access
-// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
-unsafe impl<'a> Send for ResultIterator<'a> {}
+// The underlying C type has no thread-local state, and forbids only concurrent
+// mutation/free: https://datastax.github.io/cpp-driver/topics/#thread-safety
+unsafe impl Send for ResultIterator<'_> {}
+unsafe impl Sync for ResultIterator<'_> {}
 
 impl<'a> Drop for ResultIterator<'a> {
     fn drop(&mut self) {
@@ -186,9 +207,10 @@ impl<'a> Drop for ResultIterator<'a> {
     }
 }
 
-impl<'a> Iterator for ResultIterator<'a> {
-    type Item = Row<'a>;
-    fn next(&mut self) -> Option<<Self as Iterator>::Item> {
+impl LendingIterator for ResultIterator<'_> {
+    type Item<'a> = Row<'a> where Self: 'a;
+
+    fn next(&mut self) -> Option<<Self as LendingIterator>::Item<'_>> {
         unsafe {
             match cass_iterator_next(self.0) {
                 cass_false => None,
@@ -202,18 +224,9 @@ impl<'a> Iterator for ResultIterator<'a> {
     }
 }
 
-impl<'a> ResultIterator<'a> {
-    /// Gets the next row in the result set
-    pub fn get_row(&mut self) -> Row<'a> {
+impl ResultIterator<'_> {
+    /// Gets the current row in the result set
+    pub fn get_row(&self) -> Row {
         unsafe { Row::build(cass_iterator_get_row(self.0)) }
-    }
-}
-
-impl<'a> IntoIterator for &'a CassResult {
-    type Item = Row<'a>;
-    type IntoIter = ResultIterator<'a>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
     }
 }

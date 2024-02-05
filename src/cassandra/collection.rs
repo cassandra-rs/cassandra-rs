@@ -10,7 +10,7 @@ use crate::cassandra::uuid::Uuid;
 use crate::cassandra_sys::cass_collection_append_bool;
 use crate::cassandra_sys::cass_collection_append_bytes;
 use crate::cassandra_sys::cass_collection_append_collection;
-use crate::cassandra_sys::cass_collection_append_decimal;
+
 use crate::cassandra_sys::cass_collection_append_double;
 use crate::cassandra_sys::cass_collection_append_float;
 use crate::cassandra_sys::cass_collection_append_inet;
@@ -124,9 +124,10 @@ pub trait CassCollection: Sized {
 #[derive(Debug)]
 pub struct List(*mut _CassCollection);
 
-// The underlying C type has no thread-local state, but does not support access
-// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+// The underlying C type has no thread-local state, and forbids only concurrent
+// mutation/free: https://datastax.github.io/cpp-driver/topics/#thread-safety
 unsafe impl Send for List {}
+unsafe impl Sync for List {}
 
 impl ProtectedInner<*mut _CassCollection> for List {
     fn inner(&self) -> *mut _CassCollection {
@@ -302,9 +303,10 @@ impl CassCollection for List {
 #[derive(Debug)]
 pub struct Set(*mut _CassCollection);
 
-// The underlying C type has no thread-local state, but does not support access
-// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+// The underlying C type has no thread-local state, and forbids only concurrent
+// mutation/free: https://datastax.github.io/cpp-driver/topics/#thread-safety
 unsafe impl Send for Set {}
+unsafe impl Sync for Set {}
 
 impl Drop for Set {
     fn drop(&mut self) {
@@ -438,9 +440,10 @@ impl CassCollection for Set {
 #[derive(Debug)]
 pub struct Map(*mut _CassCollection);
 
-// The underlying C type has no thread-local state, but does not support access
-// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+// The underlying C type has no thread-local state, and forbids only concurrent
+// mutation/free: https://datastax.github.io/cpp-driver/topics/#thread-safety
 unsafe impl Send for Map {}
+unsafe impl Sync for Map {}
 
 impl Drop for Map {
     fn drop(&mut self) {

@@ -9,7 +9,7 @@ use std::default::Default;
 use std::ffi::CStr;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
-use std::mem;
+
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::os::raw::c_char;
 use std::str::FromStr;

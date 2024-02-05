@@ -4,12 +4,12 @@ use crate::cassandra_sys::CassLogMessage;
 use crate::cassandra::util::ProtectedInner;
 use crate::cassandra_sys::cass_log_set_callback;
 use crate::cassandra_sys::cass_log_set_level;
-use crate::cassandra_sys::CassLogCallback;
+
 // use cassandra_sys::cass_log_set_queue_size; @deprecated
 
 #[cfg(feature = "slog")]
 use slog;
-use std::borrow::Borrow;
+
 use std::boxed::Box;
 use std::ffi::CStr;
 use std::os::raw;

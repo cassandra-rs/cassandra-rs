@@ -16,8 +16,7 @@ use crate::cassandra_sys::cass_user_type_set_bytes;
 use crate::cassandra_sys::cass_user_type_set_bytes_by_name_n;
 use crate::cassandra_sys::cass_user_type_set_collection;
 use crate::cassandra_sys::cass_user_type_set_collection_by_name_n;
-use crate::cassandra_sys::cass_user_type_set_decimal;
-use crate::cassandra_sys::cass_user_type_set_decimal_by_name_n;
+
 use crate::cassandra_sys::cass_user_type_set_double;
 use crate::cassandra_sys::cass_user_type_set_double_by_name_n;
 use crate::cassandra_sys::cass_user_type_set_float;
@@ -53,9 +52,10 @@ use std::os::raw::c_char;
 #[derive(Debug)]
 pub struct UserType(*mut _UserType);
 
-// The underlying C type has no thread-local state, but does not support access
-// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+// The underlying C type has no thread-local state, and forbids only concurrent
+// mutation/free: https://datastax.github.io/cpp-driver/topics/#thread-safety
 unsafe impl Send for UserType {}
+unsafe impl Sync for UserType {}
 
 impl ProtectedInner<*mut _UserType> for UserType {
     fn inner(&self) -> *mut _UserType {
@@ -77,12 +77,6 @@ impl Drop for UserType {
         unsafe { cass_user_type_free(self.0) }
     }
 }
-
-// impl Drop for UserType {
-//    fn drop(&mut self) {unsafe{
-//        cass_user_type_free(self.0)
-//    }}
-// }
 
 impl UserType {
     /// Gets the data type of a user defined type.

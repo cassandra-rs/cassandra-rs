@@ -17,33 +17,35 @@ use crate::cassandra_sys::cass_function_meta_return_type;
 use crate::cassandra_sys::cass_iterator_fields_from_function_meta;
 use crate::cassandra_sys::cass_true;
 use crate::cassandra_sys::CassFunctionMeta as _CassFunctionMeta;
-use crate::cassandra_sys::CASS_OK;
 
+use std::marker::PhantomData;
 use std::os::raw::c_char;
-use std::{mem, slice, str};
+use std::{slice, str};
 
 /// The metadata for a function
+//
+// Borrowed immutably.
 #[derive(Debug)]
-pub struct FunctionMeta(*const _CassFunctionMeta);
+pub struct FunctionMeta<'a>(*const _CassFunctionMeta, PhantomData<&'a _CassFunctionMeta>);
 
-impl ProtectedInner<*const _CassFunctionMeta> for FunctionMeta {
+impl ProtectedInner<*const _CassFunctionMeta> for FunctionMeta<'_> {
     fn inner(&self) -> *const _CassFunctionMeta {
         self.0
     }
 }
 
-impl Protected<*const _CassFunctionMeta> for FunctionMeta {
+impl Protected<*const _CassFunctionMeta> for FunctionMeta<'_> {
     fn build(inner: *const _CassFunctionMeta) -> Self {
         if inner.is_null() {
             panic!("Unexpected null pointer")
         };
-        FunctionMeta(inner)
+        FunctionMeta(inner, PhantomData)
     }
 }
 
-impl FunctionMeta {
-    /// Iterator over the fields in this function
-    pub fn fields_iter(&self) -> FieldIterator {
+impl<'a> FunctionMeta<'a> {
+    /// Iterator over the fields in this function.
+    pub fn fields_iter(&self) -> FieldIterator<'a> {
         unsafe { FieldIterator::build(cass_iterator_fields_from_function_meta(self.0)) }
     }
 
@@ -108,18 +110,23 @@ impl FunctionMeta {
     }
 
     /// Gets the function's argument name and type for the provided index.
-    pub fn argument(&self, index: usize) -> Result<()> {
+    pub fn argument(&self, index: usize) -> Result<(String, ConstDataType<'a>)> {
         let mut name = std::ptr::null();
         let mut name_length = 0;
         let mut data_type = std::ptr::null();
         unsafe {
             cass_function_meta_argument(self.0, index, &mut name, &mut name_length, &mut data_type)
-                .to_result(())
+                .to_result(())?;
+            let name = str::from_utf8(slice::from_raw_parts(name as *const u8, name_length))
+                .expect("must be utf8")
+                .to_owned();
+            let data_type = ConstDataType::build(data_type);
+            Ok((name, data_type))
         }
     }
 
     /// Gets the function's argument and type for the provided name.
-    pub fn argument_type_by_name(&self, name: &str) -> ConstDataType {
+    pub fn argument_type_by_name(&self, name: &str) -> ConstDataType<'a> {
         unsafe {
             let name_ptr = name.as_ptr() as *const c_char;
             // TODO: can return NULL
@@ -132,13 +139,13 @@ impl FunctionMeta {
     }
 
     /// Gets the return type of the function.
-    pub fn return_type(&self) -> ConstDataType {
+    pub fn return_type(&self) -> ConstDataType<'a> {
         unsafe { ConstDataType::build(cass_function_meta_return_type(self.0)) }
     }
 
     /// Gets a metadata field for the provided name. Metadata fields allow direct
     /// access to the column data found in the underlying "functions" metadata table.
-    pub fn field_by_name(&self, name: &str) -> Value {
+    pub fn field_by_name(&self, name: &str) -> Value<'a> {
         unsafe {
             let name_ptr = name.as_ptr() as *const c_char;
             // TODO: can return NULL

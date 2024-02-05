@@ -26,7 +26,8 @@ async fn do_work(session: &Session) -> Result<()> {
     let result = session.execute("SELECT * FROM testks.user;").await?;
 
     println!("Overall result: {}", result);
-    for row in result.iter() {
+    let mut iter = result.iter();
+    while let Some(row) = iter.next() {
         println!("Row: {}", row);
 
         let first_name: String = row.get_by_name("first_name")?;
@@ -34,18 +35,26 @@ async fn do_work(session: &Session) -> Result<()> {
             let maybe_iter: Result<MapIterator> = row.get_by_name("addresses");
             match maybe_iter {
                 Err(_) => HashMap::new(),
-                Ok(addresses_iter) => addresses_iter
-                    .map(|(k, v)| Ok((k.get_string()?, v.get_string()?)))
-                    .collect::<Result<_>>()?,
+                Ok(mut addresses_iter) => {
+                    let mut map = HashMap::new();
+                    while let Some((k, v)) = addresses_iter.next() {
+                        map.insert(k.get_string()?, v.get_string()?);
+                    }
+                    map
+                }
             }
         };
-        let emails_iter: SetIterator = row.get_by_name("email")?;
-        let emails: Vec<String> = emails_iter.map(|v| v.get_string()).collect::<Result<_>>()?;
+        let mut emails_iter: SetIterator = row.get_by_name("email")?;
+        let mut emails: Vec<String> = vec![];
+        while let Some(v) = emails_iter.next() {
+            emails.push(v.get_string()?);
+        }
         let last_name: String = row.get_by_name("last_name")?;
-        let phone_numbers_iter: SetIterator = row.get_by_name("phone_numbers")?;
-        let phone_numbers: Vec<String> = phone_numbers_iter
-            .map(|v| v.get_string())
-            .collect::<Result<_>>()?;
+        let mut phone_numbers_iter: SetIterator = row.get_by_name("phone_numbers")?;
+        let mut phone_numbers: Vec<String> = vec![];
+        while let Some(v) = phone_numbers_iter.next() {
+            phone_numbers.push(v.get_string()?);
+        }
         let title: i32 = row.get_by_name("title")?;
         println!(
             " == {} {:?} {:?} {} {:?} {}",

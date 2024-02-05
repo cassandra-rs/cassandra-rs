@@ -21,7 +21,7 @@ use std::ffi::CStr;
 use std::fmt;
 use std::fmt::Formatter;
 use std::fmt::{Debug, Display};
-use std::mem;
+
 use std::os::raw::c_char;
 use std::str;
 

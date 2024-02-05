@@ -36,10 +36,11 @@ async fn select_from_maps(session: &Session, key: &str) -> Result<Vec<Pair>> {
     let result = statement.execute().await?;
     // println!("{:?}", result);
     let mut res = vec![];
-    for row in result.iter() {
+    let mut iter = result.iter();
+    while let Some(row) = iter.next() {
         let column = row.get_column(0).unwrap(); //FIXME
-        let items_iterator: MapIterator = column.get_map().unwrap();
-        for item in items_iterator {
+        let mut items_iterator: MapIterator = column.get_map().unwrap();
+        while let Some(item) = items_iterator.next() {
             println!("item: {:?}", item);
             res.push(Pair {
                 key: item.0.get_string().expect("key").to_string(),

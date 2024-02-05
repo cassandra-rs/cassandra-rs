@@ -1,4 +1,3 @@
-use crate::cassandra::util::Protected;
 use crate::cassandra_sys::CassWriteType_;
 
 /// A Cassandra write type level.

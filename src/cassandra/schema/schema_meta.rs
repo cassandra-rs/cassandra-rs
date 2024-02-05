@@ -9,7 +9,7 @@ use crate::cassandra_sys::cass_schema_meta_snapshot_version;
 use crate::cassandra_sys::CassSchemaMeta as _CassSchemaMeta;
 use std::os::raw::c_char;
 
-/// A snapshot of the schema's metadata
+/// A snapshot of the schema's metadata. Owned.
 #[derive(Debug)]
 pub struct SchemaMeta(*const _CassSchemaMeta);
 
@@ -56,7 +56,7 @@ impl SchemaMeta {
     }
 
     /// Returns an iterator over the keyspaces in this schema
-    pub fn keyspace_iter(&mut self) -> KeyspaceIterator {
+    pub fn keyspace_iter(&self) -> KeyspaceIterator {
         unsafe { KeyspaceIterator::build(cass_iterator_keyspaces_from_schema_meta(self.0)) }
     }
 }

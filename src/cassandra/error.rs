@@ -4,9 +4,10 @@ use crate::cassandra::value::ValueType;
 use crate::cassandra::write_type::WriteType;
 
 use crate::cassandra_sys::cass_error_desc;
-use crate::cassandra_sys::cass_error_result_code;
+
 use crate::cassandra_sys::cass_error_result_free;
-use crate::cassandra_sys::cass_future_error_code;
+
+use crate::cassandra_sys::cass_false;
 use crate::cassandra_sys::cass_future_error_message;
 use crate::cassandra_sys::cass_future_get_error_result;
 use crate::cassandra_sys::CassErrorResult as CassErrorResult_;
@@ -19,14 +20,12 @@ use crate::cassandra_sys::{
     cass_error_result_num_failures, cass_error_result_responses_received,
     cass_error_result_responses_required, cass_error_result_table, cass_error_result_write_type,
 };
-use crate::cassandra_sys::{cass_false, cass_true};
 use crate::Session;
 
-use std::error::Error as IError;
-use std::ffi::{CStr, CString};
-use std::fmt::{Debug, Display, Formatter};
-use std::os::raw::c_char;
-use std::{fmt, mem, slice, str};
+use std::ffi::CStr;
+use std::fmt::Debug;
+
+use std::{slice, str};
 
 // Define the errors that may be returned by this driver.
 error_chain! {

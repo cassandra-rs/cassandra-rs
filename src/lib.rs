@@ -2,7 +2,6 @@
 #![deny(missing_docs)]
 #![allow(unknown_lints)]
 #![allow(clippy::doc_markdown)]
-#![allow(unused_imports)] // TODO: remove
 #![allow(dead_code)] // TODO: remove
 // `error_chain!` can recurse deeply
 #![recursion_limit = "1024"]
@@ -24,6 +23,7 @@ pub use crate::cassandra::data_type::DataType;
 // pub use cassandra::write_type::*;
 pub use crate::cassandra::field::Field;
 pub use crate::cassandra::inet::Inet;
+pub use crate::cassandra::iterator::LendingIterator;
 // pub use cassandra::util::*;
 // pub use cassandra::metrics::*;
 pub use crate::cassandra::iterator::{

@@ -1,9 +1,9 @@
 use crate::cassandra::error::*;
-use crate::cassandra::util::{Protected, ProtectedInner, ProtectedWithSession};
+use crate::cassandra::util::{Protected, ProtectedInner};
 
 use crate::cassandra_sys::cass_custom_payload_free;
 use crate::cassandra_sys::cass_custom_payload_new;
-use crate::cassandra_sys::cass_custom_payload_set;
+
 use crate::cassandra_sys::cass_custom_payload_set_n;
 use crate::cassandra_sys::CassCustomPayload as _CassCustomPayload;
 use std::collections::HashMap;
@@ -15,9 +15,10 @@ pub type CustomPayloadResponse = HashMap<String, Vec<u8>>;
 #[derive(Debug)]
 pub struct CustomPayload(*mut _CassCustomPayload);
 
-// The underlying C type has no thread-local state, but does not support access
-// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+// The underlying C type has no thread-local state, and forbids only concurrent
+// mutation/free: https://datastax.github.io/cpp-driver/topics/#thread-safety
 unsafe impl Send for CustomPayload {}
+unsafe impl Sync for CustomPayload {}
 
 impl ProtectedInner<*mut _CassCustomPayload> for CustomPayload {
     #[inline(always)]

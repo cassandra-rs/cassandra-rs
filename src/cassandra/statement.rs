@@ -1,5 +1,5 @@
 use crate::cassandra_sys::CASS_ERROR_LIB_INVALID_DATA;
-use bigdecimal::num_bigint::BigInt;
+
 use bigdecimal::BigDecimal;
 
 use crate::cassandra::collection::List;
@@ -95,9 +95,10 @@ impl StatementInner {
 #[derive(Debug)]
 pub struct Statement(StatementInner, Session);
 
-// The underlying C type has no thread-local state, but does not support access
-// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+// The underlying C type has no thread-local state, and forbids only concurrent
+// mutation/free: https://datastax.github.io/cpp-driver/topics/#thread-safety
 unsafe impl Send for StatementInner {}
+unsafe impl Sync for StatementInner {}
 
 impl ProtectedInner<*mut _Statement> for StatementInner {
     #[inline(always)]

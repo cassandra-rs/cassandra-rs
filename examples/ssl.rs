@@ -25,7 +25,8 @@ async fn main() -> Result<()> {
         .unwrap();
 
     println!("{}", result);
-    for row in result.iter() {
+    let mut iter = result.iter();
+    while let Some(row) = iter.next() {
         let col: String = row.get_by_name(col_name).unwrap();
         println!("ks name = {}", col);
     }
