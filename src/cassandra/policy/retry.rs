@@ -10,9 +10,10 @@ use crate::cassandra_sys::CassRetryPolicy as _RetryPolicy;
 #[derive(Debug)]
 pub struct RetryPolicy(*mut _RetryPolicy);
 
-// The underlying C type has no thread-local state, but does not support access
-// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+// The underlying C type has no thread-local state, and forbids only concurrent
+// mutation/free: https://datastax.github.io/cpp-driver/topics/#thread-safety
 unsafe impl Send for RetryPolicy {}
+unsafe impl Sync for RetryPolicy {}
 
 impl ProtectedInner<*mut _RetryPolicy> for RetryPolicy {
     fn inner(&self) -> *mut _RetryPolicy {

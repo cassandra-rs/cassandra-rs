@@ -8,7 +8,7 @@ use crate::cassandra::util::{Protected, ProtectedInner};
 use crate::cassandra::uuid::Uuid;
 
 use crate::cassandra_sys::cass_bool_t;
-use crate::cassandra_sys::cass_collection_append_decimal;
+
 use crate::cassandra_sys::cass_iterator_fields_from_user_type;
 use crate::cassandra_sys::cass_iterator_from_collection;
 use crate::cassandra_sys::cass_iterator_from_map;
@@ -29,9 +29,7 @@ use crate::cassandra_sys::cass_value_get_uint32;
 use crate::cassandra_sys::cass_value_get_uuid;
 use crate::cassandra_sys::cass_value_is_collection;
 use crate::cassandra_sys::cass_value_is_null;
-use crate::cassandra_sys::cass_value_item_count;
-use crate::cassandra_sys::cass_value_primary_sub_type;
-use crate::cassandra_sys::cass_value_secondary_sub_type;
+
 use crate::cassandra_sys::cass_value_type;
 use crate::cassandra_sys::CassInet;
 use crate::cassandra_sys::CassUuid;
@@ -39,43 +37,16 @@ use crate::cassandra_sys::CassValue as _CassValue;
 use crate::cassandra_sys::CassValueType_;
 use crate::cassandra_sys::CASS_ERROR_LIB_INVALID_VALUE_TYPE;
 use crate::cassandra_sys::CASS_ERROR_LIB_NULL_VALUE;
-use crate::cassandra_sys::CASS_VALUE_TYPE_ASCII;
-use crate::cassandra_sys::CASS_VALUE_TYPE_BIGINT;
-use crate::cassandra_sys::CASS_VALUE_TYPE_BLOB;
-use crate::cassandra_sys::CASS_VALUE_TYPE_BOOLEAN;
-use crate::cassandra_sys::CASS_VALUE_TYPE_COUNTER;
-use crate::cassandra_sys::CASS_VALUE_TYPE_CUSTOM;
-use crate::cassandra_sys::CASS_VALUE_TYPE_DATE;
-use crate::cassandra_sys::CASS_VALUE_TYPE_DECIMAL;
-use crate::cassandra_sys::CASS_VALUE_TYPE_DOUBLE;
-use crate::cassandra_sys::CASS_VALUE_TYPE_DURATION;
-use crate::cassandra_sys::CASS_VALUE_TYPE_FLOAT;
-use crate::cassandra_sys::CASS_VALUE_TYPE_INET;
-use crate::cassandra_sys::CASS_VALUE_TYPE_INT;
-use crate::cassandra_sys::CASS_VALUE_TYPE_LAST_ENTRY;
-use crate::cassandra_sys::CASS_VALUE_TYPE_LIST;
-use crate::cassandra_sys::CASS_VALUE_TYPE_MAP;
-use crate::cassandra_sys::CASS_VALUE_TYPE_SET;
-use crate::cassandra_sys::CASS_VALUE_TYPE_SMALL_INT;
-use crate::cassandra_sys::CASS_VALUE_TYPE_TEXT;
-use crate::cassandra_sys::CASS_VALUE_TYPE_TIME;
-use crate::cassandra_sys::CASS_VALUE_TYPE_TIMESTAMP;
-use crate::cassandra_sys::CASS_VALUE_TYPE_TIMEUUID;
-use crate::cassandra_sys::CASS_VALUE_TYPE_TINY_INT;
-use crate::cassandra_sys::CASS_VALUE_TYPE_TUPLE;
-use crate::cassandra_sys::CASS_VALUE_TYPE_UDT;
-use crate::cassandra_sys::CASS_VALUE_TYPE_UNKNOWN;
-use crate::cassandra_sys::CASS_VALUE_TYPE_UUID;
-use crate::cassandra_sys::CASS_VALUE_TYPE_VARCHAR;
-use crate::cassandra_sys::CASS_VALUE_TYPE_VARINT;
+
+use crate::LendingIterator;
 
 use bigdecimal::num_bigint::BigInt;
 use bigdecimal::BigDecimal;
-use std::ffi::CString;
+
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
-use std::mem;
-use std::ptr;
+use std::marker::PhantomData;
+
 use std::slice;
 use std::str;
 
@@ -146,24 +117,27 @@ enhance_nullary_enum!(ValueType, CassValueType_, {
 }, omit { CASS_VALUE_TYPE_LAST_ENTRY });
 
 /// A single primitive value or a collection of values.
-pub struct Value(*const _CassValue);
+//
+// Borrowed immutably.
+pub struct Value<'a>(*const _CassValue, PhantomData<&'a _CassValue>);
 
 // The underlying C type is read-only so thread-safe.
-unsafe impl Send for Value {}
-unsafe impl Sync for Value {}
+// https://datastax.github.io/cpp-driver/topics/#thread-safety
+unsafe impl Send for Value<'_> {}
+unsafe impl Sync for Value<'_> {}
 
-impl ProtectedInner<*const _CassValue> for Value {
+impl ProtectedInner<*const _CassValue> for Value<'_> {
     fn inner(&self) -> *const _CassValue {
         self.0
     }
 }
 
-impl Protected<*const _CassValue> for Value {
+impl Protected<*const _CassValue> for Value<'_> {
     fn build(inner: *const _CassValue) -> Self {
         if inner.is_null() {
             panic!("Unexpected null pointer")
         };
-        Value(inner)
+        Value(inner, PhantomData)
     }
 }
 
@@ -175,8 +149,8 @@ where
     write!(f, "[")?;
     match set {
         Err(_) => write!(f, "<error>")?,
-        Ok(iter) => {
-            for item in iter {
+        Ok(mut iter) => {
+            while let Some(item) = iter.next() {
                 writer(f, item)?
             }
         }
@@ -193,8 +167,8 @@ where
     write!(f, "{{")?;
     match set {
         Err(_) => write!(f, "<error>")?,
-        Ok(iter) => {
-            for item in iter {
+        Ok(mut iter) => {
+            while let Some(item) = iter.next() {
                 writer(f, item.0, item.1)?
             }
         }
@@ -213,7 +187,7 @@ where
     }
 }
 
-impl Debug for Value {
+impl Debug for Value<'_> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         if self.is_null() {
             Ok(())
@@ -259,7 +233,7 @@ impl Debug for Value {
     }
 }
 
-impl Display for Value {
+impl Display for Value<'_> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         if self.is_null() {
             Ok(())
@@ -311,9 +285,9 @@ impl Display for Value {
     }
 }
 
-impl Value {
+impl<'a> Value<'a> {
     /// Get the raw bytes of this Cassandra value.
-    pub fn get_bytes(&self) -> Result<&[u8]> {
+    pub fn get_bytes(&self) -> Result<&'a [u8]> {
         let mut output = std::ptr::null();
         let mut output_size = 0;
         unsafe {
@@ -329,7 +303,7 @@ impl Value {
     }
 
     /// Get the data type of this Cassandra value
-    pub fn data_type(&self) -> ConstDataType {
+    pub fn data_type(&self) -> ConstDataType<'a> {
         unsafe { ConstDataType::build(cass_value_data_type(self.0)) }
     }
 
@@ -358,8 +332,8 @@ impl Value {
     //        unsafe { ValueType::build(cass_value_secondary_sub_type(self.0)).unwrap() }
     //    }
 
-    /// Gets this value as a set iterator.
-    pub fn get_set(&self) -> Result<SetIterator> {
+    /// Gets this value as a set / list / tuple iterator (the same method works for any of these).
+    pub fn get_set(&self) -> Result<SetIterator<'a>> {
         unsafe {
             match self.get_type() {
                 ValueType::SET | ValueType::LIST | ValueType::TUPLE => {
@@ -377,7 +351,7 @@ impl Value {
     }
 
     /// Gets this value as a map iterator.
-    pub fn get_map(&self) -> Result<MapIterator> {
+    pub fn get_map(&self) -> Result<MapIterator<'a>> {
         unsafe {
             match self.get_type() {
                 ValueType::MAP => {
@@ -395,7 +369,7 @@ impl Value {
     }
 
     /// Gets an iterator over the fields of the user type in this column or errors if you ask for the wrong type
-    pub fn get_user_type(&self) -> Result<UserTypeIterator> {
+    pub fn get_user_type(&self) -> Result<UserTypeIterator<'a>> {
         unsafe {
             match self.get_type() {
                 ValueType::UDT => {
@@ -413,7 +387,7 @@ impl Value {
     }
 
     /// Get this value as a string slice
-    pub fn get_str(&self) -> Result<&str> {
+    pub fn get_str(&self) -> Result<&'a str> {
         let mut message_ptr = std::ptr::null();
         let mut message_length = 0;
         unsafe {

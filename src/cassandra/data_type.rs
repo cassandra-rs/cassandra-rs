@@ -27,18 +27,25 @@ use crate::cassandra_sys::cass_user_type_new_from_data_type;
 use crate::cassandra_sys::CassDataType as _CassDataType;
 
 use std::ffi::CString;
+use std::marker::PhantomData;
 use std::os::raw::c_char;
 
-/// Any cassandra datatype
+/// Any Cassandra datatype. This is an owned type.
 #[derive(Debug)]
 pub struct DataType(*mut _CassDataType);
-#[derive(Debug)]
-pub struct ConstDataType(*const _CassDataType);
 
-// The underlying C types have no thread-local state, but do not support access
-// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+/// Any Cassandra datatype. This is a reference type.
+//
+// Borrowed from whatever descriptor contains the type, e.g., a `SchemaMeta`.
+#[derive(Debug)]
+pub struct ConstDataType<'a>(*const _CassDataType, PhantomData<&'a _CassDataType>);
+
+// The underlying C types have no thread-local state, and forbids only concurrent
+// mutation/free: https://datastax.github.io/cpp-driver/topics/#thread-safety
 unsafe impl Send for DataType {}
-unsafe impl Send for ConstDataType {}
+unsafe impl Sync for DataType {}
+unsafe impl Send for ConstDataType<'_> {}
+unsafe impl Sync for ConstDataType<'_> {}
 
 impl ProtectedInner<*mut _CassDataType> for DataType {
     fn inner(&self) -> *mut _CassDataType {
@@ -55,18 +62,18 @@ impl Protected<*mut _CassDataType> for DataType {
     }
 }
 
-impl ProtectedInner<*const _CassDataType> for ConstDataType {
+impl ProtectedInner<*const _CassDataType> for ConstDataType<'_> {
     fn inner(&self) -> *const _CassDataType {
         self.0
     }
 }
 
-impl Protected<*const _CassDataType> for ConstDataType {
+impl Protected<*const _CassDataType> for ConstDataType<'_> {
     fn build(inner: *const _CassDataType) -> Self {
         if inner.is_null() {
             panic!("Unexpected null pointer")
         };
-        ConstDataType(inner)
+        ConstDataType(inner, PhantomData)
     }
 }
 
@@ -77,7 +84,7 @@ impl Drop for DataType {
     }
 }
 
-impl ConstDataType {
+impl ConstDataType<'_> {
     /// Creates a new user defined type from existing data type.
     pub fn new_user_type(&self) -> UserType {
         unsafe { UserType::build(cass_user_type_new_from_data_type(self.0)) }
@@ -233,7 +240,7 @@ impl DataType {
     /// Gets the sub-data type of a UDT (user defined type) at the specified index.
     ///
     /// <b>Note:</b> Only valid for UDT data types.
-    pub fn sub_data_type_by_name<S>(data_type: DataType, name: S) -> ConstDataType
+    pub fn sub_data_type_by_name<S>(&self, name: S) -> ConstDataType
     where
         S: Into<String>,
     {
@@ -242,7 +249,7 @@ impl DataType {
             let name_ptr = name_str.as_ptr() as *const c_char;
             // TODO: can return NULL
             ConstDataType::build(cass_data_type_sub_data_type_by_name_n(
-                data_type.0,
+                self.0,
                 name_ptr,
                 name_str.len(),
             ))
@@ -252,14 +259,14 @@ impl DataType {
     /// Gets the sub-type name of a UDT (user defined type) at the specified index.
     ///
     /// <b>Note:</b> Only valid for UDT data types.
-    pub fn sub_type_name<S>(data_type: DataType, index: usize, name: S) -> Result<()>
+    pub fn sub_type_name<S>(&self, index: usize, name: S) -> Result<()>
     where
         S: Into<String>,
     {
         unsafe {
             let name2 = CString::new(name.into())?;
             cass_data_type_sub_type_name(
-                data_type.0,
+                self.0,
                 index,
                 &mut name2.as_ptr(),
                 &mut (name2.as_bytes().len()),

@@ -46,7 +46,8 @@ async fn select_from_paging(session: &Session) -> Result<Vec<(String, String)>> 
 
         let result = statement.execute().await?;
         println!("{:?}", result);
-        for row in result.iter() {
+        let mut iter = result.iter();
+        while let Some(row) = iter.next() {
             match row.get_column(0)?.get_string() {
                 Ok(key) => {
                     let key_str = key.to_string();
@@ -57,6 +58,7 @@ async fn select_from_paging(session: &Session) -> Result<Vec<(String, String)>> 
                 Err(err) => panic!("{}", err),
             }
         }
+        drop(iter);
         has_more_pages = result.has_more_pages();
         if has_more_pages {
             prev_result = Some(result);

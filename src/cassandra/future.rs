@@ -1,28 +1,27 @@
-use crate::cassandra::custom_payload::{CustomPayload, CustomPayloadResponse};
+use crate::cassandra::custom_payload::CustomPayloadResponse;
 use crate::cassandra::error::*;
 use crate::cassandra::prepared::PreparedStatement;
 use crate::cassandra::result::CassResult;
 use crate::cassandra::util::{Protected, ProtectedWithSession};
-use crate::cassandra::write_type::WriteType;
+
 use crate::cassandra_sys::cass_future_custom_payload_item;
 use crate::cassandra_sys::cass_future_custom_payload_item_count;
 use crate::cassandra_sys::cass_future_error_code;
-use crate::cassandra_sys::cass_future_error_message;
+
 use crate::cassandra_sys::cass_future_free;
-use crate::cassandra_sys::cass_future_get_error_result;
+
 use crate::cassandra_sys::cass_future_get_prepared;
 use crate::cassandra_sys::cass_future_get_result;
 use crate::cassandra_sys::cass_future_ready;
 use crate::cassandra_sys::cass_future_set_callback;
-use crate::cassandra_sys::CassError_;
+
+use crate::cassandra_sys::cass_true;
 use crate::cassandra_sys::CassFuture as _Future;
 use crate::cassandra_sys::CASS_OK;
-use crate::cassandra_sys::{cass_false, cass_true};
-use crate::{cassandra::consistency::Consistency, Session};
+use crate::Session;
 
 use parking_lot::Mutex;
 
-use std::collections::HashMap;
 use std::future::Future;
 use std::marker::PhantomData;
 use std::mem;

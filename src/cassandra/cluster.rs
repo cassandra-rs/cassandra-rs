@@ -48,23 +48,15 @@ use crate::cassandra_sys::cass_cluster_set_whitelist_filtering;
 use crate::cassandra_sys::cass_cluster_set_write_bytes_high_water_mark;
 use crate::cassandra_sys::cass_cluster_set_write_bytes_low_water_mark;
 use crate::cassandra_sys::cass_false;
-use crate::cassandra_sys::cass_future_error_code;
+
 use crate::cassandra_sys::cass_session_connect;
 use crate::cassandra_sys::cass_session_connect_keyspace_n;
-use crate::cassandra_sys::cass_session_new;
+
 use crate::cassandra_sys::cass_true;
 use crate::cassandra_sys::CassCluster as _Cluster;
 
-use std::ffi::CStr;
-use std::ffi::NulError;
-use std::fmt;
-use std::fmt::Display;
-use std::iter::Map;
-use std::net::AddrParseError;
-use std::net::Ipv4Addr;
 use std::os::raw::c_char;
-use std::result;
-use std::str::FromStr;
+
 use std::time::Duration;
 
 /// A CQL protocol version is just an integer.
@@ -85,11 +77,12 @@ pub type CqlProtocol = i32;
 /// # }
 /// ```
 #[derive(Debug)]
-pub struct Cluster(pub *mut _Cluster);
+pub struct Cluster(*mut _Cluster);
 
-// The underlying C type has no thread-local state, but does not support access
-// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+// The underlying C type has no thread-local state, and forbids only concurrent
+// mutation/free: https://datastax.github.io/cpp-driver/topics/#thread-safety
 unsafe impl Send for Cluster {}
+unsafe impl Sync for Cluster {}
 
 impl Drop for Cluster {
     /// Frees a cluster instance.

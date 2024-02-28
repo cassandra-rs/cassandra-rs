@@ -46,9 +46,10 @@ fn to_bitset(flags: &[SslVerifyFlag]) -> i32 {
 #[derive(Debug)]
 pub struct Ssl(*mut _Ssl);
 
-// The underlying C type has no thread-local state, but does not support access
-// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+// The underlying C type has no thread-local state, and forbids only concurrent
+// mutation/free: https://datastax.github.io/cpp-driver/topics/#thread-safety
 unsafe impl Send for Ssl {}
+unsafe impl Sync for Ssl {}
 
 impl ProtectedInner<*mut _Ssl> for Ssl {
     fn inner(&self) -> *mut _Ssl {

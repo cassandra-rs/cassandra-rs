@@ -121,10 +121,10 @@ fn basic_from_result(result: CassResult) -> Result<Option<Basic>> {
         None => Ok(None),
         Some(row) => {
             // todo: refactor?
-            let fields_iter: UserTypeIterator = row.get(12)?;
+            let mut fields_iter: UserTypeIterator = row.get(12)?;
             let mut dt: u32 = 0;
             let mut tm: i64 = 0;
-            for field in fields_iter {
+            while let Some(field) = fields_iter.next() {
                 match field.0.as_ref() {
                     "dt" => dt = field.1.get_u32()?,
                     "tm" => tm = field.1.get_i64()?,
@@ -183,7 +183,8 @@ async fn test_simple() -> Result<()> {
 
     println!("{}", result);
     let mut names = vec![];
-    for row in result.iter() {
+    let mut iter = result.iter();
+    while let Some(row) = iter.next() {
         let col: String = row.get_by_name("keyspace_name").unwrap();
         println!("ks name = {}", col);
         names.push(col);
@@ -338,7 +339,8 @@ async fn test_decimal_round_trip() -> Result<()> {
             ))
             .await?;
 
-        for row in result.into_iter() {
+        let mut iter = result.iter();
+        while let Some(row) = iter.next() {
             let txt: String = row.get_by_name("txt").unwrap();
             let dec: BigDecimal = row.get_by_name("dec").unwrap();
 
@@ -368,7 +370,8 @@ async fn test_decimal_round_trip() -> Result<()> {
             ))
             .await?;
 
-        for row in result.into_iter() {
+        let mut iter = result.iter();
+        while let Some(row) = iter.next() {
             let txt: String = row.get_by_name("txt").unwrap();
             let dec: BigDecimal = row.get_by_name("dec").unwrap();
 
@@ -631,7 +634,8 @@ async fn test_error_reporting() -> Result<()> {
     let result = session
         .execute("SELECT i32 FROM examples.basic WHERE key = 'utf8';")
         .await?;
-    let row = result.iter().next().unwrap();
+    let mut iter = result.iter();
+    let row = iter.next().unwrap();
     let err = row
         .get_column(0)?
         .get_string()

@@ -25,44 +25,48 @@ use crate::cassandra_sys::cass_keyspace_meta_name;
 use crate::cassandra_sys::cass_keyspace_meta_table_by_name_n;
 use crate::cassandra_sys::cass_keyspace_meta_user_type_by_name_n;
 use crate::cassandra_sys::raw2utf8;
-use std::mem;
+
+use std::marker::PhantomData;
+
 use std::os::raw::c_char;
 
 /// A snapshot of the schema's metadata.
+//
+// Borrowed immutably.
 #[derive(Debug)]
-pub struct KeyspaceMeta(*const _CassKeyspaceMeta);
+pub struct KeyspaceMeta<'a>(*const _CassKeyspaceMeta, PhantomData<&'a _CassKeyspaceMeta>);
 
-impl ProtectedInner<*const _CassKeyspaceMeta> for KeyspaceMeta {
+impl ProtectedInner<*const _CassKeyspaceMeta> for KeyspaceMeta<'_> {
     fn inner(&self) -> *const _CassKeyspaceMeta {
         self.0
     }
 }
 
-impl Protected<*const _CassKeyspaceMeta> for KeyspaceMeta {
+impl Protected<*const _CassKeyspaceMeta> for KeyspaceMeta<'_> {
     fn build(inner: *const _CassKeyspaceMeta) -> Self {
         if inner.is_null() {
             panic!("Unexpected null pointer")
         };
-        KeyspaceMeta(inner)
+        KeyspaceMeta(inner, PhantomData)
     }
 }
 
 #[derive(Debug)]
-pub struct MetadataFieldValue(*const _CassValue);
+pub struct MetadataFieldValue<'a>(*const _CassValue, PhantomData<&'a _CassValue>);
 
-impl KeyspaceMeta {
+impl<'a> KeyspaceMeta<'a> {
     /// Iterator over the aggregates in this keyspace
-    pub fn aggregrates_iter(&self) -> AggregateIterator {
+    pub fn aggregrates_iter(&self) -> AggregateIterator<'a> {
         unsafe { AggregateIterator::build(cass_iterator_aggregates_from_keyspace_meta(self.0)) }
     }
 
     /// Iterator over the field in this keyspace
-    pub fn fields_iter(&self) -> FieldIterator {
+    pub fn fields_iter(&self) -> FieldIterator<'a> {
         unsafe { FieldIterator::build(cass_iterator_fields_from_keyspace_meta(self.0)) }
     }
 
     /// Gets the table metadata for the provided table name.
-    pub fn table_by_name(&self, name: &str) -> Option<TableMeta> {
+    pub fn table_by_name(&self, name: &str) -> Option<TableMeta<'a>> {
         unsafe {
             let name_ptr = name.as_ptr() as *const c_char;
             let value = cass_keyspace_meta_table_by_name_n(self.0, name_ptr, name.len());
@@ -75,7 +79,7 @@ impl KeyspaceMeta {
     }
 
     /// Gets the data type for the provided type name.
-    pub fn user_type_by_name(&self, name: &str) -> Option<ConstDataType> {
+    pub fn user_type_by_name(&self, name: &str) -> Option<ConstDataType<'a>> {
         unsafe {
             let name_ptr = name.as_ptr() as *const c_char;
             let value = cass_keyspace_meta_user_type_by_name_n(self.0, name_ptr, name.len());
@@ -88,7 +92,11 @@ impl KeyspaceMeta {
     }
 
     /// Gets the function metadata for the provided function name.
-    pub fn get_function_by_name(&self, name: &str, arguments: Vec<&str>) -> Option<FunctionMeta> {
+    pub fn get_function_by_name(
+        &self,
+        name: &str,
+        arguments: Vec<&str>,
+    ) -> Option<FunctionMeta<'a>> {
         unsafe {
             let name_ptr = name.as_ptr() as *const c_char;
             let arguments_str = arguments.join(",");
@@ -109,7 +117,7 @@ impl KeyspaceMeta {
     }
 
     /// Gets the aggregate metadata for the provided aggregate name.
-    pub fn aggregate_by_name(&self, name: &str, arguments: Vec<&str>) -> Option<AggregateMeta> {
+    pub fn aggregate_by_name(&self, name: &str, arguments: Vec<&str>) -> Option<AggregateMeta<'a>> {
         unsafe {
             let name_ptr = name.as_ptr() as *const c_char;
             let arguments_str = arguments.join(",");
@@ -130,17 +138,17 @@ impl KeyspaceMeta {
     }
 
     /// Iterator over the tables in this keyspaces
-    pub fn table_iter(&mut self) -> TableIterator {
+    pub fn table_iter(&self) -> TableIterator<'a> {
         unsafe { TableIterator::build(cass_iterator_tables_from_keyspace_meta(self.0)) }
     }
 
     /// Iterator over the functions in this keyspaces
-    pub fn function_iter(&mut self) -> FunctionIterator {
+    pub fn function_iter(&self) -> FunctionIterator<'a> {
         unsafe { FunctionIterator::build(cass_iterator_functions_from_keyspace_meta(self.0)) }
     }
 
     /// Iterator over the UDTs in this keyspaces
-    pub fn user_type_iter(&mut self) -> UserTypeIterator {
+    pub fn user_type_iter(&self) -> UserTypeIterator<'a> {
         unsafe { UserTypeIterator::build(cass_iterator_user_types_from_keyspace_meta(self.0)) }
     }
 
@@ -156,14 +164,14 @@ impl KeyspaceMeta {
 
     /// Gets a metadata field for the provided name. Metadata fields allow direct
     /// access to the column data found in the underlying "keyspaces" metadata table.
-    pub fn field_by_name(&self, name: &str) -> Option<MetadataFieldValue> {
+    pub fn field_by_name(&self, name: &str) -> Option<MetadataFieldValue<'a>> {
         unsafe {
             let name_ptr = name.as_ptr() as *const c_char;
             let value = cass_keyspace_meta_field_by_name_n(self.0, name_ptr, name.len());
             if value.is_null() {
                 None
             } else {
-                Some(MetadataFieldValue(value))
+                Some(MetadataFieldValue(value, PhantomData))
             }
         }
     }

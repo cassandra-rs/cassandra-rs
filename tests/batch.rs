@@ -27,13 +27,14 @@ async fn insert_into_batch_with_prepared(session: &Session, pairs: &Vec<Pair>) -
 
 async fn retrieve_batch(session: &Session) -> Result<Vec<Pair>> {
     let result = session.execute("SELECT * from examples.pairs").await?;
-    let v = result
-        .iter()
-        .map(|r| Pair {
+    let mut v = vec![];
+    let mut iter = result.iter();
+    while let Some(r) = iter.next() {
+        v.push(Pair {
             key: r.get(0).expect("Key"),
             value: r.get(1).expect("Value"),
         })
-        .collect();
+    }
     Ok(v)
 }
 

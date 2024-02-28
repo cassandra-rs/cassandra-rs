@@ -55,6 +55,56 @@ For a straightforward example see [`simple.rs`](examples/simple.rs).
 There are additional examples included with the project in [`tests`](tests/) and
 [`examples`](examples/).
 
+## Lending iterator API (version 3.0)
+
+Version 3.0 fixes a soundness issue with the previous API. The iterators in the
+underlying Cassandra driver invalidate the current item when `next()` is called,
+and this was not reflected in the Rust binding prior to version 3.
+
+To deal with this, the various iterators (`ResultIterator`, `RowIterator`,
+`MapIterator`, `SetIterator`, `FieldIterator`, `UserTypeIterator`,
+`KeyspaceIterator`, `FunctionIterator`, `AggregateIterator`, `TableIterator`,
+`ColumnIterator`) no longer implement `std::iter::Iterator`. Instead, since this
+is a [lending
+iterator,](https://blog.rust-lang.org/2022/11/03/Rust-1.65.0.html#generic-associated-types-gats)
+these types all implement a new `LendingIterator` trait. We define this
+ourselves because there is currently no widely-used crate that implements it.
+
+To upgrade, change
+
+```rust
+for row in result {
+  // ... do something with row ...
+}
+```
+
+to
+
+```rust
+let mut iter = result.iter();
+while let Some(row) = iter.next() {
+  // ... do something with row ...
+}
+```
+
+The intermediate variable `iter` is necessary, otherwise you will infinitely
+visit the first row of the result!
+
+Other changes:
+
+* Many types now take a lifetime argument, e.g., `Value` is now `Value<'a>`,
+  `ResultIterator` is now `ResultIterator<'a>`. In almost all cases you can omit
+  this and it will be inferred for you. If not, you can usually write
+  `Value<'_>` to let Rust worry about it for you.
+* `RowIterator` no longer implements `Display` (since it would consume the
+  iterator); however `Row` does.
+* `TupleIterator` is removed - it was never used, since you use the set iterator
+  (Value::get_set()) for lists, sets, and tuples.
+* `ConstDataType::sub_data_by_name` and `ConstDataType::sub_type_name` now take
+  `&self` rather than an explicit argument.
+* `FunctionMeta::argument` now returns the name and type, rather than just `()`.
+
+
 ## New session API (version 2.0)
 
 Version 2.0 introduces a new and safer API. `Statement`s (and

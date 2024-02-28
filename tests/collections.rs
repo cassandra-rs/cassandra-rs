@@ -31,10 +31,11 @@ async fn select_from_collections(session: &Session, key: &str) -> Result<Vec<Str
     let result = statement.execute().await?;
     println!("{:?}", result);
     let mut res = vec![];
-    for row in result.iter() {
+    let mut iter = result.iter();
+    while let Some(row) = iter.next() {
         let column = row.get_column(0);
-        let items_iterator: SetIterator = column?.get_set()?;
-        for item in items_iterator {
+        let mut items_iterator: SetIterator = column?.get_set()?;
+        while let Some(item) = items_iterator.next() {
             println!("item: {:?}", item);
             res.push(item.get_string().expect("Should exist").to_string());
         }

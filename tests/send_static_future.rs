@@ -9,7 +9,8 @@ async fn execute_statement() -> Result<()> {
         .execute()
         .await?;
 
-    for row in result.iter() {
+    let mut iter = result.iter();
+    while let Some(row) = iter.next() {
         let col: String = row.get_by_name("keyspace_name")?;
         print!("ks = {}", col);
     }
@@ -27,7 +28,8 @@ async fn execute_prepared_statement() -> Result<()> {
     statement.bind_string(0, "key")?;
 
     let result = statement.execute().await?;
-    for row in result.iter() {
+    let mut iter = result.iter();
+    while let Some(row) = iter.next() {
         let col: String = row.get_by_name("value")?;
         print!("value = {}", col);
     }

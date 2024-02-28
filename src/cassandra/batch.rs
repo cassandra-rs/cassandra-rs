@@ -18,10 +18,6 @@ use crate::cassandra_sys::cass_batch_set_serial_consistency;
 use crate::cassandra_sys::cass_batch_set_timestamp;
 use crate::cassandra_sys::CassBatch as _Batch;
 use crate::cassandra_sys::CassBatchType_;
-use crate::cassandra_sys::CassConsistency;
-use crate::cassandra_sys::CassCustomPayload as _CassCustomPayload;
-use std::ffi::NulError;
-use std::os::raw::c_char;
 
 #[derive(Debug)]
 struct BatchInner(*mut _Batch);
@@ -31,9 +27,10 @@ struct BatchInner(*mut _Batch);
 #[derive(Debug)]
 pub struct Batch(BatchInner, Session);
 
-// The underlying C type has no thread-local state, but does not support access
-// from multiple threads: https://datastax.github.io/cpp-driver/topics/#thread-safety
+// The underlying C type has no thread-local state, and forbids only concurrent
+// mutation/free: https://datastax.github.io/cpp-driver/topics/#thread-safety
 unsafe impl Send for BatchInner {}
+unsafe impl Sync for BatchInner {}
 
 impl ProtectedInner<*mut _Batch> for BatchInner {
     #[inline(always)]

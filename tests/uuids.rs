@@ -27,14 +27,14 @@ async fn select_from_log(session: &Session, key: &str) -> Result<Vec<(Uuid, Stri
     let mut statement = session.statement(SELECT_QUERY);
     statement.bind(0, key)?;
     let results = statement.execute().await?;
-    Ok(results
-        .iter()
-        .map(|r| {
-            let t: Uuid = r.get_column(1).expect("time").get_uuid().expect("time");
-            let e: String = r.get(2).expect("entry");
-            (t, e)
-        })
-        .collect())
+    let mut vec = vec![];
+    let mut iter = results.iter();
+    while let Some(r) = iter.next() {
+        let t: Uuid = r.get_column(1).expect("time").get_uuid().expect("time");
+        let e: String = r.get(2).expect("entry");
+        vec.push((t, e));
+    }
+    Ok(vec)
 }
 
 #[tokio::test]
