@@ -375,7 +375,7 @@ impl<'a> Row<'a> {
 
     /// Creates a new iterator for the specified row. This can be
     /// used to iterate over columns in a row.
-    fn iter(&'a self) -> RowIterator<'a> {
+    pub fn iter(&'a self) -> RowIterator<'a> {
         unsafe { RowIterator(cass_iterator_from_row(self.0), PhantomData) }
     }
 }
