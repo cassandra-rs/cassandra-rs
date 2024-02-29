@@ -14,7 +14,12 @@ version number is tracked in the file `VERSION`.
 
 ### Fixed
 
-## [3.0.0]
+## [3.0.1] - 2024-02-29
+
+### Fixed
+- Expose `Row::iter` (which was inadvertently made private in 3.0.0).
+
+## [3.0.0] - 2024-02-28
 
 ### Added
 - `get_decimal()` now gets a Cassanda decimal value as `BigDecimal`,
@@ -303,7 +308,10 @@ First release of https://github.com/Metaswitch/cassandra-rs
 ## [0.8.1] - 2016-12-13
 Last release of https://github.com/tupshin/cassandra-rs
 
-[Unreleased]: https://github.com/Metaswitch/cassandra-rs/compare/2.0.0...HEAD
+[Unreleased]: https://github.com/Metaswitch/cassandra-rs/compare/3.0.1...HEAD
+[3.0.1]: https://github.com/Metaswitch/cassandra-rs/compare/3.0.0...3.0.1
+[3.0.0]: https://github.com/Metaswitch/cassandra-rs/compare/3.0.0...2.0.0
+[2.0.1]: https://github.com/Metaswitch/cassandra-rs/compare/2.0.0...2.0.1
 [2.0.0]: https://github.com/Metaswitch/cassandra-rs/compare/1.2.0...2.0.0
 [1.2.0]: https://github.com/Metaswitch/cassandra-rs/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/Metaswitch/cassandra-rs/compare/1.0.0...1.1.0
