@@ -1,7 +1,7 @@
 use crate::cassandra::util::{Protected, ProtectedInner};
 
-use crate::cassandra_sys::cass_time_from_epoch;
 use crate::cassandra_sys::cass_date_from_epoch;
+use crate::cassandra_sys::cass_time_from_epoch;
 use crate::cassandra_sys::cass_timestamp_gen_free;
 use crate::cassandra_sys::cass_timestamp_gen_monotonic_new;
 use crate::cassandra_sys::cass_timestamp_gen_server_side_new;
