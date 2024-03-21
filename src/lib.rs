@@ -56,6 +56,7 @@ pub use crate::cassandra::ssl::{Ssl, SslVerifyFlag};
 pub use crate::cassandra::statement::BindRustType;
 pub use crate::cassandra::statement::Statement;
 // pub use cassandra::custom_payload::CustomPayload;
+pub use crate::cassandra::time::date_from_epoch;
 pub use crate::cassandra::time::TimestampGen;
 pub use crate::cassandra::tuple::Tuple;
 pub use crate::cassandra::user_type::UserType;
