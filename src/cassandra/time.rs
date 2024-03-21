@@ -70,12 +70,12 @@ impl TimestampGen {
     //    }
 }
 
-// Converts a unix timestamp (in seconds) to the Cassandra "date" type. The "date" type
-// represents the number of days since the Epoch (1970-01-01) with the Epoch centered at
-// the value 2^31.
-// fn date_from_epoch(epoch_secs: Duration) -> Date {
-//    unsafe { Date(cass_date_from_epoch(epoch_secs.num_days())) }
-// }
+/// Converts a unix timestamp (in seconds) to the Cassandra "date" type. The "date" type
+/// represents the number of days since the Epoch (1970-01-01) with the Epoch centered at
+/// the value 2^31.
+pub fn date_from_epoch(epoch_secs: i64) -> u32 {
+    unsafe { cass_date_from_epoch(epoch_secs) }
+}
 
 // Combines the Cassandra "date" and "time" types to Epoch time in seconds.
 // fn date_time_to_epoch(date: Date, time: Time) -> Duration {
