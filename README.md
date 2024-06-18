@@ -1,6 +1,6 @@
-[![Build Status](https://github.com/Metaswitch/cassandra-rs/actions/workflows/build.yml/badge.svg)](https://github.com/Metaswitch/cassandra-rs/actions)
+[![Build Status](https://github.com/cassandra-rs/cassandra-rs/actions/workflows/build.yml/badge.svg)](https://github.com/cassandra-rs/cassandra-rs/actions)
 [![Current Version](https://img.shields.io/crates/v/cassandra-cpp.svg)](https://crates.io/crates/cassandra-cpp)
-[![License](https://img.shields.io/github/license/Metaswitch/cassandra-rs.svg)](#License)
+[![License](https://img.shields.io/github/license/cassandra-rs/cassandra-rs.svg)](#License)
 
 # cassandra-cpp
 
@@ -9,7 +9,7 @@ exposes the DataStax cpp driver at https://github.com/datastax/cpp-driver/
 in a somewhat-sane crate.
 It was originally a fork of https://github.com/tupshin/cassandra-rs but that is no longer maintained.
 
-It is a wrapper around the raw driver binding crate [cassandra-cpp-sys](https://github.com/Metaswitch/cassandra-sys-rs).
+It is a wrapper around the raw driver binding crate [cassandra-cpp-sys](https://github.com/cassandra-rs/cassandra-sys-rs).
 
 [Documentation (crates.io)](https://docs.rs/cassandra-cpp).
 
@@ -51,7 +51,7 @@ thin wrapper around the DataStax driver, you may also find the DataStax
 ## Example
 
 For a straightforward example see [`simple.rs`](examples/simple.rs).
-    
+
 There are additional examples included with the project in [`tests`](tests/) and
 [`examples`](examples/).
 
@@ -129,7 +129,7 @@ In addition, the legacy `.wait()` API is removed in favour of the now-ubiquitous
   recreate the statement.
 
 * `Batch::new` is removed in favour of `Session::batch`.
-  
+
 * There is a new error, `BatchSessionMismatch`, which occurs if you try to add
   statements from different `Session`s into the same `Batch`.
 
@@ -181,7 +181,7 @@ to this project.
 
 ## Development
 
-This crate is regularly built by Travis; to see details of the most recent builds
+This crate is regularly built by GitHub Actions; to see details of the most recent builds
 click on the "build" badge at the top of this page.
 
 You must have the DataStax driver installed on your system in order to build
