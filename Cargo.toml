@@ -2,20 +2,20 @@
 description = "A Cassandra CQL driver, built on top of the DataStax C++ driver for performance and functionality."
 documentation = "https://docs.rs/cassandra-cpp"
 # no homepage yet
-repository = "https://github.com/Metaswitch/cassandra-rs"
+repository = "https://github.com/cassandra-rs/cassandra-rs"
 readme = "README.md"
 keywords = [ "Cassandra", "binding", "CQL", "client", "database" ]
 categories = [ "api-bindings", "database", "external-ffi-bindings", "asynchronous" ]
 license = "Apache-2.0"
 name = "cassandra-cpp"
-version = "3.0.2-pre"
-authors = ["Keith Wansbrough <kwansbrough@microsoft.com>"]
+version = "3.0.2"
+authors = ["Keith Wansbrough <keithw@lochan.org>"]
 edition = "2018"
 
 [dependencies]
 slog = { version = "2", optional = true }
 log = { version = "0.4.17", optional = true }
-cassandra-cpp-sys = "1.1.0"
+cassandra-cpp-sys = "1.1.1"
 uuid = "1.0"
 error-chain = "0.12"
 parking_lot = "0.12"
