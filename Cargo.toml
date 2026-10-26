@@ -18,7 +18,7 @@ log = { version = "0.4.17", optional = true }
 cassandra-cpp-sys = "1.1.1"
 uuid = "1.0"
 error-chain = "0.12"
-parking_lot = "0.12"
+parking_lot = "0.13"
 libc = "0.2"
 bigdecimal = "0.4.2"
 
